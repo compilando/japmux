@@ -13,6 +13,12 @@ import {
   DocsIcon,
   BoltIcon,
   FolderIcon,
+  TaskIcon,
+  PaperPlaneIcon,
+  BoxCubeIcon,
+  ListIcon,
+  EyeIcon,
+  ChatIcon,
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
 
@@ -20,7 +26,7 @@ type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  subItems?: { name: string; path: string; icon?: React.ReactNode; pro?: boolean; new?: boolean }[];
 };
 
 const navItems: NavItem[] = [
@@ -29,24 +35,83 @@ const navItems: NavItem[] = [
     name: "Management",
     subItems: [
       {
-        name: "Regions",
-        path: "/regions",
+        name: "Users",
+        path: "/users",
+        icon: <UserCircleIcon />,
       },
-      {
-        name: "Cultural Data",
-        path: "/cultural-data",
-      }, ,
       {
         icon: <BoltIcon />,
         name: "AI Models",
         path: "/ai-models",
       },
       {
+        name: "Environments",
+        path: "/environments",
+        icon: <TableIcon />,
+      },
+      {
         icon: <FolderIcon />,
         name: "Projects",
         path: "/projects",
+      },
+      {
+        name: "Regions",
+        path: "/regions",
+        icon: <ListIcon />,
+      },
+      {
+        name: "Cultural Data",
+        path: "/cultural-data",
+        icon: <EyeIcon />,
+      },
+      {
+        name: "Tags",
+        path: "/tags",
+        icon: <ChatIcon />,
+      },
+
+    ],
+  },
+  {
+    icon: <GridIcon />,
+    name: "Prompt Management",
+    subItems: [
+      {
+        name: "Prompts",
+        path: "/prompts",
+        icon: <TaskIcon />,
+      },
+      {
+        name: "Prompts Translations",
+        path: "/prompt-translations",
+        icon: <TaskIcon />,
+      },
+      {
+        name: "Prompt Versions",
+        path: "/prompt-versions",
+        icon: <TaskIcon />,
+      },
+      {
+        name: "Prompt Assets",
+        path: "/prompt-assets",
+        icon: <BoxCubeIcon />,
+      },
+      {
+        name: "Asset Versions",
+        path: "/prompt-asset-versions",
+        icon: <BoxCubeIcon />,
+      },
+      {
+        name: "Asset Links",
+        path: "/prompt-asset-links",
+        icon: <PaperPlaneIcon />,
       }
     ],
+  },
+  {
+    icon: <BoltIcon />,
+    name: "Serve Prompt",
+    path: "/serveprompt",
   },
   {
     icon: <UserCircleIcon />,
@@ -127,11 +192,16 @@ const AppSidebar: React.FC = () => {
                   <li key={subItem.name}>
                     <Link
                       href={subItem.path}
-                      className={`menu-dropdown-item ${isActive(subItem.path)
+                      className={`menu-dropdown-item flex items-center gap-2 ${isActive(subItem.path)
                         ? "menu-dropdown-item-active"
                         : "menu-dropdown-item-inactive"
                         }`}
                     >
+                      {subItem.icon && (
+                        <span className="inline-block w-5 h-5">
+                          {subItem.icon}
+                        </span>
+                      )}
                       {subItem.name}
                       <span className="flex items-center gap-1 ml-auto">
                         {subItem.new && (
@@ -230,20 +300,7 @@ const AppSidebar: React.FC = () => {
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <Image
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <Image
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
+              <h1 style={{ fontSize: "24px", fontWeight: "bold" }}>JAPM</h1>
             </>
           ) : (
             <Image

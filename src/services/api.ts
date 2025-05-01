@@ -214,6 +214,477 @@ export const deleteProject = async (id: string): Promise<void> => {
     await apiClient.delete(`/projects/${id}`);
 };
 
+// --- Funciones específicas para el API de Environments ---
+
+export interface Environment {
+    id: string;
+    name: string;
+    // TODO: Añadir aquí los campos reales de Environment (e.g., description, url, apiKey)
+}
+
+export type EnvironmentCreatePayload = {
+    name: string;
+    // TODO: Añadir aquí los campos reales para crear Environment
+};
+
+export type EnvironmentUpdatePayload = Partial<EnvironmentCreatePayload>;
+
+export const getEnvironments = async (): Promise<Environment[]> => {
+    const response = await apiClient.get('/environments');
+    return response.data;
+};
+
+export const getEnvironmentById = async (id: string): Promise<Environment> => {
+    const response = await apiClient.get(`/environments/${id}`);
+    return response.data;
+};
+
+export const createEnvironment = async (payload: EnvironmentCreatePayload): Promise<Environment> => {
+    const response = await apiClient.post('/environments', payload);
+    return response.data;
+};
+
+export const updateEnvironment = async (id: string, payload: EnvironmentUpdatePayload): Promise<Environment> => {
+    const response = await apiClient.patch(`/environments/${id}`, payload);
+    return response.data;
+};
+
+export const deleteEnvironment = async (id: string): Promise<void> => {
+    await apiClient.delete(`/environments/${id}`);
+};
+
+// --- Funciones específicas para el API de Tags ---
+
+export interface Tag {
+    id: string;
+    name: string;
+    // TODO: Añadir aquí los campos reales de Tag (e.g., description, color)
+}
+
+export type TagCreatePayload = {
+    name: string;
+    // TODO: Añadir aquí los campos reales para crear Tag
+};
+
+export type TagUpdatePayload = Partial<TagCreatePayload>;
+
+export const getTags = async (): Promise<Tag[]> => {
+    const response = await apiClient.get('/tags');
+    return response.data;
+};
+
+export const getTagById = async (id: string): Promise<Tag> => {
+    const response = await apiClient.get(`/tags/${id}`);
+    return response.data;
+};
+
+export const createTag = async (payload: TagCreatePayload): Promise<Tag> => {
+    const response = await apiClient.post('/tags', payload);
+    return response.data;
+};
+
+export const updateTag = async (id: string, payload: TagUpdatePayload): Promise<Tag> => {
+    const response = await apiClient.patch(`/tags/${id}`, payload);
+    return response.data;
+};
+
+export const deleteTag = async (id: string): Promise<void> => {
+    await apiClient.delete(`/tags/${id}`);
+};
+
+// --- Funciones específicas para el API de Users ---
+// Basado en el openapi.json parcial visto anteriormente
+
+// Asumiendo que la respuesta y CreateUserDto tienen estos campos.
+// Es posible que necesites ajustar esto según la definición completa.
+export interface User {
+    id: string; // Asumiendo que la respuesta incluye un ID
+    email: string;
+    name?: string;
+    // TODO: Añadir otros campos si existen (roles, etc.)
+}
+
+// Basado en CreateUserDto
+export type UserCreatePayload = {
+    email: string;
+    password?: string; // La contraseña podría ser requerida solo al crear
+    name?: string;
+    // TODO: Añadir otros campos requeridos/opcionales para crear
+};
+
+// Basado en UpdateUserDto (asumiendo campos similares, todos opcionales)
+export type UserUpdatePayload = {
+    email?: string;
+    password?: string; // Podría no ser actualizable o tener un endpoint diferente
+    name?: string;
+    // TODO: Añadir otros campos actualizables
+};
+
+
+export const getUsers = async (): Promise<User[]> => {
+    const response = await apiClient.get('/users');
+    // Asumiendo que la respuesta devuelve un array de objetos User (puede diferir de CreateUserDto si, por ejemplo, no incluye la password)
+    return response.data;
+};
+
+export const getUserById = async (id: string): Promise<User> => {
+    const response = await apiClient.get(`/users/${id}`);
+    return response.data;
+};
+
+export const createUser = async (payload: UserCreatePayload): Promise<User> => {
+    // El endpoint devolvía CreateUserDto, ajustamos para devolver User si la estructura difiere
+    const response = await apiClient.post('/users', payload);
+    return response.data;
+};
+
+export const updateUser = async (id: string, payload: UserUpdatePayload): Promise<User> => {
+    const response = await apiClient.patch(`/users/${id}`, payload);
+    return response.data;
+};
+
+export const deleteUser = async (id: string): Promise<void> => {
+    await apiClient.delete(`/users/${id}`);
+};
+
+// --- Funciones específicas para el API de Prompts ---
+
+export interface Prompt {
+    name: string; // ID único
+    description?: string;
+    tacticId?: string;
+    tags?: string[];
+    // promptText e initialTranslations son parte de CreatePromptDto, no necesariamente de la entidad Prompt devuelta por GET
+    id: string; // Asumiendo que la respuesta GET también devuelve un CUID 'id' además del 'name'
+}
+
+// Basado en CreatePromptDto
+export type PromptCreatePayload = {
+    name: string;
+    promptText: string;
+    description?: string;
+    tacticId?: string;
+    tags?: string[];
+    initialTranslations?: { languageCode: string; promptText: string }[];
+};
+
+// Basado en UpdatePromptDto
+export type PromptUpdatePayload = {
+    description?: string;
+    tacticId?: string | null;
+    tags?: string[];
+};
+
+export const getPrompts = async (): Promise<Prompt[]> => {
+    // La respuesta GET usa CreatePromptDto, adaptamos al interfaz Prompt si difieren
+    const response = await apiClient.get('/prompts');
+    return response.data.map((p: any) => ({ ...p, id: p.name })); // Asumiendo que 'name' es el ID principal
+};
+
+// Usamos 'name' como ID en la ruta
+export const getPromptById = async (name: string): Promise<Prompt> => {
+    const response = await apiClient.get(`/prompts/${name}`);
+    return { ...response.data, id: response.data.name }; // Asumiendo que 'name' es el ID principal
+};
+
+export const createPrompt = async (payload: PromptCreatePayload): Promise<Prompt> => {
+    // La respuesta POST usa CreatePromptDto, adaptamos
+    const response = await apiClient.post('/prompts', payload);
+    return { ...response.data, id: response.data.name };
+};
+
+// Usamos 'name' como ID en la ruta
+export const updatePrompt = async (name: string, payload: PromptUpdatePayload): Promise<Prompt> => {
+    const response = await apiClient.patch(`/prompts/${name}`, payload);
+    return { ...response.data, id: response.data.name };
+};
+
+// Usamos 'name' como ID en la ruta
+export const deletePrompt = async (name: string): Promise<void> => {
+    await apiClient.delete(`/prompts/${name}`);
+};
+
+// --- Funciones específicas para el API de PromptAssets ---
+
+export interface PromptAsset {
+    key: string; // ID único
+    id: string; // CUID devuelto por el backend
+    name: string;
+    type?: string;
+    description?: string;
+    category?: string;
+    enabled?: boolean;
+    projectId?: string;
+    // initialValue etc son de Create, no necesariamente parte de la entidad devuelta
+}
+
+// Basado en CreatePromptAssetDto
+export type PromptAssetCreatePayload = {
+    key: string;
+    name: string;
+    initialValue: string;
+    type?: string;
+    description?: string;
+    category?: string;
+    initialChangeMessage?: string;
+    projectId?: string;
+};
+
+// Basado en UpdatePromptAssetDto
+export type PromptAssetUpdatePayload = {
+    name?: string;
+    type?: string;
+    description?: string;
+    category?: string;
+    enabled?: boolean;
+    projectId?: string | null;
+};
+
+export const getPromptAssets = async (): Promise<PromptAsset[]> => {
+    // GET devuelve CreatePromptAssetDto, ajustamos
+    const response = await apiClient.get('/prompt-assets');
+    return response.data.map((a: any) => ({ ...a, id: a.key })); // Asumiendo que 'key' es el ID principal de negocio
+};
+
+// Usamos 'key' como ID en la ruta
+export const getPromptAssetById = async (key: string): Promise<PromptAsset> => {
+    const response = await apiClient.get(`/prompt-assets/${key}`);
+    return { ...response.data, id: response.data.key };
+};
+
+export const createPromptAsset = async (payload: PromptAssetCreatePayload): Promise<PromptAsset> => {
+    const response = await apiClient.post('/prompt-assets', payload);
+    return { ...response.data, id: response.data.key };
+};
+
+// Usamos 'key' como ID en la ruta
+export const updatePromptAsset = async (key: string, payload: PromptAssetUpdatePayload): Promise<PromptAsset> => {
+    const response = await apiClient.patch(`/prompt-assets/${key}`, payload);
+    return { ...response.data, id: response.data.key };
+};
+
+// Usamos 'key' como ID en la ruta
+export const deletePromptAsset = async (key: string): Promise<void> => {
+    // Delete devuelve el objeto eliminado, pero lo ignoramos
+    await apiClient.delete(`/prompt-assets/${key}`);
+};
+
+
+// --- Funciones específicas para el API de PromptAssetLinks ---
+
+// Basado en PromptAssetLinkResponse
+export interface PromptAssetLink {
+    id: string; // CUID
+    promptVersionId: string;
+    assetVersionId: string;
+    usageContext?: string;
+    position?: number;
+    insertionLogic?: string;
+    isRequired?: boolean;
+    prompt?: Prompt; // Objeto anidado
+    asset?: PromptAsset; // Objeto anidado
+}
+
+// Basado en CreatePromptAssetLinkDto
+export type PromptAssetLinkCreatePayload = {
+    promptVersionId: string;
+    assetVersionId: string;
+    usageContext?: string;
+    position?: number;
+    insertionLogic?: string;
+    isRequired?: boolean;
+};
+
+// Basado en UpdatePromptAssetLinkDto
+export type PromptAssetLinkUpdatePayload = {
+    usageContext?: string;
+    position?: number;
+    insertionLogic?: string;
+    isRequired?: boolean;
+};
+
+export const getPromptAssetLinks = async (): Promise<PromptAssetLink[]> => {
+    const response = await apiClient.get('/prompt-asset-links');
+    return response.data;
+};
+
+export const getPromptAssetLinkById = async (id: string): Promise<PromptAssetLink> => {
+    const response = await apiClient.get(`/prompt-asset-links/${id}`);
+    return response.data;
+};
+
+export const createPromptAssetLink = async (payload: PromptAssetLinkCreatePayload): Promise<PromptAssetLink> => {
+    const response = await apiClient.post('/prompt-asset-links', payload);
+    return response.data;
+};
+
+export const updatePromptAssetLink = async (id: string, payload: PromptAssetLinkUpdatePayload): Promise<PromptAssetLink> => {
+    const response = await apiClient.patch(`/prompt-asset-links/${id}`, payload);
+    return response.data;
+};
+
+export const deletePromptAssetLink = async (id: string): Promise<void> => {
+    await apiClient.delete(`/prompt-asset-links/${id}`);
+};
+
+
+// --- Funciones específicas para el API de PromptAssetVersions ---
+
+export interface PromptAssetVersion {
+    id: string; // CUID
+    assetId: string; // Key del asset padre
+    value: string;
+    versionTag: string;
+    changeMessage?: string;
+    // Podrían existir createdAt, updatedAt etc.
+}
+
+// Basado en CreatePromptAssetVersionDto
+export type PromptAssetVersionCreatePayload = {
+    assetId: string; // Key del asset padre
+    value: string;
+    versionTag?: string; // 'v1.0.0' por defecto en API?
+    changeMessage?: string;
+};
+
+// Basado en UpdatePromptAssetVersionDto
+export type PromptAssetVersionUpdatePayload = {
+    value?: string;
+    changeMessage?: string;
+};
+
+export const getPromptAssetVersions = async (): Promise<PromptAssetVersion[]> => {
+    // Respuesta usa CreatePromptAssetVersionDto, adaptamos
+    const response = await apiClient.get('/prompt-asset-versions');
+    return response.data;
+};
+
+export const getPromptAssetVersionById = async (id: string): Promise<PromptAssetVersion> => {
+    const response = await apiClient.get(`/prompt-asset-versions/${id}`);
+    return response.data;
+};
+
+export const createPromptAssetVersion = async (payload: PromptAssetVersionCreatePayload): Promise<PromptAssetVersion> => {
+    const response = await apiClient.post('/prompt-asset-versions', payload);
+    return response.data;
+};
+
+export const updatePromptAssetVersion = async (id: string, payload: PromptAssetVersionUpdatePayload): Promise<PromptAssetVersion> => {
+    const response = await apiClient.patch(`/prompt-asset-versions/${id}`, payload);
+    return response.data;
+};
+
+export const deletePromptAssetVersion = async (id: string): Promise<void> => {
+    // Delete devuelve el objeto eliminado, pero lo ignoramos
+    await apiClient.delete(`/prompt-asset-versions/${id}`);
+};
+
+// --- Funciones específicas para el API de PromptTranslations ---
+
+export interface PromptTranslation {
+    id: string; // CUID
+    versionId: string; // ID de PromptVersion
+    languageCode: string; // xx-XX
+    promptText: string;
+    // Podrían existir createdAt, updatedAt etc.
+}
+
+// Basado en CreatePromptTranslationDto
+export type PromptTranslationCreatePayload = {
+    versionId: string;
+    languageCode: string;
+    promptText: string;
+};
+
+// Basado en UpdatePromptTranslationDto
+export type PromptTranslationUpdatePayload = {
+    promptText?: string;
+};
+
+// El GET puede filtrar por versionId
+export const getPromptTranslations = async (versionId?: string): Promise<PromptTranslation[]> => {
+    const params = versionId ? { versionId } : {};
+    const response = await apiClient.get('/prompt-translation', { params });
+    return response.data;
+};
+
+export const getPromptTranslationById = async (id: string): Promise<PromptTranslation> => {
+    const response = await apiClient.get(`/prompt-translation/${id}`);
+    return response.data;
+};
+
+export const createPromptTranslation = async (payload: PromptTranslationCreatePayload): Promise<PromptTranslation> => {
+    const response = await apiClient.post('/prompt-translation', payload);
+    return response.data;
+};
+
+export const updatePromptTranslation = async (id: string, payload: PromptTranslationUpdatePayload): Promise<PromptTranslation> => {
+    const response = await apiClient.patch(`/prompt-translation/${id}`, payload);
+    return response.data;
+};
+
+export const deletePromptTranslation = async (id: string): Promise<void> => {
+    await apiClient.delete(`/prompt-translation/${id}`);
+};
+
+
+// --- Funciones específicas para el API de PromptVersions ---
+
+export interface PromptVersion {
+    id: string; // CUID
+    promptId: string; // Name del Prompt padre
+    promptText: string;
+    versionTag: string;
+    changeMessage?: string;
+    isActive?: boolean; // Asumiendo posible campo para activar/desactivar
+    // Podrían existir createdAt, updatedAt etc.
+}
+
+// Basado en CreatePromptVersionDto
+export type PromptVersionCreatePayload = {
+    promptId: string; // Name del Prompt padre
+    promptText: string;
+    versionTag?: string; // 'v1.0.0' por defecto en API?
+    changeMessage?: string;
+};
+
+// Basado en UpdatePromptVersionDto
+export type PromptVersionUpdatePayload = {
+    promptText?: string;
+    changeMessage?: string;
+    // Podría haber un campo para activar/desactivar aquí o en un endpoint dedicado
+    // isActive?: boolean;
+};
+
+// El GET puede filtrar por promptId
+export const getPromptVersions = async (promptId?: string): Promise<PromptVersion[]> => {
+    const params = promptId ? { promptId } : {};
+    // Respuesta usa CreatePromptVersionDto, adaptamos
+    const response = await apiClient.get('/prompt-versions', { params });
+    return response.data;
+};
+
+export const getPromptVersionById = async (id: string): Promise<PromptVersion> => {
+    const response = await apiClient.get(`/prompt-versions/${id}`);
+    return response.data;
+};
+
+export const createPromptVersion = async (payload: PromptVersionCreatePayload): Promise<PromptVersion> => {
+    const response = await apiClient.post('/prompt-versions', payload);
+    return response.data;
+};
+
+export const updatePromptVersion = async (id: string, payload: PromptVersionUpdatePayload): Promise<PromptVersion> => {
+    const response = await apiClient.patch(`/prompt-versions/${id}`, payload);
+    return response.data;
+};
+
+export const deletePromptVersion = async (id: string): Promise<void> => {
+    // Delete devuelve el objeto eliminado, pero lo ignoramos
+    await apiClient.delete(`/prompt-versions/${id}`);
+};
+
+
 // --- Funciones específicas para Serve Prompt ---
 
 interface ServePromptParams {
