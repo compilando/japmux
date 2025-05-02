@@ -258,7 +258,7 @@ export const deleteEnvironment = async (id: string): Promise<void> => {
 export interface Tag {
     id: string;
     name: string;
-    // TODO: Añadir aquí los campos reales de Tag (e.g., description, color)
+    // TODO: Añadir aquí los campos reales de Tag (e.g., description, color) si existen
 }
 
 export type TagCreatePayload = {
@@ -353,53 +353,67 @@ export interface Prompt {
     name: string; // ID único
     description?: string;
     tacticId?: string;
-    tags?: string[];
-    // promptText e initialTranslations son parte de CreatePromptDto, no necesariamente de la entidad Prompt devuelta por GET
-    id: string; // Asumiendo que la respuesta GET también devuelve un CUID 'id' además del 'name'
+    tags?: Tag[]; // <-- CAMBIO: Ahora es un array de objetos Tag
+    id: string; // CUID
 }
 
-// Basado en CreatePromptDto
+// Los payloads siguen esperando IDs (string[]) para los tags
 export type PromptCreatePayload = {
     name: string;
     promptText: string;
     description?: string;
     tacticId?: string;
-    tags?: string[];
+    tags?: string[]; // <-- SIN CAMBIOS: Array de IDs
     initialTranslations?: { languageCode: string; promptText: string }[];
 };
 
-// Basado en UpdatePromptDto
 export type PromptUpdatePayload = {
     description?: string;
     tacticId?: string | null;
-    tags?: string[];
+    tagIds?: string[]; // <-- CAMBIO: Usar tagIds para la actualización
 };
+
+// Modificar las funciones getPrompts y getPromptById para asegurar que tags sea Tag[] si la API devuelve otra cosa
+// Asumimos que la API ya devuelve los tags como objetos [{id, name}, ...]
 
 export const getPrompts = async (): Promise<Prompt[]> => {
-    // La respuesta GET usa CreatePromptDto, adaptamos al interfaz Prompt si difieren
     const response = await apiClient.get('/prompts');
-    return response.data.map((p: any) => ({ ...p, id: p.name })); // Asumiendo que 'name' es el ID principal
+    // Aseguramos que cada prompt tenga la estructura correcta, incluyendo el CUID id y los tags como objetos
+    return response.data.map((p: any) => ({
+        ...p,
+        id: p.id || p.name, // Usar CUID si existe, si no el name
+        tags: p.tags || [], // Asumir que p.tags ya es Tag[] o []
+    }));
 };
 
-// Usamos 'name' como ID en la ruta
 export const getPromptById = async (name: string): Promise<Prompt> => {
     const response = await apiClient.get(`/prompts/${name}`);
-    return { ...response.data, id: response.data.name }; // Asumiendo que 'name' es el ID principal
+    return {
+        ...response.data,
+        id: response.data.id || response.data.name,
+        tags: response.data.tags || [], // Asumir que response.data.tags ya es Tag[] o []
+    };
 };
 
+// createPrompt y updatePrompt no necesitan cambio aquí, ya que los payloads no cambiaron
 export const createPrompt = async (payload: PromptCreatePayload): Promise<Prompt> => {
-    // La respuesta POST usa CreatePromptDto, adaptamos
     const response = await apiClient.post('/prompts', payload);
-    return { ...response.data, id: response.data.name };
+    return {
+        ...response.data,
+        id: response.data.id || response.data.name,
+        tags: response.data.tags || [],
+    };
 };
 
-// Usamos 'name' como ID en la ruta
 export const updatePrompt = async (name: string, payload: PromptUpdatePayload): Promise<Prompt> => {
     const response = await apiClient.patch(`/prompts/${name}`, payload);
-    return { ...response.data, id: response.data.name };
+    return {
+        ...response.data,
+        id: response.data.id || response.data.name,
+        tags: response.data.tags || [],
+    };
 };
 
-// Usamos 'name' como ID en la ruta
 export const deletePrompt = async (name: string): Promise<void> => {
     await apiClient.delete(`/prompts/${name}`);
 };
@@ -710,4 +724,35 @@ export const servePrompt = async (params: ServePromptParams): Promise<string> =>
     });
     // Axios devuelve la respuesta completa, el string está en response.data
     return response.data;
+};
+
+// --- Funciones específicas para Health Check ---
+
+export interface HealthCheckResponse {
+    status: 'ok' | string; // 'ok' u otro estado
+    info?: {
+        prisma?: { status: 'up' | string }
+        // Otros servicios si existen
+    };
+    error?: object; // Detalles del error si status no es 'ok'
+    details?: {
+        prisma?: { status: 'up' | string }
+        // Otros servicios si existen
+    };
+}
+
+export const getApiHealth = async (): Promise<HealthCheckResponse> => {
+    // Usamos axios directamente para poder manejar errores de red más fácil
+    try {
+        const response = await apiClient.get<HealthCheckResponse>('/health');
+        return response.data;
+    } catch (error) {
+        // Si hay un error de red o el backend no responde, simulamos una respuesta de error
+        console.error("API Health Check failed:", error);
+        return {
+            status: 'error',
+            error: { message: 'Failed to connect to the API or API returned an error.' },
+            details: {},
+        };
+    }
 }; 
