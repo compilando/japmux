@@ -386,6 +386,25 @@ export interface UpdatePromptAssetVersionDto {
     changeMessage?: string;
 }
 
+// --- Asset Translation Types ---
+export interface PromptAssetTranslation {
+    id: string;               // ID de la traducción (CUID)
+    versionId: string;        // ID de la PromptAssetVersion a la que pertenece (CUID)
+    languageCode: string;     // Código de idioma (e.g., "es-ES")
+    value: string;            // Valor del asset traducido
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface CreateAssetTranslationDto {
+    languageCode: string;     // Código de idioma (e.g., "es-ES")
+    value: string;            // Valor del asset traducido
+}
+
+export interface UpdateAssetTranslationDto {
+    value?: string;           // Nuevo valor del asset traducido (opcional)
+}
+
 export interface PromptAssetLink {
     id: string;
     promptVersionId: string;
@@ -728,103 +747,130 @@ export const promptTranslationService = {
 };
 
 
-// Servicio de PromptAssets
+// --- Prompt Asset Service ---
+// Manages Assets (by assetKey), their Versions (by versionTag), and Translations (by languageCode)
 export const promptAssetService = {
-    create: async (projectId: string, payload: CreatePromptAssetDto): Promise<PromptAsset> => {
-        const response = await apiClient.post<PromptAsset>(`/projects/${projectId}/assets`, payload);
+    // == Prompt Assets ==
+
+    async create(projectId: string, payload: CreatePromptAssetDto): Promise<PromptAsset> {
+        // POST /api/projects/{projectId}/prompt-assets
+        const response = await apiClient.post<PromptAsset>(`/api/projects/${projectId}/prompt-assets`, payload);
         return response.data;
     },
-    findAll: async (projectId: string): Promise<PromptAsset[]> => {
-        const response = await apiClient.get<PromptAsset[]>(`/projects/${projectId}/assets`);
+
+    async getAll(projectId: string): Promise<PromptAsset[]> {
+        // GET /api/projects/{projectId}/prompt-assets
+        const response = await apiClient.get<PromptAsset[]>(`/api/projects/${projectId}/prompt-assets`);
         return response.data;
     },
-    findOne: async (projectId: string, id: string): Promise<PromptAsset> => {
-        const response = await apiClient.get<PromptAsset>(`/projects/${projectId}/assets/${id}`);
+
+    async findOneByKey(projectId: string, assetKey: string): Promise<PromptAsset> {
+        // GET /api/projects/{projectId}/prompt-assets/{assetKey}
+        const response = await apiClient.get<PromptAsset>(`/api/projects/${projectId}/prompt-assets/${assetKey}`);
         return response.data;
     },
-    /** Busca un asset por su key única dentro del proyecto */
-    findByKey: async (projectId: string, key: string): Promise<PromptAsset> => {
-        const response = await apiClient.get<PromptAsset>(`/projects/${projectId}/assets/by-key/${key}`);
+
+    async update(projectId: string, assetKey: string, payload: UpdatePromptAssetDto): Promise<PromptAsset> {
+        // PATCH /api/projects/{projectId}/prompt-assets/{assetKey}
+        const response = await apiClient.patch<PromptAsset>(`/api/projects/${projectId}/prompt-assets/${assetKey}`, payload);
         return response.data;
     },
-    update: async (projectId: string, id: string, payload: UpdatePromptAssetDto): Promise<PromptAsset> => {
-        // La spec indica que la actualización se hace por ID (CUID), no por key
-        const response = await apiClient.patch<PromptAsset>(`/projects/${projectId}/assets/${id}`, payload);
+
+    async remove(projectId: string, assetKey: string): Promise<void> {
+        // DELETE /api/projects/{projectId}/prompt-assets/{assetKey}
+        await apiClient.delete(`/api/projects/${projectId}/prompt-assets/${assetKey}`);
+    },
+
+    // == Prompt Asset Versions (using assetKey and versionTag) ==
+
+    async createVersion(projectId: string, assetKey: string, payload: CreatePromptAssetVersionDto): Promise<PromptAssetVersion> {
+        // POST /api/projects/{projectId}/assets/{assetKey}/versions
+        const response = await apiClient.post<PromptAssetVersion>(`/api/projects/${projectId}/assets/${assetKey}/versions`, payload);
         return response.data;
     },
-    /** Actualiza un asset usando su key */
-    updateByKey: async (projectId: string, key: string, payload: UpdatePromptAssetDto): Promise<PromptAsset> => {
-        const response = await apiClient.patch<PromptAsset>(`/projects/${projectId}/assets/by-key/${key}`, payload);
+
+    async getAllVersions(projectId: string, assetKey: string): Promise<PromptAssetVersion[]> {
+        // GET /api/projects/{projectId}/assets/{assetKey}/versions
+        const response = await apiClient.get<PromptAssetVersion[]>(`/api/projects/${projectId}/assets/${assetKey}/versions`);
         return response.data;
     },
-    remove: async (projectId: string, id: string): Promise<void> => {
-        // La spec indica que la eliminación se hace por ID (CUID), no por key
-        await apiClient.delete(`/projects/${projectId}/assets/${id}`);
+
+    async findOneVersionByTag(projectId: string, assetKey: string, versionTag: string): Promise<PromptAssetVersion> {
+        // GET /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}
+        const response = await apiClient.get<PromptAssetVersion>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}`);
+        return response.data;
     },
-    /** Elimina un asset usando su key */
-    removeByKey: async (projectId: string, key: string): Promise<void> => {
-        await apiClient.delete(`/projects/${projectId}/assets/by-key/${key}`);
+
+    async updateVersion(projectId: string, assetKey: string, versionTag: string, payload: UpdatePromptAssetVersionDto): Promise<PromptAssetVersion> {
+        // PATCH /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}
+        const response = await apiClient.patch<PromptAssetVersion>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}`, payload);
+        return response.data;
+    },
+
+    async removeVersion(projectId: string, assetKey: string, versionTag: string): Promise<void> {
+        // DELETE /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}
+        await apiClient.delete(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}`);
+    },
+
+    // == Prompt Asset Translations (using assetKey, versionTag, languageCode) ==
+
+    async createTranslation(projectId: string, assetKey: string, versionTag: string, payload: CreateAssetTranslationDto): Promise<PromptAssetTranslation> {
+        // POST /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/translations
+        // Assuming the backend returns the created PromptAssetTranslation object
+        const response = await apiClient.post<PromptAssetTranslation>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations`, payload);
+        return response.data;
+    },
+
+    async getAllTranslations(projectId: string, assetKey: string, versionTag: string): Promise<PromptAssetTranslation[]> {
+        // GET /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/translations
+        const response = await apiClient.get<PromptAssetTranslation[]>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations`);
+        return response.data;
+    },
+
+    async findOneTranslationByCode(projectId: string, assetKey: string, versionTag: string, languageCode: string): Promise<PromptAssetTranslation> {
+        // GET /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/translations/{languageCode}
+        const response = await apiClient.get<PromptAssetTranslation>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`);
+        return response.data;
+    },
+
+    async updateTranslation(projectId: string, assetKey: string, versionTag: string, languageCode: string, payload: UpdateAssetTranslationDto): Promise<PromptAssetTranslation> {
+        // PATCH /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/translations/{languageCode}
+        // Assuming the backend returns the updated PromptAssetTranslation object
+        const response = await apiClient.patch<PromptAssetTranslation>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`, payload);
+        return response.data;
+    },
+
+    async removeTranslation(projectId: string, assetKey: string, versionTag: string, languageCode: string): Promise<void> {
+        // DELETE /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/translations/{languageCode}
+        await apiClient.delete(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`);
     },
 };
 
-// Servicio de PromptAssetVersions (sub-recurso de PromptAssets)
-export const promptAssetVersionService = {
-    create: async (projectId: string, assetId: string, payload: CreatePromptAssetVersionDto): Promise<PromptAssetVersion> => {
-        // La spec usa assetId (CUID) en la ruta
-        const response = await apiClient.post<PromptAssetVersion>(`/projects/${projectId}/assets/${assetId}/versions`, payload);
-        return response.data;
-    },
-    /** Crea una versión usando la key del asset */
-    createWithAssetKey: async (projectId: string, assetKey: string, payload: CreatePromptAssetVersionDto): Promise<PromptAssetVersion> => {
-        const response = await apiClient.post<PromptAssetVersion>(`/projects/${projectId}/assets/by-key/${assetKey}/versions`, payload);
-        return response.data;
-    },
-    findAll: async (projectId: string, assetId: string): Promise<PromptAssetVersion[]> => {
-        const response = await apiClient.get<PromptAssetVersion[]>(`/projects/${projectId}/assets/${assetId}/versions`);
-        return response.data;
-    },
-    /** Obtiene versiones usando la key del asset */
-    findAllWithAssetKey: async (projectId: string, assetKey: string): Promise<PromptAssetVersion[]> => {
-        const response = await apiClient.get<PromptAssetVersion[]>(`/projects/${projectId}/assets/by-key/${assetKey}/versions`);
-        return response.data;
-    },
-    findOne: async (projectId: string, assetId: string, versionId: string): Promise<PromptAssetVersion> => {
-        const response = await apiClient.get<PromptAssetVersion>(`/projects/${projectId}/assets/${assetId}/versions/${versionId}`);
-        return response.data;
-    },
-    update: async (projectId: string, assetId: string, versionId: string, payload: UpdatePromptAssetVersionDto): Promise<PromptAssetVersion> => {
-        const response = await apiClient.patch<PromptAssetVersion>(`/projects/${projectId}/assets/${assetId}/versions/${versionId}`, payload);
-        return response.data;
-    },
-    remove: async (projectId: string, assetId: string, versionId: string): Promise<void> => {
-        await apiClient.delete(`/projects/${projectId}/assets/${assetId}/versions/${versionId}`);
-    },
-};
-
-// Servicio de PromptAssetLinks (recurso de nivel superior dentro del proyecto)
+// --- Prompt Asset Link Service ---
+// Links an Asset Version to a Prompt Version (using promptVersionId CUID)
 export const promptAssetLinkService = {
-    create: async (projectId: string, payload: CreatePromptAssetLinkDto): Promise<PromptAssetLink> => {
-        const response = await apiClient.post<PromptAssetLink>(`/projects/${projectId}/links`, payload);
+    async create(projectId: string, promptVersionId: string, payload: CreatePromptAssetLinkDto): Promise<PromptAssetLink> {
+        const response = await apiClient.post(`projects/${projectId}/prompt-versions/${promptVersionId}/links`, payload);
         return response.data;
     },
-    findAll: async (projectId: string, promptVersionId?: string, assetVersionId?: string): Promise<PromptAssetLink[]> => {
-        // Añadir query params si se proporcionan
-        const params: Record<string, string> = {};
-        if (promptVersionId) params['promptVersionId'] = promptVersionId;
-        if (assetVersionId) params['assetVersionId'] = assetVersionId;
-        const response = await apiClient.get<PromptAssetLink[]>(`/projects/${projectId}/links`, { params });
+
+    async getAll(projectId: string, promptVersionId: string): Promise<PromptAssetLink[]> {
+        const response = await apiClient.get(`projects/${projectId}/prompt-versions/${promptVersionId}/links`);
         return response.data;
     },
-    findOne: async (projectId: string, id: string): Promise<PromptAssetLink> => {
-        const response = await apiClient.get<PromptAssetLink>(`/projects/${projectId}/links/${id}`);
+
+    async findOne(projectId: string, promptVersionId: string, linkId: string): Promise<PromptAssetLink> {
+        const response = await apiClient.get(`projects/${projectId}/prompt-versions/${promptVersionId}/links/${linkId}`);
         return response.data;
     },
-    update: async (projectId: string, id: string, payload: UpdatePromptAssetLinkDto): Promise<PromptAssetLink> => {
-        const response = await apiClient.patch<PromptAssetLink>(`/projects/${projectId}/links/${id}`, payload);
+
+    async update(projectId: string, promptVersionId: string, linkId: string, payload: UpdatePromptAssetLinkDto): Promise<PromptAssetLink> {
+        const response = await apiClient.patch(`projects/${projectId}/prompt-versions/${promptVersionId}/links/${linkId}`, payload);
         return response.data;
     },
-    remove: async (projectId: string, id: string): Promise<void> => {
-        await apiClient.delete(`/projects/${projectId}/links/${id}`);
+
+    async remove(projectId: string, promptVersionId: string, linkId: string): Promise<void> {
+        await apiClient.delete(`projects/${projectId}/prompt-versions/${promptVersionId}/links/${linkId}`);
     },
 };
 

@@ -7,6 +7,7 @@ import {
     promptService,
     CreatePromptDto,
     UpdatePromptDto,
+    projectService
 } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import { useAuth } from '@/context/AuthContext';
@@ -23,8 +24,34 @@ const PromptsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingItem, setEditingItem] = useState<Prompt | null>(null);
 
-    const { selectedProjectId, isLoading: isLoadingProject } = useProjects();
+    const [project, setProject] = useState<Project | null>(null);
+    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
+
+    const { selectedProjectId, isLoading: isLoadingProject, projects: projectList } = useProjects();
     const { isAuthenticated } = useAuth();
+
+    useEffect(() => {
+        if (selectedProjectId && projectList.length > 0) {
+            setBreadcrumbLoading(true);
+            const currentProject = projectList.find(p => p.id === selectedProjectId);
+            if (currentProject) {
+                setProject(currentProject);
+                setBreadcrumbLoading(false);
+            } else {
+                projectService.findOne(selectedProjectId)
+                    .then(data => setProject(data))
+                    .catch(err => {
+                        console.error("Error fetching project for breadcrumbs:", err);
+                        showErrorToast("Failed to load project details for breadcrumbs.");
+                        setProject(null);
+                    })
+                    .finally(() => setBreadcrumbLoading(false));
+            }
+        } else if (!selectedProjectId) {
+            setProject(null);
+            setBreadcrumbLoading(false);
+        }
+    }, [selectedProjectId, projectList]);
 
     const fetchData = useCallback(async () => {
         if (!selectedProjectId) {
@@ -33,13 +60,10 @@ const PromptsPage: React.FC = () => {
             setItemsList([]);
             return;
         }
-
         setLoading(true);
         setError(null);
         try {
-            const projectId = selectedProjectId as string;
-            const data = await promptService.findAll(projectId);
-            console.log("<<< DEBUG: Raw data received from API >>>:", data);
+            const data = await promptService.findAll(selectedProjectId);
             if (Array.isArray(data)) {
                 setItemsList(data);
             } else {
@@ -49,10 +73,8 @@ const PromptsPage: React.FC = () => {
             }
         } catch (err) {
             console.error("Error fetching prompts:", err);
-            if (axios.isAxiosError(err)) {
-                console.error("Axios error details:", err.response?.status, err.response?.data);
-            }
             setError('Failed to fetch prompts.');
+            showErrorToast('Failed to fetch prompts.');
             setItemsList([]);
         } finally {
             setLoading(false);
@@ -61,10 +83,8 @@ const PromptsPage: React.FC = () => {
 
     useEffect(() => {
         if (selectedProjectId && isAuthenticated) {
-            console.log(`PromptsPage: Project selected (${selectedProjectId}), fetching prompts...`);
             fetchData();
         } else if (!isLoadingProject && !selectedProjectId) {
-            console.log("PromptsPage: No project selected.");
             setItemsList([]);
             setLoading(false);
             setError("Please select a project to view prompts.");
@@ -91,10 +111,11 @@ const PromptsPage: React.FC = () => {
 
     const handleDelete = async (id: string) => {
         if (!selectedProjectId) {
-            alert("No project selected.");
+            showErrorToast("No project selected.");
             return;
         }
         if (window.confirm('Are you sure you want to delete this prompt?')) {
+            setLoading(true);
             try {
                 await promptService.remove(selectedProjectId, id);
                 showSuccessToast("Prompt deleted successfully!");
@@ -102,7 +123,10 @@ const PromptsPage: React.FC = () => {
             } catch (err) {
                 setError('Failed to delete item');
                 console.error(err);
-                showErrorToast("Failed to delete prompt.");
+                const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to delete prompt.';
+                showErrorToast(apiErrorMessage);
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -112,6 +136,7 @@ const PromptsPage: React.FC = () => {
             showErrorToast("Cannot save, no project selected.");
             return;
         }
+        setLoading(true);
         try {
             let message = "";
             if (editingItem) {
@@ -127,8 +152,26 @@ const PromptsPage: React.FC = () => {
         } catch (err) {
             setError('Failed to save item');
             console.error(err);
+            const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to save prompt.';
+            showErrorToast(apiErrorMessage);
+        } finally {
+            setLoading(false);
         }
     };
+
+    const breadcrumbs = [
+        { label: "Home", href: "/" },
+        { label: "Projects", href: "/projects" },
+    ];
+    if (selectedProjectId) {
+        breadcrumbs.push({
+            label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId),
+            href: `/projects/${selectedProjectId}/prompts`
+        });
+        breadcrumbs.push({ label: "Prompts" });
+    } else {
+        breadcrumbs.push({ label: "Prompts (Select Project)" });
+    }
 
     if (isLoadingProject) {
         return <p>Loading project context...</p>;
@@ -136,34 +179,41 @@ const PromptsPage: React.FC = () => {
 
     return (
         <>
-            <Breadcrumb pageTitle="Prompts" />
+            <Breadcrumb crumbs={breadcrumbs} />
+
             <div className="flex justify-end mb-4">
                 <button
                     onClick={handleAdd}
                     className={`px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 ${!selectedProjectId ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
-                    disabled={!selectedProjectId}
+                    disabled={!selectedProjectId || loading || breadcrumbLoading}
                     title={!selectedProjectId ? "Select a project to add a prompt" : "Add New Prompt"}
                 >
                     Add Prompt
                 </button>
             </div>
-            {loading && !error && <p>Loading prompts...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            {!loading && !error && (
+
+            {!selectedProjectId && !isLoadingProject && (
+                <p className="text-yellow-600 dark:text-yellow-400">Please select a project from the dropdown above to see its prompts.</p>
+            )}
+            {selectedProjectId && loading && <p>Loading prompts...</p>}
+            {selectedProjectId && error && <p className="text-red-500">{error}</p>}
+
+            {selectedProjectId && !loading && !error && (
                 <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                     {itemsList.length === 0 ? (
-                        <p>No prompts found for the selected project.</p>
+                        <p className="text-center py-4 text-gray-500 dark:text-gray-400">No prompts found for project {project?.name || selectedProjectId}.</p>
                     ) : (
                         <PromptsTable
                             prompts={itemsList}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
-                            projectId={selectedProjectId || undefined}
+                            projectId={selectedProjectId}
                         />
                     )}
                 </div>
             )}
+
             {isModalOpen && selectedProjectId && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
                     <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
@@ -176,6 +226,7 @@ const PromptsPage: React.FC = () => {
                             onCancel={() => setIsModalOpen(false)}
                             projectId={selectedProjectId}
                         />
+                        {loading && <p className="text-sm text-center mt-2">Saving...</p>}
                     </div>
                 </div>
             )}

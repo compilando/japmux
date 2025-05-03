@@ -56,6 +56,12 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({ promptVersion
                                 >
                                     Translations
                                 </Link>
+                                <Link
+                                    href={`/projects/${projectId}/prompts/${item.promptId}/versions/${item.versionTag}/links`}
+                                    className="text-cyan-600 hover:text-cyan-900 dark:text-cyan-400 dark:hover:text-cyan-600"
+                                >
+                                    Asset Links
+                                </Link>
                                 <button onClick={() => onEdit(item)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600">Edit</button>
                                 <button onClick={() => onDelete(item)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">Delete</button>
                             </td>

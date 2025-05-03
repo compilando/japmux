@@ -3,11 +3,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
+    Project,
+    Prompt,
     PromptVersion,
     promptVersionService,
     CreatePromptVersionDto,
     UpdatePromptVersionDto,
-    ActivatePromptVersionDto
+    ActivatePromptVersionDto,
+    projectService,
+    promptService
 } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import { usePrompts } from '@/context/PromptContext';
@@ -15,6 +19,7 @@ import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptVersionsTable from '@/components/tables/PromptVersionsTable';
 import PromptVersionForm from '@/components/form/PromptVersionForm';
 import axios from 'axios';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 const PromptVersionsPage: React.FC = () => {
     const [itemsList, setItemsList] = useState<PromptVersion[]>([]);
@@ -23,6 +28,10 @@ const PromptVersionsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingItem, setEditingItem] = useState<PromptVersion | null>(null);
 
+    const [project, setProject] = useState<Project | null>(null);
+    const [prompt, setPrompt] = useState<Prompt | null>(null);
+    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
+
     const params = useParams();
     const router = useRouter();
     const { selectedProjectId } = useProjects();
@@ -30,6 +39,31 @@ const PromptVersionsPage: React.FC = () => {
 
     const projectId = params.projectId as string;
     const promptId = params.promptId as string;
+
+    useEffect(() => {
+        if (!projectId || !promptId) return;
+
+        const fetchBreadcrumbData = async () => {
+            setBreadcrumbLoading(true);
+            try {
+                const [projectData, promptData] = await Promise.all([
+                    projectService.findOne(projectId),
+                    promptService.findOne(projectId, promptId)
+                ]);
+                setProject(projectData);
+                setPrompt(promptData);
+            } catch (error) {
+                console.error("Error fetching breadcrumb data:", error);
+                showErrorToast("Failed to load project or prompt details for breadcrumbs.");
+                setProject(null);
+                setPrompt(null);
+            } finally {
+                setBreadcrumbLoading(false);
+            }
+        };
+
+        fetchBreadcrumbData();
+    }, [projectId, promptId]);
 
     const fetchData = useCallback(async () => {
         if (!projectId || !promptId) {
@@ -68,6 +102,7 @@ const PromptVersionsPage: React.FC = () => {
                 console.error("Axios error details:", err.response?.status, err.response?.data);
             }
             setError('Failed to fetch items.');
+            showErrorToast('Failed to fetch prompt versions.');
             setItemsList([]);
         } finally {
             setLoading(false);
@@ -91,52 +126,62 @@ const PromptVersionsPage: React.FC = () => {
     const handleDelete = async (itemToDelete: PromptVersion) => {
         if (!projectId || !promptId) return;
         if (window.confirm(`Are you sure you want to delete version tag "${itemToDelete.versionTag}"?`)) {
+            setLoading(true);
             try {
                 await promptVersionService.remove(projectId, promptId, itemToDelete.versionTag);
+                showSuccessToast(`Version ${itemToDelete.versionTag} deleted successfully!`);
                 fetchData();
             } catch (err) {
                 setError('Failed to delete item');
                 console.error(err);
-                if (axios.isAxiosError(err)) {
-                    alert(`Error deleting: ${err.response?.data?.message || err.message}`);
-                } else if (err instanceof Error) {
-                    alert(`Error deleting: ${err.message}`);
-                }
+                const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to delete version.';
+                showErrorToast(apiErrorMessage);
+            } finally {
+                setLoading(false);
             }
         }
     };
 
     const handleSave = async (payload: CreatePromptVersionDto | UpdatePromptVersionDto) => {
         if (!projectId || !promptId) return;
+        setLoading(true);
         try {
+            let message = "";
             if (editingItem) {
                 await promptVersionService.update(projectId, promptId, editingItem.versionTag, payload as UpdatePromptVersionDto);
+                message = `Version ${editingItem.versionTag} updated successfully!`;
             } else {
                 await promptVersionService.create(projectId, promptId, payload as CreatePromptVersionDto);
+                message = "New version created successfully!";
             }
             setIsModalOpen(false);
+            showSuccessToast(message);
             fetchData();
         } catch (err) {
             setError('Failed to save item');
             console.error(err);
-            if (axios.isAxiosError(err)) {
-                alert(`Error saving: ${err.response?.data?.message || err.message}`);
-            } else if (err instanceof Error) {
-                alert(`Error saving: ${err.message}`);
-            }
+            const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to save version.';
+            showErrorToast(apiErrorMessage);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleToggleActive = async (itemToToggle: PromptVersion) => {
         if (!projectId || !promptId) return;
         const payload: ActivatePromptVersionDto = { isActive: !itemToToggle.isActive };
+        setLoading(true);
         try {
             await promptVersionService.activate(projectId, promptId, itemToToggle.versionTag, payload);
+            showSuccessToast(`Version ${itemToToggle.versionTag} active status toggled.`);
             fetchData();
         } catch (err) {
             setError('Failed to toggle active state');
             console.error(err);
-            alert('Failed to toggle active state');
+            const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to toggle active status.';
+            showErrorToast(apiErrorMessage);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -152,18 +197,29 @@ const PromptVersionsPage: React.FC = () => {
         return <p className="text-yellow-600 dark:text-yellow-400">Warning: Navigated directly? URL prompt ID ({promptId.substring(0, 6)}...) differs from last selected prompt ({selectedPromptId.substring(0, 6)}...).</p>;
     }
 
+    const breadcrumbs = [
+        { label: "Home", href: "/" },
+        { label: "Projects", href: "/projects" },
+        { label: breadcrumbLoading ? projectId : (project?.name || projectId), href: `/projects/${projectId}/prompts` },
+        { label: breadcrumbLoading ? promptId : (prompt?.name || promptId), href: `/projects/${projectId}/prompts/${promptId}/versions` },
+        { label: "Versions" }
+    ];
+
+    if (breadcrumbLoading || loading) return <p>Loading version details...</p>;
+    if (error) return <p className="text-red-500">{error}</p>;
+
     return (
         <>
-            <Breadcrumb pageTitle={`Versions for Prompt ${(selectedPromptId || promptId).substring(0, 6)}...`} />
+            <Breadcrumb crumbs={breadcrumbs} />
             <div className="flex justify-end mb-4">
-                <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
+                <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600" disabled={breadcrumbLoading || loading}>
                     Add Prompt Version
                 </button>
             </div>
-            {loading && <p>Loading...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            {!loading && !error && (
-                <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                {itemsList.length === 0 && !loading ? (
+                    <p className="text-center py-4 text-gray-500 dark:text-gray-400">No versions found for this prompt.</p>
+                ) : (
                     <PromptVersionsTable
                         promptVersions={itemsList}
                         onEdit={handleEdit}
@@ -171,13 +227,14 @@ const PromptVersionsPage: React.FC = () => {
                         onToggleActive={handleToggleActive}
                         projectId={projectId}
                     />
-                </div>
-            )}
+                )
+                }
+            </div>
             {isModalOpen && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
                     <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
                         <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-                            {editingItem ? 'Edit Prompt Version' : 'Add New Prompt Version'}
+                            {editingItem ? `Edit Version (${editingItem.versionTag})` : 'Add New Prompt Version'}
                         </h3>
                         <PromptVersionForm
                             initialData={editingItem}
