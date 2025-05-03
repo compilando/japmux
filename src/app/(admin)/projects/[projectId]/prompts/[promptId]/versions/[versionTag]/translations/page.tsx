@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
     PromptTranslation,
     promptTranslationService,
@@ -20,18 +20,25 @@ const PromptTranslationsPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingItem, setEditingItem] = useState<PromptTranslation | null>(null);
-
-    const params = useParams();
+    const searchParams = useSearchParams();
     const router = useRouter();
     const { selectedProjectId } = useProjects();
+    const params = useParams();
 
     const projectId = params.projectId as string;
     const promptId = params.promptId as string;
-    const versionId = params.versionId as string;
+    const versionTag = params.versionTag as string;
+    const versionIdQueryParam = searchParams.get('versionId');
+
+    const [currentVersionId, setCurrentVersionId] = useState<string | null>(null);
+
+    useEffect(() => {
+        setCurrentVersionId(versionIdQueryParam);
+    }, [versionIdQueryParam]);
 
     const fetchData = useCallback(async () => {
-        if (!projectId || !promptId || !versionId) {
-            setError("Missing Project, Prompt or Version ID in URL.");
+        if (!projectId || !promptId || !versionTag) {
+            setError("Missing Project, Prompt or Version Tag in URL.");
             setLoading(false);
             setItemsList([]);
             return;
@@ -46,7 +53,7 @@ const PromptTranslationsPage: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await promptTranslationService.findAll(projectId, promptId, versionId);
+            const data = await promptTranslationService.findAll(projectId, promptId, versionTag);
             if (Array.isArray(data)) {
                 setItemsList(data);
             } else {
@@ -64,7 +71,7 @@ const PromptTranslationsPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [projectId, promptId, versionId, selectedProjectId]);
+    }, [projectId, promptId, versionTag, selectedProjectId]);
 
     useEffect(() => {
         fetchData();
@@ -80,11 +87,11 @@ const PromptTranslationsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (translationId: string) => {
-        if (!projectId || !promptId || !versionId) return;
-        if (window.confirm('Are you sure you want to delete this translation?')) {
+    const handleDelete = async (itemToDelete: PromptTranslation) => {
+        if (!projectId || !promptId || !versionTag || !itemToDelete?.languageCode) return;
+        if (window.confirm(`Are you sure you want to delete the translation for ${itemToDelete.languageCode}?`)) {
             try {
-                await promptTranslationService.remove(projectId, promptId, versionId, translationId);
+                await promptTranslationService.remove(projectId, promptId, versionTag, itemToDelete.languageCode);
                 fetchData();
             } catch (err) {
                 setError('Failed to delete item');
@@ -99,12 +106,12 @@ const PromptTranslationsPage: React.FC = () => {
     };
 
     const handleSave = async (payload: CreatePromptTranslationDto | UpdatePromptTranslationDto) => {
-        if (!projectId || !promptId || !versionId) return;
+        if (!projectId || !promptId || !versionTag) return;
         try {
             if (editingItem) {
-                await promptTranslationService.update(projectId, promptId, versionId, editingItem.id, payload as UpdatePromptTranslationDto);
+                await promptTranslationService.update(projectId, promptId, versionTag, editingItem.languageCode, payload as UpdatePromptTranslationDto);
             } else {
-                await promptTranslationService.create(projectId, promptId, versionId, payload as CreatePromptTranslationDto);
+                await promptTranslationService.create(projectId, promptId, versionTag, payload as CreatePromptTranslationDto);
             }
             setIsModalOpen(false);
             fetchData();
@@ -119,8 +126,8 @@ const PromptTranslationsPage: React.FC = () => {
         }
     };
 
-    if (!projectId || !promptId || !versionId) {
-        return <p className="text-red-500">Error: Missing Project, Prompt or Version ID in URL.</p>;
+    if (!projectId || !promptId || !versionTag) {
+        return <p className="text-red-500">Error: Missing Project, Prompt or Version Tag in URL.</p>;
     }
 
     if (projectId !== selectedProjectId) {
@@ -129,7 +136,7 @@ const PromptTranslationsPage: React.FC = () => {
 
     return (
         <>
-            <Breadcrumb pageTitle={`Translations (Version ${versionId.substring(0, 6)}...)`} />
+            <Breadcrumb pageTitle={`Translations (Version Tag: ${versionTag})`} />
             <div className="flex justify-end mb-4">
                 <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
                     Add Prompt Translation
@@ -156,6 +163,7 @@ const PromptTranslationsPage: React.FC = () => {
                             initialData={editingItem}
                             onSave={handleSave}
                             onCancel={() => setIsModalOpen(false)}
+                            versionId={!editingItem && currentVersionId ? currentVersionId : undefined}
                         />
                     </div>
                 </div>

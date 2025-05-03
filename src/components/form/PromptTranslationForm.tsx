@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { PromptTranslation, PromptTranslationCreatePayload, PromptTranslationUpdatePayload } from '@/services/api';
+import { PromptTranslation, CreatePromptTranslationDto, UpdatePromptTranslationDto } from '@/services/api';
 
 interface PromptTranslationFormProps {
     initialData: PromptTranslation | null;
-    onSave: (payload: PromptTranslationCreatePayload | PromptTranslationUpdatePayload) => void;
+    versionId?: string;
+    onSave: (payload: CreatePromptTranslationDto | UpdatePromptTranslationDto) => void;
     onCancel: () => void;
 }
 
-const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialData, onSave, onCancel }) => {
-    const [versionId, setVersionId] = useState('');
+const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialData, versionId, onSave, onCancel }) => {
     const [languageCode, setLanguageCode] = useState('');
     const [promptText, setPromptText] = useState('');
 
@@ -16,12 +16,9 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
 
     useEffect(() => {
         if (initialData) {
-            setVersionId(initialData.versionId || '');
             setLanguageCode(initialData.languageCode || '');
             setPromptText(initialData.promptText || '');
         } else {
-            // Reset state
-            setVersionId('');
             setLanguageCode('');
             setPromptText('');
         }
@@ -29,20 +26,32 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        let payload: PromptTranslationCreatePayload | PromptTranslationUpdatePayload;
+        let payload: CreatePromptTranslationDto | UpdatePromptTranslationDto;
 
         if (isEditing) {
             payload = {
-                promptText: promptText || undefined, // Puede que el texto vacío sea válido
-            } as PromptTranslationUpdatePayload;
+                promptText: promptText
+            } as UpdatePromptTranslationDto;
         } else {
             payload = {
-                versionId,
                 languageCode,
                 promptText,
-            } as PromptTranslationCreatePayload;
-            if (!versionId || !languageCode || !promptText) {
-                alert("Version ID, Language Code, and Prompt Text are required!");
+                versionId: versionId || '',
+            } as CreatePromptTranslationDto;
+
+            if (!versionId) {
+                alert("Error: Missing version ID for creating translation.");
+                return;
+            }
+
+            if (!languageCode || !promptText) {
+                alert("Language Code and Prompt Text are required!");
+                return;
+            }
+
+            const langCodePattern = /^[a-z]{2}-[A-Z]{2}$/;
+            if (!langCodePattern.test(languageCode)) {
+                alert("Language Code format must be xx-XX (e.g., en-US).");
                 return;
             }
         }
@@ -53,18 +62,6 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-                <label htmlFor="versionId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Prompt Version ID</label>
-                <input
-                    type="text"
-                    id="versionId"
-                    value={versionId}
-                    onChange={(e) => setVersionId(e.target.value)}
-                    required
-                    disabled={isEditing} // No editable
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500"
-                />
-            </div>
-            <div>
                 <label htmlFor="languageCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Language Code (e.g., es-ES)</label>
                 <input
                     type="text"
@@ -74,7 +71,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
                     required
                     minLength={5}
                     maxLength={5}
-                    disabled={isEditing} // No editable
+                    disabled={isEditing}
                     pattern="^[a-z]{2}-[A-Z]{2}$"
                     title="Format xx-XX (e.g., en-US)"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500"

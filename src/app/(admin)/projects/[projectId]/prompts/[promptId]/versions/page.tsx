@@ -88,11 +88,11 @@ const PromptVersionsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (versionId: string) => {
+    const handleDelete = async (itemToDelete: PromptVersion) => {
         if (!projectId || !promptId) return;
-        if (window.confirm('Are you sure you want to delete this version?')) {
+        if (window.confirm(`Are you sure you want to delete version tag "${itemToDelete.versionTag}"?`)) {
             try {
-                await promptVersionService.remove(projectId, promptId, versionId);
+                await promptVersionService.remove(projectId, promptId, itemToDelete.versionTag);
                 fetchData();
             } catch (err) {
                 setError('Failed to delete item');
@@ -110,7 +110,7 @@ const PromptVersionsPage: React.FC = () => {
         if (!projectId || !promptId) return;
         try {
             if (editingItem) {
-                await promptVersionService.update(projectId, promptId, editingItem.id, payload as UpdatePromptVersionDto);
+                await promptVersionService.update(projectId, promptId, editingItem.versionTag, payload as UpdatePromptVersionDto);
             } else {
                 await promptVersionService.create(projectId, promptId, payload as CreatePromptVersionDto);
             }
@@ -127,11 +127,11 @@ const PromptVersionsPage: React.FC = () => {
         }
     };
 
-    const handleToggleActive = async (versionId: string, currentIsActive: boolean) => {
+    const handleToggleActive = async (itemToToggle: PromptVersion) => {
         if (!projectId || !promptId) return;
-        const payload: ActivatePromptVersionDto = { isActive: !currentIsActive };
+        const payload: ActivatePromptVersionDto = { isActive: !itemToToggle.isActive };
         try {
-            await promptVersionService.activate(projectId, promptId, versionId, payload);
+            await promptVersionService.activate(projectId, promptId, itemToToggle.versionTag, payload);
             fetchData();
         } catch (err) {
             setError('Failed to toggle active state');
@@ -169,6 +169,7 @@ const PromptVersionsPage: React.FC = () => {
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onToggleActive={handleToggleActive}
+                        projectId={projectId}
                     />
                 </div>
             )}

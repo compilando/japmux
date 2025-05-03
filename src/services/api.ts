@@ -280,6 +280,7 @@ export interface CreatePromptVersionDto {
     promptText: string;
     versionTag?: string;
     changeMessage?: string;
+    assetLinks: string[];
 }
 
 export interface InitialTranslationDto {
@@ -307,6 +308,7 @@ export interface UpdatePromptDto {
 }
 
 export interface CreatePromptTranslationDto {
+    versionId: string;
     languageCode: string;
     promptText: string;
 }
@@ -684,48 +686,44 @@ export const promptVersionService = {
         const response = await apiClient.get<PromptVersion[]>(`/projects/${projectId}/prompts/${promptId}/versions`);
         return response.data;
     },
-    findOne: async (projectId: string, promptId: string, versionId: string): Promise<PromptVersion> => {
-        const response = await apiClient.get<PromptVersion>(`/projects/${projectId}/prompts/${promptId}/versions/${versionId}`);
+    findOne: async (projectId: string, promptId: string, versionTag: string): Promise<PromptVersion> => {
+        const response = await apiClient.get<PromptVersion>(`/projects/${projectId}/prompts/${promptId}/versions/${versionTag}`);
         return response.data;
     },
-    update: async (projectId: string, promptId: string, versionId: string, payload: UpdatePromptVersionDto): Promise<PromptVersion> => {
-        const response = await apiClient.patch<PromptVersion>(`/projects/${projectId}/prompts/${promptId}/versions/${versionId}`, payload);
+    update: async (projectId: string, promptId: string, versionTag: string, payload: UpdatePromptVersionDto): Promise<PromptVersion> => {
+        const response = await apiClient.patch<PromptVersion>(`/projects/${projectId}/prompts/${promptId}/versions/${versionTag}`, payload);
         return response.data;
     },
-    remove: async (projectId: string, promptId: string, versionId: string): Promise<void> => {
-        await apiClient.delete(`/projects/${projectId}/prompts/${promptId}/versions/${versionId}`);
+    remove: async (projectId: string, promptId: string, versionTag: string): Promise<void> => {
+        await apiClient.delete(`/projects/${projectId}/prompts/${promptId}/versions/${versionTag}`);
     },
-    activate: async (projectId: string, promptId: string, versionId: string, payload: ActivatePromptVersionDto): Promise<PromptVersion> => {
-        const response = await apiClient.patch<PromptVersion>(`/projects/${projectId}/prompts/${promptId}/versions/${versionId}/activate`, payload);
+    activate: async (projectId: string, promptId: string, versionTag: string, payload: ActivatePromptVersionDto): Promise<PromptVersion> => {
+        const response = await apiClient.patch<PromptVersion>(`/projects/${projectId}/prompts/${promptId}/versions/${versionTag}/activate`, payload);
         return response.data;
     },
 };
 
 // Servicio de PromptTranslations (sub-recurso de PromptVersions)
 export const promptTranslationService = {
-    create: async (projectId: string, promptId: string, versionId: string, payload: CreatePromptTranslationDto): Promise<PromptTranslation> => {
-        const response = await apiClient.post<PromptTranslation>(`/projects/${projectId}/prompts/${promptId}/versions/${versionId}/translations`, payload);
+    create: async (projectId: string, promptId: string, versionTag: string, payload: CreatePromptTranslationDto): Promise<PromptTranslation> => {
+        const response = await apiClient.post<PromptTranslation>(`/projects/${projectId}/prompts/${promptId}/versions/${versionTag}/translations`, payload);
         return response.data;
     },
-    findAll: async (projectId: string, promptId: string, versionId: string): Promise<PromptTranslation[]> => {
-        const response = await apiClient.get<PromptTranslation[]>(`/projects/${projectId}/prompts/${promptId}/versions/${versionId}/translations`);
-        return response.data;
-    },
-    findOne: async (projectId: string, promptId: string, versionId: string, translationId: string): Promise<PromptTranslation> => {
-        const response = await apiClient.get<PromptTranslation>(`/projects/${projectId}/prompts/${promptId}/versions/${versionId}/translations/${translationId}`);
+    findAll: async (projectId: string, promptId: string, versionTag: string): Promise<PromptTranslation[]> => {
+        const response = await apiClient.get<PromptTranslation[]>(`/projects/${projectId}/prompts/${promptId}/versions/${versionTag}/translations`);
         return response.data;
     },
     /** Busca una traducción por código de idioma */
-    findByLanguage: async (projectId: string, promptId: string, versionId: string, languageCode: string): Promise<PromptTranslation> => {
-        const response = await apiClient.get<PromptTranslation>(`/projects/${projectId}/prompts/${promptId}/versions/${versionId}/translations/by-language/${languageCode}`);
+    findByLanguage: async (projectId: string, promptId: string, versionTag: string, languageCode: string): Promise<PromptTranslation> => {
+        const response = await apiClient.get<PromptTranslation>(`/projects/${projectId}/prompts/${promptId}/versions/${versionTag}/translations/by-language/${languageCode}`);
         return response.data;
     },
-    update: async (projectId: string, promptId: string, versionId: string, translationId: string, payload: UpdatePromptTranslationDto): Promise<PromptTranslation> => {
-        const response = await apiClient.patch<PromptTranslation>(`/projects/${projectId}/prompts/${promptId}/versions/${versionId}/translations/${translationId}`, payload);
+    update: async (projectId: string, promptId: string, versionTag: string, languageCode: string, payload: UpdatePromptTranslationDto): Promise<PromptTranslation> => {
+        const response = await apiClient.patch<PromptTranslation>(`/projects/${projectId}/prompts/${promptId}/versions/${versionTag}/translations/${languageCode}`, payload);
         return response.data;
     },
-    remove: async (projectId: string, promptId: string, versionId: string, translationId: string): Promise<void> => {
-        await apiClient.delete(`/projects/${projectId}/prompts/${promptId}/versions/${versionId}/translations/${translationId}`);
+    remove: async (projectId: string, promptId: string, versionTag: string, languageCode: string): Promise<void> => {
+        await apiClient.delete(`/projects/${projectId}/prompts/${promptId}/versions/${versionTag}/translations/${languageCode}`);
     },
 };
 

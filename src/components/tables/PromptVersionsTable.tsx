@@ -1,15 +1,17 @@
 import React from 'react';
 import { PromptVersion } from '@/services/api';
 import CopyButton from '../common/CopyButton';
+import Link from 'next/link';
 
 interface PromptVersionsTableProps {
     promptVersions: PromptVersion[];
+    projectId: string;
     onEdit: (item: PromptVersion) => void;
-    onDelete: (id: string) => void;
-    onToggleActive?: (versionId: string, currentIsActive: boolean) => void;
+    onDelete: (item: PromptVersion) => void;
+    onToggleActive?: (item: PromptVersion) => void;
 }
 
-const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({ promptVersions, onEdit, onDelete, onToggleActive }) => {
+const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({ promptVersions, projectId, onEdit, onDelete, onToggleActive }) => {
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -40,16 +42,22 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({ promptVersion
                                 }
                                 {onToggleActive && (
                                     <button
-                                        onClick={() => onToggleActive(item.id, item.isActive)}
+                                        onClick={() => onToggleActive(item)}
                                         className="ml-2 px-2 py-0.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                     >
                                         Toggle
                                     </button>
                                 )}
                             </td>
-                            <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button onClick={() => onEdit(item)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 mr-3">Edit</button>
-                                <button onClick={() => onDelete(item.id)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">Delete</button>
+                            <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                <Link
+                                    href={`/projects/${projectId}/prompts/${item.promptId}/versions/${item.versionTag}/translations?versionId=${item.id}`}
+                                    className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-600"
+                                >
+                                    Translations
+                                </Link>
+                                <button onClick={() => onEdit(item)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600">Edit</button>
+                                <button onClick={() => onDelete(item)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">Delete</button>
                             </td>
                         </tr>
                     ))}

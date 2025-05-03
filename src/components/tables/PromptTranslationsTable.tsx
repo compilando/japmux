@@ -5,7 +5,7 @@ import CopyButton from '../common/CopyButton';
 interface PromptTranslationsTableProps {
     promptTranslations: PromptTranslation[];
     onEdit: (item: PromptTranslation) => void;
-    onDelete: (id: string) => void; // ID might be composite
+    onDelete: (item: PromptTranslation) => void;
 }
 
 const PromptTranslationsTable: React.FC<PromptTranslationsTableProps> = ({ promptTranslations, onEdit, onDelete }) => {
@@ -40,7 +40,7 @@ const PromptTranslationsTable: React.FC<PromptTranslationsTableProps> = ({ promp
                             {/* TODO: Add cells for PromptTranslation fields */}
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <button onClick={() => onEdit(item)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 mr-3">Edit</button>
-                                <button onClick={() => onDelete(item.id)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">Delete</button>
+                                <button onClick={() => onDelete(item)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">Delete</button>
                             </td>
                         </tr>
                     ))}

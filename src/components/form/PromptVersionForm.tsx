@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { PromptVersion, PromptVersionCreatePayload, PromptVersionUpdatePayload } from '@/services/api';
+import { PromptVersion, CreatePromptVersionDto, UpdatePromptVersionDto } from '@/services/api';
 
 interface PromptVersionFormProps {
     initialData: PromptVersion | null;
-    onSave: (payload: PromptVersionCreatePayload | PromptVersionUpdatePayload) => void;
+    onSave: (payload: CreatePromptVersionDto | UpdatePromptVersionDto) => void;
     onCancel: () => void;
 }
 
 const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSave, onCancel }) => {
-    const [promptId, setPromptId] = useState(''); // Name del prompt padre
     const [promptText, setPromptText] = useState('');
     const [versionTag, setVersionTag] = useState('v1.0.0');
     const [changeMessage, setChangeMessage] = useState('');
@@ -18,13 +17,11 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
 
     useEffect(() => {
         if (initialData) {
-            setPromptId(initialData.promptId || '');
             setPromptText(initialData.promptText || '');
             setVersionTag(initialData.versionTag || 'v1.0.0');
             setChangeMessage(initialData.changeMessage || '');
         } else {
             // Reset state
-            setPromptId('');
             setPromptText('');
             setVersionTag('v1.0.0');
             setChangeMessage('');
@@ -33,22 +30,30 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        let payload: PromptVersionCreatePayload | PromptVersionUpdatePayload;
+        let payload: CreatePromptVersionDto | UpdatePromptVersionDto;
 
         if (isEditing) {
             payload = {
-                promptText: promptText || undefined,
-                changeMessage: changeMessage || undefined,
-            } as PromptVersionUpdatePayload;
+                promptText: promptText ? promptText : undefined,
+                changeMessage: changeMessage ? changeMessage : undefined,
+            } as UpdatePromptVersionDto;
+            payload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v !== undefined));
+
         } else {
             payload = {
-                promptId,
                 promptText,
                 versionTag: versionTag || undefined,
                 changeMessage: changeMessage || undefined,
-            } as PromptVersionCreatePayload;
-            if (!promptId || !promptText) {
-                alert("Prompt ID (Name) and Prompt Text are required!");
+                assetLinks: [],
+            };
+
+            if (!payload.versionTag) delete payload.versionTag;
+            if (!payload.changeMessage) delete payload.changeMessage;
+
+            payload = payload as CreatePromptVersionDto;
+
+            if (!promptText) {
+                alert("Prompt Text is required!");
                 return;
             }
         }
@@ -57,20 +62,6 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-                <label htmlFor="promptId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Prompt ID (Name)</label>
-                <input
-                    type="text"
-                    id="promptId"
-                    value={promptId}
-                    onChange={(e) => setPromptId(e.target.value)}
-                    required
-                    disabled={isEditing} // No editable
-                    pattern="^[a-z0-9_]+$"
-                    title="Solo minúsculas, números y guiones bajos"
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500"
-                />
-            </div>
             <div>
                 <label htmlFor="versionTag" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Version Tag</label>
                 <input
