@@ -3,6 +3,7 @@ import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import NotificationDropdown from "@/components/header/NotificationDropdown";
 import UserDropdown from "@/components/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
+import { useProjects } from "@/context/ProjectContext";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -11,6 +12,7 @@ const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+  const { projects, selectedProjectId, setSelectedProjectId, isLoading: isLoadingProjects } = useProjects();
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {
@@ -39,6 +41,10 @@ const AppHeader: React.FC = () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedProjectId(event.target.value || null);
+  };
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
@@ -103,7 +109,28 @@ const AppHeader: React.FC = () => {
             </svg>
           </button>
 
-          <div className="hidden lg:block">
+          <div className="hidden lg:block ml-4">
+            {isLoadingProjects ? (
+              <div className="h-9 w-40 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+            ) : projects.length > 0 ? (
+              <select
+                value={selectedProjectId || ''}
+                onChange={handleProjectChange}
+                className="h-9 rounded border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 focus:border-brand-300 focus:outline-none focus:ring-1 focus:ring-brand-500/50 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90 dark:focus:border-brand-700"
+                aria-label="Select Project"
+              >
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="text-sm text-gray-500 dark:text-gray-400">No projects found</span>
+            )}
+          </div>
+
+          <div className="hidden lg:block ml-4">
             <form>
               <div className="relative">
                 <span className="absolute -translate-y-1/2 left-4 top-1/2 pointer-events-none">
@@ -147,7 +174,6 @@ const AppHeader: React.FC = () => {
             <ThemeToggleButton />
             {/* <!-- Dark Mode Toggler --> */}
 
-            <NotificationDropdown />
             {/* <!-- Notification Menu Area --> */}
           </div>
           {/* <!-- User Area --> */}

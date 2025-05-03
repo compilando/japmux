@@ -3,13 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import {
     CulturalData,
-    getCulturalData,
-    createCulturalData,
-    updateCulturalData,
-    deleteCulturalData,
-    CulturalDataCreatePayload,
-    CulturalDataUpdatePayload
+    culturalDataService,
+    CreateCulturalDataDto,
+    UpdateCulturalDataDto
 } from '@/services/api';
+import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import CulturalDataTable from '@/components/tables/CulturalDataTable';
 import CulturalDataForm from '@/components/form/CulturalDataForm';
@@ -23,14 +21,22 @@ const CulturalDataPage: React.FC = () => {
     // Estados para el modal/formulario
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingCulturalData, setEditingCulturalData] = useState<CulturalData | null>(null);
+    const { selectedProjectId } = useProjects();
 
     const fetchData = async () => {
+        if (!selectedProjectId) {
+            setCulturalDataList([]);
+            setError("Please select a project to view cultural data.");
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         setError(null);
-        console.log("Attempting to fetch cultural data...");
+        console.log("Attempting to fetch cultural data for project:", selectedProjectId);
         try {
-            const data = await getCulturalData();
-            console.log("API response for /cultural-data received:", data);
+            const data = await culturalDataService.findAll(selectedProjectId);
+            console.log(`API response for /projects/${selectedProjectId}/cultural-data received:`, data);
 
             if (Array.isArray(data)) {
                 setCulturalDataList(data);
@@ -44,7 +50,7 @@ const CulturalDataPage: React.FC = () => {
             if (axios.isAxiosError(err)) {
                 console.error("Axios error details:", err.response?.status, err.response?.data);
             }
-            setError('Failed to fetch cultural data. Check console and network tab for details.');
+            setError(`Failed to fetch cultural data: ${err instanceof Error ? err.message : String(err)}`);
             setCulturalDataList([]);
         } finally {
             setLoading(false);
@@ -53,7 +59,7 @@ const CulturalDataPage: React.FC = () => {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [selectedProjectId]);
 
     const handleAdd = () => {
         setEditingCulturalData(null);
@@ -68,10 +74,14 @@ const CulturalDataPage: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
+        if (!selectedProjectId) {
+            alert("No project selected.");
+            return;
+        }
         if (window.confirm('Are you sure you want to delete this cultural data?')) {
             try {
-                await deleteCulturalData(id);
-                fetchData(); // Refrescar la lista
+                await culturalDataService.remove(selectedProjectId, id);
+                fetchData();
             } catch (err) {
                 setError('Failed to delete cultural data');
                 console.error(err);
@@ -79,21 +89,22 @@ const CulturalDataPage: React.FC = () => {
         }
     };
 
-    const handleSave = async (payload: CulturalDataCreatePayload | CulturalDataUpdatePayload) => {
+    const handleSave = async (payload: CreateCulturalDataDto | UpdateCulturalDataDto) => {
+        if (!selectedProjectId) {
+            alert("No project selected.");
+            return;
+        }
         try {
             if (editingCulturalData) {
-                const updatePayload: CulturalDataUpdatePayload = payload as CulturalDataUpdatePayload;
-                await updateCulturalData(editingCulturalData.id, updatePayload);
+                await culturalDataService.update(selectedProjectId, editingCulturalData.id, payload as UpdateCulturalDataDto);
             } else {
-                const createPayload: CulturalDataCreatePayload = payload as CulturalDataCreatePayload;
-                await createCulturalData(createPayload);
+                await culturalDataService.create(selectedProjectId, payload as CreateCulturalDataDto);
             }
             setIsModalOpen(false);
-            fetchData(); // Recargar datos
+            fetchData();
         } catch (err) {
-            setError('Failed to save cultural data');
+            setError(`Failed to save cultural data: ${err instanceof Error ? err.message : String(err)}`);
             console.error(err);
-            // Mostrar error en el formulario o notificación
             if (axios.isAxiosError(err)) {
                 alert(`Error saving: ${err.response?.data?.message || err.message}`);
             } else if (err instanceof Error) {
@@ -107,31 +118,37 @@ const CulturalDataPage: React.FC = () => {
         <>
             <Breadcrumb pageTitle="Cultural Data" />
 
-            <div className="flex justify-end mb-4">
-                <button
-                    onClick={handleAdd}
-                    className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
-                >
-                    Add Cultural Data
-                </button>
-            </div>
+            {!selectedProjectId ? (
+                <p className="text-center text-red-500">Please select a project from the header dropdown to manage cultural data.</p>
+            ) : (
+                <>
+                    <div className="flex justify-end mb-4">
+                        <button
+                            onClick={handleAdd}
+                            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+                        >
+                            Add Cultural Data
+                        </button>
+                    </div>
 
-            {loading && <p>Loading cultural data...</p>}
-            {error && <p className="text-red-500">{error}</p>}
+                    {loading && <p>Loading cultural data...</p>}
+                    {error && <p className="text-red-500">{error}</p>}
 
-            {!loading && !error && (
-                <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                    <CulturalDataTable
-                        culturalDataList={culturalDataList}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                    />
-                    {/* {culturalDataList.length === 0 && <p>No cultural data found.</p>} // Mensaje ya dentro de la tabla */}
-                </div>
+                    {!loading && !error && (
+                        <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                            <CulturalDataTable
+                                culturalDataList={culturalDataList}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                            />
+                            {/* {culturalDataList.length === 0 && <p>No cultural data found.</p>} // Mensaje ya dentro de la tabla */}
+                        </div>
+                    )}
+                </>
             )}
 
-            {/* Modal con Formulario */}
-            {isModalOpen && (
+            {/* Modal con Formulario - Mostrar solo si hay proyecto */}
+            {isModalOpen && selectedProjectId && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
                     <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
                         <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">

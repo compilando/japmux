@@ -1,10 +1,10 @@
-# JapMux Admin Dashboard
+# JAPM
 
-This project is an admin dashboard built with Next.js and Tailwind CSS, designed to interact with a backend API to manage various application data.
+This project is an Prompt Manager built with Next.js and Tailwind CSS, designed to interact with a backend API to manage various application data.
 
 ## Overview
 
-The dashboard provides a user interface to perform CRUD (Create, Read, Update, Delete) operations on different entities managed by the backend API. It is built on:
+The app provides a user interface to perform CRUD (Create, Read, Update, Delete) operations on different entities managed by the backend API. It is built on:
 
 - Next.js 15+
 - React 19+

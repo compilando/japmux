@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import {
     PromptAssetVersion,
-    getPromptAssetVersions,
-    createPromptAssetVersion,
-    updatePromptAssetVersion,
-    deletePromptAssetVersion,
-    PromptAssetVersionCreatePayload,
-    PromptAssetVersionUpdatePayload
+    promptAssetVersionService,
+    CreatePromptAssetVersionDto,
+    UpdatePromptAssetVersionDto
 } from '@/services/api';
+import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptAssetVersionsTable from '@/components/tables/PromptAssetVersionsTable';
 import PromptAssetVersionForm from '@/components/form/PromptAssetVersionForm';
@@ -22,11 +21,31 @@ const PromptAssetVersionsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingItem, setEditingItem] = useState<PromptAssetVersion | null>(null);
 
-    const fetchData = async () => {
+    const params = useParams();
+    const router = useRouter();
+    const { selectedProjectId } = useProjects();
+
+    const projectId = params.projectId as string;
+    const assetId = params.assetId as string;
+
+    const fetchData = useCallback(async () => {
+        if (!projectId || !assetId) {
+            setError("Missing Project or Asset ID in URL.");
+            setLoading(false);
+            setItemsList([]);
+            return;
+        }
+        if (projectId !== selectedProjectId) {
+            setError("Project ID in URL does not match selected project.");
+            setLoading(false);
+            setItemsList([]);
+            return;
+        }
+
         setLoading(true);
         setError(null);
         try {
-            const data = await getPromptAssetVersions();
+            const data = await promptAssetVersionService.findAll(projectId, assetId);
             if (Array.isArray(data)) {
                 setItemsList(data);
             } else {
@@ -44,11 +63,11 @@ const PromptAssetVersionsPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [projectId, assetId, selectedProjectId]);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
     const handleAdd = () => {
         setEditingItem(null);
@@ -60,10 +79,11 @@ const PromptAssetVersionsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id: string) => {
-        if (window.confirm('Are you sure you want to delete this item?')) {
+    const handleDelete = async (versionId: string) => {
+        if (!projectId || !assetId) return;
+        if (window.confirm('Are you sure you want to delete this version?')) {
             try {
-                await deletePromptAssetVersion(id);
+                await promptAssetVersionService.remove(projectId, assetId, versionId);
                 fetchData();
             } catch (err) {
                 setError('Failed to delete item');
@@ -77,12 +97,13 @@ const PromptAssetVersionsPage: React.FC = () => {
         }
     };
 
-    const handleSave = async (payload: PromptAssetVersionCreatePayload | PromptAssetVersionUpdatePayload) => {
+    const handleSave = async (payload: CreatePromptAssetVersionDto | UpdatePromptAssetVersionDto) => {
+        if (!projectId || !assetId) return;
         try {
             if (editingItem) {
-                await updatePromptAssetVersion(editingItem.id, payload as PromptAssetVersionUpdatePayload);
+                await promptAssetVersionService.update(projectId, assetId, editingItem.id, payload as UpdatePromptAssetVersionDto);
             } else {
-                await createPromptAssetVersion(payload as PromptAssetVersionCreatePayload);
+                await promptAssetVersionService.create(projectId, assetId, payload as CreatePromptAssetVersionDto);
             }
             setIsModalOpen(false);
             fetchData();
@@ -97,9 +118,17 @@ const PromptAssetVersionsPage: React.FC = () => {
         }
     };
 
+    if (!projectId || !assetId) {
+        return <p className="text-red-500">Error: Missing Project or Asset ID in URL.</p>;
+    }
+
+    if (projectId !== selectedProjectId) {
+        return <p className="text-red-500">Error: Project ID in URL ({projectId}) does not match selected project ({selectedProjectId}).</p>;
+    }
+
     return (
         <>
-            <Breadcrumb pageTitle="Prompt Asset Versions" />
+            <Breadcrumb pageTitle={`Versions for Asset ${assetId.substring(0, 6)}...`} />
             <div className="flex justify-end mb-4">
                 <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
                     Add Prompt Asset Version
@@ -110,7 +139,7 @@ const PromptAssetVersionsPage: React.FC = () => {
             {!loading && !error && (
                 <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                     <PromptAssetVersionsTable
-                        promptAssetVersions={itemsList} // Prop name changed
+                        promptAssetVersions={itemsList}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                     />

@@ -3,16 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import {
     User,
-    getUsers,
-    createUser,
-    updateUser,
-    deleteUser,
-    UserCreatePayload,
-    UserUpdatePayload
+    userService,
+    CreateUserDto,
+    UpdateUserDto
 } from '@/services/api';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
-import UsersTable from '@/components/tables/UsersTable'; // Ajustado
-import UserForm from '@/components/form/UserForm';     // Ajustado
+import UsersTable from '@/components/tables/UsersTable';
+import UserForm from '@/components/form/UserForm';
 import axios from 'axios';
 
 const UsersPage: React.FC = () => {
@@ -26,7 +23,7 @@ const UsersPage: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await getUsers();
+            const data = await userService.findAll();
             if (Array.isArray(data)) {
                 setUsersList(data);
             } else {
@@ -63,8 +60,8 @@ const UsersPage: React.FC = () => {
     const handleDelete = async (id: string) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             try {
-                await deleteUser(id);
-                fetchData(); // Recargar datos después de borrar
+                await userService.remove(id);
+                fetchData();
             } catch (err) {
                 setError('Failed to delete user');
                 console.error(err);
@@ -77,16 +74,15 @@ const UsersPage: React.FC = () => {
         }
     };
 
-    const handleSave = async (payload: UserCreatePayload | UserUpdatePayload) => {
+    const handleSave = async (payload: CreateUserDto | UpdateUserDto) => {
         try {
             if (editingUser) {
-                // Asegúrate de que el payload de actualización no incluya campos no actualizables si es necesario
-                await updateUser(editingUser.id, payload as UserUpdatePayload);
+                await userService.update(editingUser.id, payload as UpdateUserDto);
             } else {
-                await createUser(payload as UserCreatePayload);
+                await userService.create(payload as CreateUserDto);
             }
             setIsModalOpen(false);
-            fetchData(); // Recargar datos después de guardar
+            fetchData();
         } catch (err) {
             setError('Failed to save user');
             console.error(err);

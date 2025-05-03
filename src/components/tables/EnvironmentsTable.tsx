@@ -1,5 +1,6 @@
 import React from 'react';
 import { Environment } from '@/services/api'; // Asegúrate de que la ruta sea correcta
+import CopyButton from '../common/CopyButton';
 
 interface EnvironmentsTableProps {
     environments: Environment[];
@@ -13,7 +14,7 @@ const EnvironmentsTable: React.FC<EnvironmentsTableProps> = ({ environments, onE
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-800">
                     <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        <th scope="col" className="w-1/12 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             ID
                         </th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -28,8 +29,11 @@ const EnvironmentsTable: React.FC<EnvironmentsTableProps> = ({ environments, onE
                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                     {environments.map((environment) => (
                         <tr key={environment.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                {environment.id}
+                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                <div className="flex items-center space-x-2">
+                                    <span className="truncate" title={environment.id}>{environment.id}</span>
+                                    <CopyButton textToCopy={environment.id} />
+                                </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                 {environment.name}

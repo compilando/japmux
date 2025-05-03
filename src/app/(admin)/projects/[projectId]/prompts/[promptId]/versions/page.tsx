@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import {
     PromptVersion,
-    getPromptVersions,
-    createPromptVersion,
-    updatePromptVersion,
-    deletePromptVersion,
-    PromptVersionCreatePayload,
-    PromptVersionUpdatePayload
+    promptVersionService,
+    CreatePromptVersionDto,
+    UpdatePromptVersionDto,
+    ActivatePromptVersionDto
 } from '@/services/api';
+import { useProjects } from '@/context/ProjectContext';
+import { usePrompts } from '@/context/PromptContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptVersionsTable from '@/components/tables/PromptVersionsTable';
 import PromptVersionForm from '@/components/form/PromptVersionForm';
@@ -22,11 +23,38 @@ const PromptVersionsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingItem, setEditingItem] = useState<PromptVersion | null>(null);
 
-    const fetchData = async () => {
+    const params = useParams();
+    const router = useRouter();
+    const { selectedProjectId } = useProjects();
+    const { selectedPromptId } = usePrompts();
+
+    const projectId = params.projectId as string;
+    const promptId = params.promptId as string;
+
+    const fetchData = useCallback(async () => {
+        if (!projectId || !promptId) {
+            setError("Missing Project or Prompt ID in URL.");
+            setLoading(false);
+            setItemsList([]);
+            return;
+        }
+        if (projectId !== selectedProjectId) {
+            setError("Project ID in URL does not match selected project.");
+            setLoading(false);
+            setItemsList([]);
+            return;
+        }
+        if (selectedPromptId && promptId !== selectedPromptId) {
+            setError(`Error: URL prompt ID (${promptId.substring(0, 6)}...) does not match context prompt ID (${selectedPromptId.substring(0, 6)}...). Clear selection or navigate from Prompts table.`);
+            setLoading(false);
+            setItemsList([]);
+            return;
+        }
+
         setLoading(true);
         setError(null);
         try {
-            const data = await getPromptVersions();
+            const data = await promptVersionService.findAll(projectId, promptId);
             if (Array.isArray(data)) {
                 setItemsList(data);
             } else {
@@ -44,11 +72,11 @@ const PromptVersionsPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [projectId, promptId, selectedProjectId, selectedPromptId]);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
     const handleAdd = () => {
         setEditingItem(null);
@@ -60,10 +88,11 @@ const PromptVersionsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id: string) => {
-        if (window.confirm('Are you sure you want to delete this item?')) {
+    const handleDelete = async (versionId: string) => {
+        if (!projectId || !promptId) return;
+        if (window.confirm('Are you sure you want to delete this version?')) {
             try {
-                await deletePromptVersion(id);
+                await promptVersionService.remove(projectId, promptId, versionId);
                 fetchData();
             } catch (err) {
                 setError('Failed to delete item');
@@ -77,12 +106,13 @@ const PromptVersionsPage: React.FC = () => {
         }
     };
 
-    const handleSave = async (payload: PromptVersionCreatePayload | PromptVersionUpdatePayload) => {
+    const handleSave = async (payload: CreatePromptVersionDto | UpdatePromptVersionDto) => {
+        if (!projectId || !promptId) return;
         try {
             if (editingItem) {
-                await updatePromptVersion(editingItem.id, payload as PromptVersionUpdatePayload);
+                await promptVersionService.update(projectId, promptId, editingItem.id, payload as UpdatePromptVersionDto);
             } else {
-                await createPromptVersion(payload as PromptVersionCreatePayload);
+                await promptVersionService.create(projectId, promptId, payload as CreatePromptVersionDto);
             }
             setIsModalOpen(false);
             fetchData();
@@ -97,9 +127,34 @@ const PromptVersionsPage: React.FC = () => {
         }
     };
 
+    const handleToggleActive = async (versionId: string, currentIsActive: boolean) => {
+        if (!projectId || !promptId) return;
+        const payload: ActivatePromptVersionDto = { isActive: !currentIsActive };
+        try {
+            await promptVersionService.activate(projectId, promptId, versionId, payload);
+            fetchData();
+        } catch (err) {
+            setError('Failed to toggle active state');
+            console.error(err);
+            alert('Failed to toggle active state');
+        }
+    };
+
+    if (!projectId || !promptId) {
+        return <p className="text-red-500">Error: Missing Project or Prompt ID in URL.</p>;
+    }
+
+    if (projectId !== selectedProjectId) {
+        return <p className="text-red-500">Error: Project ID in URL ({projectId}) does not match selected project ({selectedProjectId}).</p>;
+    }
+
+    if (selectedPromptId && promptId !== selectedPromptId) {
+        return <p className="text-yellow-600 dark:text-yellow-400">Warning: Navigated directly? URL prompt ID ({promptId.substring(0, 6)}...) differs from last selected prompt ({selectedPromptId.substring(0, 6)}...).</p>;
+    }
+
     return (
         <>
-            <Breadcrumb pageTitle="Prompt Versions" />
+            <Breadcrumb pageTitle={`Versions for Prompt ${(selectedPromptId || promptId).substring(0, 6)}...`} />
             <div className="flex justify-end mb-4">
                 <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
                     Add Prompt Version
@@ -110,9 +165,10 @@ const PromptVersionsPage: React.FC = () => {
             {!loading && !error && (
                 <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                     <PromptVersionsTable
-                        promptVersions={itemsList} // Prop name changed
+                        promptVersions={itemsList}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
+                        onToggleActive={handleToggleActive}
                     />
                 </div>
             )}

@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { getApiHealth, HealthCheckResponse } from '@/services/api';
+// import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Spinner } from '@nextui-org/react'; // Eliminada
+import { healthService } from '@/services/api';
 import ApiHealthErrorModal from '../ui/ApiHealthErrorModal'; // Ajusta la ruta si es necesario
+import { useAuth } from '@/context/AuthContext';
 
 const CHECK_INTERVAL_MS = 10000; // Chequear cada 5 segundos
 
@@ -15,51 +17,33 @@ const HealthCheckWrapper: React.FC<HealthCheckWrapperProps> = ({ children }) => 
     const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
-    const checkApiHealth = useCallback(async () => {
-        console.log('[HealthCheck] Attempting check...');
-        if (isLoading) {
-            console.log('[HealthCheck] Check skipped, already loading.');
-            return;
-        }
+    const checkApiStatus = useCallback(async () => {
+        console.log('[HealthCheck] Checking API status...');
         setIsLoading(true);
-        console.log('[HealthCheck] Set loading to true.');
-
         try {
-            console.log('[HealthCheck] Calling getApiHealth()...');
-            const health = await getApiHealth();
-            console.log('[HealthCheck] getApiHealth() returned:', health);
-
-            const isOk =
-                health.status === 'ok' &&
-                health.info?.prisma?.status === 'up' &&
-                health.details?.prisma?.status === 'up';
-
-            if (isOk) {
-                console.log('[HealthCheck] API is healthy.');
-                setIsApiHealthy(true);
-                setShowErrorModal(false);
-            } else {
-                console.warn('[HealthCheck] API is unhealthy or criteria failed:', health);
-                setIsApiHealthy(false);
+            // TODO: Consider adding retries with exponential backoff
+            await healthService.check();
+            console.log('[HealthCheck] API is healthy.');
+            setIsApiHealthy(true);
+            setShowErrorModal(false);
+        } catch (error) {
+            console.error('[HealthCheck] API health check failed:', error);
+            setIsApiHealthy(false);
+            if (!isAuthenticated && !isAuthLoading && !showErrorModal) {
                 setShowErrorModal(true);
             }
-        } catch (error) {
-            console.error('[HealthCheck] Unexpected error during health check:', error);
-            setIsApiHealthy(false);
-            setShowErrorModal(true);
         } finally {
-            // Asegurarse de que isLoading se ponga a false siempre
             setIsLoading(false);
-            console.log('[HealthCheck] Set loading to false (finally).');
         }
-    }, []);
+    }, [isAuthenticated, isAuthLoading, showErrorModal]);
 
     // Chequeo inicial al montar
     useEffect(() => {
-        console.log('[HealthCheck] Initial mount effect, calling checkApiHealth.');
-        checkApiHealth();
-    }, [checkApiHealth]);
+        console.log('[HealthCheck] Initial mount effect, calling checkApiStatus.');
+        checkApiStatus();
+    }, [checkApiStatus]);
 
     // Chequeo periódico
     useEffect(() => {
@@ -73,8 +57,8 @@ const HealthCheckWrapper: React.FC<HealthCheckWrapperProps> = ({ children }) => 
         if (isApiHealthy) {
             console.log(`[HealthCheck] Setting up new interval (${CHECK_INTERVAL_MS}ms).`);
             intervalRef.current = setInterval(() => {
-                console.log('[HealthCheck] Interval triggered, calling checkApiHealth.');
-                checkApiHealth();
+                console.log('[HealthCheck] Interval triggered, calling checkApiStatus.');
+                checkApiStatus();
             }, CHECK_INTERVAL_MS);
         } else {
             console.log('[HealthCheck] API not healthy, interval not set.');
@@ -88,11 +72,11 @@ const HealthCheckWrapper: React.FC<HealthCheckWrapperProps> = ({ children }) => 
                 intervalRef.current = null;
             }
         };
-    }, [checkApiHealth, isApiHealthy]);
+    }, [checkApiStatus, isApiHealthy]);
 
     const handleRetry = () => {
-        console.log('[HealthCheck] Retry button clicked, calling checkApiHealth.');
-        checkApiHealth();
+        console.log('[HealthCheck] Retry button clicked, calling checkApiStatus.');
+        checkApiStatus();
     };
 
     console.log(`[HealthCheck] Rendering wrapper. isLoading: ${isLoading}, showErrorModal: ${showErrorModal}`);

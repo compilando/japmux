@@ -40,19 +40,25 @@ const navItems: NavItem[] = [
         icon: <UserCircleIcon />,
       },
       {
+        icon: <FolderIcon />,
+        name: "Projects",
+        path: "/projects",
+      }, {
         icon: <BoltIcon />,
         name: "AI Models",
         path: "/ai-models",
-      },
+      }
+    ],
+  },
+  {
+    icon: <GridIcon />,
+    name: "Current Project",
+    subItems: [
+
       {
         name: "Environments",
         path: "/environments",
         icon: <TableIcon />,
-      },
-      {
-        icon: <FolderIcon />,
-        name: "Projects",
-        path: "/projects",
       },
       {
         name: "Regions",
@@ -80,31 +86,6 @@ const navItems: NavItem[] = [
         name: "Prompts",
         path: "/prompts",
         icon: <TaskIcon />,
-      },
-      {
-        name: "Prompts Translations",
-        path: "/prompt-translations",
-        icon: <TaskIcon />,
-      },
-      {
-        name: "Prompt Versions",
-        path: "/prompt-versions",
-        icon: <TaskIcon />,
-      },
-      {
-        name: "Prompt Assets",
-        path: "/prompt-assets",
-        icon: <BoxCubeIcon />,
-      },
-      {
-        name: "Asset Versions",
-        path: "/prompt-asset-versions",
-        icon: <BoxCubeIcon />,
-      },
-      {
-        name: "Asset Links",
-        path: "/prompt-asset-links",
-        icon: <PaperPlaneIcon />,
       }
     ],
   },

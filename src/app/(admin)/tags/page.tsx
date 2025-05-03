@@ -3,16 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import {
     Tag,
-    getTags,
-    createTag,
-    updateTag,
-    deleteTag,
-    TagCreatePayload,
-    TagUpdatePayload
+    tagService,
+    CreateTagDto,
+    UpdateTagDto
 } from '@/services/api';
+import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
-import TagsTable from '@/components/tables/TagsTable'; // Ajustado
-import TagForm from '@/components/form/TagForm';     // Ajustado
+import TagsTable from '@/components/tables/TagsTable';
+import TagForm from '@/components/form/TagForm';
 import axios from 'axios';
 
 const TagsPage: React.FC = () => {
@@ -21,12 +19,19 @@ const TagsPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingTag, setEditingTag] = useState<Tag | null>(null);
+    const { selectedProjectId } = useProjects();
 
     const fetchData = async () => {
+        if (!selectedProjectId) {
+            setLoading(false);
+            setError("Please select a project first.");
+            setTagsList([]);
+            return;
+        }
         setLoading(true);
         setError(null);
         try {
-            const data = await getTags();
+            const data = await tagService.findAll(selectedProjectId);
             if (Array.isArray(data)) {
                 setTagsList(data);
             } else {
@@ -48,7 +53,7 @@ const TagsPage: React.FC = () => {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [selectedProjectId]);
 
     const handleAdd = () => {
         setEditingTag(null);
@@ -61,10 +66,14 @@ const TagsPage: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
+        if (!selectedProjectId) {
+            alert("No project selected.");
+            return;
+        }
         if (window.confirm('Are you sure you want to delete this tag?')) {
             try {
-                await deleteTag(id);
-                fetchData(); // Recargar datos después de borrar
+                await tagService.remove(selectedProjectId, id);
+                fetchData();
             } catch (err) {
                 setError('Failed to delete tag');
                 console.error(err);
@@ -77,15 +86,19 @@ const TagsPage: React.FC = () => {
         }
     };
 
-    const handleSave = async (payload: TagCreatePayload | TagUpdatePayload) => {
+    const handleSave = async (payload: CreateTagDto | UpdateTagDto) => {
+        if (!selectedProjectId) {
+            alert("No project selected.");
+            return;
+        }
         try {
             if (editingTag) {
-                await updateTag(editingTag.id, payload as TagUpdatePayload);
+                await tagService.update(selectedProjectId, editingTag.id, payload as UpdateTagDto);
             } else {
-                await createTag(payload as TagCreatePayload);
+                await tagService.create(selectedProjectId, payload as CreateTagDto);
             }
             setIsModalOpen(false);
-            fetchData(); // Recargar datos después de guardar
+            fetchData();
         } catch (err) {
             setError('Failed to save tag');
             console.error(err);
@@ -100,23 +113,29 @@ const TagsPage: React.FC = () => {
     return (
         <>
             <Breadcrumb pageTitle="Tags" />
-            <div className="flex justify-end mb-4">
-                <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
-                    Add Tag
-                </button>
-            </div>
-            {loading && <p>Loading tags...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            {!loading && !error && (
-                <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                    <TagsTable
-                        tags={tagsList}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                    />
-                </div>
+            {!selectedProjectId ? (
+                <p className="text-center text-red-500">Please select a project from the header dropdown to manage tags.</p>
+            ) : (
+                <>
+                    <div className="flex justify-end mb-4">
+                        <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
+                            Add Tag
+                        </button>
+                    </div>
+                    {loading && <p>Loading tags...</p>}
+                    {error && <p className="text-red-500">{error}</p>}
+                    {!loading && !error && (
+                        <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                            <TagsTable
+                                tags={tagsList}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                            />
+                        </div>
+                    )}
+                </>
             )}
-            {isModalOpen && (
+            {isModalOpen && selectedProjectId && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
                     <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
                         <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">

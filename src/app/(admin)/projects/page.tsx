@@ -3,12 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import {
     Project,
-    getProjects,
-    createProject,
-    updateProject,
-    deleteProject,
-    ProjectCreatePayload,
-    ProjectUpdatePayload
+    projectService,
+    CreateProjectDto,
+    UpdateProjectDto,
+    User,
+    userService
 } from '@/services/api';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import ProjectsTable from '@/components/tables/ProjectsTable';
@@ -21,26 +20,41 @@ const ProjectsPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingProject, setEditingProject] = useState<Project | null>(null);
+    const [usersList, setUsersList] = useState<User[]>([]);
 
     const fetchData = async () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await getProjects();
-            if (Array.isArray(data)) {
-                setProjectsList(data);
+            const [projectsData, usersData] = await Promise.all([
+                projectService.findAll(),
+                userService.findAll()
+            ]);
+
+            if (Array.isArray(projectsData)) {
+                setProjectsList(projectsData);
             } else {
-                console.error("API response for /projects is not an array:", data);
+                console.error("API response for /projects is not an array:", projectsData);
                 setError('Received invalid data format for projects.');
                 setProjectsList([]);
             }
+
+            if (Array.isArray(usersData)) {
+                setUsersList(usersData);
+            } else {
+                console.error("API response for /users is not an array:", usersData);
+                setError(prev => prev ? `${prev} Also failed to load users.` : 'Failed to load users.');
+                setUsersList([]);
+            }
+
         } catch (err) {
-            console.error("Error fetching projects:", err);
+            console.error("Error fetching data:", err);
             if (axios.isAxiosError(err)) {
                 console.error("Axios error details:", err.response?.status, err.response?.data);
             }
-            setError('Failed to fetch projects.');
+            setError('Failed to fetch projects and users.');
             setProjectsList([]);
+            setUsersList([]);
         } finally {
             setLoading(false);
         }
@@ -63,7 +77,7 @@ const ProjectsPage: React.FC = () => {
     const handleDelete = async (id: string) => {
         if (window.confirm('Are you sure you want to delete this project?')) {
             try {
-                await deleteProject(id);
+                await projectService.remove(id);
                 fetchData();
             } catch (err) {
                 setError('Failed to delete project');
@@ -72,12 +86,12 @@ const ProjectsPage: React.FC = () => {
         }
     };
 
-    const handleSave = async (payload: ProjectCreatePayload | ProjectUpdatePayload) => {
+    const handleSave = async (payload: CreateProjectDto | UpdateProjectDto) => {
         try {
             if (editingProject) {
-                await updateProject(editingProject.id, payload as ProjectUpdatePayload);
+                await projectService.update(editingProject.id, payload as UpdateProjectDto);
             } else {
-                await createProject(payload as ProjectCreatePayload);
+                await projectService.create(payload as CreateProjectDto);
             }
             setIsModalOpen(false);
             fetchData();
@@ -96,7 +110,11 @@ const ProjectsPage: React.FC = () => {
         <>
             <Breadcrumb pageTitle="Projects" />
             <div className="flex justify-end mb-4">
-                <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
+                <button
+                    onClick={handleAdd}
+                    className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={loading}
+                >
                     Add Project
                 </button>
             </div>
@@ -108,6 +126,8 @@ const ProjectsPage: React.FC = () => {
                         projects={projectsList}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
+                        users={usersList}
+                        loading={loading}
                     />
                 </div>
             )}
@@ -121,6 +141,7 @@ const ProjectsPage: React.FC = () => {
                             initialData={editingProject}
                             onSave={handleSave}
                             onCancel={() => setIsModalOpen(false)}
+                            users={usersList}
                         />
                     </div>
                 </div>

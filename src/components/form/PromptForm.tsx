@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Select, { MultiValue } from 'react-select';
-import { Prompt, PromptCreatePayload, PromptUpdatePayload, getTags, Tag } from '@/services/api';
+import { Prompt, CreatePromptDto, UpdatePromptDto, tagService, Tag } from '@/services/api';
 
 interface PromptFormProps {
     initialData: Prompt | null;
-    onSave: (payload: PromptCreatePayload | PromptUpdatePayload) => void;
+    onSave: (payload: CreatePromptDto | UpdatePromptDto) => void;
     onCancel: () => void;
+    projectId: string;
 }
 
 interface TagOption {
@@ -13,7 +14,7 @@ interface TagOption {
     label: string;
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel }) => {
+const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, projectId }) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [tacticId, setTacticId] = useState('');
@@ -27,20 +28,28 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel }
     const isEditing = !!initialData;
 
     useEffect(() => {
+        if (!projectId) {
+            console.warn("[PromptForm Effect FetchTags] No projectId provided.");
+            setAvailableTags([]);
+            setLoadingTags(false);
+            return;
+        }
+
         const fetchTags = async () => {
             setLoadingTags(true);
             try {
-                const fetchedTags = await getTags();
+                const fetchedTags = await tagService.getAll(projectId);
                 setAvailableTags(fetchedTags);
                 console.log('[PromptForm Effect FetchTags] availableTags set:', fetchedTags);
             } catch (error) {
                 console.error("[PromptForm Effect FetchTags] Failed to fetch tags:", error);
+                setAvailableTags([]);
             } finally {
                 setLoadingTags(false);
             }
         };
         fetchTags();
-    }, []);
+    }, [projectId]);
 
     useEffect(() => {
         if (initialData) {
@@ -89,22 +98,22 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel }
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        let payload: PromptCreatePayload | PromptUpdatePayload;
+        let payload: CreatePromptDto | UpdatePromptDto;
 
         if (isEditing) {
             payload = {
                 description: description || undefined,
                 tacticId: tacticId || null,
-                tagIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
-            } as PromptUpdatePayload;
+                tagIds: selectedTagIds.length > 0 ? selectedTagIds : [],
+            } as UpdatePromptDto;
         } else {
             payload = {
                 name,
                 promptText,
                 description: description || undefined,
                 tacticId: tacticId || undefined,
-                tags: selectedTagIds.length > 0 ? selectedTagIds : undefined,
-            } as PromptCreatePayload;
+                tagIds: selectedTagIds.length > 0 ? selectedTagIds : [],
+            } as CreatePromptDto;
         }
         console.log('[PromptForm] Saving payload:', payload);
         onSave(payload);
@@ -232,26 +241,29 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel }
             <div>
                 <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tags</label>
                 <Select<TagOption, true>
-                    instanceId="prompt-tags-select"
+                    instanceId={`prompt-tags-select-${projectId}`}
                     id="tags"
                     isMulti
                     options={tagOptions}
                     value={currentSelectedTags}
                     onChange={handleTagSelectChange}
                     isLoading={loadingTags}
-                    isDisabled={loadingTags}
-                    placeholder={loadingTags ? "Loading tags..." : "Select tags..."}
+                    isDisabled={loadingTags || !projectId}
+                    placeholder={loadingTags ? "Loading tags..." : !projectId ? "Select a project first" : "Select tags..."}
                     closeMenuOnSelect={false}
                     className="mt-1"
                     classNamePrefix="react-select"
-                    styles={selectStyles}
                 />
                 {isEditing && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">La selección reemplaza los tags existentes.</p>}
             </div>
 
-            <div className="flex justify-end space-x-3 mt-6">
-                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200 dark:border-gray-500">Cancel</button>
-                <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{isEditing ? 'Save Changes' : 'Create Prompt'}</button>
+            <div className="flex justify-end space-x-2">
+                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:bg-gray-600">
+                    Cancel
+                </button>
+                <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    {isEditing ? 'Save Changes' : 'Create Prompt'}
+                </button>
             </div>
         </form>
     );

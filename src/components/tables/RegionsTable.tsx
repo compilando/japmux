@@ -2,6 +2,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../ui/table';
 import { Region } from '@/services/api';
 import { TrashBinIcon } from "@/icons";
+import CopyButton from '../common/CopyButton';
 
 interface RegionsTableProps {
     regions: Region[];
@@ -17,7 +18,7 @@ const RegionsTable: React.FC<RegionsTableProps> = ({ regions, onEdit, onDelete }
                     <Table>
                         <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                             <TableRow>
-                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Language Code</TableCell>
+                                <TableCell isHeader className="w-2/12 px-4 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Language Code</TableCell>
                                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Name</TableCell>
                                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Actions</TableCell>
                             </TableRow>
@@ -25,8 +26,11 @@ const RegionsTable: React.FC<RegionsTableProps> = ({ regions, onEdit, onDelete }
                         <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                             {regions.map((region) => (
                                 <TableRow key={region.languageCode}>
-                                    <TableCell className="px-5 py-4 text-start text-gray-800 dark:text-white/90 text-theme-sm">
-                                        {region.languageCode}
+                                    <TableCell className="px-4 py-4 text-start text-gray-800 dark:text-white/90 text-theme-sm">
+                                        <div className="flex items-center space-x-2">
+                                            <span title={region.languageCode}>{region.languageCode}</span>
+                                            <CopyButton textToCopy={region.languageCode} />
+                                        </div>
                                     </TableCell>
                                     <TableCell className="px-5 py-4 text-start text-gray-800 dark:text-white/90 text-theme-sm">
                                         {region.name}

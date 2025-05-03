@@ -1,5 +1,6 @@
 import React from 'react';
 import { PromptAsset } from '@/services/api';
+import CopyButton from '../common/CopyButton';
 
 interface PromptAssetsTableProps {
     promptAssets: PromptAsset[];
@@ -13,11 +14,11 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, onE
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-800">
                     <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Key (ID)</th>
+                        <th scope="col" className="w-2/12 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Key (ID)</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Project ID</th>
+                        <th scope="col" className="w-1/12 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Project ID</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Enabled</th>
                         <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -25,11 +26,25 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, onE
                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                     {promptAssets.map((item) => (
                         <tr key={item.key}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{item.key}</td>
+                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                <div className="flex items-center space-x-2">
+                                    <span className="truncate" title={item.key}>{item.key}</span>
+                                    <CopyButton textToCopy={item.key} />
+                                </div>
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{item.name}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{item.type || '-'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{item.category || '-'}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{item.projectId || '-'}</td>
+                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                {item.projectId ? (
+                                    <div className="flex items-center space-x-2">
+                                        <span className="truncate" title={item.projectId}>{item.projectId}</span>
+                                        <CopyButton textToCopy={item.projectId} />
+                                    </div>
+                                ) : (
+                                    '-'
+                                )}
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.enabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                     {item.enabled ? 'Yes' : 'No'}
