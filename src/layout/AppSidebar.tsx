@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
+import { useProjects } from "../context/ProjectContext";
 import {
   ChevronDownIcon,
   GridIcon,
@@ -29,87 +30,56 @@ type NavItem = {
   subItems?: { name: string; path: string; icon?: React.ReactNode; pro?: boolean; new?: boolean }[];
 };
 
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Management",
-    subItems: [
-      {
-        name: "Users",
-        path: "/users",
-        icon: <UserCircleIcon />,
-      },
-      {
-        icon: <FolderIcon />,
-        name: "Projects",
-        path: "/projects",
-      }, {
-        icon: <BoltIcon />,
-        name: "AI Models",
-        path: "/ai-models",
-      }
-    ],
-  },
-  {
-    icon: <GridIcon />,
-    name: "Current Project",
-    subItems: [
-
-      {
-        name: "Environments",
-        path: "/environments",
-        icon: <TableIcon />,
-      },
-      {
-        name: "Regions",
-        path: "/regions",
-        icon: <ListIcon />,
-      },
-      {
-        name: "Cultural Data",
-        path: "/cultural-data",
-        icon: <EyeIcon />,
-      },
-      {
-        name: "Tags",
-        path: "/tags",
-        icon: <ChatIcon />,
-      },
-
-    ],
-  },
-  {
-    icon: <GridIcon />,
-    name: "Prompt Management",
-    subItems: [
-      {
-        name: "Prompts",
-        path: "/prompts",
-        icon: <TaskIcon />,
-      }
-    ],
-  },
-  {
-    icon: <BoltIcon />,
-    name: "Serve Prompt",
-    path: "/serveprompt",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  }
-];
-
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
+  const { selectedProjectId } = useProjects();
 
-  const renderMenuItems = (navItems: NavItem[]) => (
+  const navItems: NavItem[] = [
+    {
+      icon: <GridIcon />,
+      name: "Management",
+      subItems: [
+        { name: "Users", path: "/users", icon: <UserCircleIcon /> },
+        { icon: <FolderIcon />, name: "Projects", path: "/projects" },
+        { icon: <BoltIcon />, name: "AI Models", path: "/ai-models" }
+      ],
+    },
+    {
+      icon: <GridIcon />,
+      name: "Current Project",
+      subItems: selectedProjectId ? [
+        { name: "Environments", path: "/environments", icon: <TableIcon /> },
+        { name: "Regions", path: "/regions", icon: <ListIcon /> },
+        { name: "Cultural Data", path: "/cultural-data", icon: <EyeIcon /> },
+        { name: "Tags", path: "/tags", icon: <ChatIcon /> },
+        { name: "Tactics", path: "/tactics", icon: <PaperPlaneIcon /> }
+      ] : [],
+    },
+    {
+      icon: <GridIcon />,
+      name: "Prompt Management",
+      subItems: selectedProjectId ? [
+        { name: "Prompts", path: `/projects/${selectedProjectId}/prompts`, icon: <TaskIcon /> },
+      ] : [],
+    },
+    {
+      icon: <BoltIcon />,
+      name: "Serve (Test)",
+      path: "/serveprompt",
+    },
+    {
+      icon: <UserCircleIcon />,
+      name: "User Profile",
+      path: "/profile",
+    }
+  ].filter(item => !(item.subItems && item.subItems.length === 0 && (item.name === "Current Project" || item.name === "Prompt Management")));
+
+  const renderMenuItems = (itemsToRender: NavItem[]) => (
     <ul className="flex flex-col gap-4">
-      {navItems.map((nav, index) => (
-        <li key={nav.name}>
-          {nav.subItems ? (
+      {itemsToRender.map((nav, index) => (
+        <li key={`${nav.name}-${index}`}>
+          {nav.subItems && nav.subItems.length > 0 ? (
             <button
               onClick={() => handleSubmenuToggle(index)}
               className={`menu-item group  ${openSubmenu === index ? "menu-item-active" : "menu-item-inactive"
@@ -157,7 +127,7 @@ const AppSidebar: React.FC = () => {
               </Link>
             )
           )}
-          {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
+          {nav.subItems && nav.subItems.length > 0 && (isExpanded || isHovered || isMobileOpen) && (
             <div
               ref={(el) => {
                 subMenuRefs.current[index] = el;
@@ -221,37 +191,56 @@ const AppSidebar: React.FC = () => {
   const [subMenuHeight, setSubMenuHeight] = useState<Record<number, number>>({});
   const subMenuRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => path === pathname;
-  const isActive = useCallback((path: string) => path === pathname, [pathname]);
+  const isActive = useCallback((path: string) => {
+    if (!path) return false;
+    if (path === pathname) {
+      return true;
+    }
+    if (path === '/') {
+      return false;
+    }
+    return pathname.startsWith(path + '/') || pathname === path;
+  }, [pathname]);
 
+  // useEffect(() => {
+  //   // COMMENT OUT: Auto-open submenu based on initial path
+  //   let submenuMatched = false;
+  //   let activeSubmenuIndex: number | null = null;
+  //
+  //   navItems.forEach((nav, index) => {
+  //     if (nav.subItems) {
+  //       if (nav.subItems.some(subItem => isActive(subItem.path))) {
+  //         activeSubmenuIndex = index;
+  //         submenuMatched = true;
+  //       }
+  //     }
+  //     else if (nav.path && isActive(nav.path)) {
+  //       // Handle active main items if needed
+  //     }
+  //   });
+  //
+  //   setOpenSubmenu(activeSubmenuIndex);
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [pathname, navItems, isActive]);
+
+  // useEffect para cerrar explícitamente el submenú si se deselecciona el proyecto
   useEffect(() => {
-    // Check if the current path matches any submenu item
-    let submenuMatched = false;
-    navItems.forEach((nav, index) => {
-      if (nav.subItems) {
-        nav.subItems.forEach((subItem) => {
-          if (isActive(subItem.path)) {
-            setOpenSubmenu(index);
-            submenuMatched = true;
-          }
-        });
-      }
-    });
-
-    // If no submenu item matches, close the open submenu
-    if (!submenuMatched) {
+    if (!selectedProjectId) {
       setOpenSubmenu(null);
     }
-  }, [pathname, isActive]);
+  }, [selectedProjectId]);
 
+  // useEffect para calcular altura del submenú (se mantiene)
   useEffect(() => {
-    // Set the height of the submenu items when the submenu is opened
-    if (openSubmenu !== null) {
-      if (subMenuRefs.current[openSubmenu]) {
-        setSubMenuHeight((prevHeights) => ({
-          ...prevHeights,
-          [openSubmenu]: subMenuRefs.current[openSubmenu]?.scrollHeight || 0,
-        }));
+    if (openSubmenu !== null && subMenuRefs.current[openSubmenu]) {
+      const currentSubMenu = subMenuRefs.current[openSubmenu];
+      if (currentSubMenu) {
+        setTimeout(() => {
+          setSubMenuHeight((prev) => ({
+            ...prev,
+            [openSubmenu]: currentSubMenu.scrollHeight,
+          }));
+        }, 0);
       }
     }
   }, [openSubmenu]);

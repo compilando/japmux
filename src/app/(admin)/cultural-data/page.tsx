@@ -5,13 +5,16 @@ import {
     CulturalData,
     culturalDataService,
     CreateCulturalDataDto,
-    UpdateCulturalDataDto
+    UpdateCulturalDataDto,
+    Project,
+    projectService
 } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import CulturalDataTable from '@/components/tables/CulturalDataTable';
 import CulturalDataForm from '@/components/form/CulturalDataForm';
 import axios from 'axios';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 const CulturalDataPage: React.FC = () => {
     const [culturalDataList, setCulturalDataList] = useState<CulturalData[]>([]);
@@ -22,6 +25,10 @@ const CulturalDataPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingCulturalData, setEditingCulturalData] = useState<CulturalData | null>(null);
     const { selectedProjectId } = useProjects();
+
+    // Estados para breadcrumb
+    const [project, setProject] = useState<Project | null>(null);
+    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     const fetchData = async () => {
         if (!selectedProjectId) {
@@ -59,6 +66,24 @@ const CulturalDataPage: React.FC = () => {
 
     useEffect(() => {
         fetchData();
+    }, [selectedProjectId]);
+
+    // Efecto para cargar nombre del proyecto
+    useEffect(() => {
+        if (selectedProjectId) {
+            setBreadcrumbLoading(true);
+            projectService.findOne(selectedProjectId)
+                .then(data => setProject(data))
+                .catch(err => {
+                    console.error("Error fetching project for breadcrumbs:", err);
+                    showErrorToast("Failed to load project details for breadcrumbs.");
+                    setProject(null);
+                })
+                .finally(() => setBreadcrumbLoading(false));
+        } else {
+            setProject(null);
+            setBreadcrumbLoading(false);
+        }
     }, [selectedProjectId]);
 
     const handleAdd = () => {
@@ -113,10 +138,26 @@ const CulturalDataPage: React.FC = () => {
         }
     };
 
+    // Definir crumbs
+    let breadcrumbs: { label: string; href?: string }[] = [
+        { label: "Home", href: "/" },
+    ];
+    if (selectedProjectId) {
+        breadcrumbs = [
+            ...breadcrumbs,
+            { label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId), href: `/projects/${selectedProjectId}/cultural-data` },
+            { label: "Cultural Data" }
+        ];
+    } else {
+        breadcrumbs = [
+            ...breadcrumbs,
+            { label: "Cultural Data (Select Project)" }
+        ];
+    }
 
     return (
         <>
-            <Breadcrumb pageTitle="Cultural Data" />
+            <Breadcrumb crumbs={breadcrumbs} />
 
             {!selectedProjectId ? (
                 <p className="text-center text-red-500">Please select a project from the header dropdown to manage cultural data.</p>

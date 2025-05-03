@@ -106,9 +106,17 @@ const ProjectsPage: React.FC = () => {
         }
     };
 
+    // Definir crumbs para esta página
+    const breadcrumbs = [
+        { label: "Home", href: "/" },
+        // { label: "Management", href: "/projects" }, // Opcional
+        { label: "Projects" } // Último elemento sin href
+    ];
+
     return (
         <>
-            <Breadcrumb pageTitle="Projects" />
+            {/* Usar la prop crumbs */}
+            <Breadcrumb crumbs={breadcrumbs} />
             <div className="flex justify-end mb-4">
                 <button
                     onClick={handleAdd}

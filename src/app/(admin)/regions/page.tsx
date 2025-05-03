@@ -5,13 +5,16 @@ import {
     Region,
     regionService,      // Importar servicio
     CreateRegionDto,
-    UpdateRegionDto
+    UpdateRegionDto,
+    Project,
+    projectService
 } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext'; // Importar hook de proyecto
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import RegionsTable from '@/components/tables/RegionsTable';
 import RegionForm from '@/components/form/RegionForm';
 import axios from 'axios';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils'; // Importar
 
 const RegionsPage: React.FC = () => {
     const [regions, setRegions] = useState<Region[]>([]);
@@ -22,6 +25,28 @@ const RegionsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingRegion, setEditingRegion] = useState<Region | null>(null);
     const { selectedProjectId } = useProjects(); // Obtener projectId
+
+    // Estados para breadcrumb
+    const [project, setProject] = useState<Project | null>(null);
+    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
+
+    // Efecto para cargar nombre del proyecto
+    useEffect(() => {
+        if (selectedProjectId) {
+            setBreadcrumbLoading(true);
+            projectService.findOne(selectedProjectId)
+                .then(data => setProject(data))
+                .catch(err => {
+                    console.error("Error fetching project for breadcrumbs:", err);
+                    showErrorToast("Failed to load project details for breadcrumbs.");
+                    setProject(null);
+                })
+                .finally(() => setBreadcrumbLoading(false));
+        } else {
+            setProject(null);
+            setBreadcrumbLoading(false);
+        }
+    }, [selectedProjectId]);
 
     // Usar useCallback para evitar re-crear la función en cada render
     const fetchRegions = useCallback(async () => {
@@ -114,9 +139,26 @@ const RegionsPage: React.FC = () => {
         }
     };
 
+    // Definir crumbs
+    let breadcrumbs: { label: string; href?: string }[] = [
+        { label: "Home", href: "/" },
+    ];
+    if (selectedProjectId) {
+        breadcrumbs = [
+            ...breadcrumbs,
+            { label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId), href: `/projects/${selectedProjectId}/regions` },
+            { label: "Regions" }
+        ];
+    } else {
+        breadcrumbs = [
+            ...breadcrumbs,
+            { label: "Regions (Select Project)" }
+        ];
+    }
+
     return (
         <>
-            <Breadcrumb pageTitle="Regions (Project Specific)" />
+            <Breadcrumb crumbs={breadcrumbs} />
             {!selectedProjectId ? (
                 <p className="text-center text-red-500">Please select a project from the header dropdown to manage regions.</p>
             ) : (

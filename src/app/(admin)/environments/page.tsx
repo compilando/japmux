@@ -5,13 +5,16 @@ import {
     Environment,
     environmentService,
     CreateEnvironmentDto,
-    UpdateEnvironmentDto
+    UpdateEnvironmentDto,
+    Project,
+    projectService
 } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import EnvironmentsTable from '@/components/tables/EnvironmentsTable';
 import EnvironmentForm from '@/components/form/EnvironmentForm';
 import axios from 'axios';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 const EnvironmentsPage: React.FC = () => {
     const [environmentsList, setEnvironmentsList] = useState<Environment[]>([]);
@@ -20,6 +23,28 @@ const EnvironmentsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingEnvironment, setEditingEnvironment] = useState<Environment | null>(null);
     const { selectedProjectId } = useProjects();
+
+    // Estados para breadcrumb
+    const [project, setProject] = useState<Project | null>(null);
+    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
+
+    // Efecto para cargar nombre del proyecto
+    useEffect(() => {
+        if (selectedProjectId) {
+            setBreadcrumbLoading(true);
+            projectService.findOne(selectedProjectId)
+                .then(data => setProject(data))
+                .catch(err => {
+                    console.error("Error fetching project for breadcrumbs:", err);
+                    showErrorToast("Failed to load project details for breadcrumbs.");
+                    setProject(null);
+                })
+                .finally(() => setBreadcrumbLoading(false));
+        } else {
+            setProject(null);
+            setBreadcrumbLoading(false);
+        }
+    }, [selectedProjectId]);
 
     const fetchData = async () => {
         if (!selectedProjectId) {
@@ -110,9 +135,26 @@ const EnvironmentsPage: React.FC = () => {
         }
     };
 
+    // Definir crumbs con estructura explícita
+    let breadcrumbs: { label: string; href?: string }[] = [
+        { label: "Home", href: "/" },
+    ];
+    if (selectedProjectId) {
+        breadcrumbs = [
+            ...breadcrumbs,
+            { label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId), href: `/projects/${selectedProjectId}/environments` }, // Penúltimo con href
+            { label: "Environments" } // Último sin href
+        ];
+    } else {
+        breadcrumbs = [
+            ...breadcrumbs,
+            { label: "Environments (Select Project)" } // Último sin href
+        ];
+    }
+
     return (
         <>
-            <Breadcrumb pageTitle="Environments" />
+            <Breadcrumb crumbs={breadcrumbs} />
             {!selectedProjectId ? (
                 <p className="text-center text-red-500">Please select a project from the header dropdown to manage environments.</p>
             ) : (

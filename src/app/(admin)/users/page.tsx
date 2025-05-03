@@ -94,9 +94,17 @@ const UsersPage: React.FC = () => {
         }
     };
 
+    // Definir crumbs para esta página
+    const breadcrumbs = [
+        { label: "Home", href: "/" },
+        // { label: "Management", href: "/users" }, // Opcional: Añadir nivel intermedio si tiene sentido
+        { label: "Users" } // Último elemento sin href
+    ];
+
     return (
         <>
-            <Breadcrumb pageTitle="Users" />
+            {/* Usar la prop crumbs */}
+            <Breadcrumb crumbs={breadcrumbs} />
             <div className="flex justify-end mb-4">
                 <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
                     Add User

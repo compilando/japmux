@@ -5,13 +5,16 @@ import {
     Tag,
     tagService,
     CreateTagDto,
-    UpdateTagDto
+    UpdateTagDto,
+    Project,
+    projectService
 } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import TagsTable from '@/components/tables/TagsTable';
 import TagForm from '@/components/form/TagForm';
 import axios from 'axios';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 const TagsPage: React.FC = () => {
     const [tagsList, setTagsList] = useState<Tag[]>([]);
@@ -20,6 +23,28 @@ const TagsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingTag, setEditingTag] = useState<Tag | null>(null);
     const { selectedProjectId } = useProjects();
+
+    // Estados para breadcrumb
+    const [project, setProject] = useState<Project | null>(null);
+    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
+
+    // Efecto para cargar nombre del proyecto
+    useEffect(() => {
+        if (selectedProjectId) {
+            setBreadcrumbLoading(true);
+            projectService.findOne(selectedProjectId)
+                .then(data => setProject(data))
+                .catch(err => {
+                    console.error("Error fetching project for breadcrumbs:", err);
+                    showErrorToast("Failed to load project details for breadcrumbs.");
+                    setProject(null);
+                })
+                .finally(() => setBreadcrumbLoading(false));
+        } else {
+            setProject(null);
+            setBreadcrumbLoading(false);
+        }
+    }, [selectedProjectId]);
 
     const fetchData = async () => {
         if (!selectedProjectId) {
@@ -110,9 +135,32 @@ const TagsPage: React.FC = () => {
         }
     };
 
+    // Definir crumbs
+    let breadcrumbs: { label: string; href?: string }[] = [
+        { label: "Home", href: "/" },
+    ];
+    if (selectedProjectId) {
+        breadcrumbs = [
+            ...breadcrumbs,
+            // Como Tags es de nivel superior, el enlace del proyecto apunta a la página principal del proyecto (ej: prompts o assets)
+            { label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId), href: `/projects/${selectedProjectId}/prompts` }, // O /assets
+            { label: "Tags", href: "/tags" } // La página actual sí tiene enlace (a sí misma)
+        ];
+        // Último elemento, si es la página actual, no debería tener href según PageBreadcrumb
+        // Ajustamos el último elemento para quitar href si es necesario
+        if (breadcrumbs.length > 0) {
+            delete breadcrumbs[breadcrumbs.length - 1].href;
+        }
+    } else {
+        breadcrumbs = [
+            ...breadcrumbs,
+            { label: "Tags (Select Project)" } // Último sin href
+        ];
+    }
+
     return (
         <>
-            <Breadcrumb pageTitle="Tags" />
+            <Breadcrumb crumbs={breadcrumbs} />
             {!selectedProjectId ? (
                 <p className="text-center text-red-500">Please select a project from the header dropdown to manage tags.</p>
             ) : (
