@@ -1,0 +1,348 @@
+/* src/app/(admin)/serveprompt/ServePromptPage.module.css */
+
+.servePromptContainer {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #fff;
+    /* Fondo claro para el contenedor principal */
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    color: #333;
+    /* Texto oscuro por defecto */
+}
+
+.servePromptContainer h1,
+.servePromptContainer h2,
+.servePromptContainer h3 {
+    color: #1a202c;
+    /* Un color de texto oscuro más específico */
+    margin-bottom: 1rem;
+}
+
+.servePromptContainer h1 {
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+
+.errorBanner {
+    background-color: #fefcbf;
+    /* Amarillo pálido */
+    color: #9f7a0a;
+    /* Marrón amarillento */
+    border: 1px solid #fce084;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+}
+
+.selectorsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    /* Responsive grid */
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.selectorsGrid label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.inputDisplay {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    background-color: #edf2f7;
+    color: #718096;
+    cursor: not-allowed;
+}
+
+/* Nueva clase contenedora para los Select */
+.selectWrapper {
+    position: relative;
+    /* Ayuda si react-select posiciona elementos de forma absoluta */
+}
+
+/* Estilos para react-select DENTRO del contenedor local */
+.selectWrapper :global(.react-select__control) {
+    border-color: #cbd5e0 !important;
+    box-shadow: none !important;
+    /* Añade más estilos si es necesario para dark mode etc. */
+}
+
+.selectWrapper :global(.react-select__control--is-disabled) {
+    background-color: #edf2f7 !important;
+}
+
+.loadingIndicator {
+    text-align: center;
+    padding: 1rem;
+    color: #718096;
+    font-style: italic;
+}
+
+.promptDetailsSection {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #f7fafc;
+    /* Fondo ligeramente diferente */
+}
+
+.promptPreview {
+    width: 100%;
+    font-family: monospace;
+    font-size: 1em;
+    padding: 1rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #2d3748;
+    resize: vertical;
+    min-height: 150px;
+    /* Altura mínima */
+}
+
+.variablesSection {
+    margin-top: 1.5rem;
+    border-top: 1px dashed #cbd5e0;
+    padding-top: 1.5rem;
+}
+
+.variableInput {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.variableInput label {
+    font-family: monospace;
+    font-weight: bold;
+    color: #2d3748;
+}
+
+.variableInput input[type="text"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #2d3748;
+}
+
+.variableInput input[type="text"]:focus {
+    outline: none;
+    border-color: #4299e1;
+    /* Color azul en foco */
+    box-shadow: 0 0 0 1px #4299e1;
+}
+
+.executeButton {
+    display: block;
+    /* Para que ocupe ancho completo si se quiere */
+    width: fit-content;
+    /* O ajustar al contenido */
+    margin: 2rem auto;
+    /* Centrar el botón */
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background-color: #4a90e2;
+    /* Azul */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.executeButton:hover:not(:disabled) {
+    background-color: #357abd;
+    /* Azul más oscuro */
+}
+
+.executeButton:disabled {
+    background-color: #a0aec0;
+    /* Gris */
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.resultsSection {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #f7fafc;
+}
+
+.metadataContainer {
+    margin-bottom: 1rem;
+    font-size: 0.9em;
+    color: #4a5568;
+}
+
+.infoLabel {
+    font-weight: bold;
+    margin-right: 5px;
+    color: #2d3748;
+}
+
+/* Estilos específicos para el textarea de resultados */
+.resultTextarea {
+    width: 100%;
+    /* Ocupa todo el ancho disponible */
+    min-height: 250px;
+    /* Altura mínima más generosa */
+    padding: 15px;
+    border: 1px solid #4a5568;
+    /* Borde más oscuro */
+    border-radius: 5px;
+    background-color: #2d3748;
+    /* Fondo oscuro */
+    color: #e2e8f0;
+    /* Texto claro */
+    font-family: monospace;
+    /* Fuente monoespaciada */
+    font-size: 0.95em;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    /* Mantiene espacios/saltos, ajusta líneas */
+    overflow-wrap: break-word;
+    /* Evita desbordamiento horizontal */
+    resize: vertical;
+    /* Permite redimensionar verticalmente */
+}
+
+/* Clases para tamaños de fuente */
+.fontSizeS {
+    font-size: 0.85em !important;
+}
+
+.fontSizeM {
+    font-size: 1em !important;
+}
+
+/* Tamaño base ajustado */
+.fontSizeL {
+    font-size: 1.15em !important;
+}
+
+.fontSizeXL {
+    font-size: 1.3em !important;
+}
+
+/* ---- INICIO: Estilos para selector de tamaño de fuente ---- */
+.fontSizeSelectorContainer {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.fontSizeSelectorLabel {
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.fontSizeSelector {
+    display: inline-flex;
+    border-radius: 6px;
+    overflow: hidden;
+    /* Para redondear los bordes del grupo */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.fontSizeButton {
+    padding: 0.5rem 0.8rem;
+    border: none;
+    background-color: #fff;
+    border-left: 1px solid #e2e8f0;
+    /* Separador */
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #4a5568;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.fontSizeButton:first-child {
+    border-left: none;
+}
+
+.fontSizeButton:hover {
+    background-color: #f7fafc;
+}
+
+.fontSizeButton.active {
+    background-color: #4a90e2;
+    /* Azul */
+    color: #fff;
+    font-weight: bold;
+}
+
+/* ---- FIN: Estilos para selector de tamaño de fuente ---- */
+
+/* ---- INICIO: Estilos para contenedor 50/50 ---- */
+.detailsResultsContainer {
+    display: block;
+    /* Por defecto, los hijos se apilan */
+    margin-top: 2rem;
+}
+
+/* En pantallas grandes (ej. 992px o más) */
+@media (min-width: 992px) {
+    .detailsResultsContainer {
+        display: flex;
+        /* Activar Flexbox */
+        flex-wrap: wrap;
+        /* Permitir que los items pasen a la siguiente línea si no caben */
+        gap: 2rem;
+        /* Espacio entre las dos columnas Y filas si se envuelve */
+        align-items: flex-start;
+        /* Alinear elementos al inicio */
+    }
+
+    /* Por defecto, todos los hijos directos intentan ocupar la mitad */
+    .detailsResultsContainer>div {
+        flex: 1 1 calc(50% - 1rem);
+        /* Grow, Shrink, Basis (50% menos la mitad del gap) */
+        max-width: calc(50% - 1rem);
+        /* Asegurar que no exceda ~50% */
+        margin-top: 0;
+        /* Resetear margen */
+    }
+
+    /* PERO, el indicador de carga SIEMPRE ocupa el 100% */
+    .detailsResultsContainer>.loadingIndicator {
+        flex: 0 0 100%;
+        /* No crecer, No encoger, Base del 100% */
+        max-width: 100%;
+    }
+
+    /* Si solo hay un elemento (que no sea el loader), que ocupe el 100% */
+    .detailsResultsContainer>div:only-child {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    /* Si el loader está presente JUNTO a otro div, aseguramos que el otro div mantenga su 50% */
+    /* (Esta regla puede ser redundante con la primera de > div, pero por si acaso) */
+    .detailsResultsContainer:has(> .loadingIndicator)>.promptDetailsSection,
+    .detailsResultsContainer:has(> .loadingIndicator)>.resultsSection {
+        flex: 1 1 calc(50% - 1rem);
+        max-width: calc(50% - 1rem);
+    }
+
+
+}
+
+/* ---- FIN: Estilos para contenedor 50/50 ---- */

@@ -3,9 +3,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useProjects } from '@/context/ProjectContext';
 import {
-    Prompt,
-    PromptVersion,
-    PromptTranslation,
+    CreatePromptDto,
+    CreatePromptVersionDto,
+    CreatePromptTranslationDto,
     CreateAiModelDto,
     ExecuteLlmDto
 } from '@/services/generated/api';
@@ -19,13 +19,14 @@ import {
 import Select, { SingleValue } from 'react-select';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import axios from 'axios';
+import styles from './ServePromptPage.module.css'; // Importar CSS Modules
 
 interface StringMap { [key: string]: string; }
 
-// Add 'id' to Prompt type if it's missing from generated types
-// Ideally, regenerate types to include it properly.
-interface PromptWithId extends Prompt {
-    id: string; // Assuming ID is a string (e.g., UUID)
+// Reintroducir interfaz para asegurar que tenemos el ID de la BD
+// Asumimos que la API devuelve 'id' (CUID) además de los campos de CreatePromptDto
+interface PromptData extends CreatePromptDto {
+    id: string; // El ID real de la base de datos (e.g., CUID)
 }
 
 // Usar CreateAiModelDto directamente si el ID está en el DTO (o añadirlo si no)
@@ -33,15 +34,19 @@ interface PromptWithId extends Prompt {
 // Vamos a asumir que CreateAiModelDto devuelto por findAll SÍ tiene id para el Select
 interface SelectOption { value: string; label: string; }
 
+// Define los tamaños posibles
+type FontSize = 's' | 'm' | 'l' | 'xl';
+const fontSizes: FontSize[] = ['s', 'm', 'l', 'xl'];
+
 const ServePromptPage: React.FC = () => {
     const { selectedProjectId } = useProjects();
 
-    // --- Estados para Selecciones ---
-    const [prompts, setPrompts] = useState<PromptWithId[]>([]);
+    // --- Estados para Selecciones (usar PromptData) ---
+    const [prompts, setPrompts] = useState<PromptData[]>([]);
     const [selectedPrompt, setSelectedPrompt] = useState<SingleValue<SelectOption>>(null);
-    const [versions, setVersions] = useState<PromptVersion[]>([]);
+    const [versions, setVersions] = useState<CreatePromptVersionDto[]>([]);
     const [selectedVersion, setSelectedVersion] = useState<SingleValue<SelectOption>>(null);
-    const [translations, setTranslations] = useState<PromptTranslation[]>([]);
+    const [translations, setTranslations] = useState<CreatePromptTranslationDto[]>([]);
     const [selectedLanguage, setSelectedLanguage] = useState<SingleValue<SelectOption>>(null);
     const [aiModels, setAiModels] = useState<CreateAiModelDto[]>([]);
     const [selectedAiModel, setSelectedAiModel] = useState<SingleValue<SelectOption>>(null);
@@ -55,6 +60,9 @@ const ServePromptPage: React.FC = () => {
     const [executionResult, setExecutionResult] = useState<any>(null);
     const [isExecuting, setIsExecuting] = useState<boolean>(false);
 
+    // --- Estado para Tamaño de Fuente ---
+    const [selectedFontSize, setSelectedFontSize] = useState<FontSize>('m'); // Default 'm'
+
     // --- Estados UI/Generales ---
     const [loadingPrompts, setLoadingPrompts] = useState<boolean>(false);
     const [loadingVersions, setLoadingVersions] = useState<boolean>(false);
@@ -62,6 +70,34 @@ const ServePromptPage: React.FC = () => {
     const [loadingText, setLoadingText] = useState<boolean>(false);
     const [loadingAiModels, setLoadingAiModels] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+
+    // --- Efecto para cargar/guardar tamaño de fuente desde localStorage ---
+    useEffect(() => {
+        const storedSize = localStorage.getItem('promptFontSize') as FontSize | null;
+        if (storedSize && fontSizes.includes(storedSize)) {
+            setSelectedFontSize(storedSize);
+        }
+    }, []); // Solo al montar
+
+    useEffect(() => {
+        localStorage.setItem('promptFontSize', selectedFontSize);
+    }, [selectedFontSize]); // Cada vez que cambie
+
+    // --- Helper para obtener la clase CSS del tamaño de fuente ---
+    const getFontSizeClass = (size: FontSize): string => {
+        switch (size) {
+            case 's': return styles.fontSizeS;
+            case 'l': return styles.fontSizeL;
+            case 'xl': return styles.fontSizeXL;
+            case 'm':
+            default: return styles.fontSizeM;
+        }
+    };
+
+    // --- Handler para cambio de tamaño de fuente ---
+    const handleFontSizeChange = (size: FontSize) => {
+        setSelectedFontSize(size);
+    };
 
     // --- Opciones para Selects (Memoizadas) ---
     const promptOptions: SelectOption[] = useMemo(() => prompts.map(p => ({ value: p.id, label: p.name })), [prompts]);
@@ -95,8 +131,9 @@ const ServePromptPage: React.FC = () => {
         setError(null);
         promptService.findAll(selectedProjectId)
             .then(data => {
-                // Cast data to PromptWithId[]
-                setPrompts(Array.isArray(data) ? (data as PromptWithId[]) : []);
+                // Usar PromptData[] y asegurar que data tiene 'id'
+                // Puede ser necesario ajustar el cast si la API no devuelve 'id' explícitamente
+                setPrompts(Array.isArray(data) ? (data as PromptData[]) : []);
                 setSelectedPrompt(null);
             })
             .catch(err => {
@@ -122,7 +159,7 @@ const ServePromptPage: React.FC = () => {
         }
         setLoadingVersions(true);
         promptVersionService.findAll(selectedProjectId, selectedPrompt.value)
-            .then((data: PromptVersion[]) => {
+            .then((data: CreatePromptVersionDto[]) => {
                 setVersions(Array.isArray(data) ? data : []);
             })
             .catch((err: Error) => {
@@ -144,7 +181,7 @@ const ServePromptPage: React.FC = () => {
         }
         setLoadingTranslations(true);
         promptTranslationService.findAll(selectedProjectId, selectedPrompt.value, selectedVersion.value)
-            .then((data: PromptTranslation[]) => {
+            .then((data: CreatePromptTranslationDto[]) => {
                 setTranslations(Array.isArray(data) ? data : []);
                 if (!data || data.length === 0) {
                     setSelectedLanguage({ value: '__BASE__', label: 'Base Text' });
@@ -216,7 +253,7 @@ const ServePromptPage: React.FC = () => {
         }
 
         fetchPromise
-            .then((data: PromptVersion | PromptTranslation) => {
+            .then((data: CreatePromptVersionDto | CreatePromptTranslationDto) => {
                 const text = data?.promptText || '';
                 setCurrentPromptText(text);
                 const vars = extractVariables(text);
@@ -257,167 +294,220 @@ const ServePromptPage: React.FC = () => {
         setSelectedAiModel(selectedOption);
     };
 
-    // --- Handler para Ejecutar Prompt (Usando el servicio generado) ---
-    const handleExecute = async () => {
-        if (!selectedProjectId || !selectedPrompt?.value || !selectedVersion?.value || !selectedAiModel?.value) {
-            showErrorToast("Please select a project, prompt, version, and AI model.");
+    // --- Handler para Ejecución ---
+    const handleExecute = useCallback(async () => {
+        if (!selectedProjectId || !selectedPrompt?.value || !selectedVersion?.value || !selectedAiModel?.value || !selectedLanguage?.value) {
+            showErrorToast("Please select project, prompt, version, language, and AI model.");
             return;
         }
 
         setIsExecuting(true);
-        setExecutionResult(null);
         setError(null);
+        setExecutionResult(null); // Limpiar resultado anterior
 
-        const payload: ExecuteLlmDto = {
-            modelId: selectedAiModel.value,
-            promptText: currentPromptText,
-            variables: variableInputs,
+        // --- Corregido: Crear DTO según la definición de ExecuteLlmDto ---
+        const executionDto: ExecuteLlmDto = {
+            modelId: selectedAiModel.value, // Usar el ID del modelo seleccionado
+            promptText: currentPromptText, // Usar el texto del prompt ya cargado/seleccionado
+            variables: variableInputs, // Pasar las variables (opcional según DTO, pero útil)
         };
 
         try {
-            const responseData = await llmExecutionService.execute(payload);
-            setExecutionResult(responseData);
-            showSuccessToast("Prompt executed successfully via LLM!");
-        } catch (err: unknown) {
-            console.error("Error executing prompt via LLM service:", err);
-            let errorMsg = 'Failed to execute prompt via LLM.';
-            if (axios.isAxiosError(err) && err.response?.data?.message) {
-                errorMsg = err.response.data.message;
-            }
-            setError(errorMsg);
-            // showErrorToast(errorMsg); // Comentado temporalmente para depurar
-            setExecutionResult(null);
+            const result = await llmExecutionService.execute(executionDto);
+            setExecutionResult(result); // Guardar TODO el resultado
+            showSuccessToast("Prompt executed successfully!");
+        } catch (err: any) {
+            console.error("Error executing prompt:", err);
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to execute prompt.';
+            setError(errorMessage);
+            showErrorToast(errorMessage);
         } finally {
             setIsExecuting(false);
         }
-    };
+    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, selectedAiModel, variableInputs]);
 
 
-    // --- Renderizado (Modificado) ---
+    // --- Limpiar resultado del prompt formateado (extraer de ```) ---
+    const formattedPromptResult = useMemo(() => {
+        if (!executionResult || typeof executionResult.result !== 'string') {
+            return '';
+        }
+        let content = executionResult.result;
+        // Quitar ```<lang> y ``` si existen
+        content = content.replace(/^```[a-zA-Z]*\\n/, ''); // Inicio
+        content = content.replace(/\\n```$/, ''); // Final
+        return content.trim();
+    }, [executionResult]);
+
+
+    // --- Render ---
     return (
-        <div className="container mx-auto p-4 space-y-6">
-            <h1 className="text-2xl font-bold mb-4 text-black dark:text-white">Serve Prompt</h1>
+        <div className={styles.servePromptContainer}>
+            {error && <div className={styles.errorBanner}>{error}</div>}
 
-            {!selectedProjectId && (
-                <p className="text-yellow-600 dark:text-yellow-400">Please select a project from the header dropdown to begin.</p>
-            )}
+            {/* --- INICIO: Selector de Tamaño de Fuente --- */}
+            <div className={styles.fontSizeSelectorContainer}>
+                <span className={styles.fontSizeSelectorLabel}>Font Size:</span>
+                <div className={styles.fontSizeSelector}>
+                    {fontSizes.map(size => (
+                        <button
+                            key={size}
+                            onClick={() => handleFontSizeChange(size)}
+                            className={`${styles.fontSizeButton} ${selectedFontSize === size ? styles.active : ''}`}
+                        >
+                            {size.toUpperCase()}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            {/* --- FIN: Selector de Tamaño de Fuente --- */}
 
-            {selectedProjectId && (
-                <>
-                    {error && <p className="text-red-500 dark:text-red-400">Error: {error}</p>}
+            <div className={styles.selectorsGrid}>
+                {/* Selector Proyecto (asumiendo que viene del contexto) */}
+                <input id="project-select" type="hidden" value={selectedProjectId || 'No Project Selected'} readOnly disabled className={styles.inputDisplay} />
 
-                    {/* --- Selección (Añadir AI Model) --- */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label htmlFor="prompt-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prompt</label>
-                            <Select
-                                id="prompt-select"
-                                options={promptOptions}
-                                value={selectedPrompt}
-                                onChange={handlePromptChange}
-                                isLoading={loadingPrompts}
-                                isDisabled={loadingPrompts || prompts.length === 0}
-                                placeholder={loadingPrompts ? "Loading..." : prompts.length === 0 ? "No prompts found" : "Select Prompt..."}
-                                styles={{ /* Estilos opcionales si quieres dark mode etc */ }}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="version-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Version</label>
-                            <Select
-                                id="version-select"
-                                options={versionOptions}
-                                value={selectedVersion}
-                                onChange={handleVersionChange}
-                                isLoading={loadingVersions}
-                                isDisabled={loadingVersions || !selectedPrompt || versions.length === 0}
-                                placeholder={!selectedPrompt ? "Select prompt first" : loadingVersions ? "Loading..." : versions.length === 0 ? "No versions found" : "Select Version..."}
-                            />
-                        </div>
-                        <div>
-                             <label htmlFor="language-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language/Text</label>
-                            <Select
-                                id="language-select"
-                                options={languageOptions}
-                                value={selectedLanguage}
-                                onChange={handleLanguageChange}
-                                isLoading={loadingTranslations}
-                                isDisabled={loadingTranslations || !selectedVersion || languageOptions.length <= 1}
-                                placeholder={!selectedVersion ? "Select version first" : loadingTranslations ? "Loading..." : "Select Language..."}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="ai-model-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">AI Model</label>
-                            <Select
-                                id="ai-model-select"
-                                options={aiModelOptions}
-                                value={selectedAiModel}
-                                onChange={handleAiModelChange}
-                                isLoading={loadingAiModels}
-                                isDisabled={loadingAiModels || aiModels.length === 0}
-                                placeholder={loadingAiModels ? "Loading..." : aiModels.length === 0 ? "No models found" : "Select AI Model..."}
-                            />
-                        </div>
+                {/* Selector Prompt */}
+                <div>
+                    <label htmlFor="prompt-select">Prompt</label>
+                    <div className={styles.selectWrapper}>
+                        <Select
+                            id="prompt-select"
+                            options={promptOptions}
+                            value={selectedPrompt}
+                            onChange={handlePromptChange}
+                            isLoading={loadingPrompts}
+                            isDisabled={!selectedProjectId || loadingPrompts}
+                            placeholder="Select a prompt..."
+                            isClearable
+                            classNamePrefix="react-select"
+                        />
                     </div>
+                </div>
 
-                    {/* --- Texto y Variables --- */}
-                    {selectedVersion && (
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prompt Text (Read-only)</label>
-                                {loadingText ? (
-                                     <div className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded h-36 w-full"></div>
-                                ) : (
-                                    <textarea
-                                        readOnly
-                                        value={currentPromptText}
-                                        rows={12}
-                                        className="mt-1 block w-full rounded-md shadow-sm sm:text-sm font-mono p-4 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 whitespace-pre-wrap cursor-text"
-                                    />
-                                )}
+                {/* Selector Versión */}
+                <div>
+                    <label htmlFor="version-select">Version</label>
+                    <div className={styles.selectWrapper}>
+                        <Select
+                            id="version-select"
+                            options={versionOptions}
+                            value={selectedVersion}
+                            onChange={handleVersionChange}
+                            isLoading={loadingVersions}
+                            isDisabled={!selectedPrompt || loadingVersions}
+                            placeholder="Select a version..."
+                            isClearable
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+                </div>
+
+                {/* Selector Idioma */}
+                <div>
+                    <label htmlFor="language-select">Language / Text</label>
+                    <div className={styles.selectWrapper}>
+                        <Select
+                            id="language-select"
+                            options={languageOptions}
+                            value={selectedLanguage}
+                            onChange={handleLanguageChange}
+                            isLoading={loadingTranslations}
+                            isDisabled={!selectedVersion || loadingTranslations}
+                            placeholder="Select language or Base Text..."
+                            isClearable
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+                </div>
+
+                {/* Selector AI Model */}
+                <div>
+                    <label htmlFor="ai-model-select">AI Model</label>
+                    <div className={styles.selectWrapper}>
+                        <Select
+                            id="ai-model-select"
+                            options={aiModelOptions}
+                            value={selectedAiModel}
+                            onChange={handleAiModelChange}
+                            isLoading={loadingAiModels}
+                            isDisabled={!selectedProjectId || loadingAiModels} // Depende de proyecto
+                            placeholder="Select an AI Model..."
+                            isClearable
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* ---- INICIO: Nuevo Contenedor para Detalles y Resultados ---- */}
+            <div className={styles.detailsResultsContainer}>
+                {/* Sección de Texto del Prompt y Variables */}
+                {loadingText && <div className={styles.loadingIndicator}>Loading prompt text...</div>}
+                {currentPromptText && !loadingText && (
+                    <div className={styles.promptDetailsSection}>
+                        <h2>Prompt Text & Variables</h2>
+                        <textarea
+                            // Añadir clase de tamaño dinámicamente
+                            className={`${styles.promptPreview} ${getFontSizeClass(selectedFontSize)}`}
+                            value={currentPromptText}
+                            // Quitar readOnly para permitir edición
+                            onChange={(e) => setCurrentPromptText(e.target.value)}
+                            rows={30}
+                        />
+
+                        {Object.keys(promptVariables).length > 0 && (
+                            <div className={styles.variablesSection}>
+                                <h3>Variables</h3>
+                                {Object.keys(promptVariables).map(varName => (
+                                    <div key={varName} className={styles.variableInput}>
+                                        <label htmlFor={`var-${varName}`}>{`{{${varName}}}`}</label>
+                                        <input
+                                            type="text"
+                                            id={`var-${varName}`}
+                                            value={variableInputs[varName] || ''}
+                                            onChange={(e) => handleVariableInputChange(varName, e.target.value)}
+                                            placeholder={`Enter value for ${varName}`}
+                                        />
+                                    </div>
+                                ))}
                             </div>
+                        )}
+                    </div>
+                )}
 
-                            {Object.keys(promptVariables).length > 0 && (
-                                <div className="space-y-2 p-4 border border-dashed border-gray-300 dark:border-gray-600 rounded">
-                                    <h3 className="text-lg font-medium text-black dark:text-white mb-2">Variables</h3>
-                                    {Object.keys(promptVariables).map(varName => (
-                                        <div key={varName}>
-                                            <label htmlFor={`var-${varName}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300">{varName}</label>
-                                            <input
-                                                type="text"
-                                                id={`var-${varName}`}
-                                                value={variableInputs[varName] || ''}
-                                                onChange={(e) => handleVariableInputChange(varName, e.target.value)}
-                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
+                {/* Sección de Resultados */}
+                {isExecuting && <div className={styles.loadingIndicator}>Executing... Please wait.</div>}
+                {executionResult && !isExecuting && (
+                    <div className={styles.resultsSection}>
+                        <h2>Execution Result</h2>
+                        <div className={styles.metadataContainer}>
+                            {executionResult.modelUsed && (
+                                <p><span className={styles.infoLabel}>Model Used:</span> {executionResult.modelUsed}</p>
                             )}
-
-                            {/* --- Ejecución (Actualizar disabled) --- */}
-                            <div className="text-right">
-                                <button
-                                    onClick={handleExecute}
-                                    disabled={isExecuting || loadingText || !selectedProjectId || !selectedPrompt || !selectedVersion || !selectedLanguage || !selectedAiModel}
-                                    className="px-6 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isExecuting ? 'Executing via LLM...' : 'Execute Prompt via LLM'}
-                                </button>
-                            </div>
-
-                             {/* --- Resultado --- */}
-                            {executionResult !== null && (
-                                <div>
-                                     <h3 className="text-lg font-medium text-black dark:text-white mb-2">Result</h3>
-                                     <pre className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm sm:text-sm bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 whitespace-pre-wrap break-words">
-                                         {typeof executionResult === 'object' ? JSON.stringify(executionResult, null, 2) : String(executionResult)}
-                                     </pre>
-                                 </div>
+                            {executionResult.providerUsed && (
+                                <p><span className={styles.infoLabel}>Provider Used:</span> {executionResult.providerUsed}</p>
                             )}
                         </div>
-                    )}
-                </>
-            )}
+                        <textarea
+                            // Añadir clase de tamaño dinámicamente
+                            className={`${styles.resultTextarea} ${getFontSizeClass(selectedFontSize)}`}
+                            value={formattedPromptResult} // Usar el valor formateado
+                            readOnly
+                            rows={25} // Aumentar filas por defecto
+                        />
+                    </div>
+                )}
+            </div>
+            {/* ---- FIN: Nuevo Contenedor ---- */}
+
+            {/* Botón de Ejecución */}
+            <button
+                onClick={handleExecute}
+                disabled={isExecuting || !selectedProjectId || !selectedPrompt || !selectedVersion || !selectedLanguage || !selectedAiModel || loadingText}
+                className={styles.executeButton}
+            >
+                {isExecuting ? 'Executing...' : 'Execute Prompt'}
+            </button>
         </div>
     );
 };
