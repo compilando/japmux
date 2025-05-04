@@ -42,14 +42,14 @@ const AppSidebar: React.FC = () => {
       name: "Management",
       subItems: [
         { name: "Users", path: "/users", icon: <UserCircleIcon /> },
-        { icon: <FolderIcon />, name: "Projects", path: "/projects" },
-        { icon: <BoltIcon />, name: "AI Models", path: "/ai-models" }
+        { icon: <FolderIcon />, name: "Projects", path: "/projects" }
       ],
     },
     {
       icon: <GridIcon />,
       name: "Current Project",
       subItems: selectedProjectId ? [
+        { name: "AI Models", path: "/ai-models", icon: <BoltIcon /> },
         { name: "Environments", path: "/environments", icon: <TableIcon /> },
         { name: "Regions", path: "/regions", icon: <ListIcon /> },
         { name: "Cultural Data", path: "/cultural-data", icon: <EyeIcon /> },

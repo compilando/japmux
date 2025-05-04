@@ -314,6 +314,11 @@
             "description": "languageCode ya existe."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Crear una nueva región para un proyecto específico",
         "tags": [
           "Regions"
@@ -347,6 +352,11 @@
             }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtener todas las regiones para un proyecto específico",
         "tags": [
           "Regions"
@@ -391,6 +401,11 @@
             "description": "Proyecto o Región no encontrada."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtener una región específica dentro de un proyecto",
         "tags": [
           "Regions"
@@ -446,6 +461,11 @@
             "description": "Proyecto o Región no encontrada."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Actualizar una región específica dentro de un proyecto",
         "tags": [
           "Regions"
@@ -481,6 +501,11 @@
             "description": "Proyecto o Región no encontrada."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Eliminar una región específica dentro de un proyecto",
         "tags": [
           "Regions"
@@ -529,6 +554,11 @@
             "description": "Proyecto o Región referenciada no encontrada."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Crear nuevos datos culturales dentro de un proyecto",
         "tags": [
           "Cultural Data"
@@ -565,6 +595,11 @@
             "description": "Proyecto no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtener todos los datos culturales de un proyecto",
         "tags": [
           "Cultural Data"
@@ -609,6 +644,11 @@
             "description": "Proyecto o Datos culturales no encontrados."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtener datos culturales por ID dentro de un proyecto",
         "tags": [
           "Cultural Data"
@@ -664,6 +704,11 @@
             "description": "Proyecto o Datos culturales no encontrados."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Actualizar datos culturales por ID dentro de un proyecto",
         "tags": [
           "Cultural Data"
@@ -702,6 +747,11 @@
             "description": "Conflicto al eliminar (referenciado por otras entidades)."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Eliminar datos culturales por ID dentro de un proyecto",
         "tags": [
           "Cultural Data"
@@ -753,6 +803,11 @@
             "description": "Conflicto, ya existe una táctica con ese nombre en el proyecto."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Crea una nueva táctica conversacional dentro de un proyecto",
         "tags": [
           "Tactics"
@@ -789,6 +844,11 @@
             "description": "Proyecto no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtiene todas las tácticas conversacionales de un proyecto",
         "tags": [
           "Tactics"
@@ -833,6 +893,11 @@
             "description": "Proyecto o Táctica no encontrada."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtiene una táctica por su nombre (ID) dentro de un proyecto",
         "tags": [
           "Tactics"
@@ -888,6 +953,11 @@
             "description": "Proyecto, Táctica, Región o CulturalData no encontrada."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Actualiza una táctica existente dentro de un proyecto",
         "tags": [
           "Tactics"
@@ -926,6 +996,11 @@
             "description": "Conflicto al eliminar (referenciada por prompts)."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Elimina una táctica dentro de un proyecto",
         "tags": [
           "Tactics"
@@ -977,6 +1052,11 @@
             "description": "Conflicto, ya existe un prompt con ese nombre en el proyecto."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Crea un nuevo prompt lógico dentro de un proyecto",
         "tags": [
           "Prompts"
@@ -1013,6 +1093,11 @@
             "description": "Proyecto no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtiene todos los prompts lógicos de un proyecto",
         "tags": [
           "Prompts"
@@ -1057,6 +1142,11 @@
             "description": "Proyecto o Prompt no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtiene un prompt lógico por su nombre dentro de un proyecto",
         "tags": [
           "Prompts"
@@ -1112,6 +1202,11 @@
             "description": "Proyecto, Prompt, Tactic o Tag no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Actualiza metadatos de un prompt lógico (descripción, tactic, tags) dentro de un proyecto",
         "tags": [
           "Prompts"
@@ -1150,6 +1245,11 @@
             "description": "Conflicto al eliminar (revisar relaciones sin Cascade)."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Elimina un prompt lógico (y sus versiones asociadas por Cascade) dentro de un proyecto",
         "tags": [
           "Prompts"
@@ -1203,6 +1303,11 @@
             "description": "Conflicto (e.g., versionTag ya existe para este prompt)."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Crear una nueva versión para un prompt existente en el proyecto.",
         "tags": [
           "Prompts"
@@ -1262,6 +1367,11 @@
             "description": "Proyecto o Versión no encontrada."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Añadir o actualizar una traducción para una versión específica de prompt en el proyecto.",
         "tags": [
           "Prompts"
@@ -1306,6 +1416,11 @@
             "description": "Conflicto, ya existe un asset con esa key en el proyecto."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Crea un nuevo prompt asset (y su primera versión) dentro de un proyecto",
         "tags": [
           "Prompt Assets"
@@ -1332,6 +1447,11 @@
             "description": "Proyecto no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtiene todos los prompt assets de un proyecto",
         "tags": [
           "Prompt Assets"
@@ -1369,6 +1489,11 @@
             "description": "Proyecto o Asset no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtiene un prompt asset por su key dentro de un proyecto",
         "tags": [
           "Prompt Assets"
@@ -1417,6 +1542,11 @@
             "description": "Proyecto o Asset no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Actualiza metadatos de un prompt asset (nombre, descripción, etc.) dentro de un proyecto",
         "tags": [
           "Prompt Assets"
@@ -1455,6 +1585,11 @@
             "description": "Conflicto al eliminar (revisar relaciones sin Cascade)."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Elimina un prompt asset (y sus versiones/traducciones por Cascade) dentro de un proyecto",
         "tags": [
           "Prompt Assets"
@@ -1821,6 +1956,11 @@
             "description": "Proyecto o Región referenciada no encontrada."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Crear metadatos para un documento RAG dentro de un proyecto",
         "tags": [
           "RAG Document Metadata"
@@ -1857,6 +1997,11 @@
             "description": "Proyecto no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtener todos los metadatos de documentos RAG de un proyecto",
         "tags": [
           "RAG Document Metadata"
@@ -1901,6 +2046,11 @@
             "description": "Proyecto o Metadatos no encontrados."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtener metadatos por ID dentro de un proyecto",
         "tags": [
           "RAG Document Metadata"
@@ -1956,6 +2106,11 @@
             "description": "Proyecto, Metadatos o Región referenciada no encontrada."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Actualizar metadatos por ID dentro de un proyecto",
         "tags": [
           "RAG Document Metadata"
@@ -1994,6 +2149,11 @@
             "description": "Conflicto al eliminar (referenciado por otras entidades)."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Eliminar metadatos por ID dentro de un proyecto",
         "tags": [
           "RAG Document Metadata"
@@ -2168,24 +2328,15 @@
         ]
       }
     },
-    "/api/projects/{projectId}/serve/{environmentName}/{promptName}": {
-      "get": {
-        "operationId": "ServePromptController_servePrompt",
+    "/serve-prompt/execute/{projectId}/{promptName}/{versionTag}": {
+      "post": {
+        "operationId": "ServePromptController_executePrompt",
         "parameters": [
           {
             "name": "projectId",
             "required": true,
             "in": "path",
             "description": "Project ID",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "environmentName",
-            "required": true,
-            "in": "path",
-            "description": "Environment name (e.g., staging, production)",
             "schema": {
               "type": "string"
             }
@@ -2201,9 +2352,9 @@
           },
           {
             "name": "versionTag",
-            "required": false,
-            "in": "query",
-            "description": "Optional specific version tag (e.g., \"v1.2.0\"). Defaults to active version.",
+            "required": true,
+            "in": "path",
+            "description": "Specific version tag (e.g., \"v1.2.0\")",
             "schema": {
               "type": "string"
             }
@@ -2212,15 +2363,35 @@
             "name": "languageCode",
             "required": false,
             "in": "query",
-            "description": "Optional language code (e.g., \"es\"). Defaults to project default or \"en\".",
+            "description": "Optional language code for translation (e.g., \"es\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "environmentName",
+            "required": false,
+            "in": "query",
+            "description": "Optional environment context (currently informational)",
             "schema": {
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "description": "Input variables for the prompt",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecutePromptBodyDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Processed prompt and metadata.",
+            "description": "Processed prompt text ready for execution and metadata.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2232,8 +2403,11 @@
               }
             }
           },
+          "201": {
+            "description": ""
+          },
           "400": {
-            "description": "Invalid parameters."
+            "description": "Invalid parameters or failed template rendering."
           },
           "401": {
             "description": "Unauthorized."
@@ -2242,7 +2416,7 @@
             "description": "Forbidden Access to Project."
           },
           "404": {
-            "description": "Project, Environment, Prompt, or active Version not found."
+            "description": "Project, Prompt, or Version not found."
           }
         },
         "security": [
@@ -2250,9 +2424,9 @@
             "bearer": []
           }
         ],
-        "summary": "Gets and assembles a specific prompt for a given environment within a project",
+        "summary": "Assembles and prepares a specific prompt version for execution with provided variables",
         "tags": [
-          "Serve Prompt (within Project)"
+          "Serve Prompt"
         ]
       }
     },
@@ -2461,10 +2635,19 @@
         ]
       }
     },
-    "/api/ai-models": {
+    "/api/projects/{projectId}/aimodels": {
       "post": {
         "operationId": "AiModelController_create",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2493,17 +2676,31 @@
             "description": "Conflict. AIModel with this name already exists."
           }
         },
-        "summary": "Create a new AI model",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new AI model for this project",
         "tags": [
-          "AI Models"
+          "AI Models (Project Specific)"
         ]
       },
       "get": {
         "operationId": "AiModelController_findAll",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "List of all AI models.",
+            "description": "List of project-specific and global AI models.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2516,18 +2713,32 @@
             }
           }
         },
-        "summary": "Get all AI models",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all AI models for this project (includes global models)",
         "tags": [
-          "AI Models"
+          "AI Models (Project Specific)"
         ]
       }
     },
-    "/api/ai-models/{id}": {
+    "/api/projects/{projectId}/aimodels/{aiModelId}": {
       "get": {
         "operationId": "AiModelController_findOne",
         "parameters": [
           {
-            "name": "id",
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aiModelId",
             "required": true,
             "in": "path",
             "description": "AI Model CUID",
@@ -2548,19 +2759,33 @@
             }
           },
           "404": {
-            "description": "AI Model not found."
+            "description": "AI Model not found or not accessible for this project."
           }
         },
-        "summary": "Get an AI model by ID",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a specific AI model by ID (must belong to project or be global)",
         "tags": [
-          "AI Models"
+          "AI Models (Project Specific)"
         ]
       },
       "patch": {
         "operationId": "AiModelController_update",
         "parameters": [
           {
-            "name": "id",
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aiModelId",
             "required": true,
             "in": "path",
             "description": "AI Model CUID",
@@ -2600,16 +2825,30 @@
             "description": "Conflict. AIModel with this name already exists."
           }
         },
-        "summary": "Update an AI model by ID",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an AI model by ID (must belong to project)",
         "tags": [
-          "AI Models"
+          "AI Models (Project Specific)"
         ]
       },
       "delete": {
         "operationId": "AiModelController_remove",
         "parameters": [
           {
-            "name": "id",
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aiModelId",
             "required": true,
             "in": "path",
             "description": "AI Model CUID",
@@ -2633,9 +2872,14 @@
             "description": "AI Model not found."
           }
         },
-        "summary": "Delete an AI model by ID",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete an AI model by ID (must belong to project)",
         "tags": [
-          "AI Models"
+          "AI Models (Project Specific)"
         ]
       }
     },
@@ -2684,6 +2928,11 @@
             "description": "Conflicto, ya existe una etiqueta con ese nombre en el proyecto."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Crea una nueva etiqueta para un proyecto",
         "tags": [
           "Tags"
@@ -2720,6 +2969,11 @@
             "description": "Proyecto no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtiene todas las etiquetas de un proyecto",
         "tags": [
           "Tags"
@@ -2764,6 +3018,11 @@
             "description": "Proyecto o Etiqueta no encontrada."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtiene una etiqueta por su ID dentro de un proyecto",
         "tags": [
           "Tags"
@@ -2822,6 +3081,11 @@
             "description": "Conflicto, ya existe una etiqueta con el nuevo nombre en el proyecto."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Actualiza una etiqueta existente en un proyecto",
         "tags": [
           "Tags"
@@ -2867,6 +3131,11 @@
             "description": "Conflicto, la etiqueta está en uso."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Elimina una etiqueta de un proyecto",
         "tags": [
           "Tags"
@@ -2911,6 +3180,11 @@
             "description": "Proyecto o Etiqueta no encontrada."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtiene una etiqueta por su nombre dentro de un proyecto",
         "tags": [
           "Tags"
@@ -4330,6 +4604,11 @@
             "description": "Conflicto, ya existe un entorno con ese nombre en el proyecto."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Crea un nuevo entorno para un proyecto",
         "tags": [
           "Environments"
@@ -4366,6 +4645,11 @@
             "description": "Proyecto no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtiene todos los entornos de un proyecto",
         "tags": [
           "Environments"
@@ -4410,6 +4694,11 @@
             "description": "Proyecto o Entorno no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtiene un entorno por su ID dentro de un proyecto",
         "tags": [
           "Environments"
@@ -4468,6 +4757,11 @@
             "description": "Conflicto, ya existe un entorno con el nuevo nombre en el proyecto."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Actualiza un entorno existente en un proyecto",
         "tags": [
           "Environments"
@@ -4510,6 +4804,11 @@
             "description": "Proyecto o Entorno no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Elimina un entorno de un proyecto",
         "tags": [
           "Environments"
@@ -4554,9 +4853,70 @@
             "description": "Proyecto o Entorno no encontrado."
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Obtiene un entorno por su nombre dentro de un proyecto",
         "tags": [
           "Environments"
+        ]
+      }
+    },
+    "/llm-execution/execute": {
+      "post": {
+        "operationId": "LlmExecutionController_executeLlm",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteLlmDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "LLM execution successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "result": "LLM response text",
+                    "modelUsed": "gpt-4o",
+                    "providerUsed": "openai"
+                  }
+                }
+              }
+            }
+          },
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "description": "Invalid request body or unsupported provider."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "AI Model not found."
+          },
+          "500": {
+            "description": "Internal server error (API Key config, LLM call failed, etc.)."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Executes a pre-assembled prompt using a specified AI Model via LangChain",
+        "tags": [
+          "LLM Execution"
         ]
       }
     }
@@ -5358,6 +5718,17 @@
         "type": "object",
         "properties": {}
       },
+      "ExecutePromptBodyDto": {
+        "type": "object",
+        "properties": {
+          "variables": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "variables"
+        ]
+      },
       "CreateProjectDto": {
         "type": "object",
         "properties": {
@@ -5661,6 +6032,32 @@
             "example": "Entorno de pruebas pre-producción"
           }
         }
+      },
+      "ExecuteLlmDto": {
+        "type": "object",
+        "properties": {
+          "modelId": {
+            "type": "string",
+            "description": "ID del AIModel a utilizar (de la tabla AIModel)",
+            "example": "clxyz..."
+          },
+          "promptText": {
+            "type": "string",
+            "description": "El texto completo del prompt ya procesado y listo para enviar al LLM",
+            "example": "Traduce este texto a español: Hello world."
+          },
+          "variables": {
+            "type": "object",
+            "description": "Variables originales usadas para ensamblar el prompt (opcional, para logging/contexto)",
+            "example": {
+              "cliente": "ACME Corp"
+            }
+          }
+        },
+        "required": [
+          "modelId",
+          "promptText"
+        ]
       }
     }
   }

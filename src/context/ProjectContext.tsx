@@ -2,7 +2,10 @@
 
 import React, { createContext, useState, useEffect, useContext, ReactNode, useCallback } from 'react';
 import { useRouter } from 'next/navigation'; // <-- Importar useRouter
-import { projectService, Project } from '@/services/api'; // Ajusta la ruta si es necesario
+// Importar tipo Project desde generated
+import { Project } from '@/services/generated/api';
+// Importar servicio desde api
+import { projectService } from '@/services/api';
 // Importa tu contexto de autenticación si lo tienes, para reaccionar a cambios de login/logout
 // import { useAuth } from './AuthContext'; 
 
@@ -61,7 +64,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
         setIsLoading(true);
         setError(null);
         try {
-            const userProjects = await projectService.getMine();
+            const userProjects = await projectService.findMine();
             setProjects(userProjects);
 
             // Si había un ID guardado, verificar que aún exista en la lista nueva

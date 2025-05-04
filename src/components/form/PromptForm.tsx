@@ -38,7 +38,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         const fetchTags = async () => {
             setLoadingTags(true);
             try {
-                const fetchedTags = await tagService.getAll(projectId);
+                const fetchedTags = await tagService.findAll(projectId);
                 setAvailableTags(fetchedTags);
                 console.log('[PromptForm Effect FetchTags] availableTags set:', fetchedTags);
             } catch (error) {
@@ -98,22 +98,22 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        let payload: CreatePromptDto | UpdatePromptDto;
+        let payload: any;
 
         if (isEditing) {
             payload = {
                 description: description || undefined,
                 tacticId: tacticId || null,
                 tagIds: selectedTagIds.length > 0 ? selectedTagIds : [],
-            } as UpdatePromptDto;
+            };
         } else {
             payload = {
                 name,
-                promptText,
+                promptText: promptText,
                 description: description || undefined,
                 tacticId: tacticId || undefined,
-                tagIds: selectedTagIds.length > 0 ? selectedTagIds : [],
-            } as CreatePromptDto;
+                tags: selectedTagIds,
+            };
         }
         console.log('[PromptForm] Saving payload:', payload);
         onSave(payload);
