@@ -35,6 +35,7 @@ const AppSidebar: React.FC = () => {
   const pathname = usePathname();
   const { selectedProjectId } = useProjects();
 
+  // Define navItems first
   const navItems: NavItem[] = [
     {
       icon: <GridIcon />,
@@ -75,6 +76,55 @@ const AppSidebar: React.FC = () => {
     }
   ].filter(item => !(item.subItems && item.subItems.length === 0 && (item.name === "Current Project" || item.name === "Prompt Management")));
 
+  // Now find the index
+  const currentProjectIndex = navItems.findIndex(item => item.name === "Current Project");
+
+  // State for submenu toggle and height calculation
+  const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);
+  const [subMenuHeight, setSubMenuHeight] = useState<Record<number, number>>({});
+  const subMenuRefs = useRef<Record<number, HTMLDivElement | null>>({});
+
+  // Calculate the correct submenu index based *only* on the current path
+  const activeSubmenuIndexBasedOnPath = React.useMemo(() => {
+    // Check specifically for /current-project
+    if (pathname === '/current-project' && currentProjectIndex !== -1) {
+      return currentProjectIndex;
+    }
+    // Find the index of the first nav item whose subitem path matches the current pathname
+    const index = navItems.findIndex(nav =>
+      nav.subItems && nav.subItems.some(subItem => subItem.path === pathname)
+    );
+    // Return the found index (-1 if not found)
+    return index;
+  }, [pathname, navItems, currentProjectIndex]);
+
+  // Effect to synchronize the open submenu state with the calculated path index
+  useEffect(() => {
+    // Set the open submenu state to match the index derived from the path
+    // If no match was found (index is -1), set it to null (no submenu open)
+    setOpenSubmenu(activeSubmenuIndexBasedOnPath !== -1 ? activeSubmenuIndexBasedOnPath : null);
+  }, [activeSubmenuIndexBasedOnPath]); // Depend only on the calculated index
+
+  // Manual toggle handler
+  const handleSubmenuToggle = (index: number) => {
+    setOpenSubmenu(openSubmenu === index ? null : index);
+  };
+
+  // useEffect para calcular altura del submenú (se mantiene)
+  useEffect(() => {
+    if (openSubmenu !== null && subMenuRefs.current[openSubmenu]) {
+      const currentSubMenu = subMenuRefs.current[openSubmenu];
+      if (currentSubMenu) {
+        setTimeout(() => {
+          setSubMenuHeight((prev) => ({
+            ...prev,
+            [openSubmenu]: currentSubMenu.scrollHeight,
+          }));
+        }, 0);
+      }
+    }
+  }, [openSubmenu]);
+
   const renderMenuItems = (itemsToRender: NavItem[]) => (
     <ul className="flex flex-col gap-4">
       {itemsToRender.map((nav, index) => (
@@ -82,14 +132,14 @@ const AppSidebar: React.FC = () => {
           {nav.subItems && nav.subItems.length > 0 ? (
             <button
               onClick={() => handleSubmenuToggle(index)}
-              className={`menu-item group  ${openSubmenu === index ? "menu-item-active" : "menu-item-inactive"
+              className={`menu-item group  ${(openSubmenu === index || (index === currentProjectIndex && pathname === '/current-project')) ? "menu-item-active" : "menu-item-inactive"
                 } cursor-pointer ${!isExpanded && !isHovered
                   ? "lg:justify-center"
                   : "lg:justify-start"
                 }`}
             >
               <span
-                className={`${openSubmenu === index
+                className={`${(openSubmenu === index || (index === currentProjectIndex && pathname === '/current-project'))
                   ? "menu-item-icon-active"
                   : "menu-item-icon-inactive"
                   }`}
@@ -110,11 +160,11 @@ const AppSidebar: React.FC = () => {
             nav.path && (
               <Link
                 href={nav.path}
-                className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                className={`menu-item group ${pathname === nav.path ? "menu-item-active" : "menu-item-inactive"
                   }`}
               >
                 <span
-                  className={`${isActive(nav.path)
+                  className={`${pathname === nav.path
                     ? "menu-item-icon-active"
                     : "menu-item-icon-inactive"
                     }`}
@@ -143,7 +193,7 @@ const AppSidebar: React.FC = () => {
                   <li key={subItem.name}>
                     <Link
                       href={subItem.path}
-                      className={`menu-dropdown-item flex items-center gap-2 ${isActive(subItem.path)
+                      className={`menu-dropdown-item flex items-center gap-2 ${pathname === subItem.path
                         ? "menu-dropdown-item-active"
                         : "menu-dropdown-item-inactive"
                         }`}
@@ -157,7 +207,7 @@ const AppSidebar: React.FC = () => {
                       <span className="flex items-center gap-1 ml-auto">
                         {subItem.new && (
                           <span
-                            className={`ml-auto ${isActive(subItem.path)
+                            className={`ml-auto ${pathname === subItem.path
                               ? "menu-dropdown-badge-active"
                               : "menu-dropdown-badge-inactive"
                               } menu-dropdown-badge `}
@@ -167,7 +217,7 @@ const AppSidebar: React.FC = () => {
                         )}
                         {subItem.pro && (
                           <span
-                            className={`ml-auto ${isActive(subItem.path)
+                            className={`ml-auto ${pathname === subItem.path
                               ? "menu-dropdown-badge-active"
                               : "menu-dropdown-badge-inactive"
                               } menu-dropdown-badge `}
@@ -187,67 +237,12 @@ const AppSidebar: React.FC = () => {
     </ul>
   );
 
-  const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<number, number>>({});
-  const subMenuRefs = useRef<Record<number, HTMLDivElement | null>>({});
-
-  const isActive = useCallback((path: string) => {
-    if (!path) return false;
-    if (path === pathname) {
-      return true;
-    }
-    if (path === '/') {
-      return false;
-    }
-    return pathname.startsWith(path + '/') || pathname === path;
-  }, [pathname]);
-
-  // useEffect(() => {
-  //   // COMMENT OUT: Auto-open submenu based on initial path
-  //   let submenuMatched = false;
-  //   let activeSubmenuIndex: number | null = null;
-  //
-  //   navItems.forEach((nav, index) => {
-  //     if (nav.subItems) {
-  //       if (nav.subItems.some(subItem => isActive(subItem.path))) {
-  //         activeSubmenuIndex = index;
-  //         submenuMatched = true;
-  //       }
-  //     }
-  //     else if (nav.path && isActive(nav.path)) {
-  //       // Handle active main items if needed
-  //     }
-  //   });
-  //
-  //   setOpenSubmenu(activeSubmenuIndex);
-  // // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [pathname, navItems, isActive]);
-
   // useEffect para cerrar explícitamente el submenú si se deselecciona el proyecto
   useEffect(() => {
     if (!selectedProjectId) {
       setOpenSubmenu(null);
     }
   }, [selectedProjectId]);
-
-  // useEffect para calcular altura del submenú (se mantiene)
-  useEffect(() => {
-    if (openSubmenu !== null && subMenuRefs.current[openSubmenu]) {
-      const currentSubMenu = subMenuRefs.current[openSubmenu];
-      if (currentSubMenu) {
-        setTimeout(() => {
-          setSubMenuHeight((prev) => ({
-            ...prev,
-            [openSubmenu]: currentSubMenu.scrollHeight,
-          }));
-        }, 0);
-      }
-    }
-  }, [openSubmenu]);
-
-  const handleSubmenuToggle = (index: number) => {
-    setOpenSubmenu(openSubmenu === index ? null : index);
-  };
 
   return (
     <aside
