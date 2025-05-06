@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    Project,
-    Prompt,
-    promptService,
+    // Prompt, // Does not exist or is not used directly
+    CreateProjectDto,
     CreatePromptDto,
     UpdatePromptDto,
+} from '@/services/generated/api';
+import {
+    promptService,
     projectService
 } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
@@ -18,28 +20,28 @@ import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 const PromptsPage: React.FC = () => {
-    const [itemsList, setItemsList] = useState<Prompt[]>([]);
+    const [itemsList, setItemsList] = useState<CreatePromptDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingItem, setEditingItem] = useState<Prompt | null>(null);
+    const [editingItem, setEditingItem] = useState<CreatePromptDto | null>(null);
 
-    const [project, setProject] = useState<Project | null>(null);
+    const [project, setProject] = useState<CreateProjectDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     const { selectedProjectId, isLoading: isLoadingProject, projects: projectList } = useProjects();
     const { isAuthenticated } = useAuth();
 
     useEffect(() => {
-        if (selectedProjectId && projectList.length > 0) {
+        if (selectedProjectId && Array.isArray(projectList) && projectList.length > 0) {
             setBreadcrumbLoading(true);
             const currentProject = projectList.find(p => p.id === selectedProjectId);
             if (currentProject) {
-                setProject(currentProject);
+                setProject(currentProject as CreateProjectDto);
                 setBreadcrumbLoading(false);
             } else {
                 projectService.findOne(selectedProjectId)
-                    .then(data => setProject(data))
+                    .then(data => setProject(data as CreateProjectDto))
                     .catch(err => {
                         console.error("Error fetching project for breadcrumbs:", err);
                         showErrorToast("Failed to load project details for breadcrumbs.");
@@ -54,18 +56,17 @@ const PromptsPage: React.FC = () => {
     }, [selectedProjectId, projectList]);
 
     const fetchData = useCallback(async () => {
+        setError(null);
         if (!selectedProjectId) {
-            setError("Please select a project first.");
             setLoading(false);
             setItemsList([]);
             return;
         }
         setLoading(true);
-        setError(null);
         try {
             const data = await promptService.findAll(selectedProjectId);
             if (Array.isArray(data)) {
-                setItemsList(data);
+                setItemsList(data as CreatePromptDto[]);
             } else {
                 console.error("API response for /prompts is not an array:", data);
                 setError('Received invalid data format.');
@@ -100,7 +101,7 @@ const PromptsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (item: Prompt) => {
+    const handleEdit = (item: CreatePromptDto) => {
         if (!selectedProjectId) {
             showErrorToast("Cannot edit, no project selected.");
             return;
@@ -109,16 +110,16 @@ const PromptsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (promptName: string) => {
         if (!selectedProjectId) {
             showErrorToast("No project selected.");
             return;
         }
-        if (window.confirm('Are you sure you want to delete this prompt?')) {
+        if (window.confirm(`Are you sure you want to delete prompt "${promptName}"?`)) {
             setLoading(true);
             try {
-                await promptService.remove(selectedProjectId, id);
-                showSuccessToast("Prompt deleted successfully!");
+                await promptService.remove(selectedProjectId, promptName);
+                showSuccessToast(`Prompt ${promptName} deleted successfully!`);
                 fetchData();
             } catch (err) {
                 setError('Failed to delete item');
@@ -140,8 +141,8 @@ const PromptsPage: React.FC = () => {
         try {
             let message = "";
             if (editingItem) {
-                await promptService.update(selectedProjectId, editingItem.id, payload as UpdatePromptDto);
-                message = "Prompt updated successfully!";
+                await promptService.update(selectedProjectId, editingItem.name, payload as UpdatePromptDto);
+                message = `Prompt ${editingItem.name} updated successfully!`;
             } else {
                 await promptService.create(selectedProjectId, payload as CreatePromptDto);
                 message = "Prompt created successfully!";
@@ -159,14 +160,15 @@ const PromptsPage: React.FC = () => {
         }
     };
 
-    const breadcrumbs = [
+    type BreadcrumbItem = { label: string; href?: string };
+
+    const breadcrumbs: BreadcrumbItem[] = [
         { label: "Home", href: "/" },
         { label: "Projects", href: "/projects" },
     ];
     if (selectedProjectId) {
         breadcrumbs.push({
             label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId),
-            href: `/projects/${selectedProjectId}/prompts`
         });
         breadcrumbs.push({ label: "Prompts" });
     } else {

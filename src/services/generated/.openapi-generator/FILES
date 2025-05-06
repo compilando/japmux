@@ -23,7 +23,6 @@ docs/CreatePromptTranslationDto.md
 docs/CreatePromptVersionDto.md
 docs/CreateRagDocumentMetadataDto.md
 docs/CreateRegionDto.md
-docs/CreateTacticDto.md
 docs/CreateTagDto.md
 docs/CreateUserDto.md
 docs/CulturalDataApi.md
@@ -51,8 +50,6 @@ docs/RagDocumentMetadataResponse.md
 docs/RegionsApi.md
 docs/RegisterDto.md
 docs/ServePromptApi.md
-docs/TacticResponse.md
-docs/TacticsApi.md
 docs/TagsApi.md
 docs/UpdateAiModelDto.md
 docs/UpdateAssetTranslationDto.md
@@ -66,7 +63,6 @@ docs/UpdatePromptDto.md
 docs/UpdatePromptTranslationDto.md
 docs/UpdatePromptVersionDto.md
 docs/UpdateRegionDto.md
-docs/UpdateTacticDto.md
 docs/UpdateTagDto.md
 docs/UserProfileResponse.md
 docs/UsersApi.md

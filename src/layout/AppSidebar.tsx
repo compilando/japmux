@@ -54,7 +54,6 @@ const AppSidebar: React.FC = () => {
         { name: "Regions", path: "/regions", icon: <ListIcon /> },
         { name: "Cultural Data", path: "/cultural-data", icon: <EyeIcon /> },
         { name: "Tags", path: "/tags", icon: <ChatIcon /> },
-        { name: "Tactics", path: "/tactics", icon: <PaperPlaneIcon /> }
       ] : [],
     },
     {
@@ -66,13 +65,8 @@ const AppSidebar: React.FC = () => {
     },
     {
       icon: <BoltIcon />,
-      name: "Serve (Test)",
+      name: "Serve Prompts",
       path: "/serveprompt",
-    },
-    {
-      icon: <UserCircleIcon />,
-      name: "User Profile",
-      path: "/profile",
     }
   ].filter(item => !(item.subItems && item.subItems.length === 0 && (item.name === "Current Project" || item.name === "Prompt Management")));
 

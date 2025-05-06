@@ -14,7 +14,7 @@ const PromptContext = createContext<PromptContextType | undefined>(undefined);
 export const PromptProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
 
-    // Cargar desde localStorage al inicio
+    // Load from localStorage on startup
     useEffect(() => {
         const storedId = localStorage.getItem(PROMPT_ID_KEY);
         if (storedId) {
@@ -29,7 +29,7 @@ export const PromptProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         } else {
             localStorage.removeItem(PROMPT_ID_KEY);
         }
-        // Opcional: Log para depuración
+        // Optional: Log for debugging
         console.log(`[PromptContext] Prompt selected: ${promptId}`);
     };
 

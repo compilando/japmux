@@ -82,18 +82,6 @@ export default function CurrentProjectPage() {
           </div>
         </Link>
 
-        {/* Tactics Card */}
-        <Link href="/tactics" className="col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3">
-          <div className="h-full rounded-sm border border-stroke bg-white p-6 shadow-default transition-shadow duration-200 ease-in-out hover:shadow-lg dark:border-strokedark dark:bg-boxdark">
-            <div className="mb-4 flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4">
-              <PaperPlaneIcon className="h-6 w-6 fill-primary dark:fill-white" />
-            </div>
-            <h3 className="mb-2 text-xl font-bold text-black dark:text-white">
-              Tactics
-            </h3>
-            <p className="text-sm font-medium">Define strategic approaches for prompts.</p>
-          </div>
-        </Link>
       </div>
     </>
   );

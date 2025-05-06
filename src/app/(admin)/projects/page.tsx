@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-    Project,
-    projectService,
     CreateProjectDto,
     UpdateProjectDto,
-    User,
+    CreateUserDto,
+} from '@/services/generated/api';
+import {
+    projectService,
     userService
 } from '@/services/api';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
@@ -14,17 +15,25 @@ import ProjectsTable from '@/components/tables/ProjectsTable';
 import ProjectForm from '@/components/form/ProjectForm';
 import axios from 'axios';
 
+interface UserData extends CreateUserDto {
+    id: string;
+}
+
+interface ProjectData extends CreateProjectDto {
+    id: string;
+}
+
 const ProjectsPage: React.FC = () => {
-    const [projectsList, setProjectsList] = useState<Project[]>([]);
+    const [projectsList, setProjectsList] = useState<ProjectData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingProject, setEditingProject] = useState<Project | null>(null);
-    const [usersList, setUsersList] = useState<User[]>([]);
+    const [editingProject, setEditingProject] = useState<ProjectData | null>(null);
+    const [usersList, setUsersList] = useState<UserData[]>([]);
 
     const fetchData = async () => {
-        setLoading(true);
         setError(null);
+        setLoading(true);
         try {
             const [projectsData, usersData] = await Promise.all([
                 projectService.findAll(),
@@ -32,7 +41,7 @@ const ProjectsPage: React.FC = () => {
             ]);
 
             if (Array.isArray(projectsData)) {
-                setProjectsList(projectsData);
+                setProjectsList(projectsData as ProjectData[]);
             } else {
                 console.error("API response for /projects is not an array:", projectsData);
                 setError('Received invalid data format for projects.');
@@ -40,7 +49,7 @@ const ProjectsPage: React.FC = () => {
             }
 
             if (Array.isArray(usersData)) {
-                setUsersList(usersData);
+                setUsersList(usersData as UserData[]);
             } else {
                 console.error("API response for /users is not an array:", usersData);
                 setError(prev => prev ? `${prev} Also failed to load users.` : 'Failed to load users.');
@@ -69,7 +78,7 @@ const ProjectsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (project: Project) => {
+    const handleEdit = (project: ProjectData) => {
         setEditingProject(project);
         setIsModalOpen(true);
     };
@@ -106,16 +115,16 @@ const ProjectsPage: React.FC = () => {
         }
     };
 
-    // Definir crumbs para esta página
+    // Define crumbs for this page
     const breadcrumbs = [
         { label: "Home", href: "/" },
-        // { label: "Management", href: "/projects" }, // Opcional
-        { label: "Projects" } // Último elemento sin href
+        // { label: "Management", href: "/projects" }, // Optional
+        { label: "Projects" } // Last element without href
     ];
 
     return (
         <>
-            {/* Usar la prop crumbs */}
+            {/* Use the crumbs prop */}
             <Breadcrumb crumbs={breadcrumbs} />
             <div className="flex justify-end mb-4">
                 <button

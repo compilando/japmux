@@ -6,7 +6,7 @@ import {
     Project,
     Prompt,
     PromptAssetLink,
-    promptAssetLinkService,
+    promptAssetService,
     CreatePromptAssetLinkDto,
     UpdatePromptAssetLinkDto,
     promptVersionService,
@@ -76,6 +76,7 @@ const PromptAssetLinksPage: React.FC = () => {
         const fetchVersion = async () => {
             try {
                 const versionData = await promptVersionService.findOne(projectId, promptId, versionTag);
+                console.log('Fetched version data:', versionData);
                 setPromptVersion(versionData);
             } catch (err) {
                 const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to fetch prompt version details.';
@@ -92,6 +93,7 @@ const PromptAssetLinksPage: React.FC = () => {
     const promptVersionId = promptVersion?.id;
 
     const fetchLinks = useCallback(async () => {
+        console.log('Attempting to fetch links with projectId:', projectId, 'and promptVersionId:', promptVersionId);
         if (!projectId || !promptVersionId) {
             if (!versionLoading) {
                 setLinksError("Cannot fetch links without a valid Prompt Version ID.");
@@ -103,7 +105,7 @@ const PromptAssetLinksPage: React.FC = () => {
         setLinksLoading(true);
         setLinksError(null);
         try {
-            const data = await promptAssetLinkService.getAll(projectId, promptVersionId);
+            const data = await promptAssetService.findAssetLinks(projectId, promptVersionId);
             if (Array.isArray(data)) {
                 setLinksList(data);
             } else {
@@ -149,7 +151,7 @@ const PromptAssetLinksPage: React.FC = () => {
         if (window.confirm('Are you sure you want to delete this link?')) {
             setLinksLoading(true);
             try {
-                await promptAssetLinkService.remove(projectId, promptVersionId, linkId);
+                await promptAssetService.removeAssetLink(projectId, promptVersionId, linkId);
                 showSuccessToast("Link deleted successfully!");
                 fetchLinks();
             } catch (err) {
@@ -169,11 +171,11 @@ const PromptAssetLinksPage: React.FC = () => {
         try {
             let message = "";
             if (editingItem) {
-                await promptAssetLinkService.update(projectId, promptVersionId, editingItem.id, payload as UpdatePromptAssetLinkDto);
+                await promptAssetService.updateAssetLink(projectId, promptVersionId, editingItem.id, payload as UpdatePromptAssetLinkDto);
                 message = "Link updated successfully!";
             } else {
                 const createPayload = { ...payload, promptVersionId } as CreatePromptAssetLinkDto;
-                await promptAssetLinkService.create(projectId, promptVersionId, createPayload);
+                await promptAssetService.createAssetLink(projectId, promptVersionId, createPayload);
                 message = "Link created successfully!";
             }
             setIsModalOpen(false);

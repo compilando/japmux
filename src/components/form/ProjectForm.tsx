@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Project, CreateProjectDto, UpdateProjectDto, User } from '@/services/api';
-// Potencialmente podríamos importar usuarios si hubiera un endpoint get('/users')
+// Potentially we could import users if there was an endpoint get('/users')
 // import { User, getUsers } from '@/services/api';
 
 interface ProjectFormProps {
@@ -14,7 +14,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, users, onSave, o
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [ownerUserId, setOwnerUserId] = useState<string>('');
-    // const [availableUsers, setAvailableUsers] = useState<User[]>([]); // Para desplegable
+    // const [availableUsers, setAvailableUsers] = useState<User[]>([]); // For dropdown
 
     const isEditing = !!initialData;
 
@@ -28,7 +28,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, users, onSave, o
             setDescription('');
             setOwnerUserId('');
         }
-        // Aquí podríamos cargar usuarios si fuera un desplegable
+        // Here we could load users if it was a dropdown
         // fetchUsers();
     }, [initialData]);
 
@@ -55,28 +55,28 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, users, onSave, o
             if (trimmedDescription !== initialDescription) {
                 updatePayload.description = trimmedDescription;
             }
-            // ¡SÍ incluir ownerUserId si cambió!
-            const initialOwnerId = initialData.ownerUserId ?? ''; // Comparar con '' si era null/undefined
+            // ¡SÍ include ownerUserId if changed!
+            const initialOwnerId = initialData.ownerUserId ?? ''; // Compare with '' if it was null/undefined
             if (ownerUserId !== initialOwnerId) {
-                // Enviar el nuevo ID o null si se seleccionó "-- Select Owner --" (valor "")
-                // Asegurarse que la API acepta null o string vacío para desasignar
-                updatePayload.ownerUserId = ownerUserId || null; // O usar undefined si la API lo prefiere a null
+                // Send the new ID or null if selected "-- Select Owner --" (value "")
+                // Ensure the API accepts null or empty string to desassign
+                updatePayload.ownerUserId = ownerUserId || null; // Or use undefined if the API prefers it to null
             }
 
-            // Solo guardar si hay cambios
+            // Only save if there are changes
             if (Object.keys(updatePayload).length > 0) {
                 onSave(updatePayload);
             } else {
                 console.log("No changes detected for update.");
-                onCancel(); // Opcional: cerrar modal si no hay cambios
+                onCancel(); // Optional: close modal if no changes
             }
         } else {
             // Create operation
             const createPayload: CreateProjectDto = {
                 name: trimmedName,
                 description: trimmedDescription,
-                // ownerUserId NO se envía en el create según el DTO CreateProjectDto
-                // (Revisar CreateProjectDto si también se puede asignar al crear)
+                // ownerUserId is not sent in the create according to the CreateProjectDto
+                // (Check CreateProjectDto if it can also be assigned at creation)
             };
             onSave(createPayload);
         }
@@ -97,7 +97,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, users, onSave, o
                 />
             </div>
 
-            {/* Owner User ID - Cambiado a Select */}
+            {/* Owner User ID - Changed to Select */}
             <div>
                 <label htmlFor="ownerUserId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Owner (Optional)</label>
                 <select
@@ -127,7 +127,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, users, onSave, o
                 />
             </div>
 
-            {/* Botones */}
+            {/* Buttons */}
             <div className="flex justify-end space-x-3 mt-6">
                 <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500">Cancel</button>
                 <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">

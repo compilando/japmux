@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag } from '@/services/api'; // Asegúrate de que la ruta sea correcta
+import { Tag } from '@/services/api'; // Make sure the path is correct
 import CopyButton from '../common/CopyButton';
 
 interface TagsTableProps {
@@ -20,7 +20,7 @@ const TagsTable: React.FC<TagsTableProps> = ({ tags, onEdit, onDelete }) => {
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Name
                         </th>
-                        {/* TODO: Añadir más cabeceras de columna según los campos de Tag */}
+                        {/* TODO: Add more column headers based on Tag fields */}
                         <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Actions
                         </th>
@@ -38,7 +38,7 @@ const TagsTable: React.FC<TagsTableProps> = ({ tags, onEdit, onDelete }) => {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                 {tag.name}
                             </td>
-                            {/* TODO: Añadir más celdas de datos según los campos de Tag */}
+                            {/* TODO: Add more data cells based on Tag fields */}
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <button onClick={() => onEdit(tag)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 mr-3">
                                     Edit

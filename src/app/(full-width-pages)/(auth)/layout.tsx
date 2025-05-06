@@ -21,12 +21,11 @@ export default function AuthLayout({
               {/* <!-- ===== Common Grid Shape Start ===== --> */}
               <GridShape />
               <div className="flex flex-col items-center max-w-xs">
-                <Link href="/" className="block mb-4">
-                  JAPM
+                <Link href="/">
+                  <p className="text-center text-5xl text-white dark:text-white">
+                    JAPM
+                  </p>
                 </Link>
-                <p className="text-center text-gray-400 dark:text-white/60">
-                  JAPM
-                </p>
               </div>
             </div>
           </div>

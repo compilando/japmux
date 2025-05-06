@@ -21,7 +21,6 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                     <tr>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
-                        <th scope="col" className="w-1/12 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tactic ID</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tags</th>
                         <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -31,27 +30,17 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                         <tr key={item.id || item.name}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{item.name}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 truncate max-w-xs" title={item.description}>{item.description || '-'}</td>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                {item.tacticId ? (
-                                    <div className="flex items-center space-x-2">
-                                        <span className="truncate" title={item.tacticId}>{item.tacticId}</span>
-                                        <CopyButton textToCopy={item.tacticId} />
-                                    </div>
-                                ) : (
-                                    '-'
-                                )}
-                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                 {item.tags && item.tags.length > 0 ? (
                                     item.tags.map((tagRelation: any, index: number) => {
-                                        // Intentar obtener id y name desde estructuras comunes
+                                        // Try to get id and name from common structures
                                         const tagId = tagRelation?.id ?? tagRelation?.tag?.id ?? tagRelation?.tagId;
                                         const tagName = tagRelation?.name ?? tagRelation?.tag?.name;
 
-                                        // Usar un índice como fallback para la key si no hay ID, aunque no es ideal
+                                        // Use index as fallback key if no ID, although not ideal
                                         const key = tagId ?? `tag-${index}`;
 
-                                        // Solo renderizar si tenemos un nombre
+                                        // Only render if we have a name
                                         return tagName ? (
                                             <span key={key} className="inline-block bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 dark:text-gray-200 mr-2 mb-1">
                                                 {tagName}

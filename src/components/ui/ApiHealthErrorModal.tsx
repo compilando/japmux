@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from './button/Button'; // Ajusta la ruta si es necesario
+import Button from './button/Button'; // Adjust path if necessary
 
 interface ApiHealthErrorModalProps {
     isOpen: boolean;

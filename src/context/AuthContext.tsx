@@ -1,20 +1,20 @@
 'use client';
 
 import React, { createContext, useState, useEffect, useContext, ReactNode, useCallback } from 'react';
-import { useRouter } from 'next/navigation'; // Para redirección
+import { useRouter } from 'next/navigation'; // For redirection
 import {
     authService,
-    userService, // Asumiendo que necesitamos userService para obtener perfil
+    userService, // Assuming we need userService to get profile
     LoginDto,
     RegisterDto,
     UserProfileResponse
-} from '@/services/api'; // Ajusta la ruta si es necesario
+} from '@/services/api'; // Adjust path if necessary
 
 interface AuthContextType {
     user: UserProfileResponse | null;
     isAuthenticated: boolean;
-    isLoading: boolean; // Para saber si se está verificando el token inicial
-    error: string | null; // Para errores de login/registro
+    isLoading: boolean; // To know if the initial token is being verified
+    error: string | null; // For login/registration errors
     login: (credentials: LoginDto) => Promise<boolean>;
     logout: () => void;
     register: (data: RegisterDto) => Promise<boolean>;
@@ -28,7 +28,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<UserProfileResponse | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true); // Empieza cargando para verificar token
+    const [isLoading, setIsLoading] = useState<boolean>(true); // Start loading to verify token
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             await authService.login(credentials);
             console.log('AuthProvider: login successful, calling fetchUserProfile...'); // Log post-login
             await fetchUserProfile();
-            setIsLoading(false); // Asegurarse que isLoading se setea a false aquí
+            setIsLoading(false); // Ensure isLoading is set to false here
             console.log('AuthProvider: login finished successfully');
             return true;
         } catch (err: any) {
@@ -84,12 +84,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setError(null);
         setIsLoading(true);
         try {
-            // Asumiendo que register no loguea automáticamente.
-            // Si lo hace, necesitaríamos manejar el token aquí también.
+            // Assuming register doesn't log in automatically.
+            // If it does, we would need to handle the token here too.
             await authService.register(data);
-            // Podrías intentar loguear automáticamente después o redirigir a login
+            // You could try logging in automatically after or redirecting to login
             setIsLoading(false);
-            // Considera si quieres loguear al usuario inmediatamente o redirigir a login
+            // Consider if you want to log the user in immediately or redirect to login
             return true;
         } catch (err: any) {
             console.error("AuthProvider: Registration failed:", err);
@@ -101,11 +101,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const logout = () => {
         // console.log("AuthProvider: Logging out...");
-        authService.logout(); // Limpia localStorage
+        authService.logout(); // Clear localStorage
         setUser(null);
         setError(null);
-        // Redirigir a la página de login
-        router.push('/signin'); // O la ruta que corresponda
+        // Redirect to the login page
+        router.push('/signin'); // Or the corresponding route
     };
 
     const contextValue = {
@@ -117,7 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logout,
         register
     };
-    // console.log("AuthProvider: Providing value:", contextValue); // Log valor proveído (puede ser muy verboso)
+    // console.log("AuthProvider: Providing value:", contextValue); // Log provided value (can be very verbose)
 
     return (
         <AuthContext.Provider value={contextValue}>
@@ -126,7 +126,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     );
 };
 
-// Hook personalizado
+// Custom hook
 export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);
     if (context === undefined) {

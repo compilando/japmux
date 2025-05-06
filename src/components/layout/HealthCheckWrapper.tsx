@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-// import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Spinner } from '@nextui-org/react'; // Eliminada
+// import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Spinner } from '@nextui-org/react'; // Removed
 import { healthService } from '@/services/api';
-import ApiHealthErrorModal from '../ui/ApiHealthErrorModal'; // Ajusta la ruta si es necesario
+import ApiHealthErrorModal from '../ui/ApiHealthErrorModal'; // Adjust path if necessary
 import { useAuth } from '@/context/AuthContext';
 
-const CHECK_INTERVAL_MS = 10000; // Chequear cada 5 segundos
+const CHECK_INTERVAL_MS = 30000; // Check every 30 seconds
 
 interface HealthCheckWrapperProps {
     children: React.ReactNode;
@@ -39,19 +39,19 @@ const HealthCheckWrapper: React.FC<HealthCheckWrapperProps> = ({ children }) => 
         }
     }, [isAuthenticated, isAuthLoading, showErrorModal]);
 
-    // Chequeo inicial al montar
+    // Initial check on mount
     useEffect(() => {
         console.log('[HealthCheck] Initial mount effect, calling checkApiStatus.');
         checkApiStatus();
     }, [checkApiStatus]);
 
-    // Chequeo periódico
+    // Periodic check
     useEffect(() => {
         console.log(`[HealthCheck] Periodic effect running. isApiHealthy: ${isApiHealthy}`);
         if (intervalRef.current) {
             console.log('[HealthCheck] Clearing previous interval.');
             clearInterval(intervalRef.current);
-            intervalRef.current = null; // Importante resetear la ref
+            intervalRef.current = null; // Important to reset the ref
         }
 
         if (isApiHealthy) {
@@ -64,7 +64,7 @@ const HealthCheckWrapper: React.FC<HealthCheckWrapperProps> = ({ children }) => 
             console.log('[HealthCheck] API not healthy, interval not set.');
         }
 
-        // Limpieza al desmontar o cuando cambien las dependencias
+        // Cleanup on unmount or when dependencies change
         return () => {
             if (intervalRef.current) {
                 console.log('[HealthCheck] Cleanup: Clearing interval.');

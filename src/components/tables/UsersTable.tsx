@@ -1,5 +1,5 @@
 import React from 'react';
-import { User } from '@/services/api'; // Asegúrate de que la ruta sea correcta
+import { User } from '@/services/api'; // Make sure the path is correct
 import CopyButton from '../common/CopyButton';
 
 interface UsersTableProps {
@@ -23,7 +23,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onEdit, onDelete }) => {
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Name
                         </th>
-                        {/* TODO: Añadir más cabeceras de columna según los campos de User */}
+                        {/* TODO: Add more column headers based on User fields */}
                         <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Actions
                         </th>
@@ -44,7 +44,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onEdit, onDelete }) => {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                 {user.name || '-'}
                             </td>
-                            {/* TODO: Añadir más celdas de datos según los campos de User */}
+                            {/* TODO: Add more data cells based on User fields */}
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <button onClick={() => onEdit(user)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 mr-3">
                                     Edit

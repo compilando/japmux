@@ -14,7 +14,7 @@ const RegionsTable: React.FC<RegionsTableProps> = ({ regions, onEdit, onDelete }
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
             <div className="max-w-full overflow-x-auto">
-                <div className="min-w-[600px]"> {/* Ajusta min-w según necesites */}
+                <div className="min-w-[600px]"> {/* Adjust min-w as needed */}
                     <Table>
                         <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                             <TableRow>

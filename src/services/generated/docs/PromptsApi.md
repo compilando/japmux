@@ -10,7 +10,7 @@ All URIs are relative to *http://localhost*
 |[**promptControllerFindAll**](#promptcontrollerfindall) | **GET** /api/projects/{projectId}/prompts | Obtiene todos los prompts lógicos de un proyecto|
 |[**promptControllerFindOne**](#promptcontrollerfindone) | **GET** /api/projects/{projectId}/prompts/{promptName} | Obtiene un prompt lógico por su nombre dentro de un proyecto|
 |[**promptControllerRemove**](#promptcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptName} | Elimina un prompt lógico (y sus versiones asociadas por Cascade) dentro de un proyecto|
-|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptName} | Actualiza metadatos de un prompt lógico (descripción, tactic, tags) dentro de un proyecto|
+|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptName} | Actualiza metadatos de un prompt lógico (descripción, tags) dentro de un proyecto|
 
 # **promptControllerAddOrUpdateTranslation**
 > promptControllerAddOrUpdateTranslation(createOrUpdatePromptTranslationDto)
@@ -126,7 +126,7 @@ No authorization required
 |-------------|-------------|------------------|
 |**201** | Prompt creado. |  -  |
 |**400** | Datos inválidos (e.g., falta promptText inicial). |  -  |
-|**404** | Proyecto, Tactic o Tag no encontrado. |  -  |
+|**404** | Proyecto o Tag no encontrado. |  -  |
 |**409** | Conflicto, ya existe un prompt con ese nombre en el proyecto. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -406,7 +406,7 @@ No authorization required
 |-------------|-------------|------------------|
 |**200** | Prompt actualizado. |  -  |
 |**400** | Datos inválidos. |  -  |
-|**404** | Proyecto, Prompt, Tactic o Tag no encontrado. |  -  |
+|**404** | Proyecto, Prompt o Tag no encontrado. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

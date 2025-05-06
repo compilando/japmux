@@ -40,6 +40,7 @@ const fontSizes: FontSize[] = ['s', 'm', 'l', 'xl'];
 
 const ServePromptPage: React.FC = () => {
     const { selectedProjectId } = useProjects();
+    const [isClient, setIsClient] = useState(false); // Estado para saber si estamos en cliente
 
     // --- Estados para Selecciones (usar PromptData) ---
     const [prompts, setPrompts] = useState<PromptData[]>([]);
@@ -71,17 +72,27 @@ const ServePromptPage: React.FC = () => {
     const [loadingAiModels, setLoadingAiModels] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    // --- Efecto para cargar/guardar tamaño de fuente desde localStorage ---
+    // --- Efecto para detectar montaje en cliente ---
     useEffect(() => {
-        const storedSize = localStorage.getItem('promptFontSize') as FontSize | null;
-        if (storedSize && fontSizes.includes(storedSize)) {
-            setSelectedFontSize(storedSize);
-        }
-    }, []); // Solo al montar
+        setIsClient(true);
+    }, []);
 
+    // --- Efecto para cargar tamaño de fuente (SOLO en cliente) ---
     useEffect(() => {
-        localStorage.setItem('promptFontSize', selectedFontSize);
-    }, [selectedFontSize]); // Cada vez que cambie
+        if (isClient) { // Asegurarse de ejecutar solo en cliente
+            const storedSize = localStorage.getItem('promptFontSize') as FontSize | null;
+            if (storedSize && fontSizes.includes(storedSize)) {
+                setSelectedFontSize(storedSize);
+            }
+        }
+    }, [isClient]); // Depende de isClient
+
+    // --- Efecto para guardar tamaño de fuente (SOLO en cliente) ---
+    useEffect(() => {
+        if (isClient) { // Asegurarse de ejecutar solo en cliente
+            localStorage.setItem('promptFontSize', selectedFontSize);
+        }
+    }, [selectedFontSize, isClient]); // Depende de cambio de tamaño Y de estar en cliente
 
     // --- Helper para obtener la clase CSS del tamaño de fuente ---
     const getFontSizeClass = (size: FontSize): string => {
@@ -452,7 +463,7 @@ const ServePromptPage: React.FC = () => {
                             value={currentPromptText}
                             // Quitar readOnly para permitir edición
                             onChange={(e) => setCurrentPromptText(e.target.value)}
-                            rows={30}
+                            rows={20}
                         />
 
                         {Object.keys(promptVariables).length > 0 && (
@@ -493,7 +504,7 @@ const ServePromptPage: React.FC = () => {
                             className={`${styles.resultTextarea} ${getFontSizeClass(selectedFontSize)}`}
                             value={formattedPromptResult} // Usar el valor formateado
                             readOnly
-                            rows={25} // Aumentar filas por defecto
+                            rows={17} // Aumentar filas por defecto
                         />
                     </div>
                 )}

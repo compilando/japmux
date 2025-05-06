@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Region } from '@/services/api';
 
-// Definimos los tipos para los payloads basados en los DTOs de OpenAPI
-// Crear requiere languageCode y name
+// Define types for payloads based on OpenAPI DTOs
+// Create requires languageCode and name
 export type RegionCreatePayload = {
     languageCode: string;
     name: string;
@@ -11,7 +11,7 @@ export type RegionCreatePayload = {
     defaultFormalityLevel?: string;
     notes?: string;
 };
-// Actualizar no incluye languageCode
+// Update does not include languageCode
 export type RegionUpdatePayload = Omit<RegionCreatePayload, 'languageCode'>;
 
 interface RegionFormProps {
@@ -55,7 +55,7 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
             alert('Language Code is required.');
             return;
         }
-        // Añadir validación de formato xx-XX para languageCode?
+        // Add xx-XX format validation for languageCode?
         // if (!/^[a-z]{2}-[A-Z]{2}$/.test(languageCode)) { ... }
 
         if (!name.trim()) {
@@ -103,7 +103,7 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
                     required={!isEditing}
                     disabled={isEditing}
                     maxLength={5}
-                    pattern="^[a-z]{2}-[A-Z]{2}$" // Añadir patrón básico
+                    pattern="^[a-z]{2}-[A-Z]{2}$" // Add basic pattern
                     title="Format must be xx-XX (e.g., en-US)"
                 />
                 {isEditing && <p className="text-xs text-gray-500 mt-1">Language Code cannot be changed after creation.</p>}
@@ -124,7 +124,7 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
                 />
             </div>
 
-            {/* Parent Region ID (Opcional - texto) */}
+            {/* Parent Region ID (Optional - text) */}
             <div>
                 <label htmlFor="parentRegionId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Parent Region ID (Optional, e.g., eu)
@@ -135,12 +135,12 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
                     value={parentRegionId}
                     onChange={(e) => setParentRegionId(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    maxLength={5} // Opcional: si sabes que los parent IDs tienen este formato
+                    maxLength={5} // Optional: if you know parent IDs have this format
                 />
-                {/* Alternativa: Podría ser un <select> cargando getRegions() */}
+                {/* Alternative: Could be a <select> loading getRegions() */}
             </div>
 
-            {/* Time Zone (Opcional) */}
+            {/* Time Zone (Optional) */}
             <div>
                 <label htmlFor="timeZone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Time Zone (Optional, e.g., Europe/Madrid)
@@ -154,7 +154,7 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
                 />
             </div>
 
-            {/* Default Formality Level (Opcional) */}
+            {/* Default Formality Level (Optional) */}
             <div>
                 <label htmlFor="defaultFormalityLevel" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Default Formality Level (Optional)
@@ -168,7 +168,7 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
                 />
             </div>
 
-            {/* Notes (Opcional) */}
+            {/* Notes (Optional) */}
             <div>
                 <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Notes (Optional)
@@ -182,7 +182,7 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
                 />
             </div>
 
-            {/* Botones */}
+            {/* Buttons */}
             <div className="flex justify-end space-x-3 mt-6">
                 <button
                     type="button"

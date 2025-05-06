@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Environment, EnvironmentCreatePayload, EnvironmentUpdatePayload } from '@/services/api'; // Asegúrate de que la ruta sea correcta
+import { Environment, EnvironmentCreatePayload, EnvironmentUpdatePayload } from '@/services/api'; // Make sure the path is correct
 
 interface EnvironmentFormProps {
     initialData: Environment | null;
@@ -9,16 +9,16 @@ interface EnvironmentFormProps {
 
 const EnvironmentForm: React.FC<EnvironmentFormProps> = ({ initialData, onSave, onCancel }) => {
     const [name, setName] = useState('');
-    // TODO: Añadir estados para otros campos de Environment
+    // TODO: Add states for other Environment fields
 
     useEffect(() => {
         if (initialData) {
             setName(initialData.name || '');
-            // TODO: Inicializar otros estados con initialData
+            // TODO: Initialize other states with initialData
         } else {
-            // Resetear el formulario si no hay initialData (modo creación)
+            // Reset the form if there is no initialData (creation mode)
             setName('');
-            // TODO: Resetear otros estados
+            // TODO: Reset other states
         }
     }, [initialData]);
 
@@ -26,7 +26,7 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({ initialData, onSave, 
         event.preventDefault();
         const payload: EnvironmentCreatePayload | EnvironmentUpdatePayload = {
             name,
-            // TODO: Añadir otros campos al payload
+            // TODO: Add other fields to the payload
         };
         onSave(payload);
     };
@@ -47,7 +47,7 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({ initialData, onSave, 
                 />
             </div>
 
-            {/* TODO: Añadir campos del formulario para otros atributos de Environment */}
+            {/* TODO: Add form fields for other Environment attributes */}
 
             <div className="flex justify-end space-x-3">
                 <button

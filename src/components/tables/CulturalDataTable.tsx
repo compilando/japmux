@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../ui/table';
 import { CulturalData } from '@/services/api';
-import { TrashBinIcon } from "@/icons"; // Asumiendo EditIcon no está disponible
+import { TrashBinIcon } from "@/icons"; // Assuming EditIcon is not available
 
 interface CulturalDataTableProps {
     culturalDataList: CulturalData[];
@@ -13,7 +13,7 @@ const CulturalDataTable: React.FC<CulturalDataTableProps> = ({ culturalDataList,
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
             <div className="max-w-full overflow-x-auto">
-                <div className="min-w-[900px]"> {/* Ajusta min-w */}
+                <div className="min-w-[900px]"> {/* Adjust min-w */}
                     <Table>
                         <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                             <TableRow>

@@ -9,28 +9,28 @@ import UserAddressCard from '@/components/user-profile/UserAddressCard';
 
 const UserProfilePage: React.FC = () => {
 
-    // Definir crumbs para esta página
+    // Define crumbs for this page
     const breadcrumbs = [
         { label: "Home", href: "/" },
-        { label: "User Profile" } // Último elemento sin href
+        { label: "User Profile" } // Last element without href
     ];
 
-    // Aquí podrías añadir lógica para obtener los datos del usuario
-    // const { user } = useAuth(); // Ejemplo si el contexto de Auth tiene los datos
+    // Here you could add logic to get user data
+    // const { user } = useAuth(); // Example if Auth context has the data
 
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
-            {/* Renderizar los componentes de perfil */}
+            {/* Render profile components */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="md:col-span-1">
-                    {/* Placeholder para datos - Pasar datos reales a los componentes */}
+                    {/* Data placeholder - Pass real data to components */}
                     <UserInfoCard userData={null} />
                     <UserMetaCard userData={null} />
                 </div>
                 <div className="md:col-span-2">
                     <UserAddressCard userData={null} />
-                    {/* Aquí podrían ir otros componentes o secciones del perfil */}
+                    {/* Other profile components or sections could go here */}
                 </div>
             </div>
         </>

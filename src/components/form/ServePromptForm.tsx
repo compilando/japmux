@@ -4,7 +4,6 @@ import React, { useState, useCallback } from 'react';
 
 const ServePromptForm: React.FC = () => {
     const [promptId, setPromptId] = useState<string>('');
-    const [tacticId, setTacticId] = useState<string>('');
     const [languageCode, setLanguageCode] = useState<string>('');
     const [versionTag, setVersionTag] = useState<string>('');
     const [useLatestActive, setUseLatestActive] = useState<boolean>(true);
@@ -19,7 +18,6 @@ const ServePromptForm: React.FC = () => {
 
         const params = new URLSearchParams();
         if (promptId) params.append('promptId', promptId);
-        if (tacticId) params.append('tacticId', tacticId);
         if (languageCode) params.append('languageCode', languageCode);
         // Only add versionTag if useLatestActive is false
         if (!useLatestActive && versionTag) params.append('versionTag', versionTag);
@@ -43,7 +41,7 @@ const ServePromptForm: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [promptId, tacticId, languageCode, versionTag, useLatestActive]);
+    }, [promptId, languageCode, versionTag, useLatestActive]);
 
     return (
         <div className="space-y-6">
@@ -59,19 +57,7 @@ const ServePromptForm: React.FC = () => {
                         className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         placeholder="e.g., bienvenida-formal-es"
                     />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Ignora otros filtros si se provee.</p>
-                </div>
-                <div>
-                    <label htmlFor="tacticId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tactic ID (Opcional)</label>
-                    <input
-                        type="text"
-                        id="tacticId"
-                        value={tacticId}
-                        onChange={(e) => setTacticId(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        placeholder="e.g., formal-greeting-es"
-                        disabled={!!promptId} // Disable if promptId is set
-                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Ignores other filters if provided.</p>
                 </div>
                 <div>
                     <label htmlFor="languageCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Language Code</label>
@@ -83,10 +69,10 @@ const ServePromptForm: React.FC = () => {
                         className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         placeholder="e.g., es-ES, en-US"
                     />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Para traducción. Si no, usa texto base.</p>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">For translation. Otherwise, uses base text.</p>
                 </div>
                 <div>
-                    <label htmlFor="versionTag" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Version Tag (Opcional)</label>
+                    <label htmlFor="versionTag" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Version Tag (Optional)</label>
                     <input
                         type="text"
                         id="versionTag"
@@ -96,7 +82,7 @@ const ServePromptForm: React.FC = () => {
                         placeholder="e.g., v1.2.1"
                         disabled={useLatestActive || !!promptId} // Disable if using latest active or promptId is set
                     />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Ignorado si 'Use Latest Active' está marcado.</p>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Ignored if 'Use Latest Active' is checked.</p>
 
                 </div>
                 <div className="flex items-center col-span-1 md:col-span-2">
@@ -118,17 +104,17 @@ const ServePromptForm: React.FC = () => {
             <div className="flex justify-end">
                 <button
                     onClick={handleFetchPrompt}
-                    disabled={isLoading || (!promptId && !tacticId)} // Require promptId or tacticId
+                    disabled={isLoading || (!promptId)} // Require promptId 
                     className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {isLoading ? 'Buscando...' : 'Obtener Prompt'}
+                    {isLoading ? 'Searching...' : 'Get Prompt'}
                 </button>
             </div>
 
             {/* Result Area */}
             {(resultPrompt !== null || error) && (
                 <div className="mt-6 p-4 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800">
-                    <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-gray-100">Resultado:</h3>
+                    <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-gray-100">Result:</h3>
                     {error && (
                         <div className="text-red-600 dark:text-red-400 p-3 border border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900 rounded">
                             <p><strong>Error:</strong> {error}</p>

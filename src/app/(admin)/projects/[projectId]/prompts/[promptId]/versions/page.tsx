@@ -3,13 +3,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-    Project,
-    Prompt,
-    PromptVersion,
-    promptVersionService,
+    CreateProjectDto,
+    CreatePromptDto,
     CreatePromptVersionDto,
     UpdatePromptVersionDto,
-    ActivatePromptVersionDto,
+} from '@/services/generated/api';
+import {
+    promptVersionService,
     projectService,
     promptService
 } from '@/services/api';
@@ -21,15 +21,27 @@ import PromptVersionForm from '@/components/form/PromptVersionForm';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
+// --- Interfaces Locales Extendidas ---
+// Asume that the API returns isActive even though the generated DTO does not include it
+interface PromptVersionData extends CreatePromptVersionDto {
+    isActive: boolean;
+}
+
+// Type for the update payload, allowing isActive
+// (Although UpdatePromptVersionDto should ideally allow it)
+// Simplify: we'll use a simple object for the payload.
+
 const PromptVersionsPage: React.FC = () => {
-    const [itemsList, setItemsList] = useState<PromptVersion[]>([]);
+    // Use local extended type
+    const [itemsList, setItemsList] = useState<PromptVersionData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingItem, setEditingItem] = useState<PromptVersion | null>(null);
+    // Use local extended type if editing
+    const [editingItem, setEditingItem] = useState<PromptVersionData | null>(null);
 
-    const [project, setProject] = useState<Project | null>(null);
-    const [prompt, setPrompt] = useState<Prompt | null>(null);
+    const [project, setProject] = useState<CreateProjectDto | null>(null);
+    const [prompt, setPrompt] = useState<CreatePromptDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     const params = useParams();
@@ -66,6 +78,10 @@ const PromptVersionsPage: React.FC = () => {
     }, [projectId, promptId]);
 
     const fetchData = useCallback(async () => {
+        // --- INICIO: Limpiar error SIEMPRE al intentar cargar datos ---
+        setError(null);
+        // --- FIN: Limpiar error ---
+
         if (!projectId || !promptId) {
             setError("Missing Project or Prompt ID in URL.");
             setLoading(false);
@@ -86,11 +102,11 @@ const PromptVersionsPage: React.FC = () => {
         }
 
         setLoading(true);
-        setError(null);
         try {
             const data = await promptVersionService.findAll(projectId, promptId);
             if (Array.isArray(data)) {
-                setItemsList(data);
+                // Cast to local interface that includes isActive
+                setItemsList(data as PromptVersionData[]);
             } else {
                 console.error("API response is not an array:", data);
                 setError('Received invalid data format.');
@@ -118,12 +134,12 @@ const PromptVersionsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (item: PromptVersion) => {
+    const handleEdit = (item: PromptVersionData) => {
         setEditingItem(item);
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (itemToDelete: PromptVersion) => {
+    const handleDelete = async (itemToDelete: PromptVersionData) => {
         if (!projectId || !promptId) return;
         if (window.confirm(`Are you sure you want to delete version tag "${itemToDelete.versionTag}"?`)) {
             setLoading(true);
@@ -167,20 +183,31 @@ const PromptVersionsPage: React.FC = () => {
         }
     };
 
-    const handleToggleActive = async (itemToToggle: PromptVersion) => {
-        if (!projectId || !promptId) return;
-        const payload: ActivatePromptVersionDto = { isActive: !itemToToggle.isActive };
+    const handleToggleActive = async (itemToToggle: PromptVersionData) => {
+        console.log("[handleToggleActive] Called with item:", JSON.stringify(itemToToggle, null, 2));
+        if (!projectId || !promptId || typeof itemToToggle.isActive === 'undefined') {
+            console.error("[handleToggleActive] Missing IDs or isActive property on item");
+            showErrorToast('Cannot toggle status: item data is incomplete.')
+            return;
+        }
+
+        const payload = { isActive: !itemToToggle.isActive };
+        console.log("[handleToggleActive] Payload prepared for UPDATE:", payload);
+
         setLoading(true);
         try {
-            await promptVersionService.activate(projectId, promptId, itemToToggle.versionTag, payload);
+            console.log("[handleToggleActive] Entering try block, about to call UPDATE service...");
+            await promptVersionService.update(projectId, promptId, itemToToggle.versionTag, payload as UpdatePromptVersionDto);
+            console.log("[handleToggleActive] UPDATE Service call successful (apparently).");
             showSuccessToast(`Version ${itemToToggle.versionTag} active status toggled.`);
             fetchData();
         } catch (err) {
+            console.error("[handleToggleActive] Caught error during UPDATE:", err);
             setError('Failed to toggle active state');
-            console.error(err);
             const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to toggle active status.';
             showErrorToast(apiErrorMessage);
         } finally {
+            console.log("[handleToggleActive] Entering finally block.");
             setLoading(false);
         }
     };

@@ -2,10 +2,10 @@
 
 import React, { createContext, useContext, ReactNode, useEffect } from 'react';
 import { toast, ToastOptions } from 'react-hot-toast';
-import { setToastImplementation } from '@/utils/toastUtils'; // Importar la utilidad
+import { setToastImplementation } from '@/utils/toastUtils'; // Import the utility
 
 interface NotificationContextType {
-    // Podríamos añadir funciones específicas si quisiéramos usarlas desde componentes React
+    // We could add specific functions if we wanted to use them from React components
     // notifySuccess: (message: string) => void;
     // notifyError: (message: string) => void;
 }
@@ -17,21 +17,21 @@ interface NotificationProviderProps {
 }
 
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
-    // Al montar el proveedor, establecemos la implementación de toast en la utilidad
+    // When mounting the provider, we set the toast implementation in the utility
     useEffect(() => {
-        // Pasamos la función `toast` de react-hot-toast a nuestro módulo de utilidad
-        // para que las funciones showErrorToast/showSuccessToast puedan usarla.
+        // Pass the `toast` function from react-hot-toast to our utility module
+        // so that showErrorToast/showSuccessToast functions can use it.
         setToastImplementation(toast);
 
-        // Opcional: Limpieza si fuera necesario (aquí no parece serlo)
-        // return () => { /* código de limpieza */ };
+        // Optional: Cleanup if necessary (doesn't seem to be here)
+        // return () => { /* cleanup code */ };
     }, []);
 
-    // Las funciones para usar desde React podrían definirse aquí si fueran necesarias
+    // Functions to use from React could be defined here if needed
     // const notifySuccess = (message: string) => toast.success(message);
     // const notifyError = (message: string) => toast.error(message);
 
-    // El valor del contexto puede estar vacío si solo lo usamos para inicializar la utilidad
+    // The context value can be empty if we only use it to initialize the utility
     const contextValue = {};
 
     return (
@@ -41,7 +41,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     );
 };
 
-// Hook personalizado (si se necesitan funciones expuestas en el futuro)
+// Custom hook (if exposed functions are needed in the future)
 export const useNotifications = (): NotificationContextType => {
     const context = useContext(NotificationContext);
     if (context === undefined) {

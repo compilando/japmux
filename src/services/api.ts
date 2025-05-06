@@ -1,7 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig, AxiosInstance } from 'axios';
 import { showErrorToast } from '@/utils/toastUtils'; // Importar la utilidad
 // Importar todo lo exportado por el cliente generado
-import * as generated from './generated';
+import * as generated from '../../generated/japmux-api';
+// Eliminar esta importación, apiClient se define abajo
+// import { apiClient } from '../axiosClient';
 
 // --- Configuración Global de Axios ---
 
@@ -122,25 +124,26 @@ export const authService = {
 
 // Servicio de Usuarios (Mantener manual o reemplazar con generated.UsersApi)
 export const userService = {
-    findAll: async (): Promise<generated.User[]> => { // Asumiendo que el DTO generado es User
+    findAll: async (): Promise<generated.UserProfileResponse[]> => { // Usar UserProfileResponse
         // Reemplazar con: const response = await usersGeneratedApi.userControllerFindAll(); return response.data;
-        const response = await apiClient.get<generated.User[]>('/api/users');
+        // Nota: El endpoint /api/users devuelve CreateUserDto[] según api.ts, pero usaremos UserProfileResponse consistentemente si es posible
+        const response = await apiClient.get<generated.UserProfileResponse[]>('/api/users');
         return response.data;
     },
-    findOne: async (id: string): Promise<generated.User> => {
+    findOne: async (id: string): Promise<generated.UserProfileResponse> => { // Usar UserProfileResponse
         // Reemplazar con: const response = await usersGeneratedApi.userControllerFindOne(id); return response.data;
-        const response = await apiClient.get<generated.User>(`/api/users/${id}`);
+        const response = await apiClient.get<generated.UserProfileResponse>(`/api/users/${id}`);
         return response.data;
     },
-    create: async (payload: generated.CreateUserDto): Promise<generated.User> => {
+    create: async (payload: generated.CreateUserDto): Promise<generated.UserProfileResponse> => { // Usar UserProfileResponse
         // Reemplazar con: const response = await usersGeneratedApi.userControllerCreate(payload); return response.data;
-        const response = await apiClient.post<generated.User>('/api/users', payload);
+        const response = await apiClient.post<generated.UserProfileResponse>('/api/users', payload);
         return response.data;
     },
-    update: async (id: string, payload: generated.UpdateUserDto): Promise<generated.User> => {
+    update: async (id: string, payload: object): Promise<generated.UserProfileResponse> => { // Usar object para payload y UserProfileResponse como retorno
         // Reemplazar con: const response = await usersGeneratedApi.userControllerUpdate(id, payload); return response.data;
-        // Nota: el método generado 'userControllerUpdate' puede esperar 'body: object' en lugar de UpdateUserDto
-        const response = await apiClient.patch<generated.User>(`/api/users/${id}`, payload);
+        // Nota: el método generado 'userControllerUpdate' espera 'body: object'
+        const response = await apiClient.patch<generated.UserProfileResponse>(`/api/users/${id}`, payload);
         return response.data;
     },
     remove: async (id: string): Promise<void> => {
@@ -151,29 +154,29 @@ export const userService = {
 
 // Servicio de Proyectos (Mantener manual o reemplazar con generated.ProjectsApi)
 export const projectService = {
-    findAll: async (): Promise<generated.Project[]> => { // Asumiendo DTO Project
+    findAll: async (): Promise<generated.CreateProjectDto[]> => { // Usar CreateProjectDto
         // Reemplazar con: const response = await projectsGeneratedApi.projectControllerFindAll(); return response.data;
-        const response = await apiClient.get<generated.Project[]>('/api/projects');
+        const response = await apiClient.get<generated.CreateProjectDto[]>('/api/projects');
         return response.data;
     },
-    findMine: async (): Promise<generated.Project[]> => {
+    findMine: async (): Promise<generated.CreateProjectDto[]> => { // Usar CreateProjectDto
         // Reemplazar con: const response = await projectsGeneratedApi.projectControllerFindMine(); return response.data;
-        const response = await apiClient.get<generated.Project[]>('/api/projects/mine');
+        const response = await apiClient.get<generated.CreateProjectDto[]>('/api/projects/mine');
         return response.data;
     },
-    findOne: async (id: string): Promise<generated.Project> => {
+    findOne: async (id: string): Promise<generated.CreateProjectDto> => { // Usar CreateProjectDto
         // Reemplazar con: const response = await projectsGeneratedApi.projectControllerFindOne(id); return response.data;
-        const response = await apiClient.get<generated.Project>(`/api/projects/${id}`);
+        const response = await apiClient.get<generated.CreateProjectDto>(`/api/projects/${id}`);
         return response.data;
     },
-    create: async (payload: generated.CreateProjectDto): Promise<generated.Project> => {
+    create: async (payload: generated.CreateProjectDto): Promise<generated.CreateProjectDto> => { // Usar CreateProjectDto
         // Reemplazar con: const response = await projectsGeneratedApi.projectControllerCreate(payload); return response.data;
-        const response = await apiClient.post<generated.Project>('/api/projects', payload);
+        const response = await apiClient.post<generated.CreateProjectDto>('/api/projects', payload);
         return response.data;
     },
-    update: async (id: string, payload: generated.UpdateProjectDto): Promise<generated.Project> => {
+    update: async (id: string, payload: generated.UpdateProjectDto): Promise<generated.CreateProjectDto> => { // Usar CreateProjectDto como retorno
         // Reemplazar con: const response = await projectsGeneratedApi.projectControllerUpdate(id, payload); return response.data;
-        const response = await apiClient.patch<generated.Project>(`/api/projects/${id}`, payload);
+        const response = await apiClient.patch<generated.CreateProjectDto>(`/api/projects/${id}`, payload);
         return response.data;
     },
     remove: async (id: string): Promise<void> => {
@@ -184,24 +187,24 @@ export const projectService = {
 
 // Servicio de Regiones (Mantener manual o reemplazar con generated.RegionsApi)
 export const regionService = {
-    findAll: async (projectId: string): Promise<generated.Region[]> => { // Asumiendo DTO Region
+    findAll: async (projectId: string): Promise<generated.CreateRegionDto[]> => { // Usar CreateRegionDto
         // Reemplazar con: const response = await regionsGeneratedApi.regionControllerFindAll(projectId); return response.data;
-        const response = await apiClient.get<generated.Region[]>(`/api/projects/${projectId}/regions`);
+        const response = await apiClient.get<generated.CreateRegionDto[]>(`/api/projects/${projectId}/regions`);
         return response.data;
     },
-    findOne: async (projectId: string, languageCode: string): Promise<generated.Region> => {
+    findOne: async (projectId: string, languageCode: string): Promise<generated.CreateRegionDto> => { // Usar CreateRegionDto
         // Reemplazar con: const response = await regionsGeneratedApi.regionControllerFindOne(languageCode, projectId); return response.data;
-        const response = await apiClient.get<generated.Region>(`/api/projects/${projectId}/regions/${languageCode}`);
+        const response = await apiClient.get<generated.CreateRegionDto>(`/api/projects/${projectId}/regions/${languageCode}`);
         return response.data;
     },
-    create: async (projectId: string, payload: generated.CreateRegionDto): Promise<generated.Region> => {
+    create: async (projectId: string, payload: generated.CreateRegionDto): Promise<generated.CreateRegionDto> => { // Usar CreateRegionDto
         // Reemplazar con: const response = await regionsGeneratedApi.regionControllerCreate(projectId, payload); return response.data;
-        const response = await apiClient.post<generated.Region>(`/api/projects/${projectId}/regions`, payload);
+        const response = await apiClient.post<generated.CreateRegionDto>(`/api/projects/${projectId}/regions`, payload);
         return response.data;
     },
-    update: async (projectId: string, languageCode: string, payload: generated.UpdateRegionDto): Promise<generated.Region> => {
+    update: async (projectId: string, languageCode: string, payload: generated.UpdateRegionDto): Promise<generated.CreateRegionDto> => { // Usar CreateRegionDto como retorno
         // Reemplazar con: const response = await regionsGeneratedApi.regionControllerUpdate(languageCode, projectId, payload); return response.data;
-        const response = await apiClient.patch<generated.Region>(`/api/projects/${projectId}/regions/${languageCode}`, payload);
+        const response = await apiClient.patch<generated.CreateRegionDto>(`/api/projects/${projectId}/regions/${languageCode}`, payload);
         return response.data;
     },
     remove: async (projectId: string, languageCode: string): Promise<void> => {
@@ -212,20 +215,20 @@ export const regionService = {
 
 // Servicio de Entornos (Mantener manual o reemplazar con generated.EnvironmentsApi)
 export const environmentService = {
-    findAll: async (projectId: string): Promise<generated.Environment[]> => { // Asumiendo DTO Environment
+    findAll: async (projectId: string): Promise<generated.CreateEnvironmentDto[]> => { // Usar CreateEnvironmentDto
         // Reemplazar con: const response = await environmentsGeneratedApi.environmentControllerFindAll(projectId); return response.data;
-        const response = await apiClient.get<generated.Environment[]>(`/api/projects/${projectId}/environments`);
+        const response = await apiClient.get<generated.CreateEnvironmentDto[]>(`/api/projects/${projectId}/environments`);
         return response.data;
     },
-    findOne: async (projectId: string, environmentId: string): Promise<generated.Environment> => {
+    findOne: async (projectId: string, environmentId: string): Promise<generated.CreateEnvironmentDto> => { // Usar CreateEnvironmentDto
         // Reemplazar con: const response = await environmentsGeneratedApi.environmentControllerFindOne(environmentId, projectId); return response.data;
-        const response = await apiClient.get<generated.Environment>(`/api/projects/${projectId}/environments/${environmentId}`);
+        const response = await apiClient.get<generated.CreateEnvironmentDto>(`/api/projects/${projectId}/environments/${environmentId}`);
         return response.data;
     },
-    findByName: async (projectId: string, name: string): Promise<generated.Environment | null> => {
+    findByName: async (projectId: string, name: string): Promise<generated.CreateEnvironmentDto | null> => { // Usar CreateEnvironmentDto
         // Reemplazar con: try { const response = await environmentsGeneratedApi.environmentControllerFindByName(name, projectId); return response.data; } catch (e) { if (e.response?.status === 404) return null; throw e; }
         try {
-            const response = await apiClient.get<generated.Environment>(`/api/projects/${projectId}/environments/by-name/${name}`);
+            const response = await apiClient.get<generated.CreateEnvironmentDto>(`/api/projects/${projectId}/environments/by-name/${name}`);
             return response.data;
         } catch (error: any) {
             if (error.response && error.response.status === 404) {
@@ -234,14 +237,14 @@ export const environmentService = {
             throw error; // Relanzar otros errores
         }
     },
-    create: async (projectId: string, payload: generated.CreateEnvironmentDto): Promise<generated.Environment> => {
+    create: async (projectId: string, payload: generated.CreateEnvironmentDto): Promise<generated.CreateEnvironmentDto> => { // Usar CreateEnvironmentDto
         // Reemplazar con: const response = await environmentsGeneratedApi.environmentControllerCreate(projectId, payload); return response.data;
-        const response = await apiClient.post<generated.Environment>(`/api/projects/${projectId}/environments`, payload);
+        const response = await apiClient.post<generated.CreateEnvironmentDto>(`/api/projects/${projectId}/environments`, payload);
         return response.data;
     },
-    update: async (projectId: string, environmentId: string, payload: generated.UpdateEnvironmentDto): Promise<generated.Environment> => {
+    update: async (projectId: string, environmentId: string, payload: generated.UpdateEnvironmentDto): Promise<generated.CreateEnvironmentDto> => { // Usar CreateEnvironmentDto como retorno
         // Reemplazar con: const response = await environmentsGeneratedApi.environmentControllerUpdate(environmentId, projectId, payload); return response.data;
-        const response = await apiClient.patch<generated.Environment>(`/api/projects/${projectId}/environments/${environmentId}`, payload);
+        const response = await apiClient.patch<generated.CreateEnvironmentDto>(`/api/projects/${projectId}/environments/${environmentId}`, payload);
         return response.data;
     },
     remove: async (projectId: string, environmentId: string): Promise<void> => {
@@ -250,50 +253,22 @@ export const environmentService = {
     },
 };
 
-// Servicio de Tácticas (Mantener manual o reemplazar con generated.TacticsApi)
-export const tacticService = {
-    findAll: async (projectId: string): Promise<generated.TacticResponse[]> => { // Asumiendo DTO TacticResponse
-        // Reemplazar con: const response = await tacticsGeneratedApi.tacticControllerFindAll(projectId); return response.data;
-        const response = await apiClient.get<generated.TacticResponse[]>(`/api/projects/${projectId}/tactics`);
-        return response.data;
-    },
-    findOne: async (projectId: string, tacticName: string): Promise<generated.TacticResponse> => {
-        // Reemplazar con: const response = await tacticsGeneratedApi.tacticControllerFindOne(tacticName, projectId); return response.data;
-        const response = await apiClient.get<generated.TacticResponse>(`/api/projects/${projectId}/tactics/${tacticName}`);
-        return response.data;
-    },
-    create: async (projectId: string, payload: generated.CreateTacticDto): Promise<generated.TacticResponse> => {
-        // Reemplazar con: const response = await tacticsGeneratedApi.tacticControllerCreate(projectId, payload); return response.data;
-        const response = await apiClient.post<generated.TacticResponse>(`/api/projects/${projectId}/tactics`, payload);
-        return response.data;
-    },
-    update: async (projectId: string, tacticName: string, payload: generated.UpdateTacticDto): Promise<generated.TacticResponse> => {
-        // Reemplazar con: const response = await tacticsGeneratedApi.tacticControllerUpdate(tacticName, projectId, payload); return response.data;
-        const response = await apiClient.patch<generated.TacticResponse>(`/api/projects/${projectId}/tactics/${tacticName}`, payload);
-        return response.data;
-    },
-    remove: async (projectId: string, tacticName: string): Promise<void> => {
-        // Reemplazar con: await tacticsGeneratedApi.tacticControllerRemove(tacticName, projectId);
-        await apiClient.delete(`/api/projects/${projectId}/tactics/${tacticName}`);
-    },
-};
-
 // Servicio de Tags (Mantener manual o reemplazar con generated.TagsApi)
 export const tagService = {
-    findAll: async (projectId: string): Promise<generated.Tag[]> => { // Asumiendo DTO Tag
+    findAll: async (projectId: string): Promise<generated.CreateTagDto[]> => { // Usar CreateTagDto
         // Reemplazar con: const response = await tagsGeneratedApi.tagControllerFindAll(projectId); return response.data;
-        const response = await apiClient.get<generated.Tag[]>(`/api/projects/${projectId}/tags`);
+        const response = await apiClient.get<generated.CreateTagDto[]>(`/api/projects/${projectId}/tags`);
         return response.data;
     },
-    findOne: async (projectId: string, tagId: string): Promise<generated.Tag> => {
+    findOne: async (projectId: string, tagId: string): Promise<generated.CreateTagDto> => { // Usar CreateTagDto
         // Reemplazar con: const response = await tagsGeneratedApi.tagControllerFindOne(tagId, projectId); return response.data;
-        const response = await apiClient.get<generated.Tag>(`/api/projects/${projectId}/tags/${tagId}`);
+        const response = await apiClient.get<generated.CreateTagDto>(`/api/projects/${projectId}/tags/${tagId}`);
         return response.data;
     },
-    findByName: async (projectId: string, name: string): Promise<generated.Tag | null> => {
+    findByName: async (projectId: string, name: string): Promise<generated.CreateTagDto | null> => { // Usar CreateTagDto
         // Reemplazar con: try { const response = await tagsGeneratedApi.tagControllerFindByName(name, projectId); return response.data; } catch (e) { if (e.response?.status === 404) return null; throw e; }
         try {
-            const response = await apiClient.get<generated.Tag>(`/api/projects/${projectId}/tags/by-name/${name}`);
+            const response = await apiClient.get<generated.CreateTagDto>(`/api/projects/${projectId}/tags/by-name/${name}`);
             return response.data;
         } catch (error: any) {
             if (error.response && error.response.status === 404) {
@@ -302,14 +277,14 @@ export const tagService = {
             throw error;
         }
     },
-    create: async (projectId: string, payload: generated.CreateTagDto): Promise<generated.Tag> => {
+    create: async (projectId: string, payload: generated.CreateTagDto): Promise<generated.CreateTagDto> => { // Usar CreateTagDto
         // Reemplazar con: const response = await tagsGeneratedApi.tagControllerCreate(projectId, payload); return response.data;
-        const response = await apiClient.post<generated.Tag>(`/api/projects/${projectId}/tags`, payload);
+        const response = await apiClient.post<generated.CreateTagDto>(`/api/projects/${projectId}/tags`, payload);
         return response.data;
     },
-    update: async (projectId: string, tagId: string, payload: generated.UpdateTagDto): Promise<generated.Tag> => {
+    update: async (projectId: string, tagId: string, payload: generated.UpdateTagDto): Promise<generated.CreateTagDto> => { // Usar CreateTagDto como retorno
         // Reemplazar con: const response = await tagsGeneratedApi.tagControllerUpdate(tagId, projectId, payload); return response.data;
-        const response = await apiClient.patch<generated.Tag>(`/api/projects/${projectId}/tags/${tagId}`, payload);
+        const response = await apiClient.patch<generated.CreateTagDto>(`/api/projects/${projectId}/tags/${tagId}`, payload);
         return response.data;
     },
     remove: async (projectId: string, tagId: string): Promise<void> => {
@@ -320,26 +295,28 @@ export const tagService = {
 
 // Servicio de Prompts (Actualizado para usar generado donde aplique)
 export const promptService = {
-    findAll: async (projectId: string): Promise<generated.Prompt[]> => {
+    findAll: async (projectId: string): Promise<generated.CreatePromptDto[]> => { // Usar CreatePromptDto
         // Reemplazar con: const response = await promptsGeneratedApi.promptControllerFindAll(projectId); return response.data;
-        const response = await apiClient.get<generated.Prompt[]>(`/api/projects/${projectId}/prompts`);
+        const response = await apiClient.get<generated.CreatePromptDto[]>(`/api/projects/${projectId}/prompts`);
         return response.data;
     },
-    findOne: async (projectId: string, promptName: string): Promise<generated.Prompt> => {
+    findOne: async (projectId: string, promptName: string): Promise<generated.CreatePromptDto> => { // Usar CreatePromptDto
         // Reemplazar con: const response = await promptsGeneratedApi.promptControllerFindOne(promptName, projectId); return response.data;
-        const response = await apiClient.get<generated.Prompt>(`/api/projects/${projectId}/prompts/${promptName}`);
+        const response = await apiClient.get<generated.CreatePromptDto>(`/api/projects/${projectId}/prompts/${promptName}`);
         return response.data;
     },
-    create: async (projectId: string, payload: generated.CreatePromptDto): Promise<generated.Prompt> => {
+    create: async (projectId: string, payload: generated.CreatePromptDto): Promise<generated.CreatePromptDto> => { // Usar CreatePromptDto
         // const response = await promptsGeneratedApi.promptControllerCreate(projectId, payload);
-        const response = await apiClient.post<generated.Prompt>(`/api/projects/${projectId}/prompts`, payload);
+        const response = await apiClient.post<generated.CreatePromptDto>(`/api/projects/${projectId}/prompts`, payload);
         return response.data;
     },
-    update: async (projectId: string, promptName: string, payload: generated.UpdatePromptDto): Promise<generated.Prompt> => {
+    // La API generada para update (promptControllerUpdate) devuelve void, así que ajustamos el tipo de retorno
+    update: async (projectId: string, promptName: string, payload: generated.UpdatePromptDto): Promise<void> => {
         // const response = await promptsGeneratedApi.promptControllerUpdate(promptName, projectId, payload);
-        const response = await apiClient.patch<generated.Prompt>(`/api/projects/${projectId}/prompts/${promptName}`, payload);
-        return response.data;
+        await apiClient.patch<void>(`/api/projects/${projectId}/prompts/${promptName}`, payload);
+        // return response.data; // No hay data que devolver
     },
+    // La API generada para remove (promptControllerRemove) devuelve void
     remove: async (projectId: string, promptName: string): Promise<void> => {
         // await promptsGeneratedApi.promptControllerRemove(promptName, projectId);
         await apiClient.delete(`/api/projects/${projectId}/prompts/${promptName}`);
@@ -363,25 +340,25 @@ export const promptService = {
 
 // Servicio para Versiones de Prompt
 export const promptVersionService = {
-    findAll: async (projectId: string, promptId: string): Promise<generated.PromptVersion[]> => {
+    findAll: async (projectId: string, promptId: string): Promise<generated.CreatePromptVersionDto[]> => { // Usar CreatePromptVersionDto
         const response = await promptVersionsGeneratedApi.promptVersionControllerFindAll(projectId, promptId);
         // Ajustar tipo si el generado devuelve CreatePromptVersionDto[]
-        return response.data as generated.PromptVersion[]; 
+        return response.data as generated.CreatePromptVersionDto[]; // El tipo devuelto ya es correcto
     },
-    findOne: async (projectId: string, promptId: string, versionTag: string): Promise<generated.PromptVersion> => {
+    findOne: async (projectId: string, promptId: string, versionTag: string): Promise<generated.CreatePromptVersionDto> => { // Usar CreatePromptVersionDto
         const response = await promptVersionsGeneratedApi.promptVersionControllerFindOneByTag(projectId, promptId, versionTag);
-         // Ajustar tipo si el generado devuelve CreatePromptVersionDto
-        return response.data as generated.PromptVersion;
+        // Ajustar tipo si el generado devuelve CreatePromptVersionDto
+        return response.data as generated.CreatePromptVersionDto; // El tipo devuelto ya es correcto
     },
-    create: async (projectId: string, promptId: string, payload: generated.CreatePromptVersionDto): Promise<generated.PromptVersion> => {
+    create: async (projectId: string, promptId: string, payload: generated.CreatePromptVersionDto): Promise<generated.CreatePromptVersionDto> => { // Usar CreatePromptVersionDto
         const response = await promptVersionsGeneratedApi.promptVersionControllerCreate(projectId, promptId, payload);
-         // Ajustar tipo si el generado devuelve CreatePromptVersionDto
-        return response.data as generated.PromptVersion;
+        // Ajustar tipo si el generado devuelve CreatePromptVersionDto
+        return response.data as generated.CreatePromptVersionDto; // El tipo devuelto ya es correcto
     },
-    update: async (projectId: string, promptId: string, versionTag: string, payload: generated.UpdatePromptVersionDto): Promise<generated.PromptVersion> => {
+    update: async (projectId: string, promptId: string, versionTag: string, payload: generated.UpdatePromptVersionDto): Promise<generated.CreatePromptVersionDto> => { // Usar CreatePromptVersionDto como retorno
         const response = await promptVersionsGeneratedApi.promptVersionControllerUpdate(projectId, promptId, versionTag, payload);
-         // Ajustar tipo si el generado devuelve CreatePromptVersionDto
-        return response.data as generated.PromptVersion;
+        // Ajustar tipo si el generado devuelve CreatePromptVersionDto
+        return response.data as generated.CreatePromptVersionDto; // El tipo devuelto ya es correcto
     },
     remove: async (projectId: string, promptId: string, versionTag: string): Promise<void> => {
         await promptVersionsGeneratedApi.promptVersionControllerRemove(projectId, promptId, versionTag);
@@ -391,25 +368,25 @@ export const promptVersionService = {
 
 // Servicio para Traducciones de Prompt
 export const promptTranslationService = {
-    findAll: async (projectId: string, promptId: string, versionTag: string): Promise<generated.PromptTranslation[]> => {
+    findAll: async (projectId: string, promptId: string, versionTag: string): Promise<generated.CreatePromptTranslationDto[]> => { // Usar CreatePromptTranslationDto
         const response = await promptTranslationsGeneratedApi.promptTranslationControllerFindAll(projectId, promptId, versionTag);
         // Ajustar tipo si el generado devuelve CreatePromptTranslationDto[]
-        return response.data as generated.PromptTranslation[];
+        return response.data as generated.CreatePromptTranslationDto[]; // El tipo devuelto ya es correcto
     },
-    findByLanguage: async (projectId: string, promptId: string, versionTag: string, languageCode: string): Promise<generated.PromptTranslation> => {
+    findByLanguage: async (projectId: string, promptId: string, versionTag: string, languageCode: string): Promise<generated.CreatePromptTranslationDto> => { // Usar CreatePromptTranslationDto
         const response = await promptTranslationsGeneratedApi.promptTranslationControllerFindOneByLanguage(projectId, promptId, versionTag, languageCode);
         // Ajustar tipo si el generado devuelve CreatePromptTranslationDto
-        return response.data as generated.PromptTranslation;
+        return response.data as generated.CreatePromptTranslationDto; // El tipo devuelto ya es correcto
     },
-    create: async (projectId: string, promptId: string, versionTag: string, payload: generated.CreatePromptTranslationDto): Promise<generated.PromptTranslation> => {
+    create: async (projectId: string, promptId: string, versionTag: string, payload: generated.CreatePromptTranslationDto): Promise<generated.CreatePromptTranslationDto> => { // Usar CreatePromptTranslationDto
         const response = await promptTranslationsGeneratedApi.promptTranslationControllerCreate(projectId, promptId, versionTag, payload);
         // Ajustar tipo si el generado devuelve CreatePromptTranslationDto
-        return response.data as generated.PromptTranslation;
+        return response.data as generated.CreatePromptTranslationDto; // El tipo devuelto ya es correcto
     },
-    update: async (projectId: string, promptId: string, versionTag: string, languageCode: string, payload: generated.UpdatePromptTranslationDto): Promise<generated.PromptTranslation> => {
+    update: async (projectId: string, promptId: string, versionTag: string, languageCode: string, payload: generated.UpdatePromptTranslationDto): Promise<generated.CreatePromptTranslationDto> => { // Usar CreatePromptTranslationDto como retorno
         const response = await promptTranslationsGeneratedApi.promptTranslationControllerUpdate(projectId, promptId, versionTag, languageCode, payload);
         // Ajustar tipo si el generado devuelve CreatePromptTranslationDto
-        return response.data as generated.PromptTranslation;
+        return response.data as generated.CreatePromptTranslationDto; // El tipo devuelto ya es correcto
     },
     remove: async (projectId: string, promptId: string, versionTag: string, languageCode: string): Promise<void> => {
         await promptTranslationsGeneratedApi.promptTranslationControllerRemove(projectId, promptId, versionTag, languageCode);
@@ -419,148 +396,135 @@ export const promptTranslationService = {
 
 // Servicio de Prompt Assets (Mantener manual o reemplazar con generated.PromptAssetsApi)
 export const promptAssetService = {
-    findAll: async (projectId: string): Promise<generated.PromptAsset[]> => { // Asumiendo DTO PromptAsset
+    findAll: async (projectId: string): Promise<generated.CreatePromptAssetDto[]> => { // Usar CreatePromptAssetDto
         // Reemplazar con: const response = await promptAssetsGeneratedApi.promptAssetControllerFindAll(projectId); return response.data;
-        const response = await apiClient.get<generated.PromptAsset[]>(`/api/projects/${projectId}/assets`);
+        const response = await apiClient.get<generated.CreatePromptAssetDto[]>(`/api/projects/${projectId}/assets`);
         return response.data;
     },
-    findOne: async (projectId: string, assetKey: string): Promise<generated.PromptAsset> => {
+    findOne: async (projectId: string, assetKey: string): Promise<generated.CreatePromptAssetDto> => { // Usar CreatePromptAssetDto
         // Reemplazar con: const response = await promptAssetsGeneratedApi.promptAssetControllerFindOne(assetKey, projectId); return response.data;
-        const response = await apiClient.get<generated.PromptAsset>(`/api/projects/${projectId}/assets/${assetKey}`);
+        const response = await apiClient.get<generated.CreatePromptAssetDto>(`/api/projects/${projectId}/assets/${assetKey}`);
         return response.data;
     },
-    create: async (projectId: string, payload: generated.CreatePromptAssetDto): Promise<generated.PromptAsset> => {
+    // La API generada promptAssetControllerCreate devuelve void
+    create: async (projectId: string, payload: generated.CreatePromptAssetDto): Promise<void> => {
         // Reemplazar con: const response = await promptAssetsGeneratedApi.promptAssetControllerCreate(projectId, payload); return response.data;
-        // Nota: El generado devuelve void. Mantener la llamada manual que asume PromptAsset.
-        const response = await apiClient.post<generated.PromptAsset>(`/api/projects/${projectId}/assets`, payload);
-        return response.data;
+        // Nota: El generado devuelve void.
+        await apiClient.post<void>(`/api/projects/${projectId}/assets`, payload);
+        // return response.data; // No hay data
     },
-    update: async (projectId: string, assetKey: string, payload: generated.UpdatePromptAssetDto): Promise<generated.PromptAsset> => {
+    // La API generada promptAssetControllerUpdate devuelve void
+    update: async (projectId: string, assetKey: string, payload: generated.UpdatePromptAssetDto): Promise<void> => {
         // Reemplazar con: const response = await promptAssetsGeneratedApi.promptAssetControllerUpdate(assetKey, projectId, payload); return response.data;
-        // Nota: El generado devuelve void. Mantener la llamada manual que asume PromptAsset.
-        const response = await apiClient.patch<generated.PromptAsset>(`/api/projects/${projectId}/assets/${assetKey}`, payload);
-        return response.data;
+        // Nota: El generado devuelve void.
+        await apiClient.patch<void>(`/api/projects/${projectId}/assets/${assetKey}`, payload);
+        // return response.data; // No hay data
     },
+    // La API generada promptAssetControllerRemove devuelve void
     remove: async (projectId: string, assetKey: string): Promise<void> => {
         // Reemplazar con: await promptAssetsGeneratedApi.promptAssetControllerRemove(assetKey, projectId);
         await apiClient.delete(`/api/projects/${projectId}/assets/${assetKey}`);
     },
     // Versiones de Asset (Mantener manual o reemplazar con generated.PromptAssetVersionsWithinProjectAssetApi)
-    findVersions: async (projectId: string, assetKey: string): Promise<generated.PromptAssetVersion[]> => { // Asumiendo DTO PromptAssetVersion
+    findVersions: async (projectId: string, assetKey: string): Promise<generated.CreatePromptAssetVersionDto[]> => { // Usar CreatePromptAssetVersionDto
         // Reemplazar con: const response = await assetVersionsGeneratedApi.promptAssetVersionControllerFindAll(projectId, assetKey); return response.data;
-        const response = await apiClient.get<generated.PromptAssetVersion[]>(`/api/projects/${projectId}/assets/${assetKey}/versions`);
+        const response = await apiClient.get<generated.CreatePromptAssetVersionDto[]>(`/api/projects/${projectId}/assets/${assetKey}/versions`);
         return response.data;
     },
-    findVersionByTag: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.PromptAssetVersion> => {
+    findVersionByTag: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => { // Usar CreatePromptAssetVersionDto
         // Reemplazar con: const response = await assetVersionsGeneratedApi.promptAssetVersionControllerFindOneByTag(projectId, assetKey, versionTag); return response.data;
-        const response = await apiClient.get<generated.PromptAssetVersion>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}`);
+        const response = await apiClient.get<generated.CreatePromptAssetVersionDto>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}`);
         return response.data;
     },
-    createVersion: async (projectId: string, assetKey: string, payload: generated.CreatePromptAssetVersionDto): Promise<generated.PromptAssetVersion> => {
+    createVersion: async (projectId: string, assetKey: string, payload: generated.CreatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => { // Usar CreatePromptAssetVersionDto
         // Reemplazar con: const response = await assetVersionsGeneratedApi.promptAssetVersionControllerCreate(projectId, assetKey, payload); return response.data;
-        const response = await apiClient.post<generated.PromptAssetVersion>(`/api/projects/${projectId}/assets/${assetKey}/versions`, payload);
+        const response = await apiClient.post<generated.CreatePromptAssetVersionDto>(`/api/projects/${projectId}/assets/${assetKey}/versions`, payload);
         return response.data;
     },
-    updateVersion: async (projectId: string, assetKey: string, versionTag: string, payload: generated.UpdatePromptAssetVersionDto): Promise<generated.PromptAssetVersion> => {
+    updateVersion: async (projectId: string, assetKey: string, versionTag: string, payload: generated.UpdatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => { // Usar CreatePromptAssetVersionDto como retorno
         // Reemplazar con: const response = await assetVersionsGeneratedApi.promptAssetVersionControllerUpdate(projectId, assetKey, versionTag, payload); return response.data;
-        const response = await apiClient.patch<generated.PromptAssetVersion>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}`, payload);
+        const response = await apiClient.patch<generated.CreatePromptAssetVersionDto>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}`, payload);
         return response.data;
     },
+    // La API generada promptAssetVersionControllerRemove devuelve void
     removeVersion: async (projectId: string, assetKey: string, versionTag: string): Promise<void> => {
         // Reemplazar con: await assetVersionsGeneratedApi.promptAssetVersionControllerRemove(projectId, assetKey, versionTag);
         await apiClient.delete(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}`);
     },
     // Traducciones de Asset (Mantener manual o reemplazar con generated.AssetTranslationsWithinProjectAssetVersionApi)
-    findAssetTranslations: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.PromptAssetTranslation[]> => { // Asumiendo DTO PromptAssetTranslation
+    findAssetTranslations: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreateAssetTranslationDto[]> => { // Usar CreateAssetTranslationDto
         // Reemplazar con: const response = await assetTranslationsGeneratedApi.assetTranslationControllerFindAll(projectId, assetKey, versionTag); return response.data;
-        const response = await apiClient.get<generated.PromptAssetTranslation[]>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations`);
+        const response = await apiClient.get<generated.CreateAssetTranslationDto[]>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations`);
         return response.data;
     },
-    findAssetTranslationByLanguage: async (projectId: string, assetKey: string, versionTag: string, languageCode: string): Promise<generated.PromptAssetTranslation> => {
+    findAssetTranslationByLanguage: async (projectId: string, assetKey: string, versionTag: string, languageCode: string): Promise<generated.CreateAssetTranslationDto> => { // Usar CreateAssetTranslationDto
         // Reemplazar con: const response = await assetTranslationsGeneratedApi.assetTranslationControllerFindOneByLanguage(projectId, assetKey, versionTag, languageCode); return response.data;
-        const response = await apiClient.get<generated.PromptAssetTranslation>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`);
+        const response = await apiClient.get<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`);
         return response.data;
     },
-    createAssetTranslation: async (projectId: string, assetKey: string, versionTag: string, payload: generated.CreateAssetTranslationDto): Promise<generated.PromptAssetTranslation> => {
+    createAssetTranslation: async (projectId: string, assetKey: string, versionTag: string, payload: generated.CreateAssetTranslationDto): Promise<generated.CreateAssetTranslationDto> => { // Usar CreateAssetTranslationDto
         // Reemplazar con: const response = await assetTranslationsGeneratedApi.assetTranslationControllerCreate(projectId, assetKey, versionTag, payload); return response.data;
-        const response = await apiClient.post<generated.PromptAssetTranslation>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations`, payload);
+        const response = await apiClient.post<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations`, payload);
         return response.data;
     },
-    updateAssetTranslation: async (projectId: string, assetKey: string, versionTag: string, languageCode: string, payload: generated.UpdateAssetTranslationDto): Promise<generated.PromptAssetTranslation> => {
+    updateAssetTranslation: async (projectId: string, assetKey: string, versionTag: string, languageCode: string, payload: generated.UpdateAssetTranslationDto): Promise<generated.CreateAssetTranslationDto> => { // Usar CreateAssetTranslationDto como retorno
         // Reemplazar con: const response = await assetTranslationsGeneratedApi.assetTranslationControllerUpdate(projectId, assetKey, versionTag, languageCode, payload); return response.data;
-        const response = await apiClient.patch<generated.PromptAssetTranslation>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`, payload);
+        const response = await apiClient.patch<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`, payload);
         return response.data;
     },
+    // La API generada assetTranslationControllerRemove devuelve void
     removeAssetTranslation: async (projectId: string, assetKey: string, versionTag: string, languageCode: string): Promise<void> => {
         // Reemplazar con: await assetTranslationsGeneratedApi.assetTranslationControllerRemove(projectId, assetKey, versionTag, languageCode);
         await apiClient.delete(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`);
     },
     // Links de Asset (Mantener manual o reemplazar con generated.PromptAssetLinksWithinProjectVersionApi)
-    findAssetLinks: async (projectId: string, promptVersionId: string): Promise<generated.PromptAssetLink[]> => { // Asumiendo DTO PromptAssetLink
+    findAssetLinks: async (projectId: string, promptVersionId: string): Promise<generated.CreatePromptAssetLinkDto[]> => { // Usar CreatePromptAssetLinkDto
         // Reemplazar con: const response = await assetLinksGeneratedApi.promptAssetLinkControllerFindAll(projectId, promptVersionId); return response.data;
-        const response = await apiClient.get<generated.PromptAssetLink[]>(`/api/projects/${projectId}/prompt-versions/${promptVersionId}/asset-links`);
+        const response = await apiClient.get<generated.CreatePromptAssetLinkDto[]>(`/api/projects/${projectId}/prompt-versions/${promptVersionId}/links`);
         return response.data;
     },
-    findAssetLink: async (projectId: string, promptVersionId: string, linkId: string): Promise<generated.PromptAssetLink> => {
+    findAssetLink: async (projectId: string, promptVersionId: string, linkId: string): Promise<generated.CreatePromptAssetLinkDto> => { // Usar CreatePromptAssetLinkDto
         // Reemplazar con: const response = await assetLinksGeneratedApi.promptAssetLinkControllerFindOne(projectId, promptVersionId, linkId); return response.data;
-        const response = await apiClient.get<generated.PromptAssetLink>(`/api/projects/${projectId}/prompt-versions/${promptVersionId}/asset-links/${linkId}`);
+        const response = await apiClient.get<generated.CreatePromptAssetLinkDto>(`/api/projects/${projectId}/prompt-versions/${promptVersionId}/links/${linkId}`);
         return response.data;
     },
-    createAssetLink: async (projectId: string, promptVersionId: string, payload: generated.CreatePromptAssetLinkDto): Promise<generated.PromptAssetLink> => {
+    createAssetLink: async (projectId: string, promptVersionId: string, payload: generated.CreatePromptAssetLinkDto): Promise<generated.CreatePromptAssetLinkDto> => { // Usar CreatePromptAssetLinkDto
         // Reemplazar con: const response = await assetLinksGeneratedApi.promptAssetLinkControllerCreate(projectId, promptVersionId, payload); return response.data;
-        const response = await apiClient.post<generated.PromptAssetLink>(`/api/projects/${projectId}/prompt-versions/${promptVersionId}/asset-links`, payload);
+        // API manual usa endpoint diferente '/asset-links' vs generado '/links'
+        const response = await apiClient.post<generated.CreatePromptAssetLinkDto>(`/api/projects/${projectId}/prompt-versions/${promptVersionId}/asset-links`, payload);
         return response.data;
     },
-    updateAssetLink: async (projectId: string, promptVersionId: string, linkId: string, payload: generated.UpdatePromptAssetLinkDto): Promise<generated.PromptAssetLink> => {
+    updateAssetLink: async (projectId: string, promptVersionId: string, linkId: string, payload: generated.UpdatePromptAssetLinkDto): Promise<generated.CreatePromptAssetLinkDto> => { // Usar CreatePromptAssetLinkDto como retorno
         // Reemplazar con: const response = await assetLinksGeneratedApi.promptAssetLinkControllerUpdate(projectId, promptVersionId, linkId, payload); return response.data;
-        const response = await apiClient.patch<generated.PromptAssetLink>(`/api/projects/${projectId}/prompt-versions/${promptVersionId}/asset-links/${linkId}`, payload);
+        // API manual usa endpoint diferente '/asset-links/' vs generado '/links/'
+        const response = await apiClient.patch<generated.CreatePromptAssetLinkDto>(`/api/projects/${projectId}/prompt-versions/${promptVersionId}/asset-links/${linkId}`, payload);
         return response.data;
     },
+    // La API generada promptAssetLinkControllerRemove devuelve void
     removeAssetLink: async (projectId: string, promptVersionId: string, linkId: string): Promise<void> => {
         // Reemplazar con: await assetLinksGeneratedApi.promptAssetLinkControllerRemove(projectId, promptVersionId, linkId);
+        // API manual usa endpoint diferente '/asset-links/' vs generado '/links/'
         await apiClient.delete(`/api/projects/${projectId}/prompt-versions/${promptVersionId}/asset-links/${linkId}`);
     },
 };
 
 // Servicio de Health Check (Mantener manual o reemplazar con generated.HealthApi)
 export const healthService = {
-    check: async (): Promise<generated.HealthCheckResult> => { // Asumiendo DTO HealthCheckResult
+    // Usar el tipo de respuesta generado HealthControllerCheck200Response
+    check: async (): Promise<generated.HealthControllerCheck200Response> => {
         // Reemplazar con: const response = await healthGeneratedApi.healthControllerCheck(); return response.data;
-        const response = await apiClient.get<generated.HealthCheckResult>('/api/health');
+        const response = await apiClient.get<generated.HealthControllerCheck200Response>('/api/health');
         return response.data;
     },
 };
 
+// --- Comentando servicios que parecen incorrectos según la API generada ---
+/*
 // Servicio de Serve (Mantener manual o reemplazar con generated.ServePromptApi)
 export const serveService = {
-    /** Sirve un prompt específico por su ID */
-    servePromptById: async (projectId: string, promptId: string, payload: generated.ServePromptDto): Promise<generated.ServePromptResponse> => { // Asumiendo DTOs ServePromptDto, ServePromptResponse
-        // Reemplazar con: const response = await servePromptGeneratedApi.servePromptControllerServePromptById(projectId, promptId, payload); return response.data;
-        const response = await apiClient.post<generated.ServePromptResponse>(`/api/projects/${projectId}/serve/prompt/${promptId}`, payload);
-        return response.data;
-    },
-    /** Sirve un prompt por el nombre único del prompt */
-    servePromptByName: async (projectId: string, promptName: string, payload: generated.ServePromptDto): Promise<generated.ServePromptResponse> => {
-        // Reemplazar con: const response = await servePromptGeneratedApi.servePromptControllerServePromptByName(projectId, promptName, payload); return response.data;
-        const response = await apiClient.post<generated.ServePromptResponse>(`/api/projects/${projectId}/serve/prompt-by-name/${promptName}`, payload);
-        return response.data;
-    },
-    /** Sirve un prompt basado en una Tactic ID */
-    servePromptByTactic: async (projectId: string, tacticId: string, payload: generated.ServePromptByTacticDto): Promise<generated.ServePromptByTacticResponse> => { // Asumiendo DTOs ServePromptByTacticDto, ServePromptByTacticResponse
-        // Reemplazar con: const response = await servePromptGeneratedApi.servePromptControllerServeByTacticId(projectId, tacticId, payload); return response.data;
-        const response = await apiClient.post<generated.ServePromptByTacticResponse>(`/api/projects/${projectId}/serve/tactic/${tacticId}`, payload);
-        return response.data;
-    },
-    /** Sirve un prompt basado en el nombre único de la Tactic */
-    servePromptByTacticName: async (projectId: string, tacticName: string, payload: generated.ServePromptByTacticDto): Promise<generated.ServePromptByTacticResponse> => {
-        // Reemplazar con: const response = await servePromptGeneratedApi.servePromptControllerServeByTacticName(projectId, tacticName, payload); return response.data;
-        const response = await apiClient.post<generated.ServePromptByTacticResponse>(`/api/projects/${projectId}/serve/tactic-by-name/${tacticName}`, payload);
-        return response.data;
-    },
-    // Nota: El endpoint POST /serve-prompt/execute/{projectId}/{promptName}/{versionTag} no parece estar cubierto directamente por ServePromptApi
-    // Se mapea a llmExecutionControllerExecutePrompt en ServePromptApi, pero requiere un DTO `ExecutePromptBodyDto`.
-    // Lo dejaremos en llmExecutionService por ahora, que usa un endpoint diferente /llm-execution/execute.
+    // ... todo el contenido comentado ...
 };
+*/
 
 // Servicio de Cultural Data (Mantener manual o reemplazar con generated.CulturalDataApi)
 export const culturalDataService = {
@@ -589,7 +553,6 @@ export const culturalDataService = {
         await apiClient.delete(`/api/projects/${projectId}/cultural-data/${culturalDataId}`);
     },
 };
-
 
 // --- Servicios Actualizados / Nuevos usando Generador ---
 
@@ -634,6 +597,16 @@ export const llmExecutionService = {
 // Exportación predeterminada del cliente Axios configurado
 export default apiClient;
 
+// Re-exportar puede causar conflictos si hay nombres duplicados o no deseados.
+// Considera importar explícitamente lo necesario o usar alias.
+// export * from '../../generated/japmux-api'; // Comentado temporalmente
+
 // YA NO SON NECESARIAS LAS INTERFACES MANUALES PARA LLM EXECUTION
-// export interface LlmExecutionPayload { ... }
-// export interface LlmExecutionResponse { ... }
+// ... existing code ...
+
+/*
+// Servicio de "Serve Prompt" (Mantener manual o reemplazar con generated.ServePromptApi)
+export const servePromptService = {
+    // ... todo el contenido comentado ...
+};
+*/

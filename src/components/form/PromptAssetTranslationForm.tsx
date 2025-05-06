@@ -9,8 +9,8 @@ interface PromptAssetTranslationFormProps {
     initialData: PromptAssetTranslation | null;
     onSave: (payload: CreateAssetTranslationDto | UpdateAssetTranslationDto) => void;
     onCancel: () => void;
-    // Podríamos necesitar versionId si el DTO de creación lo requiere,
-    // pero la API actual parece manejarlo en la ruta
+    // We might need versionId if the creation DTO requires it,
+    // but the current API seems to handle it in the route
 }
 
 const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({ initialData, onSave, onCancel }) => {
@@ -41,7 +41,7 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
             } as UpdateAssetTranslationDto;
         } else {
             if (!languageCode) {
-                // Idealmente usar un toast o validación mejor
+                // Ideally use a toast or better validation
                 alert("Language Code is required for new translations.");
                 return;
             }
@@ -62,8 +62,8 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
                     id="languageCode"
                     value={languageCode}
                     onChange={(e) => setLanguageCode(e.target.value)}
-                    required={!isEditing} // Requerido solo al crear
-                    disabled={isEditing} // No editable después de crear
+                    required={!isEditing} // Required only when creating
+                    disabled={isEditing} // Not editable after creation
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500 disabled:text-gray-400"
                     placeholder="e.g., es-ES, fr-FR, ja-JP"
                 />

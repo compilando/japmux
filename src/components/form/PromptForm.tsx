@@ -17,7 +17,6 @@ interface TagOption {
 const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, projectId }) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [tacticId, setTacticId] = useState('');
     const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
     const [initialTagNames, setInitialTagNames] = useState<string[]>([]);
     const [promptText, setPromptText] = useState('');
@@ -55,7 +54,6 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         if (initialData) {
             setName(initialData.name || '');
             setDescription(initialData.description || '');
-            setTacticId(initialData.tacticId || '');
 
             console.log('[PromptForm Effect InitialData] Inspecting initialData.tags:', initialData.tags);
             const names = initialData.tags
@@ -70,7 +68,6 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         } else {
             setName('');
             setDescription('');
-            setTacticId('');
             setInitialTagNames([]);
             setSelectedTagIds([]);
             setPromptText('');
@@ -103,7 +100,6 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         if (isEditing) {
             payload = {
                 description: description || undefined,
-                tacticId: tacticId || null,
                 tagIds: selectedTagIds.length > 0 ? selectedTagIds : [],
             };
         } else {
@@ -111,7 +107,6 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                 name,
                 promptText: promptText,
                 description: description || undefined,
-                tacticId: tacticId || undefined,
                 tags: selectedTagIds,
             };
         }
@@ -200,7 +195,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                     required
                     disabled={isEditing}
                     pattern="^[a-z0-9_]+$"
-                    title="Solo minúsculas, números y guiones bajos"
+                    title="Only lowercase letters, numbers, and underscores"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500"
                 />
             </div>
@@ -227,17 +222,6 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                     />
                 </div>
             )}
-            <div>
-                <label htmlFor="tacticId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tactic ID (Optional)</label>
-                <input
-                    type="text"
-                    id="tacticId"
-                    value={tacticId}
-                    onChange={(e) => setTacticId(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                />
-                {isEditing && <p className="text-xs text-gray-500 dark:text-gray-400">Dejar vacío para desasociar.</p>}
-            </div>
             <div>
                 <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tags</label>
                 <Select<TagOption, true>

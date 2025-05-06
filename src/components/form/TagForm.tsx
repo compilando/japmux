@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tag, TagCreatePayload, TagUpdatePayload } from '@/services/api'; // Asegúrate de que la ruta sea correcta
+import { Tag, TagCreatePayload, TagUpdatePayload } from '@/services/api'; // Make sure the path is correct
 
 interface TagFormProps {
     initialData: Tag | null;
@@ -9,15 +9,15 @@ interface TagFormProps {
 
 const TagForm: React.FC<TagFormProps> = ({ initialData, onSave, onCancel }) => {
     const [name, setName] = useState('');
-    // TODO: Añadir estados para otros campos de Tag
+    // TODO: Add states for other Tag fields
 
     useEffect(() => {
         if (initialData) {
             setName(initialData.name || '');
-            // TODO: Inicializar otros estados con initialData
+            // TODO: Initialize other states with initialData
         } else {
             setName('');
-            // TODO: Resetear otros estados
+            // TODO: Reset other states
         }
     }, [initialData]);
 
@@ -25,7 +25,7 @@ const TagForm: React.FC<TagFormProps> = ({ initialData, onSave, onCancel }) => {
         event.preventDefault();
         const payload: TagCreatePayload | TagUpdatePayload = {
             name,
-            // TODO: Añadir otros campos al payload
+            // TODO: Add other fields to the payload
         };
         onSave(payload);
     };
@@ -46,7 +46,7 @@ const TagForm: React.FC<TagFormProps> = ({ initialData, onSave, onCancel }) => {
                 />
             </div>
 
-            {/* TODO: Añadir campos del formulario para otros atributos de Tag */}
+            {/* TODO: Add form fields for other Tag attributes */}
 
             <div className="flex justify-end space-x-3">
                 <button

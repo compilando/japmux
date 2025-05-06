@@ -1,37 +1,37 @@
-# TacticsApi
+# RAGDocumentMetadataApi
 
 All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**tacticControllerCreate**](#tacticcontrollercreate) | **POST** /api/projects/{projectId}/tactics | Crea una nueva táctica conversacional dentro de un proyecto|
-|[**tacticControllerFindAll**](#tacticcontrollerfindall) | **GET** /api/projects/{projectId}/tactics | Obtiene todas las tácticas conversacionales de un proyecto|
-|[**tacticControllerFindOne**](#tacticcontrollerfindone) | **GET** /api/projects/{projectId}/tactics/{tacticName} | Obtiene una táctica por su nombre (ID) dentro de un proyecto|
-|[**tacticControllerRemove**](#tacticcontrollerremove) | **DELETE** /api/projects/{projectId}/tactics/{tacticName} | Elimina una táctica dentro de un proyecto|
-|[**tacticControllerUpdate**](#tacticcontrollerupdate) | **PATCH** /api/projects/{projectId}/tactics/{tacticName} | Actualiza una táctica existente dentro de un proyecto|
+|[**ragDocumentMetadataControllerCreate**](#ragdocumentmetadatacontrollercreate) | **POST** /api/projects/{projectId}/rag-document-metadata | Crear metadatos para un documento RAG dentro de un proyecto|
+|[**ragDocumentMetadataControllerFindAll**](#ragdocumentmetadatacontrollerfindall) | **GET** /api/projects/{projectId}/rag-document-metadata | Obtener todos los metadatos de documentos RAG de un proyecto|
+|[**ragDocumentMetadataControllerFindOne**](#ragdocumentmetadatacontrollerfindone) | **GET** /api/projects/{projectId}/rag-document-metadata/{metadataId} | Obtener metadatos por ID dentro de un proyecto|
+|[**ragDocumentMetadataControllerRemove**](#ragdocumentmetadatacontrollerremove) | **DELETE** /api/projects/{projectId}/rag-document-metadata/{metadataId} | Eliminar metadatos por ID dentro de un proyecto|
+|[**ragDocumentMetadataControllerUpdate**](#ragdocumentmetadatacontrollerupdate) | **PATCH** /api/projects/{projectId}/rag-document-metadata/{metadataId} | Actualizar metadatos por ID dentro de un proyecto|
 
-# **tacticControllerCreate**
-> TacticResponse tacticControllerCreate(createTacticDto)
+# **ragDocumentMetadataControllerCreate**
+> RagDocumentMetadataResponse ragDocumentMetadataControllerCreate(createRagDocumentMetadataDto)
 
 
 ### Example
 
 ```typescript
 import {
-    TacticsApi,
+    RAGDocumentMetadataApi,
     Configuration,
-    CreateTacticDto
+    CreateRagDocumentMetadataDto
 } from './api';
 
 const configuration = new Configuration();
-const apiInstance = new TacticsApi(configuration);
+const apiInstance = new RAGDocumentMetadataApi(configuration);
 
 let projectId: string; //ID del proyecto (default to undefined)
-let createTacticDto: CreateTacticDto; //
+let createRagDocumentMetadataDto: CreateRagDocumentMetadataDto; //
 
-const { status, data } = await apiInstance.tacticControllerCreate(
+const { status, data } = await apiInstance.ragDocumentMetadataControllerCreate(
     projectId,
-    createTacticDto
+    createRagDocumentMetadataDto
 );
 ```
 
@@ -39,17 +39,17 @@ const { status, data } = await apiInstance.tacticControllerCreate(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **createTacticDto** | **CreateTacticDto**|  | |
+| **createRagDocumentMetadataDto** | **CreateRagDocumentMetadataDto**|  | |
 | **projectId** | [**string**] | ID del proyecto | defaults to undefined|
 
 
 ### Return type
 
-**TacticResponse**
+**RagDocumentMetadataResponse**
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -60,31 +60,30 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**201** | Táctica creada. |  -  |
+|**201** | Metadatos creados. |  -  |
 |**400** | Datos inválidos. |  -  |
-|**404** | Proyecto, Región o CulturalData no encontrada. |  -  |
-|**409** | Conflicto, ya existe una táctica con ese nombre en el proyecto. |  -  |
+|**404** | Proyecto o Región referenciada no encontrada. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **tacticControllerFindAll**
-> Array<TacticResponse> tacticControllerFindAll()
+# **ragDocumentMetadataControllerFindAll**
+> Array<RagDocumentMetadataResponse> ragDocumentMetadataControllerFindAll()
 
 
 ### Example
 
 ```typescript
 import {
-    TacticsApi,
+    RAGDocumentMetadataApi,
     Configuration
 } from './api';
 
 const configuration = new Configuration();
-const apiInstance = new TacticsApi(configuration);
+const apiInstance = new RAGDocumentMetadataApi(configuration);
 
 let projectId: string; //ID del proyecto (default to undefined)
 
-const { status, data } = await apiInstance.tacticControllerFindAll(
+const { status, data } = await apiInstance.ragDocumentMetadataControllerFindAll(
     projectId
 );
 ```
@@ -98,11 +97,11 @@ const { status, data } = await apiInstance.tacticControllerFindAll(
 
 ### Return type
 
-**Array<TacticResponse>**
+**Array<RagDocumentMetadataResponse>**
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -113,31 +112,31 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Lista de tácticas. |  -  |
+|**200** | Lista de metadatos. |  -  |
 |**404** | Proyecto no encontrado. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **tacticControllerFindOne**
-> TacticResponse tacticControllerFindOne()
+# **ragDocumentMetadataControllerFindOne**
+> RagDocumentMetadataResponse ragDocumentMetadataControllerFindOne()
 
 
 ### Example
 
 ```typescript
 import {
-    TacticsApi,
+    RAGDocumentMetadataApi,
     Configuration
 } from './api';
 
 const configuration = new Configuration();
-const apiInstance = new TacticsApi(configuration);
+const apiInstance = new RAGDocumentMetadataApi(configuration);
 
-let tacticName: string; //Nombre único de la táctica (default to undefined)
+let metadataId: string; //ID de los metadatos (CUID) (default to undefined)
 let projectId: string; //ID del proyecto (default to undefined)
 
-const { status, data } = await apiInstance.tacticControllerFindOne(
-    tacticName,
+const { status, data } = await apiInstance.ragDocumentMetadataControllerFindOne(
+    metadataId,
     projectId
 );
 ```
@@ -146,17 +145,17 @@ const { status, data } = await apiInstance.tacticControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **tacticName** | [**string**] | Nombre único de la táctica | defaults to undefined|
+| **metadataId** | [**string**] | ID de los metadatos (CUID) | defaults to undefined|
 | **projectId** | [**string**] | ID del proyecto | defaults to undefined|
 
 
 ### Return type
 
-**TacticResponse**
+**RagDocumentMetadataResponse**
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -167,31 +166,31 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Táctica encontrada. |  -  |
-|**404** | Proyecto o Táctica no encontrada. |  -  |
+|**200** | Metadatos encontrados. |  -  |
+|**404** | Proyecto o Metadatos no encontrados. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **tacticControllerRemove**
-> tacticControllerRemove()
+# **ragDocumentMetadataControllerRemove**
+> ragDocumentMetadataControllerRemove()
 
 
 ### Example
 
 ```typescript
 import {
-    TacticsApi,
+    RAGDocumentMetadataApi,
     Configuration
 } from './api';
 
 const configuration = new Configuration();
-const apiInstance = new TacticsApi(configuration);
+const apiInstance = new RAGDocumentMetadataApi(configuration);
 
-let tacticName: string; //Nombre único de la táctica a eliminar (default to undefined)
+let metadataId: string; //ID a eliminar (default to undefined)
 let projectId: string; //ID del proyecto (default to undefined)
 
-const { status, data } = await apiInstance.tacticControllerRemove(
-    tacticName,
+const { status, data } = await apiInstance.ragDocumentMetadataControllerRemove(
+    metadataId,
     projectId
 );
 ```
@@ -200,7 +199,7 @@ const { status, data } = await apiInstance.tacticControllerRemove(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **tacticName** | [**string**] | Nombre único de la táctica a eliminar | defaults to undefined|
+| **metadataId** | [**string**] | ID a eliminar | defaults to undefined|
 | **projectId** | [**string**] | ID del proyecto | defaults to undefined|
 
 
@@ -210,7 +209,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -221,36 +220,35 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Táctica eliminada. |  -  |
-|**404** | Proyecto o Táctica no encontrada. |  -  |
-|**409** | Conflicto al eliminar (referenciada por prompts). |  -  |
+|**200** | Metadatos eliminados. |  -  |
+|**404** | Proyecto o Metadatos no encontrados. |  -  |
+|**409** | Conflicto al eliminar (referenciado por otras entidades). |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **tacticControllerUpdate**
-> TacticResponse tacticControllerUpdate(updateTacticDto)
+# **ragDocumentMetadataControllerUpdate**
+> RagDocumentMetadataResponse ragDocumentMetadataControllerUpdate(body)
 
 
 ### Example
 
 ```typescript
 import {
-    TacticsApi,
-    Configuration,
-    UpdateTacticDto
+    RAGDocumentMetadataApi,
+    Configuration
 } from './api';
 
 const configuration = new Configuration();
-const apiInstance = new TacticsApi(configuration);
+const apiInstance = new RAGDocumentMetadataApi(configuration);
 
-let tacticName: string; //Nombre único de la táctica a actualizar (default to undefined)
+let metadataId: string; //ID a actualizar (default to undefined)
 let projectId: string; //ID del proyecto (default to undefined)
-let updateTacticDto: UpdateTacticDto; //
+let body: object; //
 
-const { status, data } = await apiInstance.tacticControllerUpdate(
-    tacticName,
+const { status, data } = await apiInstance.ragDocumentMetadataControllerUpdate(
+    metadataId,
     projectId,
-    updateTacticDto
+    body
 );
 ```
 
@@ -258,18 +256,18 @@ const { status, data } = await apiInstance.tacticControllerUpdate(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **updateTacticDto** | **UpdateTacticDto**|  | |
-| **tacticName** | [**string**] | Nombre único de la táctica a actualizar | defaults to undefined|
+| **body** | **object**|  | |
+| **metadataId** | [**string**] | ID a actualizar | defaults to undefined|
 | **projectId** | [**string**] | ID del proyecto | defaults to undefined|
 
 
 ### Return type
 
-**TacticResponse**
+**RagDocumentMetadataResponse**
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -280,9 +278,9 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Táctica actualizada. |  -  |
+|**200** | Metadatos actualizados. |  -  |
 |**400** | Datos inválidos. |  -  |
-|**404** | Proyecto, Táctica, Región o CulturalData no encontrada. |  -  |
+|**404** | Proyecto, Metadatos o Región referenciada no encontrada. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
