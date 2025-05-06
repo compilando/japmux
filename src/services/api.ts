@@ -79,6 +79,8 @@ const aiModelsGeneratedApi = new generated.AIModelsProjectSpecificApi(generatedA
 const promptsGeneratedApi = new generated.PromptsApi(generatedApiConfig, undefined, apiClient);
 const promptVersionsGeneratedApi = new generated.PromptVersionsWithinProjectPromptApi(generatedApiConfig, undefined, apiClient);
 const promptTranslationsGeneratedApi = new generated.PromptTranslationsWithinProjectPromptVersionApi(generatedApiConfig, undefined, apiClient);
+const systemPromptsGeneratedApi = new generated.SystemPromptsApi(generatedApiConfig, undefined, apiClient);
+const rawExecutionGeneratedApi = new generated.RawExecutionApi(generatedApiConfig, undefined, apiClient);
 // const authGeneratedApi = new generated.AuthenticationApi(generatedApiConfig, undefined, apiClient); // Si decides reemplazar authService
 
 // --- Servicios Manuales (Wrapper sobre los generados o lógica personalizada) ---
@@ -594,12 +596,74 @@ export const llmExecutionService = {
     },
 };
 
+// Servicio de System Prompts
+export const systemPromptService = {
+    // NOTA: El método generado devuelve void, pero probablemente debería devolver CreateSystemPromptDto[]
+    // Lo tipamos así y veremos si funciona o si hay que ajustar basado en la respuesta real.
+    findAll: async (): Promise<generated.CreateSystemPromptDto[]> => {
+        try {
+            // Llamamos al método generado aunque su tipo de retorno sea void
+            const response: any = await systemPromptsGeneratedApi.systemPromptControllerFindAll();
+            // Si la respuesta real contiene datos (p.ej., response.data), los devolvemos.
+            // Es necesario inspeccionar la respuesta real en runtime si esto falla.
+            if (response && response.data) {
+                return response.data as generated.CreateSystemPromptDto[];
+            }
+            // Si no hay datos o la llamada falla silenciosamente (debido al tipo void)
+            console.warn('systemPromptControllerFindAll did not return data as expected.');
+            return []; // Devolver array vacío como fallback
+        } catch (error) {
+            console.error("Error fetching system prompts:", error);
+            showErrorToast('Failed to fetch system prompts.');
+            return []; // Devolver array vacío en caso de error
+        }
+    },
+    // Similar al findAll, el generado devuelve void.
+    findOne: async (name: string): Promise<generated.CreateSystemPromptDto | null> => {
+        try {
+            const response: any = await systemPromptsGeneratedApi.systemPromptControllerFindOne(name);
+            if (response && response.data) {
+                return response.data as generated.CreateSystemPromptDto;
+            }
+            console.warn(`systemPromptControllerFindOne(${name}) did not return data.`);
+            return null;
+        } catch (error: any) {
+            if (error.response && error.response.status === 404) {
+                return null; // Not found
+            }
+            console.error(`Error fetching system prompt ${name}:`, error);
+            showErrorToast(`Failed to fetch system prompt ${name}.`);
+            return null;
+        }
+    },
+    // Añadir create, update, remove si son necesarios y existen en la API generada
+    create: async (payload: generated.CreateSystemPromptDto): Promise<void> => {
+        await systemPromptsGeneratedApi.systemPromptControllerCreate(payload);
+    },
+    update: async (name: string, payload: generated.UpdateSystemPromptDto): Promise<void> => {
+        await systemPromptsGeneratedApi.systemPromptControllerUpdate(name, payload);
+    },
+    remove: async (name: string): Promise<void> => {
+        await systemPromptsGeneratedApi.systemPromptControllerRemove(name);
+    }
+};
+
+// Añadir función para execute-raw (podría ir en llmExecutionService o uno nuevo)
+export const rawExecutionService = {
+    // El método generado devuelve object. Usamos any por ahora.
+    executeRaw: async (payload: generated.ExecuteRawDto): Promise<any> => {
+        const response = await rawExecutionGeneratedApi.rawExecutionControllerExecuteRawText(payload);
+        // La respuesta real está en response.data
+        return response.data;
+    }
+};
+
 // Exportación predeterminada del cliente Axios configurado
 export default apiClient;
 
 // Re-exportar puede causar conflictos si hay nombres duplicados o no deseados.
 // Considera importar explícitamente lo necesario o usar alias.
-// export * from '../../generated/japmux-api'; // Comentado temporalmente
+export * from '../../generated/japmux-api';
 
 // YA NO SON NECESARIAS LAS INTERFACES MANUALES PARA LLM EXECUTION
 // ... existing code ...

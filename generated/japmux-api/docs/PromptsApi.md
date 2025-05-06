@@ -8,8 +8,8 @@ All URIs are relative to *http://localhost*
 |[**promptControllerCreate**](#promptcontrollercreate) | **POST** /api/projects/{projectId}/prompts | Creates a new logical prompt within a project|
 |[**promptControllerFindAll**](#promptcontrollerfindall) | **GET** /api/projects/{projectId}/prompts | Gets all logical prompts for a project|
 |[**promptControllerFindOne**](#promptcontrollerfindone) | **GET** /api/projects/{projectId}/prompts/{promptName} | Gets a logical prompt by its name within a project|
-|[**promptControllerRemove**](#promptcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptId} | Deletes a logical prompt (and its associated versions via Cascade) within a project by ID|
-|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptId} | Updates an existing prompt by ID for a specific project|
+|[**promptControllerRemove**](#promptcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptName} | Deletes a logical prompt (and its associated versions via Cascade) within a project by name|
+|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptName} | Updates an existing prompt by its name for a specific project|
 
 # **promptControllerAddOrUpdateTranslation**
 > promptControllerAddOrUpdateTranslation(createOrUpdatePromptTranslationDto)
@@ -125,7 +125,7 @@ const { status, data } = await apiInstance.promptControllerCreate(
 |-------------|-------------|------------------|
 |**201** | Prompt created. |  -  |
 |**400** | Invalid data (e.g., missing initial promptText). |  -  |
-|**404** | Project or Tag not found. |  -  |
+|**404** | Project, Tactic or Tag not found. |  -  |
 |**409** | Conflict, a prompt with this name already exists in the project. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -250,11 +250,11 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let promptId: string; //ID of the prompt to delete (CUID) (default to undefined)
+let promptName: string; //Name of the prompt to delete (default to undefined)
 let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.promptControllerRemove(
-    promptId,
+    promptName,
     projectId
 );
 ```
@@ -263,7 +263,7 @@ const { status, data } = await apiInstance.promptControllerRemove(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **promptId** | [**string**] | ID of the prompt to delete (CUID) | defaults to undefined|
+| **promptName** | [**string**] | Name of the prompt to delete | defaults to undefined|
 | **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
@@ -306,12 +306,12 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let promptId: string; //ID of the prompt to update (CUID) (default to undefined)
+let promptName: string; //Name of the prompt to update (default to undefined)
 let projectId: string; //Project ID (default to undefined)
 let updatePromptDto: UpdatePromptDto; //Data to update the prompt
 
 const { status, data } = await apiInstance.promptControllerUpdate(
-    promptId,
+    promptName,
     projectId,
     updatePromptDto
 );
@@ -322,7 +322,7 @@ const { status, data } = await apiInstance.promptControllerUpdate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **updatePromptDto** | **UpdatePromptDto**| Data to update the prompt | |
-| **promptId** | [**string**] | ID of the prompt to update (CUID) | defaults to undefined|
+| **promptName** | [**string**] | Name of the prompt to update | defaults to undefined|
 | **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
@@ -345,7 +345,7 @@ void (empty response body)
 |-------------|-------------|------------------|
 |**200** | Prompt updated successfully. |  -  |
 |**400** | Invalid data. |  -  |
-|**404** | Project, Prompt or Tag not found. |  -  |
+|**404** | Project, Prompt, or Tag not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

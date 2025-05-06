@@ -6,6 +6,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **description** | **string** | New description of the prompt\&#39;s purpose. | [optional] [default to undefined]
+**tacticId** | **string** | ID of the tactic to associate, or null to disassociate. | [optional] [default to undefined]
 **tagIds** | **Array&lt;string&gt;** | Complete list of Tag IDs to associate (replaces existing ones). Empty array to remove all. | [optional] [default to undefined]
 
 ## Example
@@ -15,6 +16,7 @@ import { UpdatePromptDto } from './api';
 
 const instance: UpdatePromptDto = {
     description,
+    tacticId,
     tagIds,
 };
 ```

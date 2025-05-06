@@ -1,6 +1,5 @@
 .gitignore
 .npmignore
-.openapi-generator-ignore
 api.ts
 base.ts
 common.ts
@@ -31,6 +30,7 @@ docs/CulturalDataResponse.md
 docs/EnvironmentsApi.md
 docs/ExecuteLlmDto.md
 docs/ExecutePromptBodyDto.md
+docs/ExecuteRawDto.md
 docs/HealthApi.md
 docs/HealthControllerCheck200Response.md
 docs/HealthControllerCheck200ResponseInfoValue.md
@@ -48,6 +48,7 @@ docs/PromptVersionsWithinProjectPromptApi.md
 docs/PromptsApi.md
 docs/RAGDocumentMetadataApi.md
 docs/RagDocumentMetadataResponse.md
+docs/RawExecutionApi.md
 docs/RegionsApi.md
 docs/RegisterDto.md
 docs/ServePromptApi.md

@@ -797,7 +797,7 @@
             "description": "Invalid data (e.g., missing initial promptText)."
           },
           "404": {
-            "description": "Project or Tag not found."
+            "description": "Project, Tactic or Tag not found."
           },
           "409": {
             "description": "Conflict, a prompt with this name already exists in the project."
@@ -902,17 +902,15 @@
         "tags": [
           "Prompts"
         ]
-      }
-    },
-    "/api/projects/{projectId}/prompts/{promptId}": {
+      },
       "patch": {
         "operationId": "PromptController_update",
         "parameters": [
           {
-            "name": "promptId",
+            "name": "promptName",
             "required": true,
             "in": "path",
-            "description": "ID of the prompt to update (CUID)",
+            "description": "Name of the prompt to update",
             "schema": {
               "type": "string"
             }
@@ -946,7 +944,7 @@
             "description": "Invalid data."
           },
           "404": {
-            "description": "Project, Prompt or Tag not found."
+            "description": "Project, Prompt, or Tag not found."
           }
         },
         "security": [
@@ -954,7 +952,7 @@
             "bearer": []
           }
         ],
-        "summary": "Updates an existing prompt by ID for a specific project",
+        "summary": "Updates an existing prompt by its name for a specific project",
         "tags": [
           "Prompts"
         ]
@@ -963,10 +961,10 @@
         "operationId": "PromptController_remove",
         "parameters": [
           {
-            "name": "promptId",
+            "name": "promptName",
             "required": true,
             "in": "path",
-            "description": "ID of the prompt to delete (CUID)",
+            "description": "Name of the prompt to delete",
             "schema": {
               "type": "string"
             }
@@ -997,7 +995,7 @@
             "bearer": []
           }
         ],
-        "summary": "Deletes a logical prompt (and its associated versions via Cascade) within a project by ID",
+        "summary": "Deletes a logical prompt (and its associated versions via Cascade) within a project by name",
         "tags": [
           "Prompts"
         ]
@@ -4785,6 +4783,52 @@
           "System Prompts"
         ]
       }
+    },
+    "/api/execute-raw": {
+      "post": {
+        "operationId": "RawExecutionController_executeRawText",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteRawDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Execution successful, response from AI model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data or unsupported provider."
+          },
+          "404": {
+            "description": "SystemPrompt or AIModel not found."
+          },
+          "500": {
+            "description": "Internal server error (API Key config, LLM execution failed)."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Executes raw text using a specified System Prompt and AI Model ID.",
+        "tags": [
+          "Raw Execution"
+        ]
+      }
     }
   },
   "info": {
@@ -5131,6 +5175,11 @@
             "description": "Description of the prompt's purpose.",
             "example": "Initial prompt to greet a customer."
           },
+          "tacticId": {
+            "type": "string",
+            "description": "ID (name) of the associated conversational tactic.",
+            "example": "start_small_talk"
+          },
           "tags": {
             "uniqueItems": true,
             "description": "List of tag names to associate.",
@@ -5168,6 +5217,12 @@
             "type": "string",
             "description": "New description of the prompt's purpose.",
             "example": "Updated prompt for greetings."
+          },
+          "tacticId": {
+            "type": "string",
+            "nullable": true,
+            "description": "ID of the tactic to associate, or null to disassociate.",
+            "example": "continue_small_talk"
           },
           "tagIds": {
             "description": "Complete list of Tag IDs to associate (replaces existing ones). Empty array to remove all.",
@@ -5897,6 +5952,31 @@
             "example": "summarization"
           }
         }
+      },
+      "ExecuteRawDto": {
+        "type": "object",
+        "properties": {
+          "userText": {
+            "type": "string",
+            "description": "The raw text input from the user.",
+            "example": "Explain the process of photosynthesis in simple terms."
+          },
+          "systemPromptName": {
+            "type": "string",
+            "description": "The unique name of the SystemPrompt to use.",
+            "example": "helpful_assistant_concise"
+          },
+          "aiModelId": {
+            "type": "string",
+            "description": "The unique ID (CUID) of the AIModel to use for execution.",
+            "example": "cmac24bp1000ck6x5iwgju5p1"
+          }
+        },
+        "required": [
+          "userText",
+          "systemPromptName",
+          "aiModelId"
+        ]
       }
     }
   }

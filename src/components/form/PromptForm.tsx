@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Select, { MultiValue } from 'react-select';
-import { Prompt, CreatePromptDto, UpdatePromptDto, tagService, Tag } from '@/services/api';
+import { CreatePromptDto, UpdatePromptDto, tagService, CreateTagDto } from '@/services/api';
+import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
+import GeneratePromptModal from '@/components/modal/GeneratePromptModal';
 
 interface PromptFormProps {
-    initialData: Prompt | null;
+    initialData: CreatePromptDto | null;
     onSave: (payload: CreatePromptDto | UpdatePromptDto) => void;
     onCancel: () => void;
     projectId: string;
@@ -17,12 +19,11 @@ interface TagOption {
 const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, projectId }) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
-    const [initialTagNames, setInitialTagNames] = useState<string[]>([]);
+    const [selectedTagNames, setSelectedTagNames] = useState<string[]>([]);
     const [promptText, setPromptText] = useState('');
-    const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+    const [availableTags, setAvailableTags] = useState<CreateTagDto[]>([]);
     const [loadingTags, setLoadingTags] = useState(true);
-    const [dataLoaded, setDataLoaded] = useState(false);
+    const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
 
     const isEditing = !!initialData;
 
@@ -38,7 +39,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
             setLoadingTags(true);
             try {
                 const fetchedTags = await tagService.findAll(projectId);
-                setAvailableTags(fetchedTags);
+                setAvailableTags(fetchedTags as CreateTagDto[]);
                 console.log('[PromptForm Effect FetchTags] availableTags set:', fetchedTags);
             } catch (error) {
                 console.error("[PromptForm Effect FetchTags] Failed to fetch tags:", error);
@@ -54,60 +55,47 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         if (initialData) {
             setName(initialData.name || '');
             setDescription(initialData.description || '');
-
-            console.log('[PromptForm Effect InitialData] Inspecting initialData.tags:', initialData.tags);
-            const names = initialData.tags
-                ?.map((tagObject: any) => tagObject?.name)
-                .filter((name): name is string => name !== undefined && name !== null) || [];
-
-            setInitialTagNames(names);
-            console.log('[PromptForm Effect InitialData] initialTagNames set:', names);
-            setDataLoaded(true);
-            setSelectedTagIds([]);
-            setPromptText('');
+            setPromptText(initialData.promptText || '');
+            setSelectedTagNames(Array.from(initialData.tags || []));
         } else {
             setName('');
             setDescription('');
-            setInitialTagNames([]);
-            setSelectedTagIds([]);
+            setSelectedTagNames([]);
             setPromptText('');
-            setDataLoaded(true);
         }
     }, [initialData]);
 
-    useEffect(() => {
-        if (dataLoaded && !loadingTags && initialTagNames.length > 0 && availableTags.length > 0) {
-            console.log('[PromptForm Effect MatchTags] Attempting to match names to available tags. Names:', initialTagNames, 'Available:', availableTags);
-            const foundIds = initialTagNames.map(nameToFind => {
-                const foundTag = availableTags.find(tag => tag.name === nameToFind);
-                return foundTag?.id;
-            }).filter((id): id is string => id !== undefined);
-
-            setSelectedTagIds(foundIds);
-            console.log('[PromptForm Effect MatchTags] selectedTagIds set after matching:', foundIds);
-        } else if (dataLoaded && !loadingTags) {
-            if (initialTagNames.length === 0 && selectedTagIds.length > 0) {
-                setSelectedTagIds([]);
-                console.log('[PromptForm Effect MatchTags] Resetting selectedTagIds as no initial names found.');
-            }
-        }
-    }, [dataLoaded, loadingTags, initialTagNames, availableTags]);
+    const handleGenerateComplete = (generatedText: string) => {
+        setPromptText(generatedText);
+        setIsGenerateModalOpen(false);
+        showSuccessToast("Prompt text updated from generator.");
+    };
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        let payload: any;
+        let payload: CreatePromptDto | UpdatePromptDto;
 
         if (isEditing) {
             payload = {
                 description: description || undefined,
-                tagIds: selectedTagIds.length > 0 ? selectedTagIds : [],
+                tags: new Set(selectedTagNames),
+                tacticId: initialData?.tacticId,
             };
+            if (Object.keys(payload).length === 0) {
+                showErrorToast("No changes detected to save.");
+                return;
+            }
         } else {
+            if (!promptText) {
+                showErrorToast("Please enter or generate the prompt text before creating.");
+                return;
+            }
             payload = {
                 name,
                 promptText: promptText,
                 description: description || undefined,
-                tags: selectedTagIds,
+                tags: new Set(selectedTagNames),
+                tacticId: undefined,
             };
         }
         console.log('[PromptForm] Saving payload:', payload);
@@ -115,27 +103,26 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
     };
 
     const handleTagSelectChange = (selectedOptions: MultiValue<TagOption>) => {
-        const newSelectedIds = selectedOptions ? selectedOptions.map(option => option.value) : [];
-        setSelectedTagIds(newSelectedIds);
-        console.log('[PromptForm] Tag selection changed:', newSelectedIds);
+        const newSelectedNames = selectedOptions ? selectedOptions.map(option => option.value) : [];
+        setSelectedTagNames(newSelectedNames);
     };
 
     const tagOptions: TagOption[] = useMemo(() => {
         console.log('[PromptForm Memo tagOptions] Recalculating based on availableTags:', availableTags);
         return availableTags.map(tag => ({
-            value: tag.id,
+            value: tag.name,
             label: tag.name
         }));
     }, [availableTags]);
 
-    const currentSelectedTags: TagOption[] = useMemo(() => {
-        console.log('[PromptForm Memo currentSelectedTags] Recalculating. Deps - selectedTagIds:', selectedTagIds, 'tagOptions:', tagOptions);
+    const currentSelectedTagOptions: TagOption[] = useMemo(() => {
+        console.log('[PromptForm Memo currentSelectedTags] Recalculating. Deps - selectedTagNames:', selectedTagNames, 'tagOptions:', tagOptions);
         const selected = tagOptions.filter(option =>
-            selectedTagIds.includes(option.value)
+            selectedTagNames.includes(option.value)
         );
         console.log('[PromptForm Memo currentSelectedTags] Calculated value:', selected);
         return selected;
-    }, [tagOptions, selectedTagIds]);
+    }, [tagOptions, selectedTagNames]);
 
     const selectStyles = {
         control: (baseStyles: any, state: any) => ({
@@ -181,75 +168,109 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         }),
     };
 
-    console.log(`[PromptForm Render] Rendering. Props for Select -> isLoading: ${loadingTags}, value:`, currentSelectedTags, 'options:', tagOptions);
+    console.log(`[PromptForm Render] Rendering. Props for Select -> isLoading: ${loadingTags}, value:`, currentSelectedTagOptions, 'options:', tagOptions);
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name (ID)</label>
-                <input
-                    type="text"
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    disabled={isEditing}
-                    pattern="^[a-z0-9_]+$"
-                    title="Only lowercase letters, numbers, and underscores"
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500"
-                />
-            </div>
-            <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                <textarea
-                    id="description"
-                    rows={3}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                />
-            </div>
-            {!isEditing && (
+        <>
+            <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                    <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Initial Prompt Text (v1.0.0)</label>
-                    <textarea
-                        id="promptText"
-                        rows={5}
-                        value={promptText}
-                        onChange={(e) => setPromptText(e.target.value)}
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name (ID)</label>
+                    <input
+                        type="text"
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                         required
+                        disabled={isEditing}
+                        pattern="^[a-z0-9_\-]+$"
+                        title="Only lowercase letters, numbers, underscores, and hyphens"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-600 disabled:text-gray-400"
+                    />
+                    {isEditing && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Prompt name cannot be changed after creation.</p>}
+                </div>
+                <div>
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                    <textarea
+                        id="description"
+                        rows={3}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                     />
                 </div>
-            )}
-            <div>
-                <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tags</label>
-                <Select<TagOption, true>
-                    instanceId={`prompt-tags-select-${projectId}`}
-                    id="tags"
-                    isMulti
-                    options={tagOptions}
-                    value={currentSelectedTags}
-                    onChange={handleTagSelectChange}
-                    isLoading={loadingTags}
-                    isDisabled={loadingTags || !projectId}
-                    placeholder={loadingTags ? "Loading tags..." : !projectId ? "Select a project first" : "Select tags..."}
-                    closeMenuOnSelect={false}
-                    className="mt-1"
-                    classNamePrefix="react-select"
-                />
-                {isEditing && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">La selección reemplaza los tags existentes.</p>}
-            </div>
-
-            <div className="flex justify-end space-x-2">
-                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:bg-gray-600">
-                    Cancel
-                </button>
-                <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    {isEditing ? 'Save Changes' : 'Create Prompt'}
-                </button>
-            </div>
-        </form>
+                {!isEditing && (
+                    <div className="space-y-2">
+                        <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Prompt Text (v1.0.0)</label>
+                        <textarea
+                            id="promptText"
+                            rows={8}
+                            value={promptText}
+                            onChange={(e) => setPromptText(e.target.value)}
+                            required
+                            placeholder="Enter prompt text manually or use the generator..."
+                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setIsGenerateModalOpen(true)}
+                            className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                        >
+                            Generate / Refine Prompt...
+                        </button>
+                    </div>
+                )}
+                {isEditing && initialData?.promptText && (
+                    <div>
+                        <label htmlFor="promptTextDisplay" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Prompt Text (Read Only - Managed via Versions)</label>
+                        <textarea
+                            id="promptTextDisplay"
+                            rows={8}
+                            value={promptText}
+                            readOnly
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400"
+                        />
+                    </div>
+                )}
+                <div>
+                    <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tags</label>
+                    <Select<TagOption, true>
+                        instanceId={`prompt-tags-select-${projectId}-${isEditing}`}
+                        id="tags"
+                        isMulti
+                        options={tagOptions}
+                        value={currentSelectedTagOptions}
+                        onChange={handleTagSelectChange}
+                        isLoading={loadingTags}
+                        isDisabled={loadingTags || !projectId}
+                        placeholder={loadingTags ? "Loading tags..." : !projectId ? "Select a project first" : "Select tags..."}
+                        closeMenuOnSelect={false}
+                        className="mt-1"
+                        classNamePrefix="react-select"
+                        styles={selectStyles}
+                    />
+                    {isEditing && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">La selección reemplaza los tags existentes al guardar.</p>}
+                </div>
+                <div className="flex justify-end space-x-2 pt-4">
+                    <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:bg-gray-600">
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={!isEditing && !promptText}
+                        className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                    >
+                        {isEditing ? 'Save Changes' : 'Create Prompt'}
+                    </button>
+                </div>
+            </form>
+            <GeneratePromptModal
+                isOpen={isGenerateModalOpen}
+                onClose={() => setIsGenerateModalOpen(false)}
+                onGenerateComplete={handleGenerateComplete}
+                projectId={projectId}
+                initialUserText={promptText}
+            />
+        </>
     );
 };
 
