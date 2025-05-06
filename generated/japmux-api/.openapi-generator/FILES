@@ -1,10 +1,12 @@
 .gitignore
 .npmignore
+.openapi-generator-ignore
 api.ts
 base.ts
 common.ts
 configuration.ts
 docs/AIModelsProjectSpecificApi.md
+docs/AiModelResponseDto.md
 docs/AssetTranslationsWithinProjectAssetVersionApi.md
 docs/AssetVersionLinkDto.md
 docs/AuthenticationApi.md
@@ -53,6 +55,7 @@ docs/RegionsApi.md
 docs/RegisterDto.md
 docs/ServePromptApi.md
 docs/SystemPromptsApi.md
+docs/TagDto.md
 docs/TagsApi.md
 docs/UpdateAiModelDto.md
 docs/UpdateAssetTranslationDto.md

@@ -26,6 +26,85 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerM
 /**
  * 
  * @export
+ * @interface AiModelResponseDto
+ */
+export interface AiModelResponseDto {
+    /**
+     * Unique CUID of the AI model
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'id': string;
+    /**
+     * Unique name for the AI model within the project
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'name': string;
+    /**
+     * Provider of the AI model
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'provider'?: string | null;
+    /**
+     * Optional description for the AI model
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'description'?: string | null;
+    /**
+     * Identifier used for API calls
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'apiIdentifier'?: string | null;
+    /**
+     * Environment variable name for the API Key
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'apiKeyEnvVar'?: string | null;
+    /**
+     * Default temperature setting
+     * @type {number}
+     * @memberof AiModelResponseDto
+     */
+    'temperature'?: number | null;
+    /**
+     * Default max tokens setting
+     * @type {number}
+     * @memberof AiModelResponseDto
+     */
+    'maxTokens'?: number | null;
+    /**
+     * Whether the model reliably supports JSON output mode
+     * @type {boolean}
+     * @memberof AiModelResponseDto
+     */
+    'supportsJson'?: boolean;
+    /**
+     * Maximum context window size in tokens
+     * @type {number}
+     * @memberof AiModelResponseDto
+     */
+    'contextWindow'?: number | null;
+    /**
+     * Timestamp of creation
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'createdAt': string;
+    /**
+     * ID of the project this model belongs to
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'projectId': string;
+}
+/**
+ * 
+ * @export
  * @interface AssetVersionLinkDto
  */
 export interface AssetVersionLinkDto {
@@ -940,6 +1019,37 @@ export interface RegisterDto {
 /**
  * 
  * @export
+ * @interface TagDto
+ */
+export interface TagDto {
+    /**
+     * Unique ID of the tag (CUID)
+     * @type {string}
+     * @memberof TagDto
+     */
+    'id': string;
+    /**
+     * Unique tag name within the project
+     * @type {string}
+     * @memberof TagDto
+     */
+    'name': string;
+    /**
+     * Description of the tag
+     * @type {string}
+     * @memberof TagDto
+     */
+    'description': string;
+    /**
+     * ID of the project this tag belongs to (CUID)
+     * @type {string}
+     * @memberof TagDto
+     */
+    'projectId': string;
+}
+/**
+ * 
+ * @export
  * @interface UpdateAiModelDto
  */
 export interface UpdateAiModelDto {
@@ -1575,7 +1685,7 @@ export const AIModelsProjectSpecificApiFp = function(configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aiModelControllerCreate(projectId: string, createAiModelDto: CreateAiModelDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateAiModelDto>> {
+        async aiModelControllerCreate(projectId: string, createAiModelDto: CreateAiModelDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AiModelResponseDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aiModelControllerCreate(projectId, createAiModelDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AIModelsProjectSpecificApi.aiModelControllerCreate']?.[localVarOperationServerIndex]?.url;
@@ -1588,7 +1698,7 @@ export const AIModelsProjectSpecificApiFp = function(configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aiModelControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CreateAiModelDto>>> {
+        async aiModelControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AiModelResponseDto>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aiModelControllerFindAll(projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AIModelsProjectSpecificApi.aiModelControllerFindAll']?.[localVarOperationServerIndex]?.url;
@@ -1602,7 +1712,7 @@ export const AIModelsProjectSpecificApiFp = function(configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aiModelControllerFindOne(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateAiModelDto>> {
+        async aiModelControllerFindOne(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AiModelResponseDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aiModelControllerFindOne(projectId, aiModelId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AIModelsProjectSpecificApi.aiModelControllerFindOne']?.[localVarOperationServerIndex]?.url;
@@ -1616,7 +1726,7 @@ export const AIModelsProjectSpecificApiFp = function(configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aiModelControllerRemove(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateAiModelDto>> {
+        async aiModelControllerRemove(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AiModelResponseDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aiModelControllerRemove(projectId, aiModelId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AIModelsProjectSpecificApi.aiModelControllerRemove']?.[localVarOperationServerIndex]?.url;
@@ -1631,7 +1741,7 @@ export const AIModelsProjectSpecificApiFp = function(configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aiModelControllerUpdate(projectId: string, aiModelId: string, updateAiModelDto: UpdateAiModelDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateAiModelDto>> {
+        async aiModelControllerUpdate(projectId: string, aiModelId: string, updateAiModelDto: UpdateAiModelDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AiModelResponseDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aiModelControllerUpdate(projectId, aiModelId, updateAiModelDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AIModelsProjectSpecificApi.aiModelControllerUpdate']?.[localVarOperationServerIndex]?.url;
@@ -1655,7 +1765,7 @@ export const AIModelsProjectSpecificApiFactory = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aiModelControllerCreate(projectId: string, createAiModelDto: CreateAiModelDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateAiModelDto> {
+        aiModelControllerCreate(projectId: string, createAiModelDto: CreateAiModelDto, options?: RawAxiosRequestConfig): AxiosPromise<AiModelResponseDto> {
             return localVarFp.aiModelControllerCreate(projectId, createAiModelDto, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1665,7 +1775,7 @@ export const AIModelsProjectSpecificApiFactory = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aiModelControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateAiModelDto>> {
+        aiModelControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AiModelResponseDto>> {
             return localVarFp.aiModelControllerFindAll(projectId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1676,7 +1786,7 @@ export const AIModelsProjectSpecificApiFactory = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aiModelControllerFindOne(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateAiModelDto> {
+        aiModelControllerFindOne(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): AxiosPromise<AiModelResponseDto> {
             return localVarFp.aiModelControllerFindOne(projectId, aiModelId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1687,7 +1797,7 @@ export const AIModelsProjectSpecificApiFactory = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aiModelControllerRemove(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateAiModelDto> {
+        aiModelControllerRemove(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): AxiosPromise<AiModelResponseDto> {
             return localVarFp.aiModelControllerRemove(projectId, aiModelId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1699,7 +1809,7 @@ export const AIModelsProjectSpecificApiFactory = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aiModelControllerUpdate(projectId: string, aiModelId: string, updateAiModelDto: UpdateAiModelDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateAiModelDto> {
+        aiModelControllerUpdate(projectId: string, aiModelId: string, updateAiModelDto: UpdateAiModelDto, options?: RawAxiosRequestConfig): AxiosPromise<AiModelResponseDto> {
             return localVarFp.aiModelControllerUpdate(projectId, aiModelId, updateAiModelDto, options).then((request) => request(axios, basePath));
         },
     };
@@ -8939,7 +9049,7 @@ export const TagsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tagControllerCreate(projectId: string, createTagDto: CreateTagDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateTagDto>> {
+        async tagControllerCreate(projectId: string, createTagDto: CreateTagDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TagDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tagControllerCreate(projectId, createTagDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TagsApi.tagControllerCreate']?.[localVarOperationServerIndex]?.url;
@@ -8952,7 +9062,7 @@ export const TagsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tagControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CreateTagDto>>> {
+        async tagControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TagDto>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tagControllerFindAll(projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TagsApi.tagControllerFindAll']?.[localVarOperationServerIndex]?.url;
@@ -8966,7 +9076,7 @@ export const TagsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tagControllerFindByName(name: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateTagDto>> {
+        async tagControllerFindByName(name: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TagDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tagControllerFindByName(name, projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TagsApi.tagControllerFindByName']?.[localVarOperationServerIndex]?.url;
@@ -8980,7 +9090,7 @@ export const TagsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tagControllerFindOne(tagId: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateTagDto>> {
+        async tagControllerFindOne(tagId: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TagDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tagControllerFindOne(tagId, projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TagsApi.tagControllerFindOne']?.[localVarOperationServerIndex]?.url;
@@ -8994,7 +9104,7 @@ export const TagsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tagControllerRemove(tagId: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateTagDto>> {
+        async tagControllerRemove(tagId: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TagDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tagControllerRemove(tagId, projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TagsApi.tagControllerRemove']?.[localVarOperationServerIndex]?.url;
@@ -9009,7 +9119,7 @@ export const TagsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tagControllerUpdate(tagId: string, projectId: string, updateTagDto: UpdateTagDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateTagDto>> {
+        async tagControllerUpdate(tagId: string, projectId: string, updateTagDto: UpdateTagDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TagDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tagControllerUpdate(tagId, projectId, updateTagDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TagsApi.tagControllerUpdate']?.[localVarOperationServerIndex]?.url;
@@ -9033,7 +9143,7 @@ export const TagsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tagControllerCreate(projectId: string, createTagDto: CreateTagDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto> {
+        tagControllerCreate(projectId: string, createTagDto: CreateTagDto, options?: RawAxiosRequestConfig): AxiosPromise<TagDto> {
             return localVarFp.tagControllerCreate(projectId, createTagDto, options).then((request) => request(axios, basePath));
         },
         /**
@@ -9043,7 +9153,7 @@ export const TagsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tagControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateTagDto>> {
+        tagControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<TagDto>> {
             return localVarFp.tagControllerFindAll(projectId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -9054,7 +9164,7 @@ export const TagsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tagControllerFindByName(name: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto> {
+        tagControllerFindByName(name: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<TagDto> {
             return localVarFp.tagControllerFindByName(name, projectId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -9065,7 +9175,7 @@ export const TagsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tagControllerFindOne(tagId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto> {
+        tagControllerFindOne(tagId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<TagDto> {
             return localVarFp.tagControllerFindOne(tagId, projectId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -9076,7 +9186,7 @@ export const TagsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tagControllerRemove(tagId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto> {
+        tagControllerRemove(tagId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<TagDto> {
             return localVarFp.tagControllerRemove(tagId, projectId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -9088,7 +9198,7 @@ export const TagsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tagControllerUpdate(tagId: string, projectId: string, updateTagDto: UpdateTagDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto> {
+        tagControllerUpdate(tagId: string, projectId: string, updateTagDto: UpdateTagDto, options?: RawAxiosRequestConfig): AxiosPromise<TagDto> {
             return localVarFp.tagControllerUpdate(tagId, projectId, updateTagDto, options).then((request) => request(axios, basePath));
         },
     };

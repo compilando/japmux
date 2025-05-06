@@ -3,7 +3,7 @@ import {
     systemPromptService,
     CreateSystemPromptDto,
     aiModelService,
-    CreateAiModelDto,
+    AiModelResponseDto,
     rawExecutionService,
     ExecuteRawDto
 } from '@/services/api';
@@ -23,9 +23,9 @@ interface SystemPromptOption {
 }
 
 interface AiModelOption {
-    value: string; // Usaremos name como value
-    label: string;
-    apiIdentifier: string; // Guardar el identificador real para la API
+    value: string; // Para el valor del Select (usaremos el 'name' del modelo)
+    label: string; // Para el texto visible en el Select
+    id: string;    // <--- El CUID real del AIModel
 }
 
 const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
@@ -40,9 +40,9 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
     const [loadingSystemPrompts, setLoadingSystemPrompts] = useState(true);
     const [selectedSystemPromptName, setSelectedSystemPromptName] = useState<string>('');
 
-    const [availableAiModels, setAvailableAiModels] = useState<CreateAiModelDto[]>([]);
+    const [availableAiModels, setAvailableAiModels] = useState<AiModelResponseDto[]>([]);
     const [loadingAiModels, setLoadingAiModels] = useState(true);
-    const [selectedAiModelName, setSelectedAiModelName] = useState<string>(''); // Guardar el 'name' para el select
+    const [selectedAiModelValue, setSelectedAiModelValue] = useState<string>(''); // Guardar el 'value' del select (que será model.name)
 
     const [generatedText, setGeneratedText] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
@@ -50,15 +50,14 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
     // --- Data Fetching Effects ---
 
     useEffect(() => {
+        console.log(`[GeneratePromptModal Effect SyncInitialText] isOpen: ${isOpen}`);
         if (isOpen) {
             console.log("[GeneratePromptModal Effect SyncInitialText] Modal opened. Setting userText from prop:", initialUserText);
             setUserText(initialUserText);
-            // Opcional: Limpiar el texto generado anteriormente al reabrir?
-            // setGeneratedText('');
         } else {
             console.log("[GeneratePromptModal Effect SyncInitialText] Modal closed.");
         }
-    }, [isOpen, initialUserText]); // Ejecutar si cambia isOpen o el texto inicial
+    }, [isOpen, initialUserText]);
 
     useEffect(() => {
         console.log(`[GeneratePromptModal Effect FetchSystemPrompts] isOpen: ${isOpen}`);
@@ -70,8 +69,6 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
                     console.log("[GeneratePromptModal Effect FetchSystemPrompts] API returned:", fetchedSystemPrompts);
                     setAvailableSystemPrompts(fetchedSystemPrompts);
                     if (fetchedSystemPrompts.length > 0) {
-                        // Solo seleccionar por defecto si NO hay uno ya seleccionado
-                        // O si el previamente seleccionado ya no está en la lista (podría pasar si se borran)
                         const currentSelectionIsValid = fetchedSystemPrompts.some(p => p.name === selectedSystemPromptName);
                         if (!selectedSystemPromptName || !currentSelectionIsValid) {
                             const defaultNameToSelect = fetchedSystemPrompts[0].name;
@@ -82,27 +79,22 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
                         }
                     } else {
                         console.log("[GeneratePromptModal Effect FetchSystemPrompts] No system prompts found, clearing selection.");
-                        setSelectedSystemPromptName(''); // Limpiar si no hay opciones
+                        setSelectedSystemPromptName('');
                     }
                 })
                 .catch(err => {
                     console.error("Failed to fetch system prompts in modal:", err);
                     showErrorToast("Failed to load system prompts.");
                     setAvailableSystemPrompts([]);
-                    setSelectedSystemPromptName(''); // Limpiar selección en caso de error
+                    setSelectedSystemPromptName('');
                 })
                 .finally(() => {
                     console.log("[GeneratePromptModal Effect FetchSystemPrompts] Finished loading.");
                     setLoadingSystemPrompts(false)
                 });
         } else {
-            // Opcional: Limpiar estado si se cierra el modal?
-            // setAvailableSystemPrompts([]);
-            // setSelectedSystemPromptName('');
-            // setGeneratedText('');
             console.log("[GeneratePromptModal Effect FetchSystemPrompts] Modal closed, skipping fetch.");
         }
-        // Dependencia solo de isOpen para que se ejecute al abrir/cerrar
     }, [isOpen]);
 
     useEffect(() => {
@@ -115,24 +107,24 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
                     console.log("[GeneratePromptModal Effect FetchAiModels] API returned:", fetchedAiModels);
                     setAvailableAiModels(fetchedAiModels);
                     if (fetchedAiModels.length > 0) {
-                        const currentSelectionIsValid = fetchedAiModels.some(m => m.name === selectedAiModelName);
-                        if (!selectedAiModelName || !currentSelectionIsValid) {
-                            const defaultNameToSelect = fetchedAiModels[0].name;
-                            setSelectedAiModelName(defaultNameToSelect);
-                            console.log("[GeneratePromptModal Effect FetchAiModels] Setting default AI model:", defaultNameToSelect);
+                        const currentSelectionIsValid = fetchedAiModels.some(m => m.name === selectedAiModelValue);
+                        if (!selectedAiModelValue || !currentSelectionIsValid) {
+                            const defaultModelValueToSelect = fetchedAiModels[0].name;
+                            setSelectedAiModelValue(defaultModelValueToSelect);
+                            console.log("[GeneratePromptModal Effect FetchAiModels] Setting default AI model value:", defaultModelValueToSelect);
                         } else {
-                            console.log("[GeneratePromptModal Effect FetchAiModels] Keeping existing AI Model selection:", selectedAiModelName);
+                            console.log("[GeneratePromptModal Effect FetchAiModels] Keeping existing AI Model selection value:", selectedAiModelValue);
                         }
                     } else {
                         console.log("[GeneratePromptModal Effect FetchAiModels] No AI models found, clearing selection.");
-                        setSelectedAiModelName(''); // Limpiar si no hay opciones
+                        setSelectedAiModelValue('');
                     }
                 })
                 .catch(err => {
                     console.error("Failed to fetch AI models in modal:", err);
                     showErrorToast("Failed to load AI models.");
                     setAvailableAiModels([]);
-                    setSelectedAiModelName(''); // Limpiar selección en caso de error
+                    setSelectedAiModelValue('');
                 })
                 .finally(() => {
                     console.log("[GeneratePromptModal Effect FetchAiModels] Finished loading.");
@@ -141,12 +133,11 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
         } else if (!projectId && isOpen) {
             console.log("[GeneratePromptModal Effect FetchAiModels] No projectId, clearing AI models.");
             setAvailableAiModels([]);
-            setSelectedAiModelName('');
+            setSelectedAiModelValue('');
             setLoadingAiModels(false);
         } else {
             console.log("[GeneratePromptModal Effect FetchAiModels] Modal closed or no projectId, skipping fetch.");
         }
-        // Dependencias: isOpen y projectId
     }, [isOpen, projectId]);
 
     // --- Memoized Options for Selects ---
@@ -160,42 +151,51 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
 
     const aiModelOptions: AiModelOption[] = useMemo(() => {
         return availableAiModels.map(model => ({
-            value: model.name, // Usar name para el valor del select
-            label: `${model.name}${model.provider ? ` (${model.provider})` : ''}`,
-            apiIdentifier: model.apiIdentifier || model.name // Usar apiIdentifier si existe, sino name
+            value: model.name,
+            label: `${model.name}${model.provider ? ` (${model.provider})` : ''} ${model.apiIdentifier ? `[${model.apiIdentifier}]` : ''}`,
+            id: model.id,
         }));
     }, [availableAiModels]);
 
     // --- Event Handlers ---
 
     const handleGenerate = async () => {
-        if (!selectedSystemPromptName || !selectedAiModelName) {
+        if (!selectedSystemPromptName || !selectedAiModelValue) {
             showErrorToast("Please select both a System Prompt and an AI Model.");
             return;
         }
 
-        const selectedModelOption = aiModelOptions.find(m => m.value === selectedAiModelName);
+        const selectedModelOption = aiModelOptions.find(m => m.value === selectedAiModelValue);
+
         if (!selectedModelOption) {
-            showErrorToast("Selected AI model not found in options.");
+            showErrorToast("Selected AI model details not found. Cannot get CUID.");
+            console.error("[GeneratePromptModal handleGenerate] Could not find selected model in aiModelOptions. Selected value:", selectedAiModelValue, "Available options:", aiModelOptions);
             return;
         }
-        // Usar el apiIdentifier guardado, o el nombre como fallback
-        const modelIdToUse = selectedModelOption.apiIdentifier;
+
+        const modelCuidToUse = selectedModelOption.id;
+        console.log(`[GeneratePromptModal handleGenerate] Using AI Model CUID: ${modelCuidToUse} (from selected option value: ${selectedModelOption.value})`);
 
         setIsGenerating(true);
-        setGeneratedText(''); // Limpiar resultado anterior
+        setGeneratedText('');
         const payload: ExecuteRawDto = {
             userText: userText,
             systemPromptName: selectedSystemPromptName,
-            aiModelId: modelIdToUse,
+            aiModelId: modelCuidToUse,
         };
+
+        console.log("[GeneratePromptModal handleGenerate] Sending payload:", payload);
 
         try {
             const result = await rawExecutionService.executeRaw(payload);
             let resultText = '';
+            console.log("[GeneratePromptModal handleGenerate] Raw API Result:", result); // Log para ver la estructura
+
             // Extraer el texto de la respuesta (puede variar según la API)
             if (typeof result === 'string') {
                 resultText = result;
+            } else if (result && typeof result.response === 'string') { // <--- AÑADIR ESTA CONDICIÓN
+                resultText = result.response;
             } else if (result && typeof result.text === 'string') {
                 resultText = result.text;
             } else if (result && typeof result.result === 'string') {
@@ -213,7 +213,7 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
             console.error("Error executing raw text:", error);
             const apiErrorMessage = (error as any)?.response?.data?.message || 'Failed to generate text.';
             showErrorToast(apiErrorMessage);
-            setGeneratedText(''); // Limpiar en caso de error
+            setGeneratedText('');
         } finally {
             setIsGenerating(false);
         }
@@ -222,7 +222,7 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
     const handleAccept = () => {
         if (generatedText) {
             onGenerateComplete(generatedText);
-            onClose(); // Cerrar modal después de aceptar
+            onClose();
         } else {
             showErrorToast("Please generate text first before accepting.");
         }
@@ -230,7 +230,7 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
 
     // --- Render Logic ---
 
-    console.log("[GeneratePromptModal Render] Rendering. isOpen:", isOpen, "loadingSP:", loadingSystemPrompts, "loadingAI:", loadingAiModels, "selectedSP:", selectedSystemPromptName, "selectedAI:", selectedAiModelName);
+    console.log("[GeneratePromptModal Render] Rendering. isOpen:", isOpen, "loadingSP:", loadingSystemPrompts, "loadingAI:", loadingAiModels, "selectedSP:", selectedSystemPromptName, "selectedAIValue:", selectedAiModelValue);
 
     if (!isOpen) {
         return null;
@@ -272,8 +272,8 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
                     <label htmlFor="modalAiModel" className="block text-sm font-medium text-gray-700 dark:text-gray-300">AI Model</label>
                     <select
                         id="modalAiModel"
-                        value={selectedAiModelName} // Controla con el 'name'
-                        onChange={(e) => setSelectedAiModelName(e.target.value)}
+                        value={selectedAiModelValue}
+                        onChange={(e) => setSelectedAiModelValue(e.target.value)}
                         required
                         disabled={loadingAiModels || isGenerating || !projectId}
                         className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -282,7 +282,7 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
                             <option>Loading AI models...</option>
                         ) : projectId ? (
                             aiModelOptions.map(option => (
-                                <option key={option.value} value={option.value}>{option.label}</option>
+                                <option key={option.id} value={option.value}>{option.label}</option>
                             ))
                         ) : (
                             <option disabled value="">Select a project first</option>
@@ -313,7 +313,7 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
                     <button
                         type="button"
                         onClick={handleGenerate}
-                        disabled={isGenerating || loadingSystemPrompts || loadingAiModels || !selectedSystemPromptName || !selectedAiModelName}
+                        disabled={isGenerating || loadingSystemPrompts || loadingAiModels || !selectedSystemPromptName || !selectedAiModelValue}
                         className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
                     >
                         {isGenerating ? 'Generating...' : 'Generate Text'}

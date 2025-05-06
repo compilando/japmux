@@ -81,6 +81,7 @@ const promptVersionsGeneratedApi = new generated.PromptVersionsWithinProjectProm
 const promptTranslationsGeneratedApi = new generated.PromptTranslationsWithinProjectPromptVersionApi(generatedApiConfig, undefined, apiClient);
 const systemPromptsGeneratedApi = new generated.SystemPromptsApi(generatedApiConfig, undefined, apiClient);
 const rawExecutionGeneratedApi = new generated.RawExecutionApi(generatedApiConfig, undefined, apiClient);
+const tagsGeneratedApi = new generated.TagsApi(generatedApiConfig, undefined, apiClient);
 // const authGeneratedApi = new generated.AuthenticationApi(generatedApiConfig, undefined, apiClient); // Si decides reemplazar authService
 
 // --- Servicios Manuales (Wrapper sobre los generados o lógica personalizada) ---
@@ -255,44 +256,28 @@ export const environmentService = {
     },
 };
 
-// Servicio de Tags (Mantener manual o reemplazar con generated.TagsApi)
+// Servicio de Tags (Actualizado para usar generado y TagDto con ID)
 export const tagService = {
-    findAll: async (projectId: string): Promise<generated.CreateTagDto[]> => { // Usar CreateTagDto
-        // Reemplazar con: const response = await tagsGeneratedApi.tagControllerFindAll(projectId); return response.data;
-        const response = await apiClient.get<generated.CreateTagDto[]>(`/api/projects/${projectId}/tags`);
+    findAll: async (projectId: string): Promise<generated.TagDto[]> => {
+        const response = await tagsGeneratedApi.tagControllerFindAll(projectId);
         return response.data;
     },
-    findOne: async (projectId: string, tagId: string): Promise<generated.CreateTagDto> => { // Usar CreateTagDto
-        // Reemplazar con: const response = await tagsGeneratedApi.tagControllerFindOne(tagId, projectId); return response.data;
-        const response = await apiClient.get<generated.CreateTagDto>(`/api/projects/${projectId}/tags/${tagId}`);
+    findOne: async (projectId: string, tagId: string): Promise<generated.TagDto> => {
+        const response = await tagsGeneratedApi.tagControllerFindOne(tagId, projectId);
         return response.data;
     },
-    findByName: async (projectId: string, name: string): Promise<generated.CreateTagDto | null> => { // Usar CreateTagDto
-        // Reemplazar con: try { const response = await tagsGeneratedApi.tagControllerFindByName(name, projectId); return response.data; } catch (e) { if (e.response?.status === 404) return null; throw e; }
-        try {
-            const response = await apiClient.get<generated.CreateTagDto>(`/api/projects/${projectId}/tags/by-name/${name}`);
-            return response.data;
-        } catch (error: any) {
-            if (error.response && error.response.status === 404) {
-                return null;
-            }
-            throw error;
-        }
-    },
-    create: async (projectId: string, payload: generated.CreateTagDto): Promise<generated.CreateTagDto> => { // Usar CreateTagDto
-        // Reemplazar con: const response = await tagsGeneratedApi.tagControllerCreate(projectId, payload); return response.data;
-        const response = await apiClient.post<generated.CreateTagDto>(`/api/projects/${projectId}/tags`, payload);
+    create: async (projectId: string, data: generated.CreateTagDto): Promise<generated.TagDto> => {
+        const response = await tagsGeneratedApi.tagControllerCreate(projectId, data);
         return response.data;
     },
-    update: async (projectId: string, tagId: string, payload: generated.UpdateTagDto): Promise<generated.CreateTagDto> => { // Usar CreateTagDto como retorno
-        // Reemplazar con: const response = await tagsGeneratedApi.tagControllerUpdate(tagId, projectId, payload); return response.data;
-        const response = await apiClient.patch<generated.CreateTagDto>(`/api/projects/${projectId}/tags/${tagId}`, payload);
+    update: async (projectId: string, tagId: string, data: generated.UpdateTagDto): Promise<generated.TagDto> => {
+        const response = await tagsGeneratedApi.tagControllerUpdate(tagId, projectId, data);
         return response.data;
     },
-    remove: async (projectId: string, tagId: string): Promise<void> => {
-        // Reemplazar con: await tagsGeneratedApi.tagControllerRemove(tagId, projectId);
-        await apiClient.delete(`/api/projects/${projectId}/tags/${tagId}`);
-    },
+    delete: async (projectId: string, tagId: string): Promise<generated.TagDto> => {
+        const response = await tagsGeneratedApi.tagControllerRemove(tagId, projectId);
+        return response.data;
+    }
 };
 
 // Servicio de Prompts (Actualizado para usar generado donde aplique)
@@ -560,34 +545,33 @@ export const culturalDataService = {
 
 // Servicio de AI Models (Actualizado para usar generado)
 export const aiModelService = {
-    findAll: async (projectId: string): Promise<generated.CreateAiModelDto[]> => {
+    findAll: async (projectId: string): Promise<generated.AiModelResponseDto[]> => {
         const response = await aiModelsGeneratedApi.aiModelControllerFindAll(projectId);
-        // El tipo de retorno real del método generado es Array<CreateAiModelDto>, no AiModel[]
-        // Se ajusta el tipo de retorno del wrapper
+        // El tipo de retorno real del método generado ahora es Array<AiModelResponseDto>
         return response.data;
     },
-    findOne: async (projectId: string, id: string): Promise<generated.CreateAiModelDto> => {
+    findOne: async (projectId: string, id: string): Promise<generated.AiModelResponseDto> => {
         const response = await aiModelsGeneratedApi.aiModelControllerFindOne(projectId, id);
-        // El tipo de retorno real es CreateAiModelDto
+        // El tipo de retorno real es AiModelResponseDto
         return response.data;
     },
-    create: async (projectId: string, payload: generated.CreateAiModelDto): Promise<generated.CreateAiModelDto> => {
+    create: async (projectId: string, payload: generated.CreateAiModelDto): Promise<generated.AiModelResponseDto> => {
+        // El create sigue usando CreateAiModelDto como payload, pero devuelve AiModelResponseDto
         const response = await aiModelsGeneratedApi.aiModelControllerCreate(projectId, payload);
-        // El tipo de retorno real es CreateAiModelDto
         return response.data;
     },
-    update: async (projectId: string, id: string, payload: generated.UpdateAiModelDto): Promise<generated.CreateAiModelDto> => {
+    update: async (projectId: string, id: string, payload: generated.UpdateAiModelDto): Promise<generated.AiModelResponseDto> => {
+        // El update sigue usando UpdateAiModelDto como payload, pero devuelve AiModelResponseDto
         const response = await aiModelsGeneratedApi.aiModelControllerUpdate(projectId, id, payload);
-        // El tipo de retorno real es CreateAiModelDto
         return response.data;
     },
     remove: async (projectId: string, id: string): Promise<void> => {
-        // El método generado remove devuelve CreateAiModelDto, pero lo ignoramos aquí ya que solo necesitamos el efecto secundario
+        // El método generado remove ahora devuelve AiModelResponseDto, pero lo ignoramos aquí.
         await aiModelsGeneratedApi.aiModelControllerRemove(projectId, id);
     },
 };
 
-// Servicio de LLM Execution (Nuevo, usando generado)
+// Servicio de LLM Execution (Actualizado para usar generado)
 export const llmExecutionService = {
     // El tipo de retorno del método generado es 'any'. Se puede especificar un tipo más concreto si se conoce la estructura de la respuesta.
     execute: async (payload: generated.ExecuteLlmDto): Promise<any> => {
