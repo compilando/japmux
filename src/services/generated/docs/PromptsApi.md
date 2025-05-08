@@ -4,12 +4,12 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**promptControllerAddOrUpdateTranslation**](#promptcontrolleraddorupdatetranslation) | **PUT** /api/projects/{projectId}/prompts/{promptName}/versions/{versionId}/translations | Adds or updates a translation for a specific prompt version in the project.|
-|[**promptControllerCreate**](#promptcontrollercreate) | **POST** /api/projects/{projectId}/prompts | Creates a new logical prompt within a project|
+|[**promptControllerAddOrUpdateTranslation**](#promptcontrolleraddorupdatetranslation) | **PUT** /api/projects/{projectId}/prompts/versions/{versionIdCuid}/translations | Adds or updates a translation for a specific prompt version (identified by CUID) in the project.|
+|[**promptControllerCreate**](#promptcontrollercreate) | **POST** /api/projects/{projectId}/prompts | Creates a new logical prompt (with ID as slug) within a project|
 |[**promptControllerFindAll**](#promptcontrollerfindall) | **GET** /api/projects/{projectId}/prompts | Gets all logical prompts for a project|
-|[**promptControllerFindOne**](#promptcontrollerfindone) | **GET** /api/projects/{projectId}/prompts/{promptName} | Gets a logical prompt by its name within a project|
-|[**promptControllerRemove**](#promptcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptName} | Deletes a logical prompt (and its associated versions via Cascade) within a project by name|
-|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptName} | Updates an existing prompt by its name for a specific project|
+|[**promptControllerFindOne**](#promptcontrollerfindone) | **GET** /api/projects/{projectId}/prompts/{promptId} | Gets a logical prompt by its ID (slug) within a project|
+|[**promptControllerRemove**](#promptcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptId} | Deletes a logical prompt (and its associated versions via Cascade) within a project by ID (slug)|
+|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptId} | Updates an existing prompt by its ID (slug) for a specific project|
 
 # **promptControllerAddOrUpdateTranslation**
 > promptControllerAddOrUpdateTranslation(createOrUpdatePromptTranslationDto)
@@ -27,14 +27,12 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let versionId: string; //ID of the version to translate (CUID) (default to undefined)
-let promptName: string; //Parent prompt name (contextual) (default to undefined)
-let projectId: string; //Project ID (default to undefined)
+let versionIdCuid: string; //ID of the version to translate (CUID) (default to undefined)
+let projectId: string; //Project ID (slug) (default to undefined)
 let createOrUpdatePromptTranslationDto: CreateOrUpdatePromptTranslationDto; //
 
 const { status, data } = await apiInstance.promptControllerAddOrUpdateTranslation(
-    versionId,
-    promptName,
+    versionIdCuid,
     projectId,
     createOrUpdatePromptTranslationDto
 );
@@ -45,9 +43,8 @@ const { status, data } = await apiInstance.promptControllerAddOrUpdateTranslatio
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **createOrUpdatePromptTranslationDto** | **CreateOrUpdatePromptTranslationDto**|  | |
-| **versionId** | [**string**] | ID of the version to translate (CUID) | defaults to undefined|
-| **promptName** | [**string**] | Parent prompt name (contextual) | defaults to undefined|
-| **projectId** | [**string**] | Project ID | defaults to undefined|
+| **versionIdCuid** | [**string**] | ID of the version to translate (CUID) | defaults to undefined|
+| **projectId** | [**string**] | Project ID (slug) | defaults to undefined|
 
 
 ### Return type
@@ -69,6 +66,7 @@ void (empty response body)
 |-------------|-------------|------------------|
 |**200** | Translation created or updated. |  -  |
 |**400** | Invalid data. |  -  |
+|**403** | Forbidden (Version not in Project). |  -  |
 |**404** | Project or Version not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -89,7 +87,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let projectId: string; //Project ID (default to undefined)
+let projectId: string; //Project ID (slug) (default to undefined)
 let createPromptDto: CreatePromptDto; //
 
 const { status, data } = await apiInstance.promptControllerCreate(
@@ -103,7 +101,7 @@ const { status, data } = await apiInstance.promptControllerCreate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **createPromptDto** | **CreatePromptDto**|  | |
-| **projectId** | [**string**] | Project ID | defaults to undefined|
+| **projectId** | [**string**] | Project ID (slug) | defaults to undefined|
 
 
 ### Return type
@@ -124,9 +122,9 @@ const { status, data } = await apiInstance.promptControllerCreate(
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**201** | Prompt created. |  -  |
-|**400** | Invalid data (e.g., missing initial promptText). |  -  |
+|**400** | Invalid data. |  -  |
 |**404** | Project or Tag not found. |  -  |
-|**409** | Conflict, a prompt with this name already exists in the project. |  -  |
+|**409** | Conflict, the generated slug for this prompt name already exists globally. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -145,7 +143,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let projectId: string; //Project ID (default to undefined)
+let projectId: string; //Project ID (slug) (default to undefined)
 
 const { status, data } = await apiInstance.promptControllerFindAll(
     projectId
@@ -156,7 +154,7 @@ const { status, data } = await apiInstance.promptControllerFindAll(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **projectId** | [**string**] | Project ID | defaults to undefined|
+| **projectId** | [**string**] | Project ID (slug) | defaults to undefined|
 
 
 ### Return type
@@ -196,11 +194,11 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let promptName: string; //Unique name of the prompt within the project (default to undefined)
-let projectId: string; //Project ID (default to undefined)
+let promptId: string; //ID (slug) of the prompt (default to undefined)
+let projectId: string; //Project ID (slug) (default to undefined)
 
 const { status, data } = await apiInstance.promptControllerFindOne(
-    promptName,
+    promptId,
     projectId
 );
 ```
@@ -209,8 +207,8 @@ const { status, data } = await apiInstance.promptControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **promptName** | [**string**] | Unique name of the prompt within the project | defaults to undefined|
-| **projectId** | [**string**] | Project ID | defaults to undefined|
+| **promptId** | [**string**] | ID (slug) of the prompt | defaults to undefined|
+| **projectId** | [**string**] | Project ID (slug) | defaults to undefined|
 
 
 ### Return type
@@ -250,11 +248,11 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let promptName: string; //Name of the prompt to delete (default to undefined)
-let projectId: string; //Project ID (default to undefined)
+let promptId: string; //ID (slug) of the prompt to delete (default to undefined)
+let projectId: string; //Project ID (slug) (default to undefined)
 
 const { status, data } = await apiInstance.promptControllerRemove(
-    promptName,
+    promptId,
     projectId
 );
 ```
@@ -263,8 +261,8 @@ const { status, data } = await apiInstance.promptControllerRemove(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **promptName** | [**string**] | Name of the prompt to delete | defaults to undefined|
-| **projectId** | [**string**] | Project ID | defaults to undefined|
+| **promptId** | [**string**] | ID (slug) of the prompt to delete | defaults to undefined|
+| **projectId** | [**string**] | Project ID (slug) | defaults to undefined|
 
 
 ### Return type
@@ -306,12 +304,12 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let promptName: string; //Name of the prompt to update (default to undefined)
-let projectId: string; //Project ID (default to undefined)
+let promptId: string; //ID (slug) of the prompt to update (default to undefined)
+let projectId: string; //Project ID (slug) (default to undefined)
 let updatePromptDto: UpdatePromptDto; //Data to update the prompt
 
 const { status, data } = await apiInstance.promptControllerUpdate(
-    promptName,
+    promptId,
     projectId,
     updatePromptDto
 );
@@ -322,8 +320,8 @@ const { status, data } = await apiInstance.promptControllerUpdate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **updatePromptDto** | **UpdatePromptDto**| Data to update the prompt | |
-| **promptName** | [**string**] | Name of the prompt to update | defaults to undefined|
-| **projectId** | [**string**] | Project ID | defaults to undefined|
+| **promptId** | [**string**] | ID (slug) of the prompt to update | defaults to undefined|
+| **projectId** | [**string**] | Project ID (slug) | defaults to undefined|
 
 
 ### Return type

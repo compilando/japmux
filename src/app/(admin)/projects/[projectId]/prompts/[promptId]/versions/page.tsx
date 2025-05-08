@@ -22,10 +22,27 @@ import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 // --- Interfaces Locales Extendidas ---
-// Asume that the API returns isActive even though the generated DTO does not include it
-interface PromptVersionData extends CreatePromptVersionDto {
-    isActive: boolean;
+// Exportar esta interfaz para poder usarla en el componente hijo (Table)
+export interface PromptVersionData extends CreatePromptVersionDto {
+    id: string; // Asumir que ID siempre está presente en la respuesta
+    isActive: boolean; // El campo que ya se asumía
+    promptId: string; // Añadir promptId, necesario para links en la tabla
 }
+
+// --- Helper para versionado (simplificado) ---
+const getLatestVersionTag = (versions: PromptVersionData[]): string | null => {
+    if (!versions || versions.length === 0) return null;
+    // Ordenar por versionTag (asume formato vX.Y.Z y orden lexicográfico simple)
+    // Una implementación robusta usaría librerías semver
+    const sorted = [...versions].sort((a, b) => {
+        // Comparación básica asumiendo prefijo 'v'
+        const tagA = a.versionTag?.startsWith('v') ? a.versionTag.substring(1) : a.versionTag;
+        const tagB = b.versionTag?.startsWith('v') ? b.versionTag.substring(1) : b.versionTag;
+        // Simple comparación lexicográfica (puede fallar con v1.10.0 vs v1.2.0)
+        return (tagB || '').localeCompare(tagA || ''); // Orden descendente
+    });
+    return sorted[0].versionTag || null;
+};
 
 // Type for the update payload, allowing isActive
 // (Although UpdatePromptVersionDto should ideally allow it)
@@ -39,6 +56,7 @@ const PromptVersionsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     // Use local extended type if editing
     const [editingItem, setEditingItem] = useState<PromptVersionData | null>(null);
+    const [latestVersionTagForForm, setLatestVersionTagForForm] = useState<string | null>(null);
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
     const [prompt, setPrompt] = useState<CreatePromptDto | null>(null);
@@ -107,11 +125,16 @@ const PromptVersionsPage: React.FC = () => {
             const data = await promptVersionService.findAll(projectId, promptId);
             if (Array.isArray(data)) {
                 // Cast to local interface that includes isActive
-                setItemsList(data as PromptVersionData[]);
+                const versionsData = data as PromptVersionData[];
+                setItemsList(versionsData);
+                // Calcular el último tag después de obtener los datos
+                const latestTag = getLatestVersionTag(versionsData);
+                setLatestVersionTagForForm(latestTag);
             } else {
                 console.error("API response is not an array:", data);
                 setError('Received invalid data format.');
                 setItemsList([]);
+                setLatestVersionTagForForm(null);
             }
         } catch (err) {
             console.error("Error fetching items:", err);
@@ -121,6 +144,7 @@ const PromptVersionsPage: React.FC = () => {
             setError('Failed to fetch items.');
             showErrorToast('Failed to fetch prompt versions.');
             setItemsList([]);
+            setLatestVersionTagForForm(null);
         } finally {
             setLoading(false);
         }
@@ -268,6 +292,7 @@ const PromptVersionsPage: React.FC = () => {
                             initialData={editingItem}
                             onSave={handleSave}
                             onCancel={() => setIsModalOpen(false)}
+                            latestVersionTag={latestVersionTagForForm ?? undefined}
                         />
                     </div>
                 </div>

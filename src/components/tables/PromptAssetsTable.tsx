@@ -1,12 +1,19 @@
 import React from 'react';
 import Link from 'next/link';
-import { PromptAsset } from '@/services/api';
+import { CreatePromptAssetDto } from '@/services/api';
 import CopyButton from '../common/CopyButton';
 
+// Nueva interfaz local para incluir campos que podrían no estar en CreatePromptAssetDto
+// pero que la API podría devolver y la tabla necesita (ej: enabled)
+export interface PromptAssetData extends CreatePromptAssetDto {
+    enabled?: boolean; // Asumir que 'enabled' viene de la API aunque no esté en el DTO
+    // key: string; // key ya está en CreatePromptAssetDto
+}
+
 interface PromptAssetsTableProps {
-    promptAssets: PromptAsset[];
+    promptAssets: PromptAssetData[]; // Usar la nueva interfaz
     projectId: string;
-    onEdit: (item: PromptAsset) => void;
+    onEdit: (item: PromptAssetData) => void; // Usar la nueva interfaz
     onDelete: (assetKey: string) => void;
     loading?: boolean;
 }
@@ -48,7 +55,7 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                                 <button onClick={() => onEdit(item)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600">Edit</button>
-                                <Link href={`/projects/${projectId}/assets/${item.key}/versions`} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600">
+                                <Link href={`/projects/${projectId}/prompt-assets/${item.key}/versions`} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600">
                                     Versions
                                 </Link>
                                 <button onClick={() => onDelete(item.key)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">Delete</button>

@@ -5,9 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**assetId** | **string** | Key (slug) del asset lógico al que pertenece esta versión | [default to undefined]
-**value** | **string** | El valor del asset para esta versión | [default to undefined]
-**versionTag** | **string** | Etiqueta de versión (e.g., v1.0.0). Debe ser única por asset. | [optional] [default to 'v1.0.0']
+**value** | **string** | El valor del asset para esta nueva versión | [default to undefined]
+**versionTag** | **string** | Etiqueta de versión (e.g., v1.0.1, v1.1.0). Si no se provee, se podría auto-incrementar o requerir. | [optional] [default to undefined]
 **changeMessage** | **string** | Mensaje describiendo los cambios en esta versión. | [optional] [default to undefined]
 
 ## Example
@@ -16,7 +15,6 @@ Name | Type | Description | Notes
 import { CreatePromptAssetVersionDto } from './api';
 
 const instance: CreatePromptAssetVersionDto = {
-    assetId,
     value,
     versionTag,
     changeMessage,

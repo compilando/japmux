@@ -1,15 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { PromptAssetVersion, CreatePromptAssetVersionDto, UpdatePromptAssetVersionDto } from '@/services/api';
+import { CreatePromptAssetVersionDto, UpdatePromptAssetVersionDto } from '@/services/api';
 
 interface PromptAssetVersionFormProps {
-    initialData: PromptAssetVersion | null;
+    initialData: CreatePromptAssetVersionDto | null;
     onSave: (payload: CreatePromptAssetVersionDto | UpdatePromptAssetVersionDto) => void;
     onCancel: () => void;
+    latestVersionTag?: string;
 }
 
-const PromptAssetVersionForm: React.FC<PromptAssetVersionFormProps> = ({ initialData, onSave, onCancel }) => {
+// Helper para calcular la siguiente versión (simplificado)
+const calculateNextAssetVersionTag = (latestTag: string | null | undefined): string => {
+    // Lógica muy básica, similar a la de PromptVersionForm
+    let baseTag = latestTag;
+    let suffix = '';
+    if (latestTag) {
+        const suffixMatch = latestTag.match(/(-[a-zA-Z0-9-.]+)?(\+[a-zA-Z0-9-.]+)?$/);
+        if (suffixMatch && suffixMatch[0]) {
+            suffix = suffixMatch[0];
+            baseTag = latestTag.substring(0, latestTag.length - suffix.length);
+        }
+    }
+
+    if (!baseTag || !baseTag.startsWith('v')) return 'v1.0.0'; // Default si no hay base o formato incorrecto
+
+    const parts = baseTag.substring(1).split('.').map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) return 'v1.0.0'; // Default si el formato no es vX.Y.Z
+
+    parts[2]++; // Incrementar patch
+    // Podría añadirse lógica para incrementar minor/major si es necesario
+
+    return `v${parts.join('.')}${suffix}`;
+};
+
+const PromptAssetVersionForm: React.FC<PromptAssetVersionFormProps> = ({ initialData, onSave, onCancel, latestVersionTag }) => {
     const [value, setValue] = useState('');
-    const [versionTag, setVersionTag] = useState('v1.0.0');
+    // Usar latestVersionTag para inicializar el estado de versionTag en modo creación
+    const [versionTag, setVersionTag] = useState(() => {
+        if (initialData) return initialData.versionTag || 'v1.0.0';
+        return calculateNextAssetVersionTag(latestVersionTag);
+    });
     const [changeMessage, setChangeMessage] = useState('');
 
     const isEditing = !!initialData;
@@ -17,14 +46,16 @@ const PromptAssetVersionForm: React.FC<PromptAssetVersionFormProps> = ({ initial
     useEffect(() => {
         if (initialData) {
             setValue(initialData.value || '');
-            setVersionTag(initialData.versionTag || '');
+            setVersionTag(initialData.versionTag || 'v1.0.0'); // Si es edición, usar el tag existente
             setChangeMessage(initialData.changeMessage || '');
         } else {
+            // En modo creación, ya se establece arriba con calculateNextAssetVersionTag
+            // así que solo reseteamos los otros campos
             setValue('');
-            setVersionTag('v1.0.0');
+            setVersionTag(calculateNextAssetVersionTag(latestVersionTag)); // Asegurar que se recalcula si latestVersionTag cambia
             setChangeMessage('');
         }
-    }, [initialData]);
+    }, [initialData, latestVersionTag]);
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();

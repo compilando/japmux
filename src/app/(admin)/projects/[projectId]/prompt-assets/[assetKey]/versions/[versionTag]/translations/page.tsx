@@ -3,28 +3,31 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import {
-    Project,
-    PromptAsset,
-    PromptAssetTranslation,
-    promptAssetService,
+    CreateProjectDto,
+    CreatePromptAssetDto,
     CreateAssetTranslationDto,
     UpdateAssetTranslationDto,
+} from '@/services/generated/api';
+import {
+    promptAssetService,
     projectService
 } from '@/services/api';
-import Breadcrumb from '@/components/common/PageBreadCrumb';
+import Breadcrumb, { Crumb } from '@/components/common/PageBreadCrumb';
 import PromptAssetTranslationsTable from '@/components/tables/PromptAssetTranslationsTable';
 import PromptAssetTranslationForm from '@/components/form/PromptAssetTranslationForm';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
+type AssetTranslationUIData = CreateAssetTranslationDto;
+
 const PromptAssetTranslationsPage: React.FC = () => {
-    const [itemsList, setItemsList] = useState<PromptAssetTranslation[]>([]);
+    const [itemsList, setItemsList] = useState<AssetTranslationUIData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingItem, setEditingItem] = useState<PromptAssetTranslation | null>(null);
+    const [editingItem, setEditingItem] = useState<AssetTranslationUIData | null>(null);
 
-    const [project, setProject] = useState<Project | null>(null);
-    const [asset, setAsset] = useState<PromptAsset | null>(null);
+    const [project, setProject] = useState<CreateProjectDto | null>(null);
+    const [asset, setAsset] = useState<CreatePromptAssetDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     const params = useParams();
@@ -34,26 +37,21 @@ const PromptAssetTranslationsPage: React.FC = () => {
 
     useEffect(() => {
         if (!projectId || !assetKey) return;
-
-        const fetchBreadcrumbData = async () => {
-            setBreadcrumbLoading(true);
-            try {
-                const [projectData, assetData] = await Promise.all([
-                    projectService.findOne(projectId),
-                    promptAssetService.findOneByKey(projectId, assetKey)
-                ]);
-                setProject(projectData);
-                setAsset(assetData);
-            } catch (error) {
-                console.error("Error fetching breadcrumb data:", error);
-                showErrorToast("Failed to load project or asset details for breadcrumbs.");
-                setProject(null);
-                setAsset(null);
-            } finally {
-                setBreadcrumbLoading(false);
-            }
-        };
-        fetchBreadcrumbData();
+        setBreadcrumbLoading(true);
+        Promise.all([
+            projectService.findOne(projectId),
+            promptAssetService.findOne(projectId, assetKey)
+        ]).then(([projectData, assetData]) => {
+            setProject(projectData as CreateProjectDto);
+            setAsset(assetData as CreatePromptAssetDto);
+        }).catch(err => {
+            console.error("Error fetching breadcrumb data (project/asset):", err);
+            showErrorToast("Failed to load project or asset details for breadcrumbs.");
+            setProject(null);
+            setAsset(null);
+        }).finally(() => {
+            setBreadcrumbLoading(false);
+        });
     }, [projectId, assetKey]);
 
     const fetchData = useCallback(async () => {
@@ -66,11 +64,11 @@ const PromptAssetTranslationsPage: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await promptAssetService.getAllTranslations(projectId, assetKey, versionTag);
+            const data = await promptAssetService.findAssetTranslations(projectId, assetKey, versionTag);
             if (Array.isArray(data)) {
-                setItemsList(data);
+                setItemsList(data as AssetTranslationUIData[]);
             } else {
-                console.error("API response is not an array:", data);
+                console.error("API response for asset translations is not an array:", data);
                 setError('Received invalid data format.');
                 setItemsList([]);
             }
@@ -96,7 +94,7 @@ const PromptAssetTranslationsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (item: PromptAssetTranslation) => {
+    const handleEdit = (item: AssetTranslationUIData) => {
         setEditingItem(item);
         setIsModalOpen(true);
     };
@@ -109,7 +107,7 @@ const PromptAssetTranslationsPage: React.FC = () => {
         if (window.confirm(`Are you sure you want to delete the translation for ${languageCode}?`)) {
             setLoading(true);
             try {
-                await promptAssetService.removeTranslation(projectId, assetKey, versionTag, languageCode);
+                await promptAssetService.removeAssetTranslation(projectId, assetKey, versionTag, languageCode);
                 showSuccessToast("Translation deleted successfully!");
                 fetchData();
             } catch (err) {
@@ -123,21 +121,23 @@ const PromptAssetTranslationsPage: React.FC = () => {
         }
     };
 
-    const handleSave = async (payload: CreateAssetTranslationDto | UpdateAssetTranslationDto) => {
+    const handleSave = async (payloadFromForm: CreateAssetTranslationDto | UpdateAssetTranslationDto) => {
         if (!projectId || !assetKey || !versionTag) return;
         setLoading(true);
         try {
             let message = "";
-            if (editingItem) {
-                if (!editingItem.languageCode) {
-                    throw new Error("Cannot update translation without languageCode.");
-                }
-                const updatePayload: UpdateAssetTranslationDto = { value: payload.value };
-                await promptAssetService.updateTranslation(projectId, assetKey, versionTag, editingItem.languageCode, updatePayload);
+            if (editingItem && editingItem.languageCode) {
+                const updatePayload: UpdateAssetTranslationDto = { value: (payloadFromForm as UpdateAssetTranslationDto).value };
+                await promptAssetService.updateAssetTranslation(projectId, assetKey, versionTag, editingItem.languageCode, updatePayload);
                 message = "Translation updated successfully!";
             } else {
-                const createPayload = payload as CreateAssetTranslationDto;
-                await promptAssetService.createTranslation(projectId, assetKey, versionTag, createPayload);
+                const createPayload = payloadFromForm as CreateAssetTranslationDto;
+                if (!createPayload.languageCode || !createPayload.value) {
+                    showErrorToast("Language code and value are required for a new translation.");
+                    setLoading(false);
+                    return;
+                }
+                await promptAssetService.createAssetTranslation(projectId, assetKey, versionTag, createPayload);
                 message = `Translation for ${createPayload.languageCode} created successfully!`;
             }
             setIsModalOpen(false);
@@ -153,20 +153,36 @@ const PromptAssetTranslationsPage: React.FC = () => {
         }
     };
 
-    const breadcrumbs = [
+    const breadcrumbs: Crumb[] = [
         { label: "Home", href: "/" },
         { label: "Projects", href: "/projects" },
-        { label: breadcrumbLoading ? projectId : (project?.name || projectId), href: `/projects/${projectId}/assets` },
-        { label: breadcrumbLoading ? assetKey : (asset?.name || assetKey), href: `/projects/${projectId}/assets/${assetKey}/versions` },
-        { label: `Version ${versionTag}`, href: `/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations` },
-        { label: "Translations" }
     ];
+    if (projectId) {
+        breadcrumbs.push({
+            label: breadcrumbLoading ? projectId : (project?.name || projectId),
+            href: `/projects/${projectId}/prompt-assets`
+        });
+        if (assetKey) {
+            breadcrumbs.push({
+                label: breadcrumbLoading ? assetKey : (asset?.name || assetKey),
+                href: `/projects/${projectId}/prompt-assets/${assetKey}/versions`
+            });
+            if (versionTag) {
+                breadcrumbs.push({
+                    label: `Version ${versionTag}`,
+                    href: `/projects/${projectId}/prompt-assets/${assetKey}/versions`
+                });
+                breadcrumbs.push({ label: "Translations" });
+            }
+        }
+    }
 
     if (!projectId || !assetKey || !versionTag) {
         return <p className="text-red-500">Error: Missing Project ID, Asset Key, or Version Tag in URL.</p>;
     }
     if (breadcrumbLoading || loading) return <p>Loading asset translation details...</p>;
-    if (error && !loading) return <p className="text-red-500">{error}</p>;
+    if (error) return <p className="text-red-500">{error}</p>;
+    if (!project || !asset) return <p className="text-red-500">Could not load project or asset details.</p>;
 
     return (
         <>
@@ -202,7 +218,6 @@ const PromptAssetTranslationsPage: React.FC = () => {
                             onSave={handleSave}
                             onCancel={() => setIsModalOpen(false)}
                         />
-                        {loading && <p className="text-sm text-center mt-2">Saving...</p>}
                     </div>
                 </div>
             )}

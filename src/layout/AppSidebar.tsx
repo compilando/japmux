@@ -61,6 +61,7 @@ const AppSidebar: React.FC = () => {
       name: "Prompt Management",
       subItems: selectedProjectId ? [
         { name: "Prompts", path: `/projects/${selectedProjectId}/prompts`, icon: <TaskIcon /> },
+        { name: "Assets", path: `/projects/${selectedProjectId}/prompt-assets`, icon: <BoxCubeIcon /> },
       ] : [],
     },
     {

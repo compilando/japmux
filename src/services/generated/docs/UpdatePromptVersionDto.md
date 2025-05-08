@@ -5,9 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**promptText** | **string** | BASE prompt text for this new version. | [optional] [default to undefined]
-**changeMessage** | **string** | Message describing the changes in this version. | [optional] [default to undefined]
-**assetLinks** | [**Array&lt;AssetVersionLinkDto&gt;**](AssetVersionLinkDto.md) | List of asset versions to link to this prompt version. | [optional] [default to undefined]
+**promptText** | **string** | El valor/texto del prompt para esta nueva versión | [optional] [default to undefined]
+**changeMessage** | **string** | Mensaje describiendo los cambios en esta versión. | [optional] [default to undefined]
 **initialTranslations** | [**Array&lt;InitialTranslationDto&gt;**](InitialTranslationDto.md) | Optional initial translations for this new version. | [optional] [default to undefined]
 
 ## Example
@@ -18,7 +17,6 @@ import { UpdatePromptVersionDto } from './api';
 const instance: UpdatePromptVersionDto = {
     promptText,
     changeMessage,
-    assetLinks,
     initialTranslations,
 };
 ```

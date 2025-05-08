@@ -1,13 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { PromptVersion, CreatePromptVersionDto, UpdatePromptVersionDto } from '@/services/api';
+import { CreatePromptVersionDto, UpdatePromptVersionDto } from '@/services/api';
 
 interface PromptVersionFormProps {
-    initialData: PromptVersion | null;
+    initialData: CreatePromptVersionDto | null;
     onSave: (payload: CreatePromptVersionDto | UpdatePromptVersionDto) => void;
     onCancel: () => void;
+    latestVersionTag?: string;
 }
 
-const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSave, onCancel }) => {
+// Helper para calcular la siguiente versión (simplificado)
+const calculateNextVersionTag = (latestTag: string | null | undefined): string => {
+    // Primero, intenta manejar prefijos y sufijos comunes como -beta, etc.
+    // Esta es una lógica muy básica y podría necesitar ajustes para casos más complejos.
+    let baseTag = latestTag;
+    let suffix = '';
+    if (latestTag) {
+        const suffixMatch = latestTag.match(/(-[a-zA-Z0-9-.]+)?(\+[a-zA-Z0-9-.]+)?$/);
+        if (suffixMatch && suffixMatch[0]) {
+            suffix = suffixMatch[0];
+            baseTag = latestTag.substring(0, latestTag.length - suffix.length);
+        }
+    }
+
+    if (!baseTag || !baseTag.startsWith('v')) {
+        return 'v1.0.0'; // Default si no hay tag anterior o formato inesperado
+    }
+
+    const parts = baseTag.substring(1).split('.');
+    if (parts.length === 3) {
+        const major = parseInt(parts[0], 10);
+        const minor = parseInt(parts[1], 10);
+        const patch = parseInt(parts[2], 10);
+        if (!isNaN(major) && !isNaN(minor) && !isNaN(patch)) {
+            // Solo incrementa patch, no maneja sufijos complejos
+            return `v${major}.${minor}.${patch + 1}`;
+        }
+    }
+    // Fallback si el parseo falla
+    return 'v1.0.0';
+};
+
+const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSave, onCancel, latestVersionTag }) => {
     const [promptText, setPromptText] = useState('');
     const [versionTag, setVersionTag] = useState('v1.0.0');
     const [changeMessage, setChangeMessage] = useState('');
@@ -23,10 +56,12 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
         } else {
             // Reset state
             setPromptText('');
-            setVersionTag('v1.0.0');
+            // Calcular y establecer el tag sugerido
+            const suggestedTag = calculateNextVersionTag(latestVersionTag);
+            setVersionTag(suggestedTag);
             setChangeMessage('');
         }
-    }, [initialData]);
+    }, [initialData, latestVersionTag]);
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -37,17 +72,14 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                 promptText: promptText ? promptText : undefined,
                 changeMessage: changeMessage ? changeMessage : undefined,
             } as UpdatePromptVersionDto;
-            payload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v !== undefined));
+            payload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v !== undefined)) as UpdatePromptVersionDto;
 
         } else {
             payload = {
                 promptText,
-                versionTag: versionTag || undefined,
                 changeMessage: changeMessage || undefined,
-                assetLinks: [],
             };
 
-            if (!payload.versionTag) delete payload.versionTag;
             if (!payload.changeMessage) delete payload.changeMessage;
 
             payload = payload as CreatePromptVersionDto;

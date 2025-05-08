@@ -1,7 +1,8 @@
 import Link from "next/link";
 import React from "react";
 
-interface Crumb {
+// Exportar la interfaz Crumb
+export interface Crumb {
   label: string;
   href?: string;
 }

@@ -105,31 +105,6 @@ export interface AiModelResponseDto {
 /**
  * 
  * @export
- * @interface AssetVersionLinkDto
- */
-export interface AssetVersionLinkDto {
-    /**
-     * ID of the PromptAssetVersion to link.
-     * @type {string}
-     * @memberof AssetVersionLinkDto
-     */
-    'assetVersionId': string;
-    /**
-     * Usage context (optional).
-     * @type {string}
-     * @memberof AssetVersionLinkDto
-     */
-    'usageContext'?: string;
-    /**
-     * Position/order (optional).
-     * @type {number}
-     * @memberof AssetVersionLinkDto
-     */
-    'position'?: number;
-}
-/**
- * 
- * @export
  * @interface CreateAiModelDto
  */
 export interface CreateAiModelDto {
@@ -190,37 +165,37 @@ export interface CreateAssetTranslationDto {
  */
 export interface CreateCulturalDataDto {
     /**
-     * Unique ID for this cultural data (slug format)
+     * Unique key for the cultural data within the project
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
-    'id': string;
+    'key': string;
     /**
-     * Associated region ID (xx-XX language code)
+     * ID (CUID) of the Region this data applies to
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
     'regionId': string;
     /**
-     * Formality level (optional)
+     * Formality level (1-10)
      * @type {number}
      * @memberof CreateCulturalDataDto
      */
     'formalityLevel'?: number;
     /**
-     * Communication style (optional)
+     * Description of the communication style
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
     'style'?: string;
     /**
-     * Cultural considerations (optional)
+     * Specific cultural considerations
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
     'considerations'?: string;
     /**
-     * Additional notes (optional)
+     * General notes
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
@@ -283,7 +258,7 @@ export interface CreateProjectDto {
      */
     'description'?: string;
     /**
-     * ID of the User who owns this project
+     * ID (CUID) of the User who owns this project
      * @type {string}
      * @memberof CreateProjectDto
      */
@@ -347,66 +322,17 @@ export interface CreatePromptAssetDto {
 /**
  * 
  * @export
- * @interface CreatePromptAssetLinkDto
- */
-export interface CreatePromptAssetLinkDto {
-    /**
-     * ID de la PromptVersion a la que se vincula el asset.
-     * @type {string}
-     * @memberof CreatePromptAssetLinkDto
-     */
-    'promptVersionId': string;
-    /**
-     * ID de la PromptAssetVersion que se vincula.
-     * @type {string}
-     * @memberof CreatePromptAssetLinkDto
-     */
-    'assetVersionId': string;
-    /**
-     * Contexto de uso o propósito de este asset en el prompt.
-     * @type {string}
-     * @memberof CreatePromptAssetLinkDto
-     */
-    'usageContext'?: string;
-    /**
-     * Orden posicional del asset dentro del prompt (si aplica).
-     * @type {number}
-     * @memberof CreatePromptAssetLinkDto
-     */
-    'position'?: number;
-    /**
-     * Lógica de inserción condicional (formato a definir).
-     * @type {string}
-     * @memberof CreatePromptAssetLinkDto
-     */
-    'insertionLogic'?: string;
-    /**
-     * Indica si el asset es requerido para el prompt (default: true).
-     * @type {boolean}
-     * @memberof CreatePromptAssetLinkDto
-     */
-    'isRequired'?: boolean;
-}
-/**
- * 
- * @export
  * @interface CreatePromptAssetVersionDto
  */
 export interface CreatePromptAssetVersionDto {
     /**
-     * Key (slug) del asset lógico al que pertenece esta versión
-     * @type {string}
-     * @memberof CreatePromptAssetVersionDto
-     */
-    'assetId': string;
-    /**
-     * El valor del asset para esta versión
+     * El valor del asset para esta nueva versión
      * @type {string}
      * @memberof CreatePromptAssetVersionDto
      */
     'value': string;
     /**
-     * Etiqueta de versión (e.g., v1.0.0). Debe ser única por asset.
+     * Etiqueta de versión (e.g., v1.0.1, v1.1.0). Si no se provee, se podría auto-incrementar o requerir.
      * @type {string}
      * @memberof CreatePromptAssetVersionDto
      */
@@ -487,29 +413,17 @@ export interface CreatePromptTranslationDto {
  */
 export interface CreatePromptVersionDto {
     /**
-     * BASE prompt text for this new version.
+     * El valor/texto del prompt para esta nueva versión
      * @type {string}
      * @memberof CreatePromptVersionDto
      */
     'promptText': string;
     /**
-     * Unique tag for this version within the prompt (e.g., v1.1.0, beta-feature-x).
-     * @type {string}
-     * @memberof CreatePromptVersionDto
-     */
-    'versionTag': string;
-    /**
-     * Message describing the changes in this version.
+     * Mensaje describiendo los cambios en esta versión.
      * @type {string}
      * @memberof CreatePromptVersionDto
      */
     'changeMessage'?: string;
-    /**
-     * List of asset versions to link to this prompt version.
-     * @type {Array<AssetVersionLinkDto>}
-     * @memberof CreatePromptVersionDto
-     */
-    'assetLinks': Array<AssetVersionLinkDto>;
     /**
      * Optional initial translations for this new version.
      * @type {Array<InitialTranslationDto>}
@@ -685,37 +599,37 @@ export interface CreateUserDto {
  */
 export interface CulturalDataResponse {
     /**
-     * Unique ID for this cultural data (slug format)
+     * Unique key for the cultural data within the project
      * @type {string}
      * @memberof CulturalDataResponse
      */
-    'id': string;
+    'key': string;
     /**
-     * Associated region ID (xx-XX language code)
+     * ID (CUID) of the Region this data applies to
      * @type {string}
      * @memberof CulturalDataResponse
      */
     'regionId': string;
     /**
-     * Formality level (optional)
+     * Formality level (1-10)
      * @type {number}
      * @memberof CulturalDataResponse
      */
     'formalityLevel'?: number;
     /**
-     * Communication style (optional)
+     * Description of the communication style
      * @type {string}
      * @memberof CulturalDataResponse
      */
     'style'?: string;
     /**
-     * Cultural considerations (optional)
+     * Specific cultural considerations
      * @type {string}
      * @memberof CulturalDataResponse
      */
     'considerations'?: string;
     /**
-     * Additional notes (optional)
+     * General notes
      * @type {string}
      * @memberof CulturalDataResponse
      */
@@ -1092,25 +1006,25 @@ export interface UpdateAssetTranslationDto {
  */
 export interface UpdateCulturalDataDto {
     /**
-     * Formality level (optional)
+     * Formality level (1-10)
      * @type {number}
      * @memberof UpdateCulturalDataDto
      */
     'formalityLevel'?: number;
     /**
-     * Communication style (optional)
+     * Description of the communication style
      * @type {string}
      * @memberof UpdateCulturalDataDto
      */
     'style'?: string;
     /**
-     * Cultural considerations (optional)
+     * Specific cultural considerations
      * @type {string}
      * @memberof UpdateCulturalDataDto
      */
     'considerations'?: string;
     /**
-     * Additional notes (optional)
+     * General notes
      * @type {string}
      * @memberof UpdateCulturalDataDto
      */
@@ -1154,7 +1068,7 @@ export interface UpdateProjectDto {
      */
     'description'?: string;
     /**
-     * ID of the User who owns this project
+     * ID (CUID) of the User who owns this project
      * @type {string}
      * @memberof UpdateProjectDto
      */
@@ -1196,43 +1110,6 @@ export interface UpdatePromptAssetDto {
      * @memberof UpdatePromptAssetDto
      */
     'enabled'?: boolean;
-    /**
-     * ID opcional del proyecto al que pertenece el asset (null para desvincular)
-     * @type {string}
-     * @memberof UpdatePromptAssetDto
-     */
-    'projectId'?: string | null;
-}
-/**
- * 
- * @export
- * @interface UpdatePromptAssetLinkDto
- */
-export interface UpdatePromptAssetLinkDto {
-    /**
-     * Contexto de uso o propósito de este asset en el prompt.
-     * @type {string}
-     * @memberof UpdatePromptAssetLinkDto
-     */
-    'usageContext'?: string;
-    /**
-     * Orden posicional del asset dentro del prompt (si aplica).
-     * @type {number}
-     * @memberof UpdatePromptAssetLinkDto
-     */
-    'position'?: number;
-    /**
-     * Lógica de inserción condicional (formato a definir).
-     * @type {string}
-     * @memberof UpdatePromptAssetLinkDto
-     */
-    'insertionLogic'?: string;
-    /**
-     * Indica si el asset es requerido para el prompt (default: true).
-     * @type {boolean}
-     * @memberof UpdatePromptAssetLinkDto
-     */
-    'isRequired'?: boolean;
 }
 /**
  * 
@@ -1266,12 +1143,6 @@ export interface UpdatePromptDto {
      */
     'description'?: string;
     /**
-     * Base prompt text for the latest version. If provided, updates the text of the most recent version of this prompt.
-     * @type {string}
-     * @memberof UpdatePromptDto
-     */
-    'promptText'?: string;
-    /**
      * Complete list of Tag IDs to associate (replaces existing ones). Empty array to remove all.
      * @type {Array<string>}
      * @memberof UpdatePromptDto
@@ -1298,23 +1169,17 @@ export interface UpdatePromptTranslationDto {
  */
 export interface UpdatePromptVersionDto {
     /**
-     * BASE prompt text for this new version.
+     * El valor/texto del prompt para esta nueva versión
      * @type {string}
      * @memberof UpdatePromptVersionDto
      */
     'promptText'?: string;
     /**
-     * Message describing the changes in this version.
+     * Mensaje describiendo los cambios en esta versión.
      * @type {string}
      * @memberof UpdatePromptVersionDto
      */
     'changeMessage'?: string;
-    /**
-     * List of asset versions to link to this prompt version.
-     * @type {Array<AssetVersionLinkDto>}
-     * @memberof UpdatePromptVersionDto
-     */
-    'assetLinks'?: Array<AssetVersionLinkDto>;
     /**
      * Optional initial translations for this new version.
      * @type {Array<InitialTranslationDto>}
@@ -2801,7 +2666,7 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
         /**
          * 
          * @summary Gets cultural data by ID within a project
-         * @param {string} culturalDataId ID of the cultural data
+         * @param {string} culturalDataId Key of the cultural data (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2843,7 +2708,7 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
         /**
          * 
          * @summary Deletes cultural data by ID within a project
-         * @param {string} culturalDataId ID to delete
+         * @param {string} culturalDataId Key of the cultural data to delete (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2885,7 +2750,7 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
         /**
          * 
          * @summary Updates cultural data by ID within a project
-         * @param {string} culturalDataId ID to update
+         * @param {string} culturalDataId Key of the cultural data to update (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {UpdateCulturalDataDto} updateCulturalDataDto 
          * @param {*} [options] Override http request option.
@@ -2970,7 +2835,7 @@ export const CulturalDataApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Gets cultural data by ID within a project
-         * @param {string} culturalDataId ID of the cultural data
+         * @param {string} culturalDataId Key of the cultural data (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2984,7 +2849,7 @@ export const CulturalDataApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Deletes cultural data by ID within a project
-         * @param {string} culturalDataId ID to delete
+         * @param {string} culturalDataId Key of the cultural data to delete (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2998,7 +2863,7 @@ export const CulturalDataApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Updates cultural data by ID within a project
-         * @param {string} culturalDataId ID to update
+         * @param {string} culturalDataId Key of the cultural data to update (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {UpdateCulturalDataDto} updateCulturalDataDto 
          * @param {*} [options] Override http request option.
@@ -3044,7 +2909,7 @@ export const CulturalDataApiFactory = function (configuration?: Configuration, b
         /**
          * 
          * @summary Gets cultural data by ID within a project
-         * @param {string} culturalDataId ID of the cultural data
+         * @param {string} culturalDataId Key of the cultural data (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3055,7 +2920,7 @@ export const CulturalDataApiFactory = function (configuration?: Configuration, b
         /**
          * 
          * @summary Deletes cultural data by ID within a project
-         * @param {string} culturalDataId ID to delete
+         * @param {string} culturalDataId Key of the cultural data to delete (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3066,7 +2931,7 @@ export const CulturalDataApiFactory = function (configuration?: Configuration, b
         /**
          * 
          * @summary Updates cultural data by ID within a project
-         * @param {string} culturalDataId ID to update
+         * @param {string} culturalDataId Key of the cultural data to update (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {UpdateCulturalDataDto} updateCulturalDataDto 
          * @param {*} [options] Override http request option.
@@ -3113,7 +2978,7 @@ export class CulturalDataApi extends BaseAPI {
     /**
      * 
      * @summary Gets cultural data by ID within a project
-     * @param {string} culturalDataId ID of the cultural data
+     * @param {string} culturalDataId Key of the cultural data (e.g., direct-and-formal)
      * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3126,7 +2991,7 @@ export class CulturalDataApi extends BaseAPI {
     /**
      * 
      * @summary Deletes cultural data by ID within a project
-     * @param {string} culturalDataId ID to delete
+     * @param {string} culturalDataId Key of the cultural data to delete (e.g., direct-and-formal)
      * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3139,7 +3004,7 @@ export class CulturalDataApi extends BaseAPI {
     /**
      * 
      * @summary Updates cultural data by ID within a project
-     * @param {string} culturalDataId ID to update
+     * @param {string} culturalDataId Key of the cultural data to update (e.g., direct-and-formal)
      * @param {string} projectId Project ID
      * @param {UpdateCulturalDataDto} updateCulturalDataDto 
      * @param {*} [options] Override http request option.
@@ -4336,484 +4201,6 @@ export class ProjectsApi extends BaseAPI {
      */
     public projectControllerUpdate(id: string, updateProjectDto: UpdateProjectDto, options?: RawAxiosRequestConfig) {
         return ProjectsApiFp(this.configuration).projectControllerUpdate(id, updateProjectDto, options).then((request) => request(this.axios, this.basePath));
-    }
-}
-
-
-
-/**
- * PromptAssetLinksWithinProjectVersionApi - axios parameter creator
- * @export
- */
-export const PromptAssetLinksWithinProjectVersionApiAxiosParamCreator = function (configuration?: Configuration) {
-    return {
-        /**
-         * 
-         * @summary Link an Asset Version to a Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {CreatePromptAssetLinkDto} createPromptAssetLinkDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptAssetLinkControllerCreate: async (projectId: string, promptVersionId: string, createPromptAssetLinkDto: CreatePromptAssetLinkDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerCreate', 'projectId', projectId)
-            // verify required parameter 'promptVersionId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerCreate', 'promptVersionId', promptVersionId)
-            // verify required parameter 'createPromptAssetLinkDto' is not null or undefined
-            assertParamExists('promptAssetLinkControllerCreate', 'createPromptAssetLinkDto', createPromptAssetLinkDto)
-            const localVarPath = `/api/projects/{projectId}/prompt-versions/{promptVersionId}/links`
-                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
-                .replace(`{${"promptVersionId"}}`, encodeURIComponent(String(promptVersionId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(createPromptAssetLinkDto, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get all links for a specific Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptAssetLinkControllerFindAll: async (projectId: string, promptVersionId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerFindAll', 'projectId', projectId)
-            // verify required parameter 'promptVersionId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerFindAll', 'promptVersionId', promptVersionId)
-            const localVarPath = `/api/projects/{projectId}/prompt-versions/{promptVersionId}/links`
-                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
-                .replace(`{${"promptVersionId"}}`, encodeURIComponent(String(promptVersionId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get a specific link by its ID for a Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {string} linkId Link ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptAssetLinkControllerFindOne: async (projectId: string, promptVersionId: string, linkId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerFindOne', 'projectId', projectId)
-            // verify required parameter 'promptVersionId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerFindOne', 'promptVersionId', promptVersionId)
-            // verify required parameter 'linkId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerFindOne', 'linkId', linkId)
-            const localVarPath = `/api/projects/{projectId}/prompt-versions/{promptVersionId}/links/{linkId}`
-                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
-                .replace(`{${"promptVersionId"}}`, encodeURIComponent(String(promptVersionId)))
-                .replace(`{${"linkId"}}`, encodeURIComponent(String(linkId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Delete a specific link by its ID for a Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {string} linkId Link ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptAssetLinkControllerRemove: async (projectId: string, promptVersionId: string, linkId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerRemove', 'projectId', projectId)
-            // verify required parameter 'promptVersionId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerRemove', 'promptVersionId', promptVersionId)
-            // verify required parameter 'linkId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerRemove', 'linkId', linkId)
-            const localVarPath = `/api/projects/{projectId}/prompt-versions/{promptVersionId}/links/{linkId}`
-                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
-                .replace(`{${"promptVersionId"}}`, encodeURIComponent(String(promptVersionId)))
-                .replace(`{${"linkId"}}`, encodeURIComponent(String(linkId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Update a specific link by its ID for a Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {string} linkId Link ID
-         * @param {UpdatePromptAssetLinkDto} updatePromptAssetLinkDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptAssetLinkControllerUpdate: async (projectId: string, promptVersionId: string, linkId: string, updatePromptAssetLinkDto: UpdatePromptAssetLinkDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerUpdate', 'projectId', projectId)
-            // verify required parameter 'promptVersionId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerUpdate', 'promptVersionId', promptVersionId)
-            // verify required parameter 'linkId' is not null or undefined
-            assertParamExists('promptAssetLinkControllerUpdate', 'linkId', linkId)
-            // verify required parameter 'updatePromptAssetLinkDto' is not null or undefined
-            assertParamExists('promptAssetLinkControllerUpdate', 'updatePromptAssetLinkDto', updatePromptAssetLinkDto)
-            const localVarPath = `/api/projects/{projectId}/prompt-versions/{promptVersionId}/links/{linkId}`
-                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
-                .replace(`{${"promptVersionId"}}`, encodeURIComponent(String(promptVersionId)))
-                .replace(`{${"linkId"}}`, encodeURIComponent(String(linkId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(updatePromptAssetLinkDto, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-    }
-};
-
-/**
- * PromptAssetLinksWithinProjectVersionApi - functional programming interface
- * @export
- */
-export const PromptAssetLinksWithinProjectVersionApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = PromptAssetLinksWithinProjectVersionApiAxiosParamCreator(configuration)
-    return {
-        /**
-         * 
-         * @summary Link an Asset Version to a Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {CreatePromptAssetLinkDto} createPromptAssetLinkDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async promptAssetLinkControllerCreate(projectId: string, promptVersionId: string, createPromptAssetLinkDto: CreatePromptAssetLinkDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptAssetLinkDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetLinkControllerCreate(projectId, promptVersionId, createPromptAssetLinkDto, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptAssetLinksWithinProjectVersionApi.promptAssetLinkControllerCreate']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get all links for a specific Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async promptAssetLinkControllerFindAll(projectId: string, promptVersionId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CreatePromptAssetLinkDto>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetLinkControllerFindAll(projectId, promptVersionId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptAssetLinksWithinProjectVersionApi.promptAssetLinkControllerFindAll']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get a specific link by its ID for a Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {string} linkId Link ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async promptAssetLinkControllerFindOne(projectId: string, promptVersionId: string, linkId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptAssetLinkDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetLinkControllerFindOne(projectId, promptVersionId, linkId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptAssetLinksWithinProjectVersionApi.promptAssetLinkControllerFindOne']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Delete a specific link by its ID for a Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {string} linkId Link ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async promptAssetLinkControllerRemove(projectId: string, promptVersionId: string, linkId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetLinkControllerRemove(projectId, promptVersionId, linkId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptAssetLinksWithinProjectVersionApi.promptAssetLinkControllerRemove']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Update a specific link by its ID for a Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {string} linkId Link ID
-         * @param {UpdatePromptAssetLinkDto} updatePromptAssetLinkDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async promptAssetLinkControllerUpdate(projectId: string, promptVersionId: string, linkId: string, updatePromptAssetLinkDto: UpdatePromptAssetLinkDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptAssetLinkDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetLinkControllerUpdate(projectId, promptVersionId, linkId, updatePromptAssetLinkDto, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptAssetLinksWithinProjectVersionApi.promptAssetLinkControllerUpdate']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-    }
-};
-
-/**
- * PromptAssetLinksWithinProjectVersionApi - factory interface
- * @export
- */
-export const PromptAssetLinksWithinProjectVersionApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = PromptAssetLinksWithinProjectVersionApiFp(configuration)
-    return {
-        /**
-         * 
-         * @summary Link an Asset Version to a Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {CreatePromptAssetLinkDto} createPromptAssetLinkDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptAssetLinkControllerCreate(projectId: string, promptVersionId: string, createPromptAssetLinkDto: CreatePromptAssetLinkDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetLinkDto> {
-            return localVarFp.promptAssetLinkControllerCreate(projectId, promptVersionId, createPromptAssetLinkDto, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get all links for a specific Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptAssetLinkControllerFindAll(projectId: string, promptVersionId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreatePromptAssetLinkDto>> {
-            return localVarFp.promptAssetLinkControllerFindAll(projectId, promptVersionId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get a specific link by its ID for a Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {string} linkId Link ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptAssetLinkControllerFindOne(projectId: string, promptVersionId: string, linkId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetLinkDto> {
-            return localVarFp.promptAssetLinkControllerFindOne(projectId, promptVersionId, linkId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Delete a specific link by its ID for a Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {string} linkId Link ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptAssetLinkControllerRemove(projectId: string, promptVersionId: string, linkId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.promptAssetLinkControllerRemove(projectId, promptVersionId, linkId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Update a specific link by its ID for a Prompt Version within a Project
-         * @param {string} projectId Project ID
-         * @param {string} promptVersionId Prompt Version ID
-         * @param {string} linkId Link ID
-         * @param {UpdatePromptAssetLinkDto} updatePromptAssetLinkDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptAssetLinkControllerUpdate(projectId: string, promptVersionId: string, linkId: string, updatePromptAssetLinkDto: UpdatePromptAssetLinkDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetLinkDto> {
-            return localVarFp.promptAssetLinkControllerUpdate(projectId, promptVersionId, linkId, updatePromptAssetLinkDto, options).then((request) => request(axios, basePath));
-        },
-    };
-};
-
-/**
- * PromptAssetLinksWithinProjectVersionApi - object-oriented interface
- * @export
- * @class PromptAssetLinksWithinProjectVersionApi
- * @extends {BaseAPI}
- */
-export class PromptAssetLinksWithinProjectVersionApi extends BaseAPI {
-    /**
-     * 
-     * @summary Link an Asset Version to a Prompt Version within a Project
-     * @param {string} projectId Project ID
-     * @param {string} promptVersionId Prompt Version ID
-     * @param {CreatePromptAssetLinkDto} createPromptAssetLinkDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetLinksWithinProjectVersionApi
-     */
-    public promptAssetLinkControllerCreate(projectId: string, promptVersionId: string, createPromptAssetLinkDto: CreatePromptAssetLinkDto, options?: RawAxiosRequestConfig) {
-        return PromptAssetLinksWithinProjectVersionApiFp(this.configuration).promptAssetLinkControllerCreate(projectId, promptVersionId, createPromptAssetLinkDto, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get all links for a specific Prompt Version within a Project
-     * @param {string} projectId Project ID
-     * @param {string} promptVersionId Prompt Version ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetLinksWithinProjectVersionApi
-     */
-    public promptAssetLinkControllerFindAll(projectId: string, promptVersionId: string, options?: RawAxiosRequestConfig) {
-        return PromptAssetLinksWithinProjectVersionApiFp(this.configuration).promptAssetLinkControllerFindAll(projectId, promptVersionId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get a specific link by its ID for a Prompt Version within a Project
-     * @param {string} projectId Project ID
-     * @param {string} promptVersionId Prompt Version ID
-     * @param {string} linkId Link ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetLinksWithinProjectVersionApi
-     */
-    public promptAssetLinkControllerFindOne(projectId: string, promptVersionId: string, linkId: string, options?: RawAxiosRequestConfig) {
-        return PromptAssetLinksWithinProjectVersionApiFp(this.configuration).promptAssetLinkControllerFindOne(projectId, promptVersionId, linkId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Delete a specific link by its ID for a Prompt Version within a Project
-     * @param {string} projectId Project ID
-     * @param {string} promptVersionId Prompt Version ID
-     * @param {string} linkId Link ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetLinksWithinProjectVersionApi
-     */
-    public promptAssetLinkControllerRemove(projectId: string, promptVersionId: string, linkId: string, options?: RawAxiosRequestConfig) {
-        return PromptAssetLinksWithinProjectVersionApiFp(this.configuration).promptAssetLinkControllerRemove(projectId, promptVersionId, linkId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Update a specific link by its ID for a Prompt Version within a Project
-     * @param {string} projectId Project ID
-     * @param {string} promptVersionId Prompt Version ID
-     * @param {string} linkId Link ID
-     * @param {UpdatePromptAssetLinkDto} updatePromptAssetLinkDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetLinksWithinProjectVersionApi
-     */
-    public promptAssetLinkControllerUpdate(projectId: string, promptVersionId: string, linkId: string, updatePromptAssetLinkDto: UpdatePromptAssetLinkDto, options?: RawAxiosRequestConfig) {
-        return PromptAssetLinksWithinProjectVersionApiFp(this.configuration).promptAssetLinkControllerUpdate(projectId, promptVersionId, linkId, updatePromptAssetLinkDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -6739,26 +6126,22 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
     return {
         /**
          * 
-         * @summary Adds or updates a translation for a specific prompt version in the project.
-         * @param {string} versionId ID of the version to translate (CUID)
-         * @param {string} promptName Parent prompt name (contextual)
-         * @param {string} projectId Project ID
+         * @summary Adds or updates a translation for a specific prompt version (identified by CUID) in the project.
+         * @param {string} versionIdCuid ID of the version to translate (CUID)
+         * @param {string} projectId Project ID (slug)
          * @param {CreateOrUpdatePromptTranslationDto} createOrUpdatePromptTranslationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerAddOrUpdateTranslation: async (versionId: string, promptName: string, projectId: string, createOrUpdatePromptTranslationDto: CreateOrUpdatePromptTranslationDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'versionId' is not null or undefined
-            assertParamExists('promptControllerAddOrUpdateTranslation', 'versionId', versionId)
-            // verify required parameter 'promptName' is not null or undefined
-            assertParamExists('promptControllerAddOrUpdateTranslation', 'promptName', promptName)
+        promptControllerAddOrUpdateTranslation: async (versionIdCuid: string, projectId: string, createOrUpdatePromptTranslationDto: CreateOrUpdatePromptTranslationDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'versionIdCuid' is not null or undefined
+            assertParamExists('promptControllerAddOrUpdateTranslation', 'versionIdCuid', versionIdCuid)
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('promptControllerAddOrUpdateTranslation', 'projectId', projectId)
             // verify required parameter 'createOrUpdatePromptTranslationDto' is not null or undefined
             assertParamExists('promptControllerAddOrUpdateTranslation', 'createOrUpdatePromptTranslationDto', createOrUpdatePromptTranslationDto)
-            const localVarPath = `/api/projects/{projectId}/prompts/{promptName}/versions/{versionId}/translations`
-                .replace(`{${"versionId"}}`, encodeURIComponent(String(versionId)))
-                .replace(`{${"promptName"}}`, encodeURIComponent(String(promptName)))
+            const localVarPath = `/api/projects/{projectId}/prompts/versions/{versionIdCuid}/translations`
+                .replace(`{${"versionIdCuid"}}`, encodeURIComponent(String(versionIdCuid)))
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -6791,8 +6174,8 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Creates a new logical prompt within a project
-         * @param {string} projectId Project ID
+         * @summary Creates a new logical prompt (with ID as slug) within a project
+         * @param {string} projectId Project ID (slug)
          * @param {CreatePromptDto} createPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6836,7 +6219,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * 
          * @summary Gets all logical prompts for a project
-         * @param {string} projectId Project ID
+         * @param {string} projectId Project ID (slug)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6873,19 +6256,19 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Gets a logical prompt by its name within a project
-         * @param {string} promptName Unique name of the prompt within the project
-         * @param {string} projectId Project ID
+         * @summary Gets a logical prompt by its ID (slug) within a project
+         * @param {string} promptId ID (slug) of the prompt
+         * @param {string} projectId Project ID (slug)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerFindOne: async (promptName: string, projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'promptName' is not null or undefined
-            assertParamExists('promptControllerFindOne', 'promptName', promptName)
+        promptControllerFindOne: async (promptId: string, projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'promptId' is not null or undefined
+            assertParamExists('promptControllerFindOne', 'promptId', promptId)
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('promptControllerFindOne', 'projectId', projectId)
-            const localVarPath = `/api/projects/{projectId}/prompts/{promptName}`
-                .replace(`{${"promptName"}}`, encodeURIComponent(String(promptName)))
+            const localVarPath = `/api/projects/{projectId}/prompts/{promptId}`
+                .replace(`{${"promptId"}}`, encodeURIComponent(String(promptId)))
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -6915,19 +6298,19 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Deletes a logical prompt (and its associated versions via Cascade) within a project by name
-         * @param {string} promptName Name of the prompt to delete
-         * @param {string} projectId Project ID
+         * @summary Deletes a logical prompt (and its associated versions via Cascade) within a project by ID (slug)
+         * @param {string} promptId ID (slug) of the prompt to delete
+         * @param {string} projectId Project ID (slug)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerRemove: async (promptName: string, projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'promptName' is not null or undefined
-            assertParamExists('promptControllerRemove', 'promptName', promptName)
+        promptControllerRemove: async (promptId: string, projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'promptId' is not null or undefined
+            assertParamExists('promptControllerRemove', 'promptId', promptId)
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('promptControllerRemove', 'projectId', projectId)
-            const localVarPath = `/api/projects/{projectId}/prompts/{promptName}`
-                .replace(`{${"promptName"}}`, encodeURIComponent(String(promptName)))
+            const localVarPath = `/api/projects/{projectId}/prompts/{promptId}`
+                .replace(`{${"promptId"}}`, encodeURIComponent(String(promptId)))
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -6957,22 +6340,22 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Updates an existing prompt by its name for a specific project
-         * @param {string} promptName Name of the prompt to update
-         * @param {string} projectId Project ID
+         * @summary Updates an existing prompt by its ID (slug) for a specific project
+         * @param {string} promptId ID (slug) of the prompt to update
+         * @param {string} projectId Project ID (slug)
          * @param {UpdatePromptDto} updatePromptDto Data to update the prompt
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerUpdate: async (promptName: string, projectId: string, updatePromptDto: UpdatePromptDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'promptName' is not null or undefined
-            assertParamExists('promptControllerUpdate', 'promptName', promptName)
+        promptControllerUpdate: async (promptId: string, projectId: string, updatePromptDto: UpdatePromptDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'promptId' is not null or undefined
+            assertParamExists('promptControllerUpdate', 'promptId', promptId)
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('promptControllerUpdate', 'projectId', projectId)
             // verify required parameter 'updatePromptDto' is not null or undefined
             assertParamExists('promptControllerUpdate', 'updatePromptDto', updatePromptDto)
-            const localVarPath = `/api/projects/{projectId}/prompts/{promptName}`
-                .replace(`{${"promptName"}}`, encodeURIComponent(String(promptName)))
+            const localVarPath = `/api/projects/{projectId}/prompts/{promptId}`
+                .replace(`{${"promptId"}}`, encodeURIComponent(String(promptId)))
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -7015,24 +6398,23 @@ export const PromptsApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
-         * @summary Adds or updates a translation for a specific prompt version in the project.
-         * @param {string} versionId ID of the version to translate (CUID)
-         * @param {string} promptName Parent prompt name (contextual)
-         * @param {string} projectId Project ID
+         * @summary Adds or updates a translation for a specific prompt version (identified by CUID) in the project.
+         * @param {string} versionIdCuid ID of the version to translate (CUID)
+         * @param {string} projectId Project ID (slug)
          * @param {CreateOrUpdatePromptTranslationDto} createOrUpdatePromptTranslationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptControllerAddOrUpdateTranslation(versionId: string, promptName: string, projectId: string, createOrUpdatePromptTranslationDto: CreateOrUpdatePromptTranslationDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerAddOrUpdateTranslation(versionId, promptName, projectId, createOrUpdatePromptTranslationDto, options);
+        async promptControllerAddOrUpdateTranslation(versionIdCuid: string, projectId: string, createOrUpdatePromptTranslationDto: CreateOrUpdatePromptTranslationDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerAddOrUpdateTranslation(versionIdCuid, projectId, createOrUpdatePromptTranslationDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerAddOrUpdateTranslation']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * 
-         * @summary Creates a new logical prompt within a project
-         * @param {string} projectId Project ID
+         * @summary Creates a new logical prompt (with ID as slug) within a project
+         * @param {string} projectId Project ID (slug)
          * @param {CreatePromptDto} createPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -7046,7 +6428,7 @@ export const PromptsApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Gets all logical prompts for a project
-         * @param {string} projectId Project ID
+         * @param {string} projectId Project ID (slug)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7058,43 +6440,43 @@ export const PromptsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Gets a logical prompt by its name within a project
-         * @param {string} promptName Unique name of the prompt within the project
-         * @param {string} projectId Project ID
+         * @summary Gets a logical prompt by its ID (slug) within a project
+         * @param {string} promptId ID (slug) of the prompt
+         * @param {string} projectId Project ID (slug)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptControllerFindOne(promptName: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerFindOne(promptName, projectId, options);
+        async promptControllerFindOne(promptId: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerFindOne(promptId, projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerFindOne']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * 
-         * @summary Deletes a logical prompt (and its associated versions via Cascade) within a project by name
-         * @param {string} promptName Name of the prompt to delete
-         * @param {string} projectId Project ID
+         * @summary Deletes a logical prompt (and its associated versions via Cascade) within a project by ID (slug)
+         * @param {string} promptId ID (slug) of the prompt to delete
+         * @param {string} projectId Project ID (slug)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptControllerRemove(promptName: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerRemove(promptName, projectId, options);
+        async promptControllerRemove(promptId: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerRemove(promptId, projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerRemove']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * 
-         * @summary Updates an existing prompt by its name for a specific project
-         * @param {string} promptName Name of the prompt to update
-         * @param {string} projectId Project ID
+         * @summary Updates an existing prompt by its ID (slug) for a specific project
+         * @param {string} promptId ID (slug) of the prompt to update
+         * @param {string} projectId Project ID (slug)
          * @param {UpdatePromptDto} updatePromptDto Data to update the prompt
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptControllerUpdate(promptName: string, projectId: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerUpdate(promptName, projectId, updatePromptDto, options);
+        async promptControllerUpdate(promptId: string, projectId: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerUpdate(promptId, projectId, updatePromptDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerUpdate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -7111,21 +6493,20 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
     return {
         /**
          * 
-         * @summary Adds or updates a translation for a specific prompt version in the project.
-         * @param {string} versionId ID of the version to translate (CUID)
-         * @param {string} promptName Parent prompt name (contextual)
-         * @param {string} projectId Project ID
+         * @summary Adds or updates a translation for a specific prompt version (identified by CUID) in the project.
+         * @param {string} versionIdCuid ID of the version to translate (CUID)
+         * @param {string} projectId Project ID (slug)
          * @param {CreateOrUpdatePromptTranslationDto} createOrUpdatePromptTranslationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerAddOrUpdateTranslation(versionId: string, promptName: string, projectId: string, createOrUpdatePromptTranslationDto: CreateOrUpdatePromptTranslationDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.promptControllerAddOrUpdateTranslation(versionId, promptName, projectId, createOrUpdatePromptTranslationDto, options).then((request) => request(axios, basePath));
+        promptControllerAddOrUpdateTranslation(versionIdCuid: string, projectId: string, createOrUpdatePromptTranslationDto: CreateOrUpdatePromptTranslationDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.promptControllerAddOrUpdateTranslation(versionIdCuid, projectId, createOrUpdatePromptTranslationDto, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @summary Creates a new logical prompt within a project
-         * @param {string} projectId Project ID
+         * @summary Creates a new logical prompt (with ID as slug) within a project
+         * @param {string} projectId Project ID (slug)
          * @param {CreatePromptDto} createPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -7136,7 +6517,7 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
         /**
          * 
          * @summary Gets all logical prompts for a project
-         * @param {string} projectId Project ID
+         * @param {string} projectId Project ID (slug)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7145,37 +6526,37 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
-         * @summary Gets a logical prompt by its name within a project
-         * @param {string} promptName Unique name of the prompt within the project
-         * @param {string} projectId Project ID
+         * @summary Gets a logical prompt by its ID (slug) within a project
+         * @param {string} promptId ID (slug) of the prompt
+         * @param {string} projectId Project ID (slug)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerFindOne(promptName: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptDto> {
-            return localVarFp.promptControllerFindOne(promptName, projectId, options).then((request) => request(axios, basePath));
+        promptControllerFindOne(promptId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptDto> {
+            return localVarFp.promptControllerFindOne(promptId, projectId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @summary Deletes a logical prompt (and its associated versions via Cascade) within a project by name
-         * @param {string} promptName Name of the prompt to delete
-         * @param {string} projectId Project ID
+         * @summary Deletes a logical prompt (and its associated versions via Cascade) within a project by ID (slug)
+         * @param {string} promptId ID (slug) of the prompt to delete
+         * @param {string} projectId Project ID (slug)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerRemove(promptName: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.promptControllerRemove(promptName, projectId, options).then((request) => request(axios, basePath));
+        promptControllerRemove(promptId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.promptControllerRemove(promptId, projectId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @summary Updates an existing prompt by its name for a specific project
-         * @param {string} promptName Name of the prompt to update
-         * @param {string} projectId Project ID
+         * @summary Updates an existing prompt by its ID (slug) for a specific project
+         * @param {string} promptId ID (slug) of the prompt to update
+         * @param {string} projectId Project ID (slug)
          * @param {UpdatePromptDto} updatePromptDto Data to update the prompt
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerUpdate(promptName: string, projectId: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.promptControllerUpdate(promptName, projectId, updatePromptDto, options).then((request) => request(axios, basePath));
+        promptControllerUpdate(promptId: string, projectId: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.promptControllerUpdate(promptId, projectId, updatePromptDto, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -7189,23 +6570,22 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
 export class PromptsApi extends BaseAPI {
     /**
      * 
-     * @summary Adds or updates a translation for a specific prompt version in the project.
-     * @param {string} versionId ID of the version to translate (CUID)
-     * @param {string} promptName Parent prompt name (contextual)
-     * @param {string} projectId Project ID
+     * @summary Adds or updates a translation for a specific prompt version (identified by CUID) in the project.
+     * @param {string} versionIdCuid ID of the version to translate (CUID)
+     * @param {string} projectId Project ID (slug)
      * @param {CreateOrUpdatePromptTranslationDto} createOrUpdatePromptTranslationDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
      */
-    public promptControllerAddOrUpdateTranslation(versionId: string, promptName: string, projectId: string, createOrUpdatePromptTranslationDto: CreateOrUpdatePromptTranslationDto, options?: RawAxiosRequestConfig) {
-        return PromptsApiFp(this.configuration).promptControllerAddOrUpdateTranslation(versionId, promptName, projectId, createOrUpdatePromptTranslationDto, options).then((request) => request(this.axios, this.basePath));
+    public promptControllerAddOrUpdateTranslation(versionIdCuid: string, projectId: string, createOrUpdatePromptTranslationDto: CreateOrUpdatePromptTranslationDto, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerAddOrUpdateTranslation(versionIdCuid, projectId, createOrUpdatePromptTranslationDto, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @summary Creates a new logical prompt within a project
-     * @param {string} projectId Project ID
+     * @summary Creates a new logical prompt (with ID as slug) within a project
+     * @param {string} projectId Project ID (slug)
      * @param {CreatePromptDto} createPromptDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -7218,7 +6598,7 @@ export class PromptsApi extends BaseAPI {
     /**
      * 
      * @summary Gets all logical prompts for a project
-     * @param {string} projectId Project ID
+     * @param {string} projectId Project ID (slug)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
@@ -7229,42 +6609,42 @@ export class PromptsApi extends BaseAPI {
 
     /**
      * 
-     * @summary Gets a logical prompt by its name within a project
-     * @param {string} promptName Unique name of the prompt within the project
-     * @param {string} projectId Project ID
+     * @summary Gets a logical prompt by its ID (slug) within a project
+     * @param {string} promptId ID (slug) of the prompt
+     * @param {string} projectId Project ID (slug)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
      */
-    public promptControllerFindOne(promptName: string, projectId: string, options?: RawAxiosRequestConfig) {
-        return PromptsApiFp(this.configuration).promptControllerFindOne(promptName, projectId, options).then((request) => request(this.axios, this.basePath));
+    public promptControllerFindOne(promptId: string, projectId: string, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerFindOne(promptId, projectId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @summary Deletes a logical prompt (and its associated versions via Cascade) within a project by name
-     * @param {string} promptName Name of the prompt to delete
-     * @param {string} projectId Project ID
+     * @summary Deletes a logical prompt (and its associated versions via Cascade) within a project by ID (slug)
+     * @param {string} promptId ID (slug) of the prompt to delete
+     * @param {string} projectId Project ID (slug)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
      */
-    public promptControllerRemove(promptName: string, projectId: string, options?: RawAxiosRequestConfig) {
-        return PromptsApiFp(this.configuration).promptControllerRemove(promptName, projectId, options).then((request) => request(this.axios, this.basePath));
+    public promptControllerRemove(promptId: string, projectId: string, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerRemove(promptId, projectId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @summary Updates an existing prompt by its name for a specific project
-     * @param {string} promptName Name of the prompt to update
-     * @param {string} projectId Project ID
+     * @summary Updates an existing prompt by its ID (slug) for a specific project
+     * @param {string} promptId ID (slug) of the prompt to update
+     * @param {string} projectId Project ID (slug)
      * @param {UpdatePromptDto} updatePromptDto Data to update the prompt
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
      */
-    public promptControllerUpdate(promptName: string, projectId: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig) {
-        return PromptsApiFp(this.configuration).promptControllerUpdate(promptName, projectId, updatePromptDto, options).then((request) => request(this.axios, this.basePath));
+    public promptControllerUpdate(promptId: string, projectId: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerUpdate(promptId, projectId, updatePromptDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

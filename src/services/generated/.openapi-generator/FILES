@@ -7,7 +7,6 @@ configuration.ts
 docs/AIModelsProjectSpecificApi.md
 docs/AiModelResponseDto.md
 docs/AssetTranslationsWithinProjectAssetVersionApi.md
-docs/AssetVersionLinkDto.md
 docs/AuthenticationApi.md
 docs/CreateAiModelDto.md
 docs/CreateAssetTranslationDto.md
@@ -16,7 +15,6 @@ docs/CreateEnvironmentDto.md
 docs/CreateOrUpdatePromptTranslationDto.md
 docs/CreateProjectDto.md
 docs/CreatePromptAssetDto.md
-docs/CreatePromptAssetLinkDto.md
 docs/CreatePromptAssetVersionDto.md
 docs/CreatePromptDto.md
 docs/CreatePromptTranslationDto.md
@@ -41,7 +39,6 @@ docs/LLMExecutionApi.md
 docs/LoginDto.md
 docs/LoginResponse.md
 docs/ProjectsApi.md
-docs/PromptAssetLinksWithinProjectVersionApi.md
 docs/PromptAssetVersionsWithinProjectAssetApi.md
 docs/PromptAssetsApi.md
 docs/PromptTranslationsWithinProjectPromptVersionApi.md
@@ -62,7 +59,6 @@ docs/UpdateCulturalDataDto.md
 docs/UpdateEnvironmentDto.md
 docs/UpdateProjectDto.md
 docs/UpdatePromptAssetDto.md
-docs/UpdatePromptAssetLinkDto.md
 docs/UpdatePromptAssetVersionDto.md
 docs/UpdatePromptDto.md
 docs/UpdatePromptTranslationDto.md

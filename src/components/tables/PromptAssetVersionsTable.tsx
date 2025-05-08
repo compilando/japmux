@@ -1,14 +1,14 @@
 import React from 'react';
 import Link from 'next/link';
-import { PromptAssetVersion } from '@/services/api';
+import { AssetVersionUIData } from '@/app/(admin)/projects/[projectId]/prompt-assets/[assetKey]/versions/page';
 import CopyButton from '../common/CopyButton';
 import { format } from 'date-fns';
 
 interface PromptAssetVersionsTableProps {
-    promptAssetVersions: PromptAssetVersion[];
+    promptAssetVersions: AssetVersionUIData[];
     projectId: string;
     assetKey: string;
-    onEdit: (item: PromptAssetVersion) => void;
+    onEdit: (item: AssetVersionUIData) => void;
     onDelete: (versionTag: string) => void;
     loading?: boolean;
 }
@@ -56,8 +56,8 @@ const PromptAssetVersionsTable: React.FC<PromptAssetVersionsTableProps> = ({ pro
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatDate(item.createdAt)}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                                 <button onClick={() => onEdit(item)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600">Edit</button>
-                                <Link href={`/projects/${projectId}/assets/${assetKey}/versions/${item.versionTag}/translations`} className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600">
-                                    Translate
+                                <Link href={`/projects/${projectId}/prompt-assets/${assetKey}/versions/${item.versionTag}/translations`} className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600">
+                                    Translations
                                 </Link>
                                 <button onClick={() => onDelete(item.versionTag)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">Delete</button>
                             </td>

@@ -1,14 +1,15 @@
 import React from 'react';
-import { PromptVersion } from '@/services/api';
+import { PromptVersionData } from '@/app/(admin)/projects/[projectId]/prompts/[promptId]/versions/page';
+import { CreatePromptVersionDto } from '@/services/api';
 import CopyButton from '../common/CopyButton';
 import Link from 'next/link';
 
 interface PromptVersionsTableProps {
-    promptVersions: PromptVersion[];
+    promptVersions: PromptVersionData[];
     projectId: string;
-    onEdit: (item: PromptVersion) => void;
-    onDelete: (item: PromptVersion) => void;
-    onToggleActive?: (item: PromptVersion) => void;
+    onEdit: (item: PromptVersionData) => void;
+    onDelete: (item: PromptVersionData) => void;
+    onToggleActive?: (item: PromptVersionData) => void;
 }
 
 const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({ promptVersions, projectId, onEdit, onDelete, onToggleActive }) => {
@@ -55,12 +56,6 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({ promptVersion
                                     className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-600"
                                 >
                                     Translations
-                                </Link>
-                                <Link
-                                    href={`/projects/${projectId}/prompts/${item.promptId}/versions/${item.versionTag}/links`}
-                                    className="text-cyan-600 hover:text-cyan-900 dark:text-cyan-400 dark:hover:text-cyan-600"
-                                >
-                                    Asset Links
                                 </Link>
                                 <button onClick={() => onEdit(item)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600">Edit</button>
                                 <button onClick={() => onDelete(item)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">Delete</button>
