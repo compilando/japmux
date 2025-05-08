@@ -3,14 +3,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
-    Project,
-    Prompt,
-    PromptTranslation,
     promptTranslationService,
     CreatePromptTranslationDto,
     UpdatePromptTranslationDto,
     projectService,
-    promptService
+    promptService,
+    promptVersionService
 } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
@@ -18,16 +16,18 @@ import PromptTranslationsTable from '@/components/tables/PromptTranslationsTable
 import PromptTranslationForm from '@/components/form/PromptTranslationForm';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import { CreateProjectDto, CreatePromptDto, CreatePromptVersionDto } from '@/services/generated/api';
 
 const PromptTranslationsPage: React.FC = () => {
-    const [itemsList, setItemsList] = useState<PromptTranslation[]>([]);
+    const [itemsList, setItemsList] = useState<CreatePromptTranslationDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingItem, setEditingItem] = useState<PromptTranslation | null>(null);
+    const [editingItem, setEditingItem] = useState<CreatePromptTranslationDto | null>(null);
+    const [versionText, setVersionText] = useState<string>('');
 
-    const [project, setProject] = useState<Project | null>(null);
-    const [prompt, setPrompt] = useState<Prompt | null>(null);
+    const [project, setProject] = useState<CreateProjectDto | null>(null);
+    const [prompt, setPrompt] = useState<CreatePromptDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     const searchParams = useSearchParams();
@@ -71,6 +71,22 @@ const PromptTranslationsPage: React.FC = () => {
         fetchBreadcrumbData();
     }, [projectId, promptId]);
 
+    useEffect(() => {
+        const fetchVersionText = async () => {
+            if (!projectId || !promptId || !versionTag) return;
+            try {
+                const version = await promptVersionService.findOne(projectId, promptId, versionTag);
+                if (version?.promptText) {
+                    setVersionText(version.promptText);
+                }
+            } catch (error) {
+                console.error('Error fetching version text:', error);
+            }
+        };
+
+        fetchVersionText();
+    }, [projectId, promptId, versionTag]);
+
     const fetchData = useCallback(async () => {
         if (!projectId || !promptId || !versionTag) {
             setError("Missing Project, Prompt or Version Tag in URL.");
@@ -109,12 +125,12 @@ const PromptTranslationsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (item: PromptTranslation) => {
+    const handleEdit = (item: CreatePromptTranslationDto) => {
         setEditingItem(item);
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (itemToDelete: PromptTranslation) => {
+    const handleDelete = async (itemToDelete: CreatePromptTranslationDto) => {
         if (!projectId || !promptId || !versionTag || !itemToDelete?.languageCode) return;
         if (window.confirm(`Are you sure you want to delete the translation for ${itemToDelete.languageCode}?`)) {
             setLoading(true);
@@ -201,17 +217,17 @@ const PromptTranslationsPage: React.FC = () => {
             </div>
 
             {isModalOpen && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
-                    <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
-                        <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-                            {editingItem ? `Edit Translation (${editingItem.languageCode})` : 'Add New Prompt Translation'}
-                        </h3>
-                        <PromptTranslationForm
-                            initialData={editingItem}
-                            onSave={handleSave}
-                            onCancel={() => setIsModalOpen(false)}
-                            versionId={!editingItem && currentVersionId ? currentVersionId : undefined}
-                        />
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+                    <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+                        <div className="mt-3">
+                            <PromptTranslationForm
+                                initialData={editingItem}
+                                versionId={currentVersionId || undefined}
+                                onSave={handleSave}
+                                onCancel={() => setIsModalOpen(false)}
+                                versionText={versionText}
+                            />
+                        </div>
                     </div>
                 </div>
             )}

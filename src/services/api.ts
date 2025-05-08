@@ -594,7 +594,7 @@ export const systemPromptService = {
 
 // Añadir función para execute-raw (podría ir en llmExecutionService o uno nuevo)
 export const rawExecutionService = {
-    executeRaw: async (payload: generated.ExecuteRawDto): Promise<any> => {
+    executeRaw: async (payload: generated.ExecuteRawDto & { variables?: Record<string, any> }): Promise<any> => {
         const response = await rawExecutionGeneratedApi.rawExecutionControllerExecuteRawText(payload);
         return response.data;
     }

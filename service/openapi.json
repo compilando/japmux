@@ -3586,7 +3586,7 @@
         ]
       }
     },
-    "/api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/translations": {
+    "/api/projects/{projectId}/prompt-assets/{assetKey}/versions/{versionTag}/translations": {
       "post": {
         "operationId": "AssetTranslationController_create",
         "parameters": [
@@ -3731,7 +3731,7 @@
         ]
       }
     },
-    "/api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/translations/{languageCode}": {
+    "/api/projects/{projectId}/prompt-assets/{assetKey}/versions/{versionTag}/translations/{languageCode}": {
       "get": {
         "operationId": "AssetTranslationController_findOneByLanguage",
         "parameters": [
@@ -5015,11 +5015,6 @@
       "UpdatePromptAssetDto": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string",
-            "description": "Nombre descriptivo del asset",
-            "example": "Saludo Formal (España)"
-          },
           "category": {
             "type": "string",
             "description": "Categoría para organizar assets (e.g., Saludos, Despedidas)",
@@ -5471,6 +5466,7 @@
             "type": "string",
             "minLength": 5,
             "maxLength": 5,
+            "pattern": "/^[a-z]{2}-[A-Z]{2}$/",
             "description": "Código de idioma para esta traducción (formato xx-XX)",
             "example": "es-ES"
           },
@@ -5632,6 +5628,14 @@
             "type": "string",
             "description": "The unique ID (CUID) of the AIModel to use for execution.",
             "example": "cmac24bp1000ck6x5iwgju5p1"
+          },
+          "variables": {
+            "type": "object",
+            "description": "Optional variables to substitute in the system prompt.",
+            "example": {
+              "text": "Hello world",
+              "targetLanguage": "es-ES"
+            }
           }
         },
         "required": [

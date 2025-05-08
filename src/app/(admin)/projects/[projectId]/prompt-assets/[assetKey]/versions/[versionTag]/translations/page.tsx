@@ -243,6 +243,7 @@ const PromptAssetTranslationsPage: React.FC = () => {
                             onSave={handleSave}
                             onCancel={() => setIsModalOpen(false)}
                             versionId={version.id}
+                            versionText={version.value}
                         />
                     </div>
                 </div>
