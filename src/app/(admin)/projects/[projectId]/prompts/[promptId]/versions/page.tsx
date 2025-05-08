@@ -58,6 +58,7 @@ const PromptVersionsPage: React.FC = () => {
         const fetchBreadcrumbData = async () => {
             setBreadcrumbLoading(true);
             try {
+                console.log('[fetchBreadcrumbData] Attempting to fetch with projectId:', projectId, 'and promptId (actually promptName):', promptId);
                 const [projectData, promptData] = await Promise.all([
                     projectService.findOne(projectId),
                     promptService.findOne(projectId, promptId)

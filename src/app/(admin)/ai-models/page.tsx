@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import {
     CreateAiModelDto,
-    UpdateAiModelDto
+    UpdateAiModelDto,
+    AiModelResponseDto
 } from '@/services/generated/api';
 import { aiModelService } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
@@ -12,19 +13,12 @@ import AiModelsTable from '@/components/tables/AiModelsTable';
 import AiModelForm from '@/components/form/AiModelForm';
 import axios from 'axios';
 
-// Definir tipo local que incluye el ID
-interface AiModelWithId extends CreateAiModelDto {
-    id: string;
-    // Podríamos añadir createdAt, updatedAt si la API los devuelve y los necesitamos
-}
-
 const AiModelsPage: React.FC = () => {
-    // Usar el tipo local AiModelWithId
-    const [aiModelsList, setAiModelsList] = useState<AiModelWithId[]>([]);
+    const [aiModelsList, setAiModelsList] = useState<AiModelResponseDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingModel, setEditingModel] = useState<AiModelWithId | null>(null);
+    const [editingModel, setEditingModel] = useState<AiModelResponseDto | null>(null);
     const { selectedProjectId } = useProjects();
 
     const fetchData = async (projectId: string) => {
@@ -33,8 +27,7 @@ const AiModelsPage: React.FC = () => {
         try {
             const data = await aiModelService.findAll(projectId);
             if (Array.isArray(data)) {
-                // Castear la respuesta a AiModelWithId[], asumiendo que la API sí devuelve 'id'
-                setAiModelsList(data as AiModelWithId[]);
+                setAiModelsList(data);
             } else {
                 console.error("API response for /ai-models is not an array:", data);
                 setError('Received invalid data format for AI models.');
@@ -49,7 +42,7 @@ const AiModelsPage: React.FC = () => {
                 errorMessage += `: ${String(err)}`;
             }
             if (axios.isAxiosError(err) && err.response?.data?.message) {
-                 errorMessage = `Failed to fetch AI models: ${err.response.data.message}`;
+                errorMessage = `Failed to fetch AI models: ${err.response.data.message}`;
             }
             setError(errorMessage);
             setAiModelsList([]);
@@ -73,16 +66,15 @@ const AiModelsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    // Usar AiModelWithId para el tipo del parámetro model
-    const handleEdit = (model: AiModelWithId) => {
+    const handleEdit = (model: AiModelResponseDto) => {
         setEditingModel(model);
         setIsModalOpen(true);
     };
 
     const handleDelete = async (id: string) => {
         if (!selectedProjectId) {
-             setError("Cannot delete model without a selected project.");
-             return;
+            setError("Cannot delete model without a selected project.");
+            return;
         }
         if (window.confirm('Are you sure you want to delete this AI model?')) {
             try {
@@ -96,16 +88,16 @@ const AiModelsPage: React.FC = () => {
             }
             setIsModalOpen(false);
             if (selectedProjectId) {
-               fetchData(selectedProjectId);
+                fetchData(selectedProjectId);
             }
         }
     };
 
     const handleSave = async (payload: CreateAiModelDto | UpdateAiModelDto) => {
         if (!selectedProjectId) {
-             setError("Cannot save model without a selected project.");
-             setIsModalOpen(false);
-             return;
+            setError("Cannot save model without a selected project.");
+            setIsModalOpen(false);
+            return;
         }
         try {
             if (editingModel && editingModel.id) {
@@ -115,7 +107,7 @@ const AiModelsPage: React.FC = () => {
             }
             setIsModalOpen(false);
             if (selectedProjectId) {
-               fetchData(selectedProjectId);
+                fetchData(selectedProjectId);
             }
         } catch (err) {
             setError(`Failed to save AI model: ${err instanceof Error ? err.message : String(err)}`);
@@ -137,7 +129,7 @@ const AiModelsPage: React.FC = () => {
         <>
             <Breadcrumb crumbs={breadcrumbs} />
             {!selectedProjectId && !loading && (
-                 <p className="text-yellow-600 dark:text-yellow-400">Please select a project to manage AI Models.</p>
+                <p className="text-yellow-600 dark:text-yellow-400">Please select a project to manage AI Models.</p>
             )}
             {selectedProjectId && (
                 <>
@@ -169,6 +161,7 @@ const AiModelsPage: React.FC = () => {
                             initialData={editingModel}
                             onSave={handleSave}
                             onCancel={() => setIsModalOpen(false)}
+                            projectId={selectedProjectId || ''}
                         />
                     </div>
                 </div>

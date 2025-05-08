@@ -5,8 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**languageCode** | **string** | Código de idioma de la traducción (e.g., es-ES, fr-FR). | [default to undefined]
-**promptText** | **string** | Texto traducido del prompt para esta versión y idioma. | [default to undefined]
+**languageCode** | **string** | Language code for the translation (e.g., es-ES, fr-FR). | [default to undefined]
+**promptText** | **string** | Translated prompt text for this version and language. | [default to undefined]
 
 ## Example
 

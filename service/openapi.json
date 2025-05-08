@@ -614,7 +614,7 @@
             "name": "culturalDataId",
             "required": true,
             "in": "path",
-            "description": "ID of the cultural data",
+            "description": "Key of the cultural data (e.g., direct-and-formal)",
             "schema": {
               "type": "string"
             }
@@ -661,7 +661,7 @@
             "name": "culturalDataId",
             "required": true,
             "in": "path",
-            "description": "ID to update",
+            "description": "Key of the cultural data to update (e.g., direct-and-formal)",
             "schema": {
               "type": "string"
             }
@@ -721,7 +721,7 @@
             "name": "culturalDataId",
             "required": true,
             "in": "path",
-            "description": "ID to delete",
+            "description": "Key of the cultural data to delete (e.g., direct-and-formal)",
             "schema": {
               "type": "string"
             }
@@ -2689,6 +2689,36 @@
           }
         ],
         "summary": "Delete an AI model by ID (must belong to project)",
+        "tags": [
+          "AI Models (Project Specific)"
+        ]
+      }
+    },
+    "/api/projects/{projectId}/aimodels/providers/types": {
+      "get": {
+        "operationId": "AiModelController_getProviderTypes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A list of Langchain provider types.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List available Langchain provider types",
         "tags": [
           "AI Models (Project Specific)"
         ]
@@ -5036,74 +5066,72 @@
       "CreateCulturalDataDto": {
         "type": "object",
         "properties": {
-          "id": {
+          "key": {
             "type": "string",
-            "description": "Unique ID for this cultural data (slug format)",
+            "description": "Unique key for the cultural data within the project",
             "example": "direct-and-formal"
           },
           "regionId": {
             "type": "string",
             "minLength": 5,
             "maxLength": 5,
-            "description": "Associated region ID (xx-XX language code)",
-            "example": "es-ES"
+            "description": "ID (CUID) of the Region this data applies to"
           },
           "formalityLevel": {
             "type": "number",
-            "description": "Formality level (optional)",
-            "example": 5
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Formality level (1-10)"
           },
           "style": {
             "type": "string",
-            "description": "Communication style (optional)",
-            "example": "Direct"
+            "description": "Description of the communication style"
           },
           "considerations": {
             "type": "string",
-            "description": "Cultural considerations (optional)"
+            "description": "Specific cultural considerations"
           },
           "notes": {
             "type": "string",
-            "description": "Additional notes (optional)"
+            "description": "General notes"
           }
         },
         "required": [
-          "id",
+          "key",
           "regionId"
         ]
       },
       "CulturalDataResponse": {
         "type": "object",
         "properties": {
-          "id": {
+          "key": {
             "type": "string",
-            "description": "Unique ID for this cultural data (slug format)",
+            "description": "Unique key for the cultural data within the project",
             "example": "direct-and-formal"
           },
           "regionId": {
             "type": "string",
             "minLength": 5,
             "maxLength": 5,
-            "description": "Associated region ID (xx-XX language code)",
-            "example": "es-ES"
+            "description": "ID (CUID) of the Region this data applies to"
           },
           "formalityLevel": {
             "type": "number",
-            "description": "Formality level (optional)",
-            "example": 5
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Formality level (1-10)"
           },
           "style": {
             "type": "string",
-            "description": "Communication style (optional)",
-            "example": "Direct"
+            "description": "Description of the communication style"
           },
           "considerations": {
             "type": "string",
-            "description": "Cultural considerations (optional)"
+            "description": "Specific cultural considerations"
           },
           "notes": {
             "type": "string",
-            "description": "Additional notes (optional)"
+            "description": "General notes"
           },
           "region": {
             "$ref": "#/components/schemas/CreateRegionDto"
@@ -5113,7 +5141,7 @@
           }
         },
         "required": [
-          "id",
+          "key",
           "regionId",
           "region",
           "projectId"
@@ -5124,21 +5152,21 @@
         "properties": {
           "formalityLevel": {
             "type": "number",
-            "description": "Formality level (optional)",
-            "example": 5
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Formality level (1-10)"
           },
           "style": {
             "type": "string",
-            "description": "Communication style (optional)",
-            "example": "Direct"
+            "description": "Description of the communication style"
           },
           "considerations": {
             "type": "string",
-            "description": "Cultural considerations (optional)"
+            "description": "Specific cultural considerations"
           },
           "notes": {
             "type": "string",
-            "description": "Additional notes (optional)"
+            "description": "General notes"
           }
         }
       },
@@ -5376,13 +5404,6 @@
           "enabled": {
             "type": "boolean",
             "description": "Activa o desactiva el asset"
-          },
-          "projectId": {
-            "type": "string",
-            "nullable": true,
-            "minLength": 25,
-            "maxLength": 25,
-            "description": "ID opcional del proyecto al que pertenece el asset (null para desvincular)"
           }
         }
       },
@@ -5565,14 +5586,15 @@
             "description": "Optional description for the project",
             "example": "A project to demonstrate NestJS and Prisma"
           },
-          "ownerUserId": {
+          "owner": {
             "type": "string",
-            "description": "Optional ID of the User who owns this project",
-            "example": "cl..."
+            "description": "ID (CUID) of the User who owns this project",
+            "example": "user-cuid-xxxx"
           }
         },
         "required": [
-          "name"
+          "name",
+          "owner"
         ]
       },
       "UpdateProjectDto": {
@@ -5588,10 +5610,10 @@
             "description": "Optional description for the project",
             "example": "A project to demonstrate NestJS and Prisma"
           },
-          "ownerUserId": {
+          "owner": {
             "type": "string",
-            "description": "Optional ID of the User who owns this project",
-            "example": "cl..."
+            "description": "ID (CUID) of the User who owns this project",
+            "example": "user-cuid-xxxx"
           }
         }
       },
@@ -5851,20 +5873,14 @@
       "CreatePromptAssetVersionDto": {
         "type": "object",
         "properties": {
-          "assetId": {
-            "type": "string",
-            "description": "Key (slug) del asset lógico al que pertenece esta versión",
-            "example": "saludo-inicial"
-          },
           "value": {
             "type": "string",
-            "description": "El valor del asset para esta versión"
+            "description": "El valor del asset para esta nueva versión"
           },
           "versionTag": {
             "type": "string",
-            "default": "v1.0.0",
-            "description": "Etiqueta de versión (e.g., v1.0.0). Debe ser única por asset.",
-            "example": "v1.0.0"
+            "description": "Etiqueta de versión (e.g., v1.0.1, v1.1.0). Si no se provee, se podría auto-incrementar o requerir.",
+            "example": "v1.0.1"
           },
           "changeMessage": {
             "type": "string",
@@ -5872,7 +5888,6 @@
           }
         },
         "required": [
-          "assetId",
           "value"
         ]
       },

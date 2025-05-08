@@ -42,7 +42,7 @@ const { status, data } = await apiInstance.llmExecutionControllerExecuteLlm(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 

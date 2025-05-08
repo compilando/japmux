@@ -4,12 +4,12 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**environmentControllerCreate**](#environmentcontrollercreate) | **POST** /api/projects/{projectId}/environments | Crea un nuevo entorno para un proyecto|
-|[**environmentControllerFindAll**](#environmentcontrollerfindall) | **GET** /api/projects/{projectId}/environments | Obtiene todos los entornos de un proyecto|
-|[**environmentControllerFindByName**](#environmentcontrollerfindbyname) | **GET** /api/projects/{projectId}/environments/by-name/{name} | Obtiene un entorno por su nombre dentro de un proyecto|
-|[**environmentControllerFindOne**](#environmentcontrollerfindone) | **GET** /api/projects/{projectId}/environments/{environmentId} | Obtiene un entorno por su ID dentro de un proyecto|
-|[**environmentControllerRemove**](#environmentcontrollerremove) | **DELETE** /api/projects/{projectId}/environments/{environmentId} | Elimina un entorno de un proyecto|
-|[**environmentControllerUpdate**](#environmentcontrollerupdate) | **PATCH** /api/projects/{projectId}/environments/{environmentId} | Actualiza un entorno existente en un proyecto|
+|[**environmentControllerCreate**](#environmentcontrollercreate) | **POST** /api/projects/{projectId}/environments | Creates a new environment for a project|
+|[**environmentControllerFindAll**](#environmentcontrollerfindall) | **GET** /api/projects/{projectId}/environments | Gets all environments for a project|
+|[**environmentControllerFindByName**](#environmentcontrollerfindbyname) | **GET** /api/projects/{projectId}/environments/by-name/{name} | Gets an environment by its name within a project|
+|[**environmentControllerFindOne**](#environmentcontrollerfindone) | **GET** /api/projects/{projectId}/environments/{environmentId} | Gets an environment by its ID within a project|
+|[**environmentControllerRemove**](#environmentcontrollerremove) | **DELETE** /api/projects/{projectId}/environments/{environmentId} | Deletes an environment from a project|
+|[**environmentControllerUpdate**](#environmentcontrollerupdate) | **PATCH** /api/projects/{projectId}/environments/{environmentId} | Updates an existing environment in a project|
 
 # **environmentControllerCreate**
 > CreateEnvironmentDto environmentControllerCreate(createEnvironmentDto)
@@ -27,7 +27,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new EnvironmentsApi(configuration);
 
-let projectId: string; //ID del proyecto (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 let createEnvironmentDto: CreateEnvironmentDto; //
 
 const { status, data } = await apiInstance.environmentControllerCreate(
@@ -41,7 +41,7 @@ const { status, data } = await apiInstance.environmentControllerCreate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **createEnvironmentDto** | **CreateEnvironmentDto**|  | |
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -50,7 +50,7 @@ const { status, data } = await apiInstance.environmentControllerCreate(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -61,10 +61,10 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**201** | Entorno creado. |  -  |
-|**400** | Datos inválidos. |  -  |
-|**404** | Proyecto no encontrado. |  -  |
-|**409** | Conflicto, ya existe un entorno con ese nombre en el proyecto. |  -  |
+|**201** | Environment created. |  -  |
+|**400** | Invalid data. |  -  |
+|**404** | Project not found. |  -  |
+|**409** | Conflict, an environment with this name already exists in the project. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -83,7 +83,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new EnvironmentsApi(configuration);
 
-let projectId: string; //ID del proyecto (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.environmentControllerFindAll(
     projectId
@@ -94,7 +94,7 @@ const { status, data } = await apiInstance.environmentControllerFindAll(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -103,7 +103,7 @@ const { status, data } = await apiInstance.environmentControllerFindAll(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -114,8 +114,8 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Lista de entornos. |  -  |
-|**404** | Proyecto no encontrado. |  -  |
+|**200** | List of environments. |  -  |
+|**404** | Project not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -134,8 +134,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new EnvironmentsApi(configuration);
 
-let name: string; //Nombre único del entorno en el proyecto (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let name: string; //Unique environment name in the project (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.environmentControllerFindByName(
     name,
@@ -147,8 +147,8 @@ const { status, data } = await apiInstance.environmentControllerFindByName(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **name** | [**string**] | Nombre único del entorno en el proyecto | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **name** | [**string**] | Unique environment name in the project | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -157,7 +157,7 @@ const { status, data } = await apiInstance.environmentControllerFindByName(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -168,8 +168,8 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Entorno encontrado. |  -  |
-|**404** | Proyecto o Entorno no encontrado. |  -  |
+|**200** | Environment found. |  -  |
+|**404** | Project or Environment not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -188,8 +188,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new EnvironmentsApi(configuration);
 
-let environmentId: string; //ID único del entorno (CUID) (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let environmentId: string; //Unique environment ID (CUID) (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.environmentControllerFindOne(
     environmentId,
@@ -201,8 +201,8 @@ const { status, data } = await apiInstance.environmentControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **environmentId** | [**string**] | ID único del entorno (CUID) | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **environmentId** | [**string**] | Unique environment ID (CUID) | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -211,7 +211,7 @@ const { status, data } = await apiInstance.environmentControllerFindOne(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -222,8 +222,8 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Entorno encontrado. |  -  |
-|**404** | Proyecto o Entorno no encontrado. |  -  |
+|**200** | Environment found. |  -  |
+|**404** | Project or Environment not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -242,8 +242,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new EnvironmentsApi(configuration);
 
-let environmentId: string; //ID único del entorno a eliminar (CUID) (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let environmentId: string; //Unique ID of the environment to delete (CUID) (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.environmentControllerRemove(
     environmentId,
@@ -255,8 +255,8 @@ const { status, data } = await apiInstance.environmentControllerRemove(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **environmentId** | [**string**] | ID único del entorno a eliminar (CUID) | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **environmentId** | [**string**] | Unique ID of the environment to delete (CUID) | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -265,7 +265,7 @@ const { status, data } = await apiInstance.environmentControllerRemove(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -276,8 +276,8 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Entorno eliminado. |  -  |
-|**404** | Proyecto o Entorno no encontrado. |  -  |
+|**200** | Environment deleted. |  -  |
+|**404** | Project or Environment not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -297,8 +297,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new EnvironmentsApi(configuration);
 
-let environmentId: string; //ID único del entorno a actualizar (CUID) (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let environmentId: string; //Unique ID of the environment to update (CUID) (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 let updateEnvironmentDto: UpdateEnvironmentDto; //
 
 const { status, data } = await apiInstance.environmentControllerUpdate(
@@ -313,8 +313,8 @@ const { status, data } = await apiInstance.environmentControllerUpdate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **updateEnvironmentDto** | **UpdateEnvironmentDto**|  | |
-| **environmentId** | [**string**] | ID único del entorno a actualizar (CUID) | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **environmentId** | [**string**] | Unique ID of the environment to update (CUID) | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -323,7 +323,7 @@ const { status, data } = await apiInstance.environmentControllerUpdate(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -334,10 +334,10 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Entorno actualizado. |  -  |
-|**400** | Datos inválidos. |  -  |
-|**404** | Proyecto o Entorno no encontrado. |  -  |
-|**409** | Conflicto, ya existe un entorno con el nuevo nombre en el proyecto. |  -  |
+|**200** | Environment updated. |  -  |
+|**400** | Invalid data. |  -  |
+|**404** | Project or Environment not found. |  -  |
+|**409** | Conflict, an environment with the new name already exists in the project. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

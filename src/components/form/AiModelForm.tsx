@@ -1,17 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { AiModel, AiModelCreatePayload, AiModelUpdatePayload } from '@/services/api';
+import { aiModelService } from '@/services/api';
+import * as generated from '../../../generated/japmux-api';
+import { showErrorToast } from '@/utils/toastUtils';
 
-interface AiModelFormProps {
-    initialData: AiModel | null;
-    onSave: (data: AiModelCreatePayload | AiModelUpdatePayload) => void;
-    onCancel: () => void;
+// Tipo provisional para las opciones del proveedor, ajustar según la respuesta real del API
+interface ProviderTypeOption {
+    value: string;
+    label: string;
 }
 
-const AiModelForm: React.FC<AiModelFormProps> = ({ initialData, onSave, onCancel }) => {
+interface AiModelFormProps {
+    initialData: generated.AiModelResponseDto | null;
+    onSave: (data: generated.CreateAiModelDto | generated.UpdateAiModelDto) => void;
+    onCancel: () => void;
+    projectId: string;
+}
+
+const AiModelForm: React.FC<AiModelFormProps> = ({ initialData, onSave, onCancel, projectId }) => {
     const [name, setName] = useState('');
     const [provider, setProvider] = useState('');
     const [description, setDescription] = useState('');
     const [apiIdentifier, setApiIdentifier] = useState('');
+
+    // Estados para los tipos de proveedor
+    const [providerTypes, setProviderTypes] = useState<ProviderTypeOption[]>([]);
+    const [isLoadingProviderTypes, setIsLoadingProviderTypes] = useState(false);
 
     const isEditing = !!initialData;
 
@@ -29,17 +42,44 @@ const AiModelForm: React.FC<AiModelFormProps> = ({ initialData, onSave, onCancel
         }
     }, [initialData]);
 
+    // Efecto para cargar los tipos de proveedores
+    useEffect(() => {
+        console.log('[AiModelForm] useEffect for provider types. ProjectId:', projectId);
+        if (projectId) {
+            setIsLoadingProviderTypes(true);
+            aiModelService.getProviderTypes(projectId)
+                .then(data => {
+                    // La API devuelve string[], mapeamos a ProviderTypeOption[]
+                    const options: ProviderTypeOption[] = data.map(pt => ({ value: pt, label: pt }));
+                    setProviderTypes(options);
+                })
+                .catch(err => {
+                    console.error("[AiModelForm] Error fetching provider types:", err);
+                    showErrorToast("Failed to load provider types. Please try again.");
+                    setProviderTypes([]); // Limpiar en caso de error
+                })
+                .finally(() => setIsLoadingProviderTypes(false));
+        } else {
+            setProviderTypes([]); // Limpiar si no hay projectId
+        }
+    }, [projectId]);
+
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
 
         if (!name.trim()) {
-            alert('Model Name is required.');
+            showErrorToast('Model Name is required.');
             return;
         }
 
-        const payload: AiModelCreatePayload | AiModelUpdatePayload = {
+        if (!provider.trim()) {
+            showErrorToast('Provider is required.');
+            return;
+        }
+
+        const payload: generated.CreateAiModelDto | generated.UpdateAiModelDto = {
             name: name.trim(),
-            provider: provider.trim() || undefined,
+            provider: provider.trim(),
             description: description.trim() || undefined,
             apiIdentifier: apiIdentifier.trim() || undefined,
         };
@@ -62,16 +102,23 @@ const AiModelForm: React.FC<AiModelFormProps> = ({ initialData, onSave, onCancel
                 />
             </div>
 
-            {/* Provider */}
+            {/* Provider - CAMBIADO A SELECT */}
             <div>
-                <label htmlFor="provider" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Provider (Optional)</label>
-                <input
-                    type="text"
+                <label htmlFor="provider" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Provider</label>
+                <select
                     id="provider"
                     value={provider}
                     onChange={(e) => setProvider(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
+                    required
+                    disabled={isLoadingProviderTypes}
+                >
+                    <option value="">-- Select Provider --</option>
+                    {providerTypes.map(pt => (
+                        <option key={pt.value} value={pt.value}>{pt.label}</option>
+                    ))}
+                </select>
+                {isLoadingProviderTypes && <p className="text-sm text-gray-500 dark:text-gray-400">Loading providers...</p>}
             </div>
 
             {/* API Identifier */}

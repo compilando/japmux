@@ -57,7 +57,7 @@ const { status, data } = await apiInstance.servePromptControllerExecutePrompt(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 

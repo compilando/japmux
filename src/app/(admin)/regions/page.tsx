@@ -2,32 +2,31 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    Region,
-    regionService,      // Importar servicio
+    regionService,
     CreateRegionDto,
     UpdateRegionDto,
-    Project,
     projectService
 } from '@/services/api';
-import { useProjects } from '@/context/ProjectContext'; // Importar hook de proyecto
+import * as generated from '../../../../generated/japmux-api';
+import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import RegionsTable from '@/components/tables/RegionsTable';
 import RegionForm from '@/components/form/RegionForm';
 import axios from 'axios';
-import { showSuccessToast, showErrorToast } from '@/utils/toastUtils'; // Importar
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 const RegionsPage: React.FC = () => {
-    const [regions, setRegions] = useState<Region[]>([]);
+    const [regions, setRegions] = useState<generated.CreateRegionDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
     // Estados para el modal/formulario
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingRegion, setEditingRegion] = useState<Region | null>(null);
-    const { selectedProjectId } = useProjects(); // Obtener projectId
+    const [editingRegion, setEditingRegion] = useState<generated.CreateRegionDto | null>(null);
+    const { selectedProjectId } = useProjects();
 
     // Estados para breadcrumb
-    const [project, setProject] = useState<Project | null>(null);
+    const [project, setProject] = useState<generated.CreateProjectDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     // Efecto para cargar nombre del proyecto
@@ -50,7 +49,7 @@ const RegionsPage: React.FC = () => {
 
     // Usar useCallback para evitar re-crear la función en cada render
     const fetchRegions = useCallback(async () => {
-        if (!selectedProjectId) { // Comprobar si hay proyecto seleccionado
+        if (!selectedProjectId) {
             setLoading(false);
             setError("Please select a project first to manage regions.");
             setRegions([]);
@@ -60,7 +59,6 @@ const RegionsPage: React.FC = () => {
         setError(null);
         console.log("Attempting to fetch regions for project:", selectedProjectId);
         try {
-            // Pasar projectId al servicio
             const data = await regionService.findAll(selectedProjectId);
             console.log("API response for regions received:", data);
             if (Array.isArray(data)) {
@@ -80,7 +78,7 @@ const RegionsPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [selectedProjectId]); // Dependencia de selectedProjectId
+    }, [selectedProjectId]);
 
     useEffect(() => {
         fetchRegions();
@@ -88,27 +86,26 @@ const RegionsPage: React.FC = () => {
 
     const handleAdd = () => {
         if (!selectedProjectId) {
-            alert("Please select a project first.");
+            showErrorToast("Please select a project first.");
             return;
         }
         setEditingRegion(null);
         setIsModalOpen(true);
     };
 
-    const handleEdit = (region: Region) => {
-        if (!selectedProjectId) return; // Seguridad extra
+    const handleEdit = (region: generated.CreateRegionDto) => {
+        if (!selectedProjectId) return;
         setEditingRegion(region);
         setIsModalOpen(true);
     };
 
     const handleDelete = async (languageCode: string) => {
         if (!selectedProjectId) {
-            alert("No project selected.");
+            showErrorToast("No project selected.");
             return;
         }
         if (window.confirm(`Are you sure you want to delete the region for ${languageCode}?`)) {
             try {
-                // Pasar projectId al servicio
                 await regionService.remove(selectedProjectId, languageCode);
                 fetchRegions();
             } catch (err) {
@@ -120,15 +117,13 @@ const RegionsPage: React.FC = () => {
 
     const handleSave = async (payload: CreateRegionDto | UpdateRegionDto) => {
         if (!selectedProjectId) {
-            alert("No project selected.");
+            showErrorToast("No project selected.");
             return;
         }
         try {
             if (editingRegion) {
-                // Pasar projectId al servicio
                 await regionService.update(selectedProjectId, editingRegion.languageCode, payload as UpdateRegionDto);
             } else {
-                // Pasar projectId al servicio
                 await regionService.create(selectedProjectId, payload as CreateRegionDto);
             }
             setIsModalOpen(false);
@@ -195,8 +190,7 @@ const RegionsPage: React.FC = () => {
                             initialData={editingRegion}
                             onSave={handleSave}
                             onCancel={() => setIsModalOpen(false)}
-                        // Pasar projectId si el formulario lo necesita
-                        // projectId={selectedProjectId}
+                            projectId={selectedProjectId}
                         />
                     </div>
                 </div>

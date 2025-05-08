@@ -5,12 +5,12 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**languageCode** | **string** | Código de idioma único que actúa como ID | [default to undefined]
-**name** | **string** | Nombre de la región | [default to undefined]
-**parentRegionId** | **string** | languageCode de la región padre (opcional) | [optional] [default to undefined]
-**timeZone** | **string** | Zona horaria | [optional] [default to undefined]
-**defaultFormalityLevel** | **string** | Nivel de formalidad por defecto (opcional) | [optional] [default to undefined]
-**notes** | **string** | Notas adicionales (opcional) | [optional] [default to undefined]
+**languageCode** | **string** | Unique language code acting as ID | [default to undefined]
+**name** | **string** | Name of the region | [default to undefined]
+**parentRegionId** | **string** | languageCode of the parent region (optional) | [optional] [default to undefined]
+**timeZone** | **string** | Time zone | [optional] [default to undefined]
+**defaultFormalityLevel** | **string** | Default formality level (optional) | [optional] [default to undefined]
+**notes** | **string** | Additional notes (optional) | [optional] [default to undefined]
 
 ## Example
 

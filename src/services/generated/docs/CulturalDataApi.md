@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**culturalDataControllerCreate**](#culturaldatacontrollercreate) | **POST** /api/projects/{projectId}/cultural-data | Crear nuevos datos culturales dentro de un proyecto|
-|[**culturalDataControllerFindAll**](#culturaldatacontrollerfindall) | **GET** /api/projects/{projectId}/cultural-data | Obtener todos los datos culturales de un proyecto|
-|[**culturalDataControllerFindOne**](#culturaldatacontrollerfindone) | **GET** /api/projects/{projectId}/cultural-data/{culturalDataId} | Obtener datos culturales por ID dentro de un proyecto|
-|[**culturalDataControllerRemove**](#culturaldatacontrollerremove) | **DELETE** /api/projects/{projectId}/cultural-data/{culturalDataId} | Eliminar datos culturales por ID dentro de un proyecto|
-|[**culturalDataControllerUpdate**](#culturaldatacontrollerupdate) | **PATCH** /api/projects/{projectId}/cultural-data/{culturalDataId} | Actualizar datos culturales por ID dentro de un proyecto|
+|[**culturalDataControllerCreate**](#culturaldatacontrollercreate) | **POST** /api/projects/{projectId}/cultural-data | Creates new cultural data within a project|
+|[**culturalDataControllerFindAll**](#culturaldatacontrollerfindall) | **GET** /api/projects/{projectId}/cultural-data | Gets all cultural data for a project|
+|[**culturalDataControllerFindOne**](#culturaldatacontrollerfindone) | **GET** /api/projects/{projectId}/cultural-data/{culturalDataId} | Gets cultural data by ID within a project|
+|[**culturalDataControllerRemove**](#culturaldatacontrollerremove) | **DELETE** /api/projects/{projectId}/cultural-data/{culturalDataId} | Deletes cultural data by ID within a project|
+|[**culturalDataControllerUpdate**](#culturaldatacontrollerupdate) | **PATCH** /api/projects/{projectId}/cultural-data/{culturalDataId} | Updates cultural data by ID within a project|
 
 # **culturalDataControllerCreate**
 > CulturalDataResponse culturalDataControllerCreate(createCulturalDataDto)
@@ -26,7 +26,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new CulturalDataApi(configuration);
 
-let projectId: string; //ID del proyecto (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 let createCulturalDataDto: CreateCulturalDataDto; //
 
 const { status, data } = await apiInstance.culturalDataControllerCreate(
@@ -40,7 +40,7 @@ const { status, data } = await apiInstance.culturalDataControllerCreate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **createCulturalDataDto** | **CreateCulturalDataDto**|  | |
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -49,7 +49,7 @@ const { status, data } = await apiInstance.culturalDataControllerCreate(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -60,9 +60,9 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**201** | Datos culturales creados. |  -  |
-|**400** | Datos inválidos. |  -  |
-|**404** | Proyecto o Región referenciada no encontrada. |  -  |
+|**201** | Cultural data created. |  -  |
+|**400** | Invalid data. |  -  |
+|**404** | Project or referenced Region not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -81,7 +81,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new CulturalDataApi(configuration);
 
-let projectId: string; //ID del proyecto (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.culturalDataControllerFindAll(
     projectId
@@ -92,7 +92,7 @@ const { status, data } = await apiInstance.culturalDataControllerFindAll(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -101,7 +101,7 @@ const { status, data } = await apiInstance.culturalDataControllerFindAll(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -112,8 +112,8 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Lista de datos culturales. |  -  |
-|**404** | Proyecto no encontrado. |  -  |
+|**200** | List of cultural data. |  -  |
+|**404** | Project not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -132,8 +132,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new CulturalDataApi(configuration);
 
-let culturalDataId: string; //ID de los datos culturales (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let culturalDataId: string; //ID of the cultural data (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.culturalDataControllerFindOne(
     culturalDataId,
@@ -145,8 +145,8 @@ const { status, data } = await apiInstance.culturalDataControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **culturalDataId** | [**string**] | ID de los datos culturales | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **culturalDataId** | [**string**] | ID of the cultural data | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -155,7 +155,7 @@ const { status, data } = await apiInstance.culturalDataControllerFindOne(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -166,8 +166,8 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Datos culturales encontrados. |  -  |
-|**404** | Proyecto o Datos culturales no encontrados. |  -  |
+|**200** | Cultural data found. |  -  |
+|**404** | Project or Cultural data not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -186,8 +186,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new CulturalDataApi(configuration);
 
-let culturalDataId: string; //ID a eliminar (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let culturalDataId: string; //ID to delete (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.culturalDataControllerRemove(
     culturalDataId,
@@ -199,8 +199,8 @@ const { status, data } = await apiInstance.culturalDataControllerRemove(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **culturalDataId** | [**string**] | ID a eliminar | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **culturalDataId** | [**string**] | ID to delete | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -209,7 +209,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -220,9 +220,9 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Datos culturales eliminados. |  -  |
-|**404** | Proyecto o Datos culturales no encontrados. |  -  |
-|**409** | Conflicto al eliminar (referenciado por otras entidades). |  -  |
+|**200** | Cultural data deleted. |  -  |
+|**404** | Project or Cultural data not found. |  -  |
+|**409** | Conflict on delete (referenced by other entities). |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -242,8 +242,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new CulturalDataApi(configuration);
 
-let culturalDataId: string; //ID a actualizar (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let culturalDataId: string; //ID to update (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 let updateCulturalDataDto: UpdateCulturalDataDto; //
 
 const { status, data } = await apiInstance.culturalDataControllerUpdate(
@@ -258,8 +258,8 @@ const { status, data } = await apiInstance.culturalDataControllerUpdate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **updateCulturalDataDto** | **UpdateCulturalDataDto**|  | |
-| **culturalDataId** | [**string**] | ID a actualizar | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **culturalDataId** | [**string**] | ID to update | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -268,7 +268,7 @@ const { status, data } = await apiInstance.culturalDataControllerUpdate(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -279,9 +279,9 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Datos culturales actualizados. |  -  |
-|**400** | Datos inválidos. |  -  |
-|**404** | Proyecto o Datos culturales no encontrados. |  -  |
+|**200** | Cultural data updated. |  -  |
+|**400** | Invalid data. |  -  |
+|**404** | Project or Cultural data not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

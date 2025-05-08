@@ -52,7 +52,7 @@ const { status, data } = await apiInstance.promptAssetLinkControllerCreate(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -109,7 +109,7 @@ const { status, data } = await apiInstance.promptAssetLinkControllerFindAll(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -168,7 +168,7 @@ const { status, data } = await apiInstance.promptAssetLinkControllerFindOne(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -227,7 +227,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -290,7 +290,7 @@ const { status, data } = await apiInstance.promptAssetLinkControllerUpdate(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 

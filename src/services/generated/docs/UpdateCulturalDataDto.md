@@ -5,10 +5,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**formalityLevel** | **number** | Nivel de formalidad (opcional) | [optional] [default to undefined]
-**style** | **string** | Estilo de comunicación (opcional) | [optional] [default to undefined]
-**considerations** | **string** | Consideraciones culturales (opcional) | [optional] [default to undefined]
-**notes** | **string** | Notas adicionales (opcional) | [optional] [default to undefined]
+**formalityLevel** | **number** | Formality level (optional) | [optional] [default to undefined]
+**style** | **string** | Communication style (optional) | [optional] [default to undefined]
+**considerations** | **string** | Cultural considerations (optional) | [optional] [default to undefined]
+**notes** | **string** | Additional notes (optional) | [optional] [default to undefined]
 
 ## Example
 

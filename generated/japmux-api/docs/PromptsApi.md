@@ -125,7 +125,7 @@ const { status, data } = await apiInstance.promptControllerCreate(
 |-------------|-------------|------------------|
 |**201** | Prompt created. |  -  |
 |**400** | Invalid data (e.g., missing initial promptText). |  -  |
-|**404** | Project, Tactic or Tag not found. |  -  |
+|**404** | Project or Tag not found. |  -  |
 |**409** | Conflict, a prompt with this name already exists in the project. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

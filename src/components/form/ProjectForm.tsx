@@ -50,33 +50,41 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, users, onSave, o
             if (trimmedName !== initialData.name) {
                 updatePayload.name = trimmedName;
             }
-            // Check against initialData.description correctly handling null/undefined
             const initialDescription = initialData.description ?? undefined;
             if (trimmedDescription !== initialDescription) {
                 updatePayload.description = trimmedDescription;
             }
-            // ¡SÍ include ownerUserId if changed!
-            const initialOwnerId = initialData.ownerUserId ?? ''; // Compare with '' if it was null/undefined
+
+            const initialOwnerId = initialData.ownerUserId ?? '';
             if (ownerUserId !== initialOwnerId) {
-                // Send the new ID or null if selected "-- Select Owner --" (value "")
-                // Ensure the API accepts null or empty string to desassign
-                updatePayload.ownerUserId = ownerUserId || null; // Or use undefined if the API prefers it to null
+                // Si ownerUserId es "" (ninguno seleccionado), enviar null o undefined según prefiera la API.
+                // Si la API puede manejar "" como "sin propietario", entonces ownerUserId directamente.
+                // Asumiendo que undefined es preferible para "no cambio" o "quitar propietario" si era opcional.
+                updatePayload.ownerUserId = ownerUserId === "" ? undefined : ownerUserId;
             }
 
-            // Only save if there are changes
             if (Object.keys(updatePayload).length > 0) {
                 onSave(updatePayload);
             } else {
                 console.log("No changes detected for update.");
-                onCancel(); // Optional: close modal if no changes
+                onCancel();
             }
         } else {
             // Create operation
+            if (!name.trim()) {
+                alert('Project Name is required.');
+                return;
+            }
+
+            if (!ownerUserId) {
+                alert('Please select an Owner for the project.');
+                return;
+            }
+
             const createPayload: CreateProjectDto = {
                 name: trimmedName,
                 description: trimmedDescription,
-                // ownerUserId is not sent in the create according to the CreateProjectDto
-                // (Check CreateProjectDto if it can also be assigned at creation)
+                ownerUserId: ownerUserId,
             };
             onSave(createPayload);
         }

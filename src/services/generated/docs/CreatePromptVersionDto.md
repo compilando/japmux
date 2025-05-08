@@ -5,11 +5,11 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**promptText** | **string** | Texto BASE del prompt para esta nueva versión. | [default to undefined]
-**versionTag** | **string** | Etiqueta única para esta versión dentro del prompt (e.g., v1.1.0, beta-feature-x). | [default to undefined]
-**changeMessage** | **string** | Mensaje describiendo los cambios en esta versión. | [optional] [default to undefined]
-**assetLinks** | [**Array&lt;AssetVersionLinkDto&gt;**](AssetVersionLinkDto.md) | Lista de versiones de assets a vincular a esta versión del prompt. | [default to undefined]
-**initialTranslations** | [**Array&lt;InitialTranslationDto&gt;**](InitialTranslationDto.md) | Traducciones iniciales opcionales para esta nueva versión. | [optional] [default to undefined]
+**promptText** | **string** | BASE prompt text for this new version. | [default to undefined]
+**versionTag** | **string** | Unique tag for this version within the prompt (e.g., v1.1.0, beta-feature-x). | [default to undefined]
+**changeMessage** | **string** | Message describing the changes in this version. | [optional] [default to undefined]
+**assetLinks** | [**Array&lt;AssetVersionLinkDto&gt;**](AssetVersionLinkDto.md) | List of asset versions to link to this prompt version. | [default to undefined]
+**initialTranslations** | [**Array&lt;InitialTranslationDto&gt;**](InitialTranslationDto.md) | Optional initial translations for this new version. | [optional] [default to undefined]
 
 ## Example
 

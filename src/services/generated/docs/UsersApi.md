@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**userControllerCreate**](#usercontrollercreate) | **POST** /api/users | Crear un nuevo usuario|
-|[**userControllerFindAll**](#usercontrollerfindall) | **GET** /api/users | Obtener todos los usuarios|
-|[**userControllerFindOne**](#usercontrollerfindone) | **GET** /api/users/{id} | Obtener un usuario por ID|
-|[**userControllerRemove**](#usercontrollerremove) | **DELETE** /api/users/{id} | Eliminar un usuario por ID|
-|[**userControllerUpdate**](#usercontrollerupdate) | **PATCH** /api/users/{id} | Actualizar un usuario por ID|
+|[**userControllerCreate**](#usercontrollercreate) | **POST** /api/users | Create a new user|
+|[**userControllerFindAll**](#usercontrollerfindall) | **GET** /api/users | Get all users|
+|[**userControllerFindOne**](#usercontrollerfindone) | **GET** /api/users/{id} | Get a user by ID|
+|[**userControllerRemove**](#usercontrollerremove) | **DELETE** /api/users/{id} | Delete a user by ID|
+|[**userControllerUpdate**](#usercontrollerupdate) | **PATCH** /api/users/{id} | Update a user by ID|
 
 # **userControllerCreate**
 > CreateUserDto userControllerCreate(createUserDto)
@@ -57,8 +57,8 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**201** | El usuario ha sido creado exitosamente. |  -  |
-|**400** | Datos de entrada inválidos. |  -  |
+|**201** | User created successfully. |  -  |
+|**400** | Invalid input data. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -101,7 +101,7 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Lista de usuarios. |  -  |
+|**200** | List of users. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -120,7 +120,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new UsersApi(configuration);
 
-let id: string; //ID del usuario (default to undefined)
+let id: string; //User ID (default to undefined)
 
 const { status, data } = await apiInstance.userControllerFindOne(
     id
@@ -131,7 +131,7 @@ const { status, data } = await apiInstance.userControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **id** | [**string**] | ID del usuario | defaults to undefined|
+| **id** | [**string**] | User ID | defaults to undefined|
 
 
 ### Return type
@@ -151,8 +151,8 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | El usuario encontrado. |  -  |
-|**404** | Usuario no encontrado. |  -  |
+|**200** | User found. |  -  |
+|**404** | User not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -171,7 +171,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new UsersApi(configuration);
 
-let id: string; //ID del usuario a eliminar (default to undefined)
+let id: string; //ID of the user to delete (default to undefined)
 
 const { status, data } = await apiInstance.userControllerRemove(
     id
@@ -182,7 +182,7 @@ const { status, data } = await apiInstance.userControllerRemove(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **id** | [**string**] | ID del usuario a eliminar | defaults to undefined|
+| **id** | [**string**] | ID of the user to delete | defaults to undefined|
 
 
 ### Return type
@@ -202,8 +202,8 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | El usuario ha sido eliminado exitosamente. |  -  |
-|**404** | Usuario no encontrado. |  -  |
+|**200** | User deleted successfully. |  -  |
+|**404** | User not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -222,7 +222,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new UsersApi(configuration);
 
-let id: string; //ID del usuario a actualizar (default to undefined)
+let id: string; //ID of the user to update (default to undefined)
 let body: object; //
 
 const { status, data } = await apiInstance.userControllerUpdate(
@@ -236,7 +236,7 @@ const { status, data } = await apiInstance.userControllerUpdate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **body** | **object**|  | |
-| **id** | [**string**] | ID del usuario a actualizar | defaults to undefined|
+| **id** | [**string**] | ID of the user to update | defaults to undefined|
 
 
 ### Return type
@@ -256,9 +256,9 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | El usuario ha sido actualizado exitosamente. |  -  |
-|**400** | Datos de entrada inválidos. |  -  |
-|**404** | Usuario no encontrado. |  -  |
+|**200** | User updated successfully. |  -  |
+|**400** | Invalid input data. |  -  |
+|**404** | User not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**name** | **string** | Nombre del usuario | [optional] [default to undefined]
-**email** | **string** | Email único del usuario | [default to undefined]
-**password** | **string** | Contraseña del usuario | [default to undefined]
+**name** | **string** | User\&#39;s name | [optional] [default to undefined]
+**email** | **string** | Unique user email | [default to undefined]
+**password** | **string** | User\&#39;s password | [default to undefined]
 
 ## Example
 

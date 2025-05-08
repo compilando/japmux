@@ -2,13 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-    Tag,
     tagService,
     CreateTagDto,
     UpdateTagDto,
-    Project,
     projectService
 } from '@/services/api';
+import * as generated from '../../../../generated/japmux-api';
 import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import TagsTable from '@/components/tables/TagsTable';
@@ -17,18 +16,16 @@ import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 const TagsPage: React.FC = () => {
-    const [tagsList, setTagsList] = useState<Tag[]>([]);
+    const [tagsList, setTagsList] = useState<generated.TagDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingTag, setEditingTag] = useState<Tag | null>(null);
+    const [editingTag, setEditingTag] = useState<generated.TagDto | null>(null);
     const { selectedProjectId } = useProjects();
 
-    // Estados para breadcrumb
-    const [project, setProject] = useState<Project | null>(null);
+    const [project, setProject] = useState<generated.CreateProjectDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
-    // Efecto para cargar nombre del proyecto
     useEffect(() => {
         if (selectedProjectId) {
             setBreadcrumbLoading(true);
@@ -66,10 +63,7 @@ const TagsPage: React.FC = () => {
             }
         } catch (err) {
             console.error("Error fetching tags:", err);
-            if (axios.isAxiosError(err)) {
-                console.error("Axios error details:", err.response?.status, err.response?.data);
-            }
-            setError('Failed to fetch tags.');
+            showErrorToast('Failed to fetch tags.');
             setTagsList([]);
         } finally {
             setLoading(false);
@@ -85,76 +79,62 @@ const TagsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (tag: Tag) => {
+    const handleEdit = (tag: generated.TagDto) => {
         setEditingTag(tag);
         setIsModalOpen(true);
     };
 
     const handleDelete = async (id: string) => {
         if (!selectedProjectId) {
-            alert("No project selected.");
+            showErrorToast("No project selected.");
             return;
         }
         if (window.confirm('Are you sure you want to delete this tag?')) {
             try {
-                await tagService.remove(selectedProjectId, id);
+                await tagService.delete(selectedProjectId, id);
+                showSuccessToast("Tag deleted successfully.");
                 fetchData();
-            } catch (err) {
-                setError('Failed to delete tag');
+            } catch (err: any) {
+                showErrorToast(err.response?.data?.message || err.message || 'Failed to delete tag.');
                 console.error(err);
-                if (axios.isAxiosError(err)) {
-                    alert(`Error deleting: ${err.response?.data?.message || err.message}`);
-                } else if (err instanceof Error) {
-                    alert(`Error deleting: ${err.message}`);
-                }
             }
         }
     };
 
     const handleSave = async (payload: CreateTagDto | UpdateTagDto) => {
         if (!selectedProjectId) {
-            alert("No project selected.");
+            showErrorToast("No project selected.");
             return;
         }
         try {
             if (editingTag) {
                 await tagService.update(selectedProjectId, editingTag.id, payload as UpdateTagDto);
+                showSuccessToast("Tag updated successfully.");
             } else {
                 await tagService.create(selectedProjectId, payload as CreateTagDto);
+                showSuccessToast("Tag created successfully.");
             }
             setIsModalOpen(false);
             fetchData();
-        } catch (err) {
-            setError('Failed to save tag');
+        } catch (err: any) {
+            showErrorToast(err.response?.data?.message || err.message || 'Failed to save tag.');
             console.error(err);
-            if (axios.isAxiosError(err)) {
-                alert(`Error saving: ${err.response?.data?.message || err.message}`);
-            } else if (err instanceof Error) {
-                alert(`Error saving: ${err.message}`);
-            }
         }
     };
 
-    // Definir crumbs
     let breadcrumbs: { label: string; href?: string }[] = [
         { label: "Home", href: "/" },
     ];
     if (selectedProjectId) {
         breadcrumbs = [
             ...breadcrumbs,
-            // Como Tags es de nivel superior, el enlace del proyecto apunta a la página principal del proyecto (ej: prompts o assets)
-            { label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId), href: `/projects/${selectedProjectId}/prompts` }, // O /assets
-            { label: "Tags", href: "/tags" } // La página actual sí tiene enlace (a sí misma)
+            { label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId), href: `/projects/${selectedProjectId}/prompts` },
+            { label: "Tags" }
         ];
-        // Último elemento, si es la página actual, no debería tener href según PageBreadcrumb
-        // Ajustamos el último elemento para quitar href si es necesario
-        if (breadcrumbs.length > 0) {
-            delete breadcrumbs[breadcrumbs.length - 1].href;
-        }
     } else {
         breadcrumbs = [
             ...breadcrumbs,
-            { label: "Tags (Select Project)" } // Último sin href
+            { label: "Tags (Select Project)" }
         ];
     }
 

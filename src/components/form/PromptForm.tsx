@@ -4,13 +4,12 @@ import {
     CreatePromptDto,
     UpdatePromptDto,
     tagService,
-    TagDto,
 } from '@/services/api';
+import * as generated from '../../../generated/japmux-api';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
-import GeneratePromptModal from '@/components/modal/GeneratePromptModal';
 
 interface PromptFormProps {
-    initialData: CreatePromptDto | null;
+    initialData: generated.CreatePromptDto | null;
     onSave: (payload: CreatePromptDto | UpdatePromptDto) => void;
     onCancel: () => void;
     projectId: string;
@@ -24,18 +23,17 @@ interface TagOption {
 const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, projectId }) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [promptText, setPromptText] = useState('');
-    const [availableTags, setAvailableTags] = useState<TagDto[]>([]);
+    const [availableTags, setAvailableTags] = useState<generated.TagDto[]>([]);
     const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
     const [isLoadingTags, setIsLoadingTags] = useState(false);
-    const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+    const [promptTextBody, setPromptTextBody] = useState('');
 
     const isEditing = useMemo(() => !!initialData, [initialData]);
 
     useEffect(() => {
+        console.log("[PromptForm Effect FetchTags] Fetching tags for projectId:", projectId);
         if (projectId) {
             setIsLoadingTags(true);
-            console.log('[PromptForm Effect FetchTags] Fetching tags for projectId:', projectId);
             tagService.findAll(projectId)
                 .then(fetchedTags => {
                     console.log('[PromptForm Effect FetchTags] Fetched tags:', fetchedTags);
@@ -54,34 +52,20 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         if (initialData) { // Modo Edición
             setName(initialData.name || '');
             setDescription(initialData.description || '');
-            setPromptText(initialData.promptText || '');
 
-            if (initialData.tags && initialData.tags.size > 0) {
-                console.log("[PromptForm Effect InitForm] Editing mode. initialData.tags:", Array.from(initialData.tags));
-                if (availableTags.length > 0) {
-                    console.log("[PromptForm Effect InitForm] availableTags is populated. Proceeding to map names to IDs.");
-                    const initialTagNames = Array.from(initialData.tags);
-                    const ids = initialTagNames.map(tagName => {
-                        const foundTag = availableTags.find(t => t.name === tagName);
-                        console.log(`[PromptForm Effect InitForm] Mapping tag name "${tagName}" to ID: ${foundTag?.id}`);
-                        return foundTag?.id;
-                    }).filter(id => id !== undefined) as string[];
-                    console.log("[PromptForm Effect InitForm] Setting selectedTagIds to:", ids);
-                    setSelectedTagIds(ids);
-                } else {
-                    console.warn("[PromptForm Effect InitForm] availableTags is EMPTY. Cannot map tag names to IDs yet. initialData.tags:", Array.from(initialData.tags));
-                    setSelectedTagIds([]); // Asegurar que se limpia si availableTags no está listo
-                }
-            } else {
-                console.log("[PromptForm Effect InitForm] Editing mode, but initialData.tags is empty or undefined.");
-                setSelectedTagIds([]);
+            let initialTagIdsSet = new Set<string>();
+            if (initialData.tags && initialData.tags.size > 0 && availableTags.length > 0) {
+                const initialTagNames = Array.from(initialData.tags);
+                initialTagIdsSet = new Set(initialTagNames.map(tagName => availableTags.find(t => t.name === tagName)?.id)
+                    .filter(id => id !== undefined) as string[]);
             }
+            setSelectedTagIds(Array.from(initialTagIdsSet));
         } else { // Modo Creación
             console.log("[PromptForm Effect InitForm] Creation mode. Resetting form fields.");
             setName('');
             setDescription('');
-            setPromptText('');
             setSelectedTagIds([]);
+            setPromptTextBody('');
         }
     }, [initialData, availableTags]);
 
@@ -108,12 +92,6 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         return selected;
     }, [tagOptions, selectedTagIds]);
 
-    const handleGenerateComplete = (generatedText: string) => {
-        setPromptText(generatedText);
-        setIsGenerateModalOpen(false);
-        showSuccessToast("Prompt text updated with generated content!");
-    };
-
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
 
@@ -126,16 +104,12 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                 hasChanges = true;
             }
 
-            if (promptText !== (initialData.promptText || '')) {
-                (updatePayload as any).promptText = promptText;
-                hasChanges = true;
+            let initialTagIdsSet = new Set<string>();
+            if (initialData.tags && initialData.tags.size > 0 && availableTags.length > 0) {
+                const initialTagNames = Array.from(initialData.tags);
+                initialTagIdsSet = new Set(initialTagNames.map(tagName => availableTags.find(t => t.name === tagName)?.id)
+                    .filter(id => id !== undefined) as string[]);
             }
-
-            const initialTagIdsSet = new Set(initialData.tags && availableTags.length > 0 ?
-                (Array.from(initialData.tags)
-                    .map(name => availableTags.find(t => t.name === name)?.id)
-                    .filter(id => id !== undefined) as string[])
-                : []);
             const selectedTagIdsSet = new Set(selectedTagIds);
 
             if (initialTagIdsSet.size !== selectedTagIdsSet.size ||
@@ -157,6 +131,10 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                 showErrorToast("Prompt name cannot be empty.");
                 return;
             }
+            if (!promptTextBody.trim()) {
+                showErrorToast("Prompt text cannot be empty.");
+                return;
+            }
 
             const tagNamesForCreation = new Set<string>();
             selectedTagIds.forEach(id => {
@@ -167,10 +145,10 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
             });
 
             const createPayload: CreatePromptDto = {
-                name,
-                description,
-                promptText,
-                tags: tagNamesForCreation.size > 0 ? tagNamesForCreation : undefined,
+                name: name.trim(),
+                description: description.trim() || undefined,
+                tags: (tagNamesForCreation.size > 0 ? Array.from(tagNamesForCreation) : undefined) as any,
+                promptText: promptTextBody.trim(),
             };
             onSave(createPayload);
         }
@@ -210,6 +188,23 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                     />
                 </div>
 
+                {!isEditing && (
+                    <div>
+                        <label htmlFor="promptTextBody" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Prompt Text
+                        </label>
+                        <textarea
+                            name="promptTextBody"
+                            id="promptTextBody"
+                            rows={4}
+                            value={promptTextBody}
+                            onChange={(e) => setPromptTextBody(e.target.value)}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                            required
+                        />
+                    </div>
+                )}
+
                 <div>
                     <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Tags
@@ -224,30 +219,6 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                         className="mt-1 react-select-container"
                         classNamePrefix="react-select"
                     />
-                </div>
-
-                <div>
-                    <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Prompt Text
-                    </label>
-                    <div className="mt-1 relative">
-                        <textarea
-                            id="promptText"
-                            name="promptText"
-                            rows={10}
-                            className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-                            value={promptText}
-                            onChange={(e) => setPromptText(e.target.value)}
-                            required
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setIsGenerateModalOpen(true)}
-                            className="absolute bottom-2 right-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-1 px-3 rounded-md text-xs shadow-md transition duration-150 ease-in-out"
-                        >
-                            Generate / Improve
-                        </button>
-                    </div>
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">
@@ -266,16 +237,6 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                     </button>
                 </div>
             </form>
-
-            {isGenerateModalOpen && projectId && (
-                <GeneratePromptModal
-                    isOpen={isGenerateModalOpen}
-                    onClose={() => setIsGenerateModalOpen(false)}
-                    onGenerateComplete={handleGenerateComplete}
-                    projectId={projectId}
-                    initialUserText={promptText}
-                />
-            )}
         </>
     );
 };

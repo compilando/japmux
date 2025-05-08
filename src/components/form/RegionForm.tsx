@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Region } from '@/services/api';
+import * as generated from '../../../generated/japmux-api';
+import { regionService } from '@/services/api'; // Importar regionService
+import { showErrorToast } from '@/utils/toastUtils'; // Para mostrar errores
 
 // Define types for payloads based on OpenAPI DTOs
 // Create requires languageCode and name
@@ -14,21 +16,83 @@ export type RegionCreatePayload = {
 // Update does not include languageCode
 export type RegionUpdatePayload = Omit<RegionCreatePayload, 'languageCode'>;
 
-interface RegionFormProps {
-    initialData: Region | null;
-    onSave: (data: RegionCreatePayload | RegionUpdatePayload) => void;
-    onCancel: () => void;
+interface TimeZoneOption {
+    value: string;
+    label: string;
 }
 
-const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }) => {
+// Interfaz para las opciones del select de regiones padre
+interface ParentRegionOption {
+    value: string; // languageCode de la región padre
+    label: string; // name de la región padre
+}
+
+interface RegionFormProps {
+    initialData: generated.CreateRegionDto | null;
+    onSave: (data: RegionCreatePayload | RegionUpdatePayload) => void;
+    onCancel: () => void;
+    projectId: string;
+}
+
+const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel, projectId }) => {
     const [languageCode, setLanguageCode] = useState('');
     const [name, setName] = useState('');
     const [parentRegionId, setParentRegionId] = useState('');
     const [timeZone, setTimeZone] = useState('');
+    const [timeZoneOptions, setTimeZoneOptions] = useState<TimeZoneOption[]>([]);
     const [defaultFormalityLevel, setDefaultFormalityLevel] = useState('');
     const [notes, setNotes] = useState('');
 
+    // Estado para las regiones padre
+    const [availableParentRegions, setAvailableParentRegions] = useState<ParentRegionOption[]>([]);
+    const [isLoadingParentRegions, setIsLoadingParentRegions] = useState<boolean>(false);
+
     const isEditing = !!initialData;
+
+    // Efecto para cargar las zonas horarias IANA
+    useEffect(() => {
+        try {
+            const supportedTimeZones = Intl.supportedValuesOf('timeZone');
+            const options = supportedTimeZones
+                .sort()
+                .map(tz => ({ value: tz, label: tz }));
+            setTimeZoneOptions(options);
+        } catch (error) {
+            console.error("Error getting supported time zones:", error);
+            showErrorToast("Could not load time zones.");
+            setTimeZoneOptions([]);
+        }
+    }, []);
+
+    // Efecto para cargar las regiones padre
+    useEffect(() => {
+        if (projectId) {
+            setIsLoadingParentRegions(true);
+            regionService.findAll(projectId)
+                .then(regions => {
+                    // Filtrar la región actual si se está editando, para no ser padre de sí misma
+                    const filteredRegions = initialData
+                        ? regions.filter(r => r.languageCode !== initialData.languageCode)
+                        : regions;
+
+                    const options: ParentRegionOption[] = filteredRegions.map(region => ({
+                        value: region.languageCode,
+                        label: `${region.name} (${region.languageCode})`
+                    }));
+                    setAvailableParentRegions(options);
+                })
+                .catch(err => {
+                    console.error("Error fetching parent regions:", err);
+                    showErrorToast("Could not load parent regions for selection.");
+                    setAvailableParentRegions([]);
+                })
+                .finally(() => {
+                    setIsLoadingParentRegions(false);
+                });
+        } else {
+            setAvailableParentRegions([]); // Limpiar si no hay projectId
+        }
+    }, [projectId, initialData]); // Depender también de initialData para el filtro
 
     useEffect(() => {
         if (initialData) {
@@ -39,9 +103,10 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
             setDefaultFormalityLevel(initialData.defaultFormalityLevel ?? '');
             setNotes(initialData.notes ?? '');
         } else {
+            // Resetear campos para nuevo formulario
             setLanguageCode('');
             setName('');
-            setParentRegionId('');
+            setParentRegionId(''); // Importante resetear para que el select "-- None --" funcione
             setTimeZone('');
             setDefaultFormalityLevel('');
             setNotes('');
@@ -52,14 +117,11 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
         event.preventDefault();
 
         if (!isEditing && !languageCode.trim()) {
-            alert('Language Code is required.');
+            showErrorToast('Language Code is required.');
             return;
         }
-        // Add xx-XX format validation for languageCode?
-        // if (!/^[a-z]{2}-[A-Z]{2}$/.test(languageCode)) { ... }
-
         if (!name.trim()) {
-            alert('Region Name is required.');
+            showErrorToast('Region Name is required.');
             return;
         }
 
@@ -68,8 +130,8 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
         if (isEditing) {
             payload = {
                 name: name.trim(),
-                parentRegionId: parentRegionId.trim() || undefined,
-                timeZone: timeZone.trim() || undefined,
+                parentRegionId: parentRegionId || undefined, // Enviar undefined si está vacío
+                timeZone: timeZone || undefined,
                 defaultFormalityLevel: defaultFormalityLevel.trim() || undefined,
                 notes: notes.trim() || undefined,
             } as RegionUpdatePayload;
@@ -77,8 +139,8 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
             payload = {
                 languageCode: languageCode.trim(),
                 name: name.trim(),
-                parentRegionId: parentRegionId.trim() || undefined,
-                timeZone: timeZone.trim() || undefined,
+                parentRegionId: parentRegionId || undefined, // Enviar undefined si está vacío
+                timeZone: timeZone || undefined,
                 defaultFormalityLevel: defaultFormalityLevel.trim() || undefined,
                 notes: notes.trim() || undefined,
             } as RegionCreatePayload;
@@ -98,12 +160,33 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
                     type="text"
                     id="languageCode"
                     value={languageCode}
-                    onChange={(e) => setLanguageCode(e.target.value)}
+                    onChange={(e) => {
+                        let inputValue = e.target.value;
+                        // Remover caracteres no alfabéticos excepto el guion en la posición correcta
+                        inputValue = inputValue.replace(/[^a-zA-Z]/g, '');
+
+                        let formattedValue = "";
+
+                        if (inputValue.length > 0) {
+                            formattedValue += inputValue.substring(0, 2).toLowerCase();
+                        }
+                        if (inputValue.length > 2) {
+                            formattedValue += "-";
+                            formattedValue += inputValue.substring(2, 4).toUpperCase();
+                        }
+
+                        // Limitar la longitud a 5 caracteres (xx-XX)
+                        if (formattedValue.length > 5) {
+                            formattedValue = formattedValue.substring(0, 5);
+                        }
+
+                        setLanguageCode(formattedValue);
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
                     required={!isEditing}
                     disabled={isEditing}
                     maxLength={5}
-                    pattern="^[a-z]{2}-[A-Z]{2}$" // Add basic pattern
+                    pattern="^[a-z]{2}-[A-Z]{2}$"
                     title="Format must be xx-XX (e.g., en-US)"
                 />
                 {isEditing && <p className="text-xs text-gray-500 mt-1">Language Code cannot be changed after creation.</p>}
@@ -124,34 +207,46 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel }
                 />
             </div>
 
-            {/* Parent Region ID (Optional - text) */}
+            {/* Parent Region ID (Convertido a Select) */}
             <div>
                 <label htmlFor="parentRegionId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Parent Region ID (Optional, e.g., eu)
+                    Parent Region (Optional)
                 </label>
-                <input
-                    type="text"
+                <select
                     id="parentRegionId"
                     value={parentRegionId}
                     onChange={(e) => setParentRegionId(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    maxLength={5} // Optional: if you know parent IDs have this format
-                />
-                {/* Alternative: Could be a <select> loading getRegions() */}
+                    disabled={isLoadingParentRegions}
+                >
+                    <option value="">-- None --</option>
+                    {availableParentRegions.map(option => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
+                {isLoadingParentRegions && <p className="text-xs text-gray-500 mt-1">Loading regions...</p>}
             </div>
 
-            {/* Time Zone (Optional) */}
+            {/* Time Zone (Optional) - Select */}
             <div>
                 <label htmlFor="timeZone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Time Zone (Optional, e.g., Europe/Madrid)
+                    Time Zone (Optional)
                 </label>
-                <input
-                    type="text"
+                <select
                     id="timeZone"
                     value={timeZone}
                     onChange={(e) => setTimeZone(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
+                >
+                    <option value="">-- Select Time Zone --</option>
+                    {timeZoneOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
             </div>
 
             {/* Default Formality Level (Optional) */}

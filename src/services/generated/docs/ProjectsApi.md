@@ -134,7 +134,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 

@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * JAPM API
- * API para la aplicación de Prompt Engineering JAPM
+ * API for the JAPM Prompt Engineering application
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -26,23 +26,102 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerM
 /**
  * 
  * @export
+ * @interface AiModelResponseDto
+ */
+export interface AiModelResponseDto {
+    /**
+     * Unique CUID of the AI model
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'id': string;
+    /**
+     * Unique name for the AI model within the project
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'name': string;
+    /**
+     * Provider of the AI model
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'provider'?: string | null;
+    /**
+     * Optional description for the AI model
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'description'?: string | null;
+    /**
+     * Identifier used for API calls
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'apiIdentifier'?: string | null;
+    /**
+     * Environment variable name for the API Key
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'apiKeyEnvVar'?: string | null;
+    /**
+     * Default temperature setting
+     * @type {number}
+     * @memberof AiModelResponseDto
+     */
+    'temperature'?: number | null;
+    /**
+     * Default max tokens setting
+     * @type {number}
+     * @memberof AiModelResponseDto
+     */
+    'maxTokens'?: number | null;
+    /**
+     * Whether the model reliably supports JSON output mode
+     * @type {boolean}
+     * @memberof AiModelResponseDto
+     */
+    'supportsJson'?: boolean;
+    /**
+     * Maximum context window size in tokens
+     * @type {number}
+     * @memberof AiModelResponseDto
+     */
+    'contextWindow'?: number | null;
+    /**
+     * Timestamp of creation
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'createdAt': string;
+    /**
+     * ID of the project this model belongs to
+     * @type {string}
+     * @memberof AiModelResponseDto
+     */
+    'projectId': string;
+}
+/**
+ * 
+ * @export
  * @interface AssetVersionLinkDto
  */
 export interface AssetVersionLinkDto {
     /**
-     * ID de la PromptAssetVersion a vincular.
+     * ID of the PromptAssetVersion to link.
      * @type {string}
      * @memberof AssetVersionLinkDto
      */
     'assetVersionId': string;
     /**
-     * Contexto de uso (opcional).
+     * Usage context (optional).
      * @type {string}
      * @memberof AssetVersionLinkDto
      */
     'usageContext'?: string;
     /**
-     * Posición/orden (opcional).
+     * Position/order (optional).
      * @type {number}
      * @memberof AssetVersionLinkDto
      */
@@ -111,37 +190,37 @@ export interface CreateAssetTranslationDto {
  */
 export interface CreateCulturalDataDto {
     /**
-     * ID único para estos datos culturales (formato slug)
+     * Unique ID for this cultural data (slug format)
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
     'id': string;
     /**
-     * ID de la región asociada (código de idioma xx-XX)
+     * Associated region ID (xx-XX language code)
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
     'regionId': string;
     /**
-     * Nivel de formalidad (opcional)
+     * Formality level (optional)
      * @type {number}
      * @memberof CreateCulturalDataDto
      */
     'formalityLevel'?: number;
     /**
-     * Estilo de comunicación (opcional)
+     * Communication style (optional)
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
     'style'?: string;
     /**
-     * Consideraciones culturales (opcional)
+     * Cultural considerations (optional)
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
     'considerations'?: string;
     /**
-     * Notas adicionales (opcional)
+     * Additional notes (optional)
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
@@ -154,13 +233,13 @@ export interface CreateCulturalDataDto {
  */
 export interface CreateEnvironmentDto {
     /**
-     * Nombre único del entorno
+     * Unique name of the environment
      * @type {string}
      * @memberof CreateEnvironmentDto
      */
     'name': string;
     /**
-     * Descripción opcional del entorno
+     * Optional description of the environment
      * @type {string}
      * @memberof CreateEnvironmentDto
      */
@@ -173,13 +252,13 @@ export interface CreateEnvironmentDto {
  */
 export interface CreateOrUpdatePromptTranslationDto {
     /**
-     * Código de idioma de la traducción (e.g., es-ES, fr-FR).
+     * Language code for the translation (e.g., es-ES, fr-FR).
      * @type {string}
      * @memberof CreateOrUpdatePromptTranslationDto
      */
     'languageCode': string;
     /**
-     * Texto traducido del prompt para esta versión y idioma.
+     * Translated prompt text for this version and language.
      * @type {string}
      * @memberof CreateOrUpdatePromptTranslationDto
      */
@@ -204,11 +283,11 @@ export interface CreateProjectDto {
      */
     'description'?: string;
     /**
-     * Optional ID of the User who owns this project
+     * ID of the User who owns this project
      * @type {string}
      * @memberof CreateProjectDto
      */
-    'ownerUserId'?: string;
+    'owner': string;
 }
 /**
  * 
@@ -346,31 +425,31 @@ export interface CreatePromptAssetVersionDto {
  */
 export interface CreatePromptDto {
     /**
-     * Nombre único del prompt (usado como ID)
+     * Unique prompt name (used as ID)
      * @type {string}
      * @memberof CreatePromptDto
      */
     'name': string;
     /**
-     * Descripción del propósito del prompt.
+     * Description of the prompt\'s purpose.
      * @type {string}
      * @memberof CreatePromptDto
      */
     'description'?: string;
     /**
-     * Lista de nombres de etiquetas a asociar.
+     * List of tag names to associate.
      * @type {Set<string>}
      * @memberof CreatePromptDto
      */
     'tags'?: Set<string>;
     /**
-     * Texto base del prompt para la primera versión (v1.0.0)
+     * Base prompt text for the first version (v1.0.0)
      * @type {string}
      * @memberof CreatePromptDto
      */
     'promptText': string;
     /**
-     * Traducciones iniciales opcionales para la primera versión
+     * Optional initial translations for the first version
      * @type {Array<InitialTranslationDto>}
      * @memberof CreatePromptDto
      */
@@ -408,31 +487,31 @@ export interface CreatePromptTranslationDto {
  */
 export interface CreatePromptVersionDto {
     /**
-     * Texto BASE del prompt para esta nueva versión.
+     * BASE prompt text for this new version.
      * @type {string}
      * @memberof CreatePromptVersionDto
      */
     'promptText': string;
     /**
-     * Etiqueta única para esta versión dentro del prompt (e.g., v1.1.0, beta-feature-x).
+     * Unique tag for this version within the prompt (e.g., v1.1.0, beta-feature-x).
      * @type {string}
      * @memberof CreatePromptVersionDto
      */
     'versionTag': string;
     /**
-     * Mensaje describiendo los cambios en esta versión.
+     * Message describing the changes in this version.
      * @type {string}
      * @memberof CreatePromptVersionDto
      */
     'changeMessage'?: string;
     /**
-     * Lista de versiones de assets a vincular a esta versión del prompt.
+     * List of asset versions to link to this prompt version.
      * @type {Array<AssetVersionLinkDto>}
      * @memberof CreatePromptVersionDto
      */
     'assetLinks': Array<AssetVersionLinkDto>;
     /**
-     * Traducciones iniciales opcionales para esta nueva versión.
+     * Optional initial translations for this new version.
      * @type {Array<InitialTranslationDto>}
      * @memberof CreatePromptVersionDto
      */
@@ -488,37 +567,37 @@ export interface CreateRagDocumentMetadataDto {
  */
 export interface CreateRegionDto {
     /**
-     * Código de idioma único que actúa como ID
+     * Unique language code acting as ID
      * @type {string}
      * @memberof CreateRegionDto
      */
     'languageCode': string;
     /**
-     * Nombre de la región
+     * Name of the region
      * @type {string}
      * @memberof CreateRegionDto
      */
     'name': string;
     /**
-     * languageCode de la región padre (opcional)
+     * languageCode of the parent region (optional)
      * @type {string}
      * @memberof CreateRegionDto
      */
     'parentRegionId'?: string;
     /**
-     * Zona horaria
+     * Time zone
      * @type {string}
      * @memberof CreateRegionDto
      */
     'timeZone'?: string;
     /**
-     * Nivel de formalidad por defecto (opcional)
+     * Default formality level (optional)
      * @type {string}
      * @memberof CreateRegionDto
      */
     'defaultFormalityLevel'?: string;
     /**
-     * Notas adicionales (opcional)
+     * Additional notes (optional)
      * @type {string}
      * @memberof CreateRegionDto
      */
@@ -527,39 +606,33 @@ export interface CreateRegionDto {
 /**
  * 
  * @export
- * @interface CreateTacticDto
+ * @interface CreateSystemPromptDto
  */
-export interface CreateTacticDto {
+export interface CreateSystemPromptDto {
     /**
-     * Nombre único de la táctica (formato slug: minúsculas, guiones)
+     * Unique name/identifier for the system prompt
      * @type {string}
-     * @memberof CreateTacticDto
+     * @memberof CreateSystemPromptDto
      */
     'name': string;
     /**
-     * Código de idioma de la región asociada (e.g., es-ES, opcional)
+     * Optional description of the prompt\'s purpose
      * @type {string}
-     * @memberof CreateTacticDto
+     * @memberof CreateSystemPromptDto
      */
-    'regionId'?: string;
+    'description'?: string;
     /**
-     * ID (slug) de los datos culturales asociados (opcional)
+     * The actual text content of the system prompt
      * @type {string}
-     * @memberof CreateTacticDto
+     * @memberof CreateSystemPromptDto
      */
-    'culturalDataId'?: string;
+    'promptText': string;
     /**
-     * Configuración específica de la táctica en formato JSON (opcional)
-     * @type {object}
-     * @memberof CreateTacticDto
-     */
-    'tacticsConfig'?: object;
-    /**
-     * ID del proyecto al que pertenece la táctica.
+     * Optional category for grouping prompts
      * @type {string}
-     * @memberof CreateTacticDto
+     * @memberof CreateSystemPromptDto
      */
-    'projectId'?: string;
+    'category'?: string;
 }
 /**
  * 
@@ -587,19 +660,19 @@ export interface CreateTagDto {
  */
 export interface CreateUserDto {
     /**
-     * Nombre del usuario
+     * User\'s name
      * @type {string}
      * @memberof CreateUserDto
      */
     'name'?: string;
     /**
-     * Email único del usuario
+     * Unique user email
      * @type {string}
      * @memberof CreateUserDto
      */
     'email': string;
     /**
-     * Contraseña del usuario
+     * User\'s password
      * @type {string}
      * @memberof CreateUserDto
      */
@@ -612,37 +685,37 @@ export interface CreateUserDto {
  */
 export interface CulturalDataResponse {
     /**
-     * ID único para estos datos culturales (formato slug)
+     * Unique ID for this cultural data (slug format)
      * @type {string}
      * @memberof CulturalDataResponse
      */
     'id': string;
     /**
-     * ID de la región asociada (código de idioma xx-XX)
+     * Associated region ID (xx-XX language code)
      * @type {string}
      * @memberof CulturalDataResponse
      */
     'regionId': string;
     /**
-     * Nivel de formalidad (opcional)
+     * Formality level (optional)
      * @type {number}
      * @memberof CulturalDataResponse
      */
     'formalityLevel'?: number;
     /**
-     * Estilo de comunicación (opcional)
+     * Communication style (optional)
      * @type {string}
      * @memberof CulturalDataResponse
      */
     'style'?: string;
     /**
-     * Consideraciones culturales (opcional)
+     * Cultural considerations (optional)
      * @type {string}
      * @memberof CulturalDataResponse
      */
     'considerations'?: string;
     /**
-     * Notas adicionales (opcional)
+     * Additional notes (optional)
      * @type {string}
      * @memberof CulturalDataResponse
      */
@@ -697,6 +770,31 @@ export interface ExecutePromptBodyDto {
      * @memberof ExecutePromptBodyDto
      */
     'variables': object;
+}
+/**
+ * 
+ * @export
+ * @interface ExecuteRawDto
+ */
+export interface ExecuteRawDto {
+    /**
+     * The raw text input from the user.
+     * @type {string}
+     * @memberof ExecuteRawDto
+     */
+    'userText': string;
+    /**
+     * The unique name of the SystemPrompt to use.
+     * @type {string}
+     * @memberof ExecuteRawDto
+     */
+    'systemPromptName': string;
+    /**
+     * The unique ID (CUID) of the AIModel to use for execution.
+     * @type {string}
+     * @memberof ExecuteRawDto
+     */
+    'aiModelId': string;
 }
 /**
  * 
@@ -782,13 +880,13 @@ export interface HealthControllerCheck503Response {
  */
 export interface InitialTranslationDto {
     /**
-     * Código de idioma ISO (e.g., es, en)
+     * ISO language code (e.g., es, en)
      * @type {string}
      * @memberof InitialTranslationDto
      */
     'languageCode': string;
     /**
-     * Texto traducido del prompt
+     * Translated prompt text
      * @type {string}
      * @memberof InitialTranslationDto
      */
@@ -915,37 +1013,31 @@ export interface RegisterDto {
 /**
  * 
  * @export
- * @interface TacticResponse
+ * @interface TagDto
  */
-export interface TacticResponse {
+export interface TagDto {
     /**
-     * 
+     * Unique ID of the tag (CUID)
      * @type {string}
-     * @memberof TacticResponse
+     * @memberof TagDto
+     */
+    'id': string;
+    /**
+     * Unique tag name within the project
+     * @type {string}
+     * @memberof TagDto
      */
     'name': string;
     /**
-     * 
+     * Description of the tag
      * @type {string}
-     * @memberof TacticResponse
+     * @memberof TagDto
      */
-    'tacticsConfig'?: string;
+    'description': string;
     /**
-     * 
-     * @type {CreateRegionDto}
-     * @memberof TacticResponse
-     */
-    'region'?: CreateRegionDto;
-    /**
-     * 
-     * @type {CreateCulturalDataDto}
-     * @memberof TacticResponse
-     */
-    'culturalData'?: CreateCulturalDataDto;
-    /**
-     * 
+     * ID of the project this tag belongs to (CUID)
      * @type {string}
-     * @memberof TacticResponse
+     * @memberof TagDto
      */
     'projectId': string;
 }
@@ -1000,25 +1092,25 @@ export interface UpdateAssetTranslationDto {
  */
 export interface UpdateCulturalDataDto {
     /**
-     * Nivel de formalidad (opcional)
+     * Formality level (optional)
      * @type {number}
      * @memberof UpdateCulturalDataDto
      */
     'formalityLevel'?: number;
     /**
-     * Estilo de comunicación (opcional)
+     * Communication style (optional)
      * @type {string}
      * @memberof UpdateCulturalDataDto
      */
     'style'?: string;
     /**
-     * Consideraciones culturales (opcional)
+     * Cultural considerations (optional)
      * @type {string}
      * @memberof UpdateCulturalDataDto
      */
     'considerations'?: string;
     /**
-     * Notas adicionales (opcional)
+     * Additional notes (optional)
      * @type {string}
      * @memberof UpdateCulturalDataDto
      */
@@ -1031,13 +1123,13 @@ export interface UpdateCulturalDataDto {
  */
 export interface UpdateEnvironmentDto {
     /**
-     * Nuevo nombre único del entorno (opcional)
+     * New unique name for the environment (optional)
      * @type {string}
      * @memberof UpdateEnvironmentDto
      */
     'name'?: string;
     /**
-     * Nueva descripción opcional del entorno
+     * New optional description for the environment
      * @type {string}
      * @memberof UpdateEnvironmentDto
      */
@@ -1062,11 +1154,11 @@ export interface UpdateProjectDto {
      */
     'description'?: string;
     /**
-     * Optional ID of the User who owns this project
+     * ID of the User who owns this project
      * @type {string}
      * @memberof UpdateProjectDto
      */
-    'ownerUserId'?: string;
+    'owner'?: string;
 }
 /**
  * 
@@ -1168,14 +1260,19 @@ export interface UpdatePromptAssetVersionDto {
  */
 export interface UpdatePromptDto {
     /**
-     * Nueva descripción del propósito del prompt.
+     * New description of the prompt\'s purpose.
      * @type {string}
      * @memberof UpdatePromptDto
      */
     'description'?: string;
-
     /**
-     * Lista completa de IDs de etiquetas a asociar (reemplaza las existentes). Array vacío para quitar todas.
+     * Base prompt text for the latest version. If provided, updates the text of the most recent version of this prompt.
+     * @type {string}
+     * @memberof UpdatePromptDto
+     */
+    'promptText'?: string;
+    /**
+     * Complete list of Tag IDs to associate (replaces existing ones). Empty array to remove all.
      * @type {Array<string>}
      * @memberof UpdatePromptDto
      */
@@ -1201,25 +1298,25 @@ export interface UpdatePromptTranslationDto {
  */
 export interface UpdatePromptVersionDto {
     /**
-     * Texto BASE del prompt para esta nueva versión.
+     * BASE prompt text for this new version.
      * @type {string}
      * @memberof UpdatePromptVersionDto
      */
     'promptText'?: string;
     /**
-     * Mensaje describiendo los cambios en esta versión.
+     * Message describing the changes in this version.
      * @type {string}
      * @memberof UpdatePromptVersionDto
      */
     'changeMessage'?: string;
     /**
-     * Lista de versiones de assets a vincular a esta versión del prompt.
+     * List of asset versions to link to this prompt version.
      * @type {Array<AssetVersionLinkDto>}
      * @memberof UpdatePromptVersionDto
      */
     'assetLinks'?: Array<AssetVersionLinkDto>;
     /**
-     * Traducciones iniciales opcionales para esta nueva versión.
+     * Optional initial translations for this new version.
      * @type {Array<InitialTranslationDto>}
      * @memberof UpdatePromptVersionDto
      */
@@ -1232,31 +1329,31 @@ export interface UpdatePromptVersionDto {
  */
 export interface UpdateRegionDto {
     /**
-     * Nombre de la región
+     * Name of the region
      * @type {string}
      * @memberof UpdateRegionDto
      */
     'name'?: string;
     /**
-     * languageCode de la región padre (opcional)
+     * languageCode of the parent region (optional)
      * @type {string}
      * @memberof UpdateRegionDto
      */
     'parentRegionId'?: string;
     /**
-     * Zona horaria
+     * Time zone
      * @type {string}
      * @memberof UpdateRegionDto
      */
     'timeZone'?: string;
     /**
-     * Nivel de formalidad por defecto (opcional)
+     * Default formality level (optional)
      * @type {string}
      * @memberof UpdateRegionDto
      */
     'defaultFormalityLevel'?: string;
     /**
-     * Notas adicionales (opcional)
+     * Additional notes (optional)
      * @type {string}
      * @memberof UpdateRegionDto
      */
@@ -1265,33 +1362,33 @@ export interface UpdateRegionDto {
 /**
  * 
  * @export
- * @interface UpdateTacticDto
+ * @interface UpdateSystemPromptDto
  */
-export interface UpdateTacticDto {
+export interface UpdateSystemPromptDto {
     /**
-     * Nueva configuración específica de la táctica (e.g., JSON string)
+     * Unique name/identifier for the system prompt
      * @type {string}
-     * @memberof UpdateTacticDto
+     * @memberof UpdateSystemPromptDto
      */
-    'tacticsConfig'?: string;
+    'name'?: string;
     /**
-     * Nuevo código de idioma de la región asociada, o null para desasociar.
+     * Optional description of the prompt\'s purpose
      * @type {string}
-     * @memberof UpdateTacticDto
+     * @memberof UpdateSystemPromptDto
      */
-    'regionId'?: string | null;
+    'description'?: string;
     /**
-     * Nuevo ID de los datos culturales asociados, o null para desasociar.
+     * The actual text content of the system prompt
      * @type {string}
-     * @memberof UpdateTacticDto
+     * @memberof UpdateSystemPromptDto
      */
-    'culturalDataId'?: string | null;
+    'promptText'?: string;
     /**
-     * Nuevo ID del proyecto asociado, o null para desasociar.
+     * Optional category for grouping prompts
      * @type {string}
-     * @memberof UpdateTacticDto
+     * @memberof UpdateSystemPromptDto
      */
-    'projectId'?: string | null;
+    'category'?: string;
 }
 /**
  * 
@@ -1372,17 +1469,21 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createAiModelDto, localVarRequestOptions, configuration)
 
             return {
@@ -1409,15 +1510,19 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1447,15 +1552,53 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List available Langchain provider types
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        aiModelControllerGetProviderTypes: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/projects/{projectId}/aimodels/providers/types`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1485,15 +1628,19 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1526,17 +1673,21 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateAiModelDto, localVarRequestOptions, configuration)
 
             return {
@@ -1551,7 +1702,7 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
  * AIModelsProjectSpecificApi - functional programming interface
  * @export
  */
-export const AIModelsProjectSpecificApiFp = function (configuration?: Configuration) {
+export const AIModelsProjectSpecificApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AIModelsProjectSpecificApiAxiosParamCreator(configuration)
     return {
         /**
@@ -1562,7 +1713,7 @@ export const AIModelsProjectSpecificApiFp = function (configuration?: Configurat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aiModelControllerCreate(projectId: string, createAiModelDto: CreateAiModelDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateAiModelDto>> {
+        async aiModelControllerCreate(projectId: string, createAiModelDto: CreateAiModelDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AiModelResponseDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aiModelControllerCreate(projectId, createAiModelDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AIModelsProjectSpecificApi.aiModelControllerCreate']?.[localVarOperationServerIndex]?.url;
@@ -1575,7 +1726,7 @@ export const AIModelsProjectSpecificApiFp = function (configuration?: Configurat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aiModelControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CreateAiModelDto>>> {
+        async aiModelControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AiModelResponseDto>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aiModelControllerFindAll(projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AIModelsProjectSpecificApi.aiModelControllerFindAll']?.[localVarOperationServerIndex]?.url;
@@ -1589,10 +1740,22 @@ export const AIModelsProjectSpecificApiFp = function (configuration?: Configurat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aiModelControllerFindOne(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateAiModelDto>> {
+        async aiModelControllerFindOne(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AiModelResponseDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aiModelControllerFindOne(projectId, aiModelId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AIModelsProjectSpecificApi.aiModelControllerFindOne']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List available Langchain provider types
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async aiModelControllerGetProviderTypes(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.aiModelControllerGetProviderTypes(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AIModelsProjectSpecificApi.aiModelControllerGetProviderTypes']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -1603,7 +1766,7 @@ export const AIModelsProjectSpecificApiFp = function (configuration?: Configurat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aiModelControllerRemove(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateAiModelDto>> {
+        async aiModelControllerRemove(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AiModelResponseDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aiModelControllerRemove(projectId, aiModelId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AIModelsProjectSpecificApi.aiModelControllerRemove']?.[localVarOperationServerIndex]?.url;
@@ -1618,7 +1781,7 @@ export const AIModelsProjectSpecificApiFp = function (configuration?: Configurat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aiModelControllerUpdate(projectId: string, aiModelId: string, updateAiModelDto: UpdateAiModelDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateAiModelDto>> {
+        async aiModelControllerUpdate(projectId: string, aiModelId: string, updateAiModelDto: UpdateAiModelDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AiModelResponseDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aiModelControllerUpdate(projectId, aiModelId, updateAiModelDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AIModelsProjectSpecificApi.aiModelControllerUpdate']?.[localVarOperationServerIndex]?.url;
@@ -1642,7 +1805,7 @@ export const AIModelsProjectSpecificApiFactory = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aiModelControllerCreate(projectId: string, createAiModelDto: CreateAiModelDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateAiModelDto> {
+        aiModelControllerCreate(projectId: string, createAiModelDto: CreateAiModelDto, options?: RawAxiosRequestConfig): AxiosPromise<AiModelResponseDto> {
             return localVarFp.aiModelControllerCreate(projectId, createAiModelDto, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1652,7 +1815,7 @@ export const AIModelsProjectSpecificApiFactory = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aiModelControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateAiModelDto>> {
+        aiModelControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AiModelResponseDto>> {
             return localVarFp.aiModelControllerFindAll(projectId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1663,8 +1826,17 @@ export const AIModelsProjectSpecificApiFactory = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aiModelControllerFindOne(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateAiModelDto> {
+        aiModelControllerFindOne(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): AxiosPromise<AiModelResponseDto> {
             return localVarFp.aiModelControllerFindOne(projectId, aiModelId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List available Langchain provider types
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        aiModelControllerGetProviderTypes(options?: RawAxiosRequestConfig): AxiosPromise<Array<string>> {
+            return localVarFp.aiModelControllerGetProviderTypes(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1674,7 +1846,7 @@ export const AIModelsProjectSpecificApiFactory = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aiModelControllerRemove(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateAiModelDto> {
+        aiModelControllerRemove(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): AxiosPromise<AiModelResponseDto> {
             return localVarFp.aiModelControllerRemove(projectId, aiModelId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1686,74 +1858,11 @@ export const AIModelsProjectSpecificApiFactory = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aiModelControllerUpdate(projectId: string, aiModelId: string, updateAiModelDto: UpdateAiModelDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateAiModelDto> {
+        aiModelControllerUpdate(projectId: string, aiModelId: string, updateAiModelDto: UpdateAiModelDto, options?: RawAxiosRequestConfig): AxiosPromise<AiModelResponseDto> {
             return localVarFp.aiModelControllerUpdate(projectId, aiModelId, updateAiModelDto, options).then((request) => request(axios, basePath));
         },
     };
 };
-
-/**
- * AIModelsProjectSpecificApi - interface
- * @export
- * @interface AIModelsProjectSpecificApi
- */
-export interface AIModelsProjectSpecificApiInterface {
-    /**
-     * 
-     * @summary Create a new AI model for this project
-     * @param {string} projectId 
-     * @param {CreateAiModelDto} createAiModelDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AIModelsProjectSpecificApiInterface
-     */
-    aiModelControllerCreate(projectId: string, createAiModelDto: CreateAiModelDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateAiModelDto>;
-
-    /**
-     * 
-     * @summary Get all AI models for this project (includes global models)
-     * @param {string} projectId 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AIModelsProjectSpecificApiInterface
-     */
-    aiModelControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateAiModelDto>>;
-
-    /**
-     * 
-     * @summary Get a specific AI model by ID (must belong to project or be global)
-     * @param {string} projectId Project ID
-     * @param {string} aiModelId AI Model CUID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AIModelsProjectSpecificApiInterface
-     */
-    aiModelControllerFindOne(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateAiModelDto>;
-
-    /**
-     * 
-     * @summary Delete an AI model by ID (must belong to project)
-     * @param {string} projectId Project ID
-     * @param {string} aiModelId AI Model CUID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AIModelsProjectSpecificApiInterface
-     */
-    aiModelControllerRemove(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateAiModelDto>;
-
-    /**
-     * 
-     * @summary Update an AI model by ID (must belong to project)
-     * @param {string} projectId Project ID
-     * @param {string} aiModelId AI Model CUID
-     * @param {UpdateAiModelDto} updateAiModelDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AIModelsProjectSpecificApiInterface
-     */
-    aiModelControllerUpdate(projectId: string, aiModelId: string, updateAiModelDto: UpdateAiModelDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateAiModelDto>;
-
-}
 
 /**
  * AIModelsProjectSpecificApi - object-oriented interface
@@ -1761,7 +1870,7 @@ export interface AIModelsProjectSpecificApiInterface {
  * @class AIModelsProjectSpecificApi
  * @extends {BaseAPI}
  */
-export class AIModelsProjectSpecificApi extends BaseAPI implements AIModelsProjectSpecificApiInterface {
+export class AIModelsProjectSpecificApi extends BaseAPI {
     /**
      * 
      * @summary Create a new AI model for this project
@@ -1798,6 +1907,17 @@ export class AIModelsProjectSpecificApi extends BaseAPI implements AIModelsProje
      */
     public aiModelControllerFindOne(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig) {
         return AIModelsProjectSpecificApiFp(this.configuration).aiModelControllerFindOne(projectId, aiModelId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List available Langchain provider types
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AIModelsProjectSpecificApi
+     */
+    public aiModelControllerGetProviderTypes(options?: RawAxiosRequestConfig) {
+        return AIModelsProjectSpecificApiFp(this.configuration).aiModelControllerGetProviderTypes(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1866,17 +1986,21 @@ export const AssetTranslationsWithinProjectAssetVersionApiAxiosParamCreator = fu
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createAssetTranslationDto, localVarRequestOptions, configuration)
 
             return {
@@ -1911,15 +2035,19 @@ export const AssetTranslationsWithinProjectAssetVersionApiAxiosParamCreator = fu
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1957,15 +2085,19 @@ export const AssetTranslationsWithinProjectAssetVersionApiAxiosParamCreator = fu
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2003,15 +2135,19 @@ export const AssetTranslationsWithinProjectAssetVersionApiAxiosParamCreator = fu
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2052,17 +2188,21 @@ export const AssetTranslationsWithinProjectAssetVersionApiAxiosParamCreator = fu
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateAssetTranslationDto, localVarRequestOptions, configuration)
 
             return {
@@ -2077,7 +2217,7 @@ export const AssetTranslationsWithinProjectAssetVersionApiAxiosParamCreator = fu
  * AssetTranslationsWithinProjectAssetVersionApi - functional programming interface
  * @export
  */
-export const AssetTranslationsWithinProjectAssetVersionApiFp = function (configuration?: Configuration) {
+export const AssetTranslationsWithinProjectAssetVersionApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AssetTranslationsWithinProjectAssetVersionApiAxiosParamCreator(configuration)
     return {
         /**
@@ -2239,85 +2379,12 @@ export const AssetTranslationsWithinProjectAssetVersionApiFactory = function (co
 };
 
 /**
- * AssetTranslationsWithinProjectAssetVersionApi - interface
- * @export
- * @interface AssetTranslationsWithinProjectAssetVersionApi
- */
-export interface AssetTranslationsWithinProjectAssetVersionApiInterface {
-    /**
-     * 
-     * @summary Create a translation for a specific asset version within a project
-     * @param {string} projectId Project ID
-     * @param {string} assetKey Asset Key
-     * @param {string} versionTag Version Tag
-     * @param {CreateAssetTranslationDto} createAssetTranslationDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AssetTranslationsWithinProjectAssetVersionApiInterface
-     */
-    assetTranslationControllerCreate(projectId: string, assetKey: string, versionTag: string, createAssetTranslationDto: CreateAssetTranslationDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateAssetTranslationDto>;
-
-    /**
-     * 
-     * @summary Get all translations for a specific asset version within a project
-     * @param {string} projectId Project ID
-     * @param {string} assetKey Asset Key
-     * @param {string} versionTag Version Tag
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AssetTranslationsWithinProjectAssetVersionApiInterface
-     */
-    assetTranslationControllerFindAll(projectId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateAssetTranslationDto>>;
-
-    /**
-     * 
-     * @summary Get a specific translation by language code for an asset version
-     * @param {string} projectId Project ID
-     * @param {string} assetKey Asset Key
-     * @param {string} versionTag Version Tag
-     * @param {string} languageCode Language code (e.g., es-ES)
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AssetTranslationsWithinProjectAssetVersionApiInterface
-     */
-    assetTranslationControllerFindOneByLanguage(projectId: string, assetKey: string, versionTag: string, languageCode: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateAssetTranslationDto>;
-
-    /**
-     * 
-     * @summary Delete a specific translation by language code for an asset version
-     * @param {string} projectId Project ID
-     * @param {string} assetKey Asset Key
-     * @param {string} versionTag Version Tag
-     * @param {string} languageCode Language code of the translation to delete
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AssetTranslationsWithinProjectAssetVersionApiInterface
-     */
-    assetTranslationControllerRemove(projectId: string, assetKey: string, versionTag: string, languageCode: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Update a specific translation by language code for an asset version
-     * @param {string} projectId Project ID
-     * @param {string} assetKey Asset Key
-     * @param {string} versionTag Version Tag
-     * @param {string} languageCode Language code of the translation to update
-     * @param {UpdateAssetTranslationDto} updateAssetTranslationDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AssetTranslationsWithinProjectAssetVersionApiInterface
-     */
-    assetTranslationControllerUpdate(projectId: string, assetKey: string, versionTag: string, languageCode: string, updateAssetTranslationDto: UpdateAssetTranslationDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateAssetTranslationDto>;
-
-}
-
-/**
  * AssetTranslationsWithinProjectAssetVersionApi - object-oriented interface
  * @export
  * @class AssetTranslationsWithinProjectAssetVersionApi
  * @extends {BaseAPI}
  */
-export class AssetTranslationsWithinProjectAssetVersionApi extends BaseAPI implements AssetTranslationsWithinProjectAssetVersionApiInterface {
+export class AssetTranslationsWithinProjectAssetVersionApi extends BaseAPI {
     /**
      * 
      * @summary Create a translation for a specific asset version within a project
@@ -2417,15 +2484,19 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2450,17 +2521,17 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(loginDto, localVarRequestOptions, configuration)
 
             return {
@@ -2486,17 +2557,17 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(registerDto, localVarRequestOptions, configuration)
 
             return {
@@ -2511,7 +2582,7 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
  * AuthenticationApi - functional programming interface
  * @export
  */
-export const AuthenticationApiFp = function (configuration?: Configuration) {
+export const AuthenticationApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AuthenticationApiAxiosParamCreator(configuration)
     return {
         /**
@@ -2595,49 +2666,12 @@ export const AuthenticationApiFactory = function (configuration?: Configuration,
 };
 
 /**
- * AuthenticationApi - interface
- * @export
- * @interface AuthenticationApi
- */
-export interface AuthenticationApiInterface {
-    /**
-     * 
-     * @summary Get current user profile
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AuthenticationApiInterface
-     */
-    authControllerGetProfile(options?: RawAxiosRequestConfig): AxiosPromise<UserProfileResponse>;
-
-    /**
-     * 
-     * @summary Log in a user
-     * @param {LoginDto} loginDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AuthenticationApiInterface
-     */
-    authControllerLogin(loginDto: LoginDto, options?: RawAxiosRequestConfig): AxiosPromise<LoginResponse>;
-
-    /**
-     * 
-     * @summary Register a new user
-     * @param {RegisterDto} registerDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AuthenticationApiInterface
-     */
-    authControllerRegister(registerDto: RegisterDto, options?: RawAxiosRequestConfig): AxiosPromise<UserProfileResponse>;
-
-}
-
-/**
  * AuthenticationApi - object-oriented interface
  * @export
  * @class AuthenticationApi
  * @extends {BaseAPI}
  */
-export class AuthenticationApi extends BaseAPI implements AuthenticationApiInterface {
+export class AuthenticationApi extends BaseAPI {
     /**
      * 
      * @summary Get current user profile
@@ -2684,8 +2718,8 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
     return {
         /**
          * 
-         * @summary Crear nuevos datos culturales dentro de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Creates new cultural data within a project
+         * @param {string} projectId Project ID
          * @param {CreateCulturalDataDto} createCulturalDataDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2704,17 +2738,21 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createCulturalDataDto, localVarRequestOptions, configuration)
 
             return {
@@ -2724,8 +2762,8 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * 
-         * @summary Obtener todos los datos culturales de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets all cultural data for a project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2741,15 +2779,19 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2758,9 +2800,9 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * 
-         * @summary Obtener datos culturales por ID dentro de un proyecto
-         * @param {string} culturalDataId ID de los datos culturales
-         * @param {string} projectId ID del proyecto
+         * @summary Gets cultural data by ID within a project
+         * @param {string} culturalDataId ID of the cultural data
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2779,15 +2821,19 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2796,9 +2842,9 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * 
-         * @summary Eliminar datos culturales por ID dentro de un proyecto
-         * @param {string} culturalDataId ID a eliminar
-         * @param {string} projectId ID del proyecto
+         * @summary Deletes cultural data by ID within a project
+         * @param {string} culturalDataId ID to delete
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2817,15 +2863,19 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2834,9 +2884,9 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * 
-         * @summary Actualizar datos culturales por ID dentro de un proyecto
-         * @param {string} culturalDataId ID a actualizar
-         * @param {string} projectId ID del proyecto
+         * @summary Updates cultural data by ID within a project
+         * @param {string} culturalDataId ID to update
+         * @param {string} projectId Project ID
          * @param {UpdateCulturalDataDto} updateCulturalDataDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2858,17 +2908,21 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateCulturalDataDto, localVarRequestOptions, configuration)
 
             return {
@@ -2883,13 +2937,13 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
  * CulturalDataApi - functional programming interface
  * @export
  */
-export const CulturalDataApiFp = function (configuration?: Configuration) {
+export const CulturalDataApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = CulturalDataApiAxiosParamCreator(configuration)
     return {
         /**
          * 
-         * @summary Crear nuevos datos culturales dentro de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Creates new cultural data within a project
+         * @param {string} projectId Project ID
          * @param {CreateCulturalDataDto} createCulturalDataDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2902,8 +2956,8 @@ export const CulturalDataApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Obtener todos los datos culturales de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets all cultural data for a project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2915,9 +2969,9 @@ export const CulturalDataApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Obtener datos culturales por ID dentro de un proyecto
-         * @param {string} culturalDataId ID de los datos culturales
-         * @param {string} projectId ID del proyecto
+         * @summary Gets cultural data by ID within a project
+         * @param {string} culturalDataId ID of the cultural data
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2929,9 +2983,9 @@ export const CulturalDataApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Eliminar datos culturales por ID dentro de un proyecto
-         * @param {string} culturalDataId ID a eliminar
-         * @param {string} projectId ID del proyecto
+         * @summary Deletes cultural data by ID within a project
+         * @param {string} culturalDataId ID to delete
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2943,9 +2997,9 @@ export const CulturalDataApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Actualizar datos culturales por ID dentro de un proyecto
-         * @param {string} culturalDataId ID a actualizar
-         * @param {string} projectId ID del proyecto
+         * @summary Updates cultural data by ID within a project
+         * @param {string} culturalDataId ID to update
+         * @param {string} projectId Project ID
          * @param {UpdateCulturalDataDto} updateCulturalDataDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2968,8 +3022,8 @@ export const CulturalDataApiFactory = function (configuration?: Configuration, b
     return {
         /**
          * 
-         * @summary Crear nuevos datos culturales dentro de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Creates new cultural data within a project
+         * @param {string} projectId Project ID
          * @param {CreateCulturalDataDto} createCulturalDataDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2979,8 +3033,8 @@ export const CulturalDataApiFactory = function (configuration?: Configuration, b
         },
         /**
          * 
-         * @summary Obtener todos los datos culturales de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets all cultural data for a project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2989,9 +3043,9 @@ export const CulturalDataApiFactory = function (configuration?: Configuration, b
         },
         /**
          * 
-         * @summary Obtener datos culturales por ID dentro de un proyecto
-         * @param {string} culturalDataId ID de los datos culturales
-         * @param {string} projectId ID del proyecto
+         * @summary Gets cultural data by ID within a project
+         * @param {string} culturalDataId ID of the cultural data
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3000,9 +3054,9 @@ export const CulturalDataApiFactory = function (configuration?: Configuration, b
         },
         /**
          * 
-         * @summary Eliminar datos culturales por ID dentro de un proyecto
-         * @param {string} culturalDataId ID a eliminar
-         * @param {string} projectId ID del proyecto
+         * @summary Deletes cultural data by ID within a project
+         * @param {string} culturalDataId ID to delete
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3011,9 +3065,9 @@ export const CulturalDataApiFactory = function (configuration?: Configuration, b
         },
         /**
          * 
-         * @summary Actualizar datos culturales por ID dentro de un proyecto
-         * @param {string} culturalDataId ID a actualizar
-         * @param {string} projectId ID del proyecto
+         * @summary Updates cultural data by ID within a project
+         * @param {string} culturalDataId ID to update
+         * @param {string} projectId Project ID
          * @param {UpdateCulturalDataDto} updateCulturalDataDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3025,79 +3079,16 @@ export const CulturalDataApiFactory = function (configuration?: Configuration, b
 };
 
 /**
- * CulturalDataApi - interface
- * @export
- * @interface CulturalDataApi
- */
-export interface CulturalDataApiInterface {
-    /**
-     * 
-     * @summary Crear nuevos datos culturales dentro de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {CreateCulturalDataDto} createCulturalDataDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof CulturalDataApiInterface
-     */
-    culturalDataControllerCreate(projectId: string, createCulturalDataDto: CreateCulturalDataDto, options?: RawAxiosRequestConfig): AxiosPromise<CulturalDataResponse>;
-
-    /**
-     * 
-     * @summary Obtener todos los datos culturales de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof CulturalDataApiInterface
-     */
-    culturalDataControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CulturalDataResponse>>;
-
-    /**
-     * 
-     * @summary Obtener datos culturales por ID dentro de un proyecto
-     * @param {string} culturalDataId ID de los datos culturales
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof CulturalDataApiInterface
-     */
-    culturalDataControllerFindOne(culturalDataId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CulturalDataResponse>;
-
-    /**
-     * 
-     * @summary Eliminar datos culturales por ID dentro de un proyecto
-     * @param {string} culturalDataId ID a eliminar
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof CulturalDataApiInterface
-     */
-    culturalDataControllerRemove(culturalDataId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Actualizar datos culturales por ID dentro de un proyecto
-     * @param {string} culturalDataId ID a actualizar
-     * @param {string} projectId ID del proyecto
-     * @param {UpdateCulturalDataDto} updateCulturalDataDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof CulturalDataApiInterface
-     */
-    culturalDataControllerUpdate(culturalDataId: string, projectId: string, updateCulturalDataDto: UpdateCulturalDataDto, options?: RawAxiosRequestConfig): AxiosPromise<CulturalDataResponse>;
-
-}
-
-/**
  * CulturalDataApi - object-oriented interface
  * @export
  * @class CulturalDataApi
  * @extends {BaseAPI}
  */
-export class CulturalDataApi extends BaseAPI implements CulturalDataApiInterface {
+export class CulturalDataApi extends BaseAPI {
     /**
      * 
-     * @summary Crear nuevos datos culturales dentro de un proyecto
-     * @param {string} projectId ID del proyecto
+     * @summary Creates new cultural data within a project
+     * @param {string} projectId Project ID
      * @param {CreateCulturalDataDto} createCulturalDataDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3109,8 +3100,8 @@ export class CulturalDataApi extends BaseAPI implements CulturalDataApiInterface
 
     /**
      * 
-     * @summary Obtener todos los datos culturales de un proyecto
-     * @param {string} projectId ID del proyecto
+     * @summary Gets all cultural data for a project
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CulturalDataApi
@@ -3121,9 +3112,9 @@ export class CulturalDataApi extends BaseAPI implements CulturalDataApiInterface
 
     /**
      * 
-     * @summary Obtener datos culturales por ID dentro de un proyecto
-     * @param {string} culturalDataId ID de los datos culturales
-     * @param {string} projectId ID del proyecto
+     * @summary Gets cultural data by ID within a project
+     * @param {string} culturalDataId ID of the cultural data
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CulturalDataApi
@@ -3134,9 +3125,9 @@ export class CulturalDataApi extends BaseAPI implements CulturalDataApiInterface
 
     /**
      * 
-     * @summary Eliminar datos culturales por ID dentro de un proyecto
-     * @param {string} culturalDataId ID a eliminar
-     * @param {string} projectId ID del proyecto
+     * @summary Deletes cultural data by ID within a project
+     * @param {string} culturalDataId ID to delete
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CulturalDataApi
@@ -3147,9 +3138,9 @@ export class CulturalDataApi extends BaseAPI implements CulturalDataApiInterface
 
     /**
      * 
-     * @summary Actualizar datos culturales por ID dentro de un proyecto
-     * @param {string} culturalDataId ID a actualizar
-     * @param {string} projectId ID del proyecto
+     * @summary Updates cultural data by ID within a project
+     * @param {string} culturalDataId ID to update
+     * @param {string} projectId Project ID
      * @param {UpdateCulturalDataDto} updateCulturalDataDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3170,8 +3161,8 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
     return {
         /**
          * 
-         * @summary Crea un nuevo entorno para un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Creates a new environment for a project
+         * @param {string} projectId Project ID
          * @param {CreateEnvironmentDto} createEnvironmentDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3190,17 +3181,21 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createEnvironmentDto, localVarRequestOptions, configuration)
 
             return {
@@ -3210,8 +3205,8 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * 
-         * @summary Obtiene todos los entornos de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets all environments for a project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3227,15 +3222,19 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3244,9 +3243,9 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * 
-         * @summary Obtiene un entorno por su nombre dentro de un proyecto
-         * @param {string} name Nombre único del entorno en el proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets an environment by its name within a project
+         * @param {string} name Unique environment name in the project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3265,15 +3264,19 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3282,9 +3285,9 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * 
-         * @summary Obtiene un entorno por su ID dentro de un proyecto
-         * @param {string} environmentId ID único del entorno (CUID)
-         * @param {string} projectId ID del proyecto
+         * @summary Gets an environment by its ID within a project
+         * @param {string} environmentId Unique environment ID (CUID)
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3303,15 +3306,19 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3320,9 +3327,9 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * 
-         * @summary Elimina un entorno de un proyecto
-         * @param {string} environmentId ID único del entorno a eliminar (CUID)
-         * @param {string} projectId ID del proyecto
+         * @summary Deletes an environment from a project
+         * @param {string} environmentId Unique ID of the environment to delete (CUID)
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3341,15 +3348,19 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3358,9 +3369,9 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * 
-         * @summary Actualiza un entorno existente en un proyecto
-         * @param {string} environmentId ID único del entorno a actualizar (CUID)
-         * @param {string} projectId ID del proyecto
+         * @summary Updates an existing environment in a project
+         * @param {string} environmentId Unique ID of the environment to update (CUID)
+         * @param {string} projectId Project ID
          * @param {UpdateEnvironmentDto} updateEnvironmentDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3382,17 +3393,21 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateEnvironmentDto, localVarRequestOptions, configuration)
 
             return {
@@ -3407,13 +3422,13 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
  * EnvironmentsApi - functional programming interface
  * @export
  */
-export const EnvironmentsApiFp = function (configuration?: Configuration) {
+export const EnvironmentsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = EnvironmentsApiAxiosParamCreator(configuration)
     return {
         /**
          * 
-         * @summary Crea un nuevo entorno para un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Creates a new environment for a project
+         * @param {string} projectId Project ID
          * @param {CreateEnvironmentDto} createEnvironmentDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3426,8 +3441,8 @@ export const EnvironmentsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Obtiene todos los entornos de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets all environments for a project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3439,9 +3454,9 @@ export const EnvironmentsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Obtiene un entorno por su nombre dentro de un proyecto
-         * @param {string} name Nombre único del entorno en el proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets an environment by its name within a project
+         * @param {string} name Unique environment name in the project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3453,9 +3468,9 @@ export const EnvironmentsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Obtiene un entorno por su ID dentro de un proyecto
-         * @param {string} environmentId ID único del entorno (CUID)
-         * @param {string} projectId ID del proyecto
+         * @summary Gets an environment by its ID within a project
+         * @param {string} environmentId Unique environment ID (CUID)
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3467,9 +3482,9 @@ export const EnvironmentsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Elimina un entorno de un proyecto
-         * @param {string} environmentId ID único del entorno a eliminar (CUID)
-         * @param {string} projectId ID del proyecto
+         * @summary Deletes an environment from a project
+         * @param {string} environmentId Unique ID of the environment to delete (CUID)
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3481,9 +3496,9 @@ export const EnvironmentsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Actualiza un entorno existente en un proyecto
-         * @param {string} environmentId ID único del entorno a actualizar (CUID)
-         * @param {string} projectId ID del proyecto
+         * @summary Updates an existing environment in a project
+         * @param {string} environmentId Unique ID of the environment to update (CUID)
+         * @param {string} projectId Project ID
          * @param {UpdateEnvironmentDto} updateEnvironmentDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3506,8 +3521,8 @@ export const EnvironmentsApiFactory = function (configuration?: Configuration, b
     return {
         /**
          * 
-         * @summary Crea un nuevo entorno para un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Creates a new environment for a project
+         * @param {string} projectId Project ID
          * @param {CreateEnvironmentDto} createEnvironmentDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3517,8 +3532,8 @@ export const EnvironmentsApiFactory = function (configuration?: Configuration, b
         },
         /**
          * 
-         * @summary Obtiene todos los entornos de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets all environments for a project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3527,9 +3542,9 @@ export const EnvironmentsApiFactory = function (configuration?: Configuration, b
         },
         /**
          * 
-         * @summary Obtiene un entorno por su nombre dentro de un proyecto
-         * @param {string} name Nombre único del entorno en el proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets an environment by its name within a project
+         * @param {string} name Unique environment name in the project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3538,9 +3553,9 @@ export const EnvironmentsApiFactory = function (configuration?: Configuration, b
         },
         /**
          * 
-         * @summary Obtiene un entorno por su ID dentro de un proyecto
-         * @param {string} environmentId ID único del entorno (CUID)
-         * @param {string} projectId ID del proyecto
+         * @summary Gets an environment by its ID within a project
+         * @param {string} environmentId Unique environment ID (CUID)
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3549,9 +3564,9 @@ export const EnvironmentsApiFactory = function (configuration?: Configuration, b
         },
         /**
          * 
-         * @summary Elimina un entorno de un proyecto
-         * @param {string} environmentId ID único del entorno a eliminar (CUID)
-         * @param {string} projectId ID del proyecto
+         * @summary Deletes an environment from a project
+         * @param {string} environmentId Unique ID of the environment to delete (CUID)
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3560,9 +3575,9 @@ export const EnvironmentsApiFactory = function (configuration?: Configuration, b
         },
         /**
          * 
-         * @summary Actualiza un entorno existente en un proyecto
-         * @param {string} environmentId ID único del entorno a actualizar (CUID)
-         * @param {string} projectId ID del proyecto
+         * @summary Updates an existing environment in a project
+         * @param {string} environmentId Unique ID of the environment to update (CUID)
+         * @param {string} projectId Project ID
          * @param {UpdateEnvironmentDto} updateEnvironmentDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3574,90 +3589,16 @@ export const EnvironmentsApiFactory = function (configuration?: Configuration, b
 };
 
 /**
- * EnvironmentsApi - interface
- * @export
- * @interface EnvironmentsApi
- */
-export interface EnvironmentsApiInterface {
-    /**
-     * 
-     * @summary Crea un nuevo entorno para un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {CreateEnvironmentDto} createEnvironmentDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof EnvironmentsApiInterface
-     */
-    environmentControllerCreate(projectId: string, createEnvironmentDto: CreateEnvironmentDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateEnvironmentDto>;
-
-    /**
-     * 
-     * @summary Obtiene todos los entornos de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof EnvironmentsApiInterface
-     */
-    environmentControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateEnvironmentDto>>;
-
-    /**
-     * 
-     * @summary Obtiene un entorno por su nombre dentro de un proyecto
-     * @param {string} name Nombre único del entorno en el proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof EnvironmentsApiInterface
-     */
-    environmentControllerFindByName(name: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateEnvironmentDto>;
-
-    /**
-     * 
-     * @summary Obtiene un entorno por su ID dentro de un proyecto
-     * @param {string} environmentId ID único del entorno (CUID)
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof EnvironmentsApiInterface
-     */
-    environmentControllerFindOne(environmentId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateEnvironmentDto>;
-
-    /**
-     * 
-     * @summary Elimina un entorno de un proyecto
-     * @param {string} environmentId ID único del entorno a eliminar (CUID)
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof EnvironmentsApiInterface
-     */
-    environmentControllerRemove(environmentId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateEnvironmentDto>;
-
-    /**
-     * 
-     * @summary Actualiza un entorno existente en un proyecto
-     * @param {string} environmentId ID único del entorno a actualizar (CUID)
-     * @param {string} projectId ID del proyecto
-     * @param {UpdateEnvironmentDto} updateEnvironmentDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof EnvironmentsApiInterface
-     */
-    environmentControllerUpdate(environmentId: string, projectId: string, updateEnvironmentDto: UpdateEnvironmentDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateEnvironmentDto>;
-
-}
-
-/**
  * EnvironmentsApi - object-oriented interface
  * @export
  * @class EnvironmentsApi
  * @extends {BaseAPI}
  */
-export class EnvironmentsApi extends BaseAPI implements EnvironmentsApiInterface {
+export class EnvironmentsApi extends BaseAPI {
     /**
      * 
-     * @summary Crea un nuevo entorno para un proyecto
-     * @param {string} projectId ID del proyecto
+     * @summary Creates a new environment for a project
+     * @param {string} projectId Project ID
      * @param {CreateEnvironmentDto} createEnvironmentDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3669,8 +3610,8 @@ export class EnvironmentsApi extends BaseAPI implements EnvironmentsApiInterface
 
     /**
      * 
-     * @summary Obtiene todos los entornos de un proyecto
-     * @param {string} projectId ID del proyecto
+     * @summary Gets all environments for a project
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof EnvironmentsApi
@@ -3681,9 +3622,9 @@ export class EnvironmentsApi extends BaseAPI implements EnvironmentsApiInterface
 
     /**
      * 
-     * @summary Obtiene un entorno por su nombre dentro de un proyecto
-     * @param {string} name Nombre único del entorno en el proyecto
-     * @param {string} projectId ID del proyecto
+     * @summary Gets an environment by its name within a project
+     * @param {string} name Unique environment name in the project
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof EnvironmentsApi
@@ -3694,9 +3635,9 @@ export class EnvironmentsApi extends BaseAPI implements EnvironmentsApiInterface
 
     /**
      * 
-     * @summary Obtiene un entorno por su ID dentro de un proyecto
-     * @param {string} environmentId ID único del entorno (CUID)
-     * @param {string} projectId ID del proyecto
+     * @summary Gets an environment by its ID within a project
+     * @param {string} environmentId Unique environment ID (CUID)
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof EnvironmentsApi
@@ -3707,9 +3648,9 @@ export class EnvironmentsApi extends BaseAPI implements EnvironmentsApiInterface
 
     /**
      * 
-     * @summary Elimina un entorno de un proyecto
-     * @param {string} environmentId ID único del entorno a eliminar (CUID)
-     * @param {string} projectId ID del proyecto
+     * @summary Deletes an environment from a project
+     * @param {string} environmentId Unique ID of the environment to delete (CUID)
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof EnvironmentsApi
@@ -3720,9 +3661,9 @@ export class EnvironmentsApi extends BaseAPI implements EnvironmentsApiInterface
 
     /**
      * 
-     * @summary Actualiza un entorno existente en un proyecto
-     * @param {string} environmentId ID único del entorno a actualizar (CUID)
-     * @param {string} projectId ID del proyecto
+     * @summary Updates an existing environment in a project
+     * @param {string} environmentId Unique ID of the environment to update (CUID)
+     * @param {string} projectId Project ID
      * @param {UpdateEnvironmentDto} updateEnvironmentDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3755,15 +3696,15 @@ export const HealthApiAxiosParamCreator = function (configuration?: Configuratio
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3777,7 +3718,7 @@ export const HealthApiAxiosParamCreator = function (configuration?: Configuratio
  * HealthApi - functional programming interface
  * @export
  */
-export const HealthApiFp = function (configuration?: Configuration) {
+export const HealthApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = HealthApiAxiosParamCreator(configuration)
     return {
         /**
@@ -3813,28 +3754,12 @@ export const HealthApiFactory = function (configuration?: Configuration, basePat
 };
 
 /**
- * HealthApi - interface
- * @export
- * @interface HealthApi
- */
-export interface HealthApiInterface {
-    /**
-     * 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof HealthApiInterface
-     */
-    healthControllerCheck(options?: RawAxiosRequestConfig): AxiosPromise<HealthControllerCheck200Response>;
-
-}
-
-/**
  * HealthApi - object-oriented interface
  * @export
  * @class HealthApi
  * @extends {BaseAPI}
  */
-export class HealthApi extends BaseAPI implements HealthApiInterface {
+export class HealthApi extends BaseAPI {
     /**
      * 
      * @param {*} [options] Override http request option.
@@ -3872,17 +3797,21 @@ export const LLMExecutionApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(executeLlmDto, localVarRequestOptions, configuration)
 
             return {
@@ -3897,7 +3826,7 @@ export const LLMExecutionApiAxiosParamCreator = function (configuration?: Config
  * LLMExecutionApi - functional programming interface
  * @export
  */
-export const LLMExecutionApiFp = function (configuration?: Configuration) {
+export const LLMExecutionApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = LLMExecutionApiAxiosParamCreator(configuration)
     return {
         /**
@@ -3937,30 +3866,12 @@ export const LLMExecutionApiFactory = function (configuration?: Configuration, b
 };
 
 /**
- * LLMExecutionApi - interface
- * @export
- * @interface LLMExecutionApi
- */
-export interface LLMExecutionApiInterface {
-    /**
-     * 
-     * @summary Executes a pre-assembled prompt using a specified AI Model via LangChain
-     * @param {ExecuteLlmDto} executeLlmDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof LLMExecutionApiInterface
-     */
-    llmExecutionControllerExecuteLlm(executeLlmDto: ExecuteLlmDto, options?: RawAxiosRequestConfig): AxiosPromise<any>;
-
-}
-
-/**
  * LLMExecutionApi - object-oriented interface
  * @export
  * @class LLMExecutionApi
  * @extends {BaseAPI}
  */
-export class LLMExecutionApi extends BaseAPI implements LLMExecutionApiInterface {
+export class LLMExecutionApi extends BaseAPI {
     /**
      * 
      * @summary Executes a pre-assembled prompt using a specified AI Model via LangChain
@@ -4000,17 +3911,17 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createProjectDto, localVarRequestOptions, configuration)
 
             return {
@@ -4033,15 +3944,15 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4063,15 +3974,19 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4097,15 +4012,15 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4131,15 +4046,15 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4168,17 +4083,17 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateProjectDto, localVarRequestOptions, configuration)
 
             return {
@@ -4193,7 +4108,7 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
  * ProjectsApi - functional programming interface
  * @export
  */
-export const ProjectsApiFp = function (configuration?: Configuration) {
+export const ProjectsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ProjectsApiAxiosParamCreator(configuration)
     return {
         /**
@@ -4346,79 +4261,12 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
 };
 
 /**
- * ProjectsApi - interface
- * @export
- * @interface ProjectsApi
- */
-export interface ProjectsApiInterface {
-    /**
-     * 
-     * @summary Create a new project
-     * @param {CreateProjectDto} createProjectDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ProjectsApiInterface
-     */
-    projectControllerCreate(createProjectDto: CreateProjectDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateProjectDto>;
-
-    /**
-     * 
-     * @summary Get all projects
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ProjectsApiInterface
-     */
-    projectControllerFindAll(options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateProjectDto>>;
-
-    /**
-     * 
-     * @summary Get projects accessible by the current user
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ProjectsApiInterface
-     */
-    projectControllerFindMine(options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateProjectDto>>;
-
-    /**
-     * 
-     * @summary Get a project by ID
-     * @param {string} id Project CUID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ProjectsApiInterface
-     */
-    projectControllerFindOne(id: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateProjectDto>;
-
-    /**
-     * 
-     * @summary Delete a project by ID
-     * @param {string} id Project CUID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ProjectsApiInterface
-     */
-    projectControllerRemove(id: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateProjectDto>;
-
-    /**
-     * 
-     * @summary Update a project by ID
-     * @param {string} id Project CUID
-     * @param {UpdateProjectDto} updateProjectDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ProjectsApiInterface
-     */
-    projectControllerUpdate(id: string, updateProjectDto: UpdateProjectDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateProjectDto>;
-
-}
-
-/**
  * ProjectsApi - object-oriented interface
  * @export
  * @class ProjectsApi
  * @extends {BaseAPI}
  */
-export class ProjectsApi extends BaseAPI implements ProjectsApiInterface {
+export class ProjectsApi extends BaseAPI {
     /**
      * 
      * @summary Create a new project
@@ -4525,17 +4373,21 @@ export const PromptAssetLinksWithinProjectVersionApiAxiosParamCreator = function
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createPromptAssetLinkDto, localVarRequestOptions, configuration)
 
             return {
@@ -4566,15 +4418,19 @@ export const PromptAssetLinksWithinProjectVersionApiAxiosParamCreator = function
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4608,15 +4464,19 @@ export const PromptAssetLinksWithinProjectVersionApiAxiosParamCreator = function
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4650,15 +4510,19 @@ export const PromptAssetLinksWithinProjectVersionApiAxiosParamCreator = function
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4695,17 +4559,21 @@ export const PromptAssetLinksWithinProjectVersionApiAxiosParamCreator = function
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updatePromptAssetLinkDto, localVarRequestOptions, configuration)
 
             return {
@@ -4720,7 +4588,7 @@ export const PromptAssetLinksWithinProjectVersionApiAxiosParamCreator = function
  * PromptAssetLinksWithinProjectVersionApi - functional programming interface
  * @export
  */
-export const PromptAssetLinksWithinProjectVersionApiFp = function (configuration?: Configuration) {
+export const PromptAssetLinksWithinProjectVersionApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PromptAssetLinksWithinProjectVersionApiAxiosParamCreator(configuration)
     return {
         /**
@@ -4872,80 +4740,12 @@ export const PromptAssetLinksWithinProjectVersionApiFactory = function (configur
 };
 
 /**
- * PromptAssetLinksWithinProjectVersionApi - interface
- * @export
- * @interface PromptAssetLinksWithinProjectVersionApi
- */
-export interface PromptAssetLinksWithinProjectVersionApiInterface {
-    /**
-     * 
-     * @summary Link an Asset Version to a Prompt Version within a Project
-     * @param {string} projectId Project ID
-     * @param {string} promptVersionId Prompt Version ID
-     * @param {CreatePromptAssetLinkDto} createPromptAssetLinkDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetLinksWithinProjectVersionApiInterface
-     */
-    promptAssetLinkControllerCreate(projectId: string, promptVersionId: string, createPromptAssetLinkDto: CreatePromptAssetLinkDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetLinkDto>;
-
-    /**
-     * 
-     * @summary Get all links for a specific Prompt Version within a Project
-     * @param {string} projectId Project ID
-     * @param {string} promptVersionId Prompt Version ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetLinksWithinProjectVersionApiInterface
-     */
-    promptAssetLinkControllerFindAll(projectId: string, promptVersionId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreatePromptAssetLinkDto>>;
-
-    /**
-     * 
-     * @summary Get a specific link by its ID for a Prompt Version within a Project
-     * @param {string} projectId Project ID
-     * @param {string} promptVersionId Prompt Version ID
-     * @param {string} linkId Link ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetLinksWithinProjectVersionApiInterface
-     */
-    promptAssetLinkControllerFindOne(projectId: string, promptVersionId: string, linkId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetLinkDto>;
-
-    /**
-     * 
-     * @summary Delete a specific link by its ID for a Prompt Version within a Project
-     * @param {string} projectId Project ID
-     * @param {string} promptVersionId Prompt Version ID
-     * @param {string} linkId Link ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetLinksWithinProjectVersionApiInterface
-     */
-    promptAssetLinkControllerRemove(projectId: string, promptVersionId: string, linkId: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Update a specific link by its ID for a Prompt Version within a Project
-     * @param {string} projectId Project ID
-     * @param {string} promptVersionId Prompt Version ID
-     * @param {string} linkId Link ID
-     * @param {UpdatePromptAssetLinkDto} updatePromptAssetLinkDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetLinksWithinProjectVersionApiInterface
-     */
-    promptAssetLinkControllerUpdate(projectId: string, promptVersionId: string, linkId: string, updatePromptAssetLinkDto: UpdatePromptAssetLinkDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetLinkDto>;
-
-}
-
-/**
  * PromptAssetLinksWithinProjectVersionApi - object-oriented interface
  * @export
  * @class PromptAssetLinksWithinProjectVersionApi
  * @extends {BaseAPI}
  */
-export class PromptAssetLinksWithinProjectVersionApi extends BaseAPI implements PromptAssetLinksWithinProjectVersionApiInterface {
+export class PromptAssetLinksWithinProjectVersionApi extends BaseAPI {
     /**
      * 
      * @summary Link an Asset Version to a Prompt Version within a Project
@@ -5051,17 +4851,21 @@ export const PromptAssetVersionsWithinProjectAssetApiAxiosParamCreator = functio
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createPromptAssetVersionDto, localVarRequestOptions, configuration)
 
             return {
@@ -5092,15 +4896,19 @@ export const PromptAssetVersionsWithinProjectAssetApiAxiosParamCreator = functio
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5134,15 +4942,19 @@ export const PromptAssetVersionsWithinProjectAssetApiAxiosParamCreator = functio
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5176,15 +4988,19 @@ export const PromptAssetVersionsWithinProjectAssetApiAxiosParamCreator = functio
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5221,17 +5037,21 @@ export const PromptAssetVersionsWithinProjectAssetApiAxiosParamCreator = functio
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updatePromptAssetVersionDto, localVarRequestOptions, configuration)
 
             return {
@@ -5246,7 +5066,7 @@ export const PromptAssetVersionsWithinProjectAssetApiAxiosParamCreator = functio
  * PromptAssetVersionsWithinProjectAssetApi - functional programming interface
  * @export
  */
-export const PromptAssetVersionsWithinProjectAssetApiFp = function (configuration?: Configuration) {
+export const PromptAssetVersionsWithinProjectAssetApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PromptAssetVersionsWithinProjectAssetApiAxiosParamCreator(configuration)
     return {
         /**
@@ -5398,80 +5218,12 @@ export const PromptAssetVersionsWithinProjectAssetApiFactory = function (configu
 };
 
 /**
- * PromptAssetVersionsWithinProjectAssetApi - interface
- * @export
- * @interface PromptAssetVersionsWithinProjectAssetApi
- */
-export interface PromptAssetVersionsWithinProjectAssetApiInterface {
-    /**
-     * 
-     * @summary Create a new version for a specific asset within a project
-     * @param {string} projectId Project ID
-     * @param {string} assetKey Asset Key
-     * @param {CreatePromptAssetVersionDto} createPromptAssetVersionDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetVersionsWithinProjectAssetApiInterface
-     */
-    promptAssetVersionControllerCreate(projectId: string, assetKey: string, createPromptAssetVersionDto: CreatePromptAssetVersionDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetVersionDto>;
-
-    /**
-     * 
-     * @summary Get all versions for a specific asset within a project
-     * @param {string} projectId Project ID
-     * @param {string} assetKey Asset Key
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetVersionsWithinProjectAssetApiInterface
-     */
-    promptAssetVersionControllerFindAll(projectId: string, assetKey: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreatePromptAssetVersionDto>>;
-
-    /**
-     * 
-     * @summary Get a specific asset version by its tag within a project/asset
-     * @param {string} projectId Project ID
-     * @param {string} assetKey Asset Key
-     * @param {string} versionTag Version tag (e.g., v1.0.0)
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetVersionsWithinProjectAssetApiInterface
-     */
-    promptAssetVersionControllerFindOneByTag(projectId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetVersionDto>;
-
-    /**
-     * 
-     * @summary Delete a specific asset version by its tag within a project/asset
-     * @param {string} projectId Project ID
-     * @param {string} assetKey Asset Key
-     * @param {string} versionTag Version tag to delete
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetVersionsWithinProjectAssetApiInterface
-     */
-    promptAssetVersionControllerRemove(projectId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Update a specific asset version by its tag within a project/asset
-     * @param {string} projectId Project ID
-     * @param {string} assetKey Asset Key
-     * @param {string} versionTag Version tag to update
-     * @param {UpdatePromptAssetVersionDto} updatePromptAssetVersionDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetVersionsWithinProjectAssetApiInterface
-     */
-    promptAssetVersionControllerUpdate(projectId: string, assetKey: string, versionTag: string, updatePromptAssetVersionDto: UpdatePromptAssetVersionDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetVersionDto>;
-
-}
-
-/**
  * PromptAssetVersionsWithinProjectAssetApi - object-oriented interface
  * @export
  * @class PromptAssetVersionsWithinProjectAssetApi
  * @extends {BaseAPI}
  */
-export class PromptAssetVersionsWithinProjectAssetApi extends BaseAPI implements PromptAssetVersionsWithinProjectAssetApiInterface {
+export class PromptAssetVersionsWithinProjectAssetApi extends BaseAPI {
     /**
      * 
      * @summary Create a new version for a specific asset within a project
@@ -5573,17 +5325,21 @@ export const PromptAssetsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createPromptAssetDto, localVarRequestOptions, configuration)
 
             return {
@@ -5610,15 +5366,19 @@ export const PromptAssetsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5648,15 +5408,19 @@ export const PromptAssetsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5686,15 +5450,19 @@ export const PromptAssetsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5727,17 +5495,21 @@ export const PromptAssetsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updatePromptAssetDto, localVarRequestOptions, configuration)
 
             return {
@@ -5752,7 +5524,7 @@ export const PromptAssetsApiAxiosParamCreator = function (configuration?: Config
  * PromptAssetsApi - functional programming interface
  * @export
  */
-export const PromptAssetsApiFp = function (configuration?: Configuration) {
+export const PromptAssetsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PromptAssetsApiAxiosParamCreator(configuration)
     return {
         /**
@@ -5894,75 +5666,12 @@ export const PromptAssetsApiFactory = function (configuration?: Configuration, b
 };
 
 /**
- * PromptAssetsApi - interface
- * @export
- * @interface PromptAssetsApi
- */
-export interface PromptAssetsApiInterface {
-    /**
-     * 
-     * @summary Crea un nuevo prompt asset (y su primera versión) dentro de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {CreatePromptAssetDto} createPromptAssetDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetsApiInterface
-     */
-    promptAssetControllerCreate(projectId: string, createPromptAssetDto: CreatePromptAssetDto, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Obtiene todos los prompt assets de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetsApiInterface
-     */
-    promptAssetControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Obtiene un prompt asset por su key dentro de un proyecto
-     * @param {string} assetKey Key única del asset dentro del proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetsApiInterface
-     */
-    promptAssetControllerFindOne(assetKey: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Elimina un prompt asset (y sus versiones/traducciones por Cascade) dentro de un proyecto
-     * @param {string} assetKey Key única del asset a eliminar
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetsApiInterface
-     */
-    promptAssetControllerRemove(assetKey: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Actualiza metadatos de un prompt asset (nombre, descripción, etc.) dentro de un proyecto
-     * @param {string} assetKey Key única del asset a actualizar
-     * @param {string} projectId ID del proyecto
-     * @param {UpdatePromptAssetDto} updatePromptAssetDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetsApiInterface
-     */
-    promptAssetControllerUpdate(assetKey: string, projectId: string, updatePromptAssetDto: UpdatePromptAssetDto, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-}
-
-/**
  * PromptAssetsApi - object-oriented interface
  * @export
  * @class PromptAssetsApi
  * @extends {BaseAPI}
  */
-export class PromptAssetsApi extends BaseAPI implements PromptAssetsApiInterface {
+export class PromptAssetsApi extends BaseAPI {
     /**
      * 
      * @summary Crea un nuevo prompt asset (y su primera versión) dentro de un proyecto
@@ -6067,17 +5776,21 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createPromptTranslationDto, localVarRequestOptions, configuration)
 
             return {
@@ -6112,15 +5825,19 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -6158,15 +5875,19 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -6204,15 +5925,19 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -6253,17 +5978,21 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updatePromptTranslationDto, localVarRequestOptions, configuration)
 
             return {
@@ -6278,7 +6007,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
  * PromptTranslationsWithinProjectPromptVersionApi - functional programming interface
  * @export
  */
-export const PromptTranslationsWithinProjectPromptVersionApiFp = function (configuration?: Configuration) {
+export const PromptTranslationsWithinProjectPromptVersionApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator(configuration)
     return {
         /**
@@ -6440,85 +6169,12 @@ export const PromptTranslationsWithinProjectPromptVersionApiFactory = function (
 };
 
 /**
- * PromptTranslationsWithinProjectPromptVersionApi - interface
- * @export
- * @interface PromptTranslationsWithinProjectPromptVersionApi
- */
-export interface PromptTranslationsWithinProjectPromptVersionApiInterface {
-    /**
-     * 
-     * @summary Create a translation for a specific prompt version within a project
-     * @param {string} projectId Project ID
-     * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag
-     * @param {CreatePromptTranslationDto} createPromptTranslationDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptTranslationsWithinProjectPromptVersionApiInterface
-     */
-    promptTranslationControllerCreate(projectId: string, promptId: string, versionTag: string, createPromptTranslationDto: CreatePromptTranslationDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptTranslationDto>;
-
-    /**
-     * 
-     * @summary Get all translations for a specific prompt version within a project
-     * @param {string} projectId Project ID
-     * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptTranslationsWithinProjectPromptVersionApiInterface
-     */
-    promptTranslationControllerFindAll(projectId: string, promptId: string, versionTag: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreatePromptTranslationDto>>;
-
-    /**
-     * 
-     * @summary Get a specific translation by language code for a prompt version
-     * @param {string} projectId Project ID
-     * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag
-     * @param {string} languageCode Language code (e.g., es-ES)
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptTranslationsWithinProjectPromptVersionApiInterface
-     */
-    promptTranslationControllerFindOneByLanguage(projectId: string, promptId: string, versionTag: string, languageCode: string, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptTranslationDto>;
-
-    /**
-     * 
-     * @summary Delete a specific translation by language code for a prompt version
-     * @param {string} projectId Project ID
-     * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag
-     * @param {string} languageCode Language code of the translation to delete
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptTranslationsWithinProjectPromptVersionApiInterface
-     */
-    promptTranslationControllerRemove(projectId: string, promptId: string, versionTag: string, languageCode: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Update a specific translation by language code for a prompt version
-     * @param {string} projectId Project ID
-     * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag
-     * @param {string} languageCode Language code of the translation to update
-     * @param {UpdatePromptTranslationDto} updatePromptTranslationDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptTranslationsWithinProjectPromptVersionApiInterface
-     */
-    promptTranslationControllerUpdate(projectId: string, promptId: string, versionTag: string, languageCode: string, updatePromptTranslationDto: UpdatePromptTranslationDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptTranslationDto>;
-
-}
-
-/**
  * PromptTranslationsWithinProjectPromptVersionApi - object-oriented interface
  * @export
  * @class PromptTranslationsWithinProjectPromptVersionApi
  * @extends {BaseAPI}
  */
-export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI implements PromptTranslationsWithinProjectPromptVersionApiInterface {
+export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI {
     /**
      * 
      * @summary Create a translation for a specific prompt version within a project
@@ -6629,17 +6285,21 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createPromptVersionDto, localVarRequestOptions, configuration)
 
             return {
@@ -6670,15 +6330,19 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -6712,15 +6376,19 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -6754,15 +6422,19 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -6799,17 +6471,21 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updatePromptVersionDto, localVarRequestOptions, configuration)
 
             return {
@@ -6824,7 +6500,7 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
  * PromptVersionsWithinProjectPromptApi - functional programming interface
  * @export
  */
-export const PromptVersionsWithinProjectPromptApiFp = function (configuration?: Configuration) {
+export const PromptVersionsWithinProjectPromptApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PromptVersionsWithinProjectPromptApiAxiosParamCreator(configuration)
     return {
         /**
@@ -6976,80 +6652,12 @@ export const PromptVersionsWithinProjectPromptApiFactory = function (configurati
 };
 
 /**
- * PromptVersionsWithinProjectPromptApi - interface
- * @export
- * @interface PromptVersionsWithinProjectPromptApi
- */
-export interface PromptVersionsWithinProjectPromptApiInterface {
-    /**
-     * 
-     * @summary Create a new version for a specific prompt within a project
-     * @param {string} projectId Project ID
-     * @param {string} promptId Prompt CUID
-     * @param {CreatePromptVersionDto} createPromptVersionDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptVersionsWithinProjectPromptApiInterface
-     */
-    promptVersionControllerCreate(projectId: string, promptId: string, createPromptVersionDto: CreatePromptVersionDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptVersionDto>;
-
-    /**
-     * 
-     * @summary Get all versions for a specific prompt within a project
-     * @param {string} projectId Project ID
-     * @param {string} promptId Prompt CUID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptVersionsWithinProjectPromptApiInterface
-     */
-    promptVersionControllerFindAll(projectId: string, promptId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreatePromptVersionDto>>;
-
-    /**
-     * 
-     * @summary Get a specific prompt version by its tag within a project/prompt
-     * @param {string} projectId Project ID
-     * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version tag (e.g., v1.0.0)
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptVersionsWithinProjectPromptApiInterface
-     */
-    promptVersionControllerFindOneByTag(projectId: string, promptId: string, versionTag: string, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptVersionDto>;
-
-    /**
-     * 
-     * @summary Delete a specific prompt version by its tag within a project/prompt
-     * @param {string} projectId Project ID
-     * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version tag to delete
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptVersionsWithinProjectPromptApiInterface
-     */
-    promptVersionControllerRemove(projectId: string, promptId: string, versionTag: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Update a specific prompt version by its tag within a project/prompt
-     * @param {string} projectId Project ID
-     * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version tag to update
-     * @param {UpdatePromptVersionDto} updatePromptVersionDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptVersionsWithinProjectPromptApiInterface
-     */
-    promptVersionControllerUpdate(projectId: string, promptId: string, versionTag: string, updatePromptVersionDto: UpdatePromptVersionDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptVersionDto>;
-
-}
-
-/**
  * PromptVersionsWithinProjectPromptApi - object-oriented interface
  * @export
  * @class PromptVersionsWithinProjectPromptApi
  * @extends {BaseAPI}
  */
-export class PromptVersionsWithinProjectPromptApi extends BaseAPI implements PromptVersionsWithinProjectPromptApiInterface {
+export class PromptVersionsWithinProjectPromptApi extends BaseAPI {
     /**
      * 
      * @summary Create a new version for a specific prompt within a project
@@ -7131,10 +6739,10 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
     return {
         /**
          * 
-         * @summary Añadir o actualizar una traducción para una versión específica de prompt en el proyecto.
-         * @param {string} versionId ID de la versión a traducir (CUID)
-         * @param {string} promptName Nombre del prompt padre (contextual)
-         * @param {string} projectId ID del proyecto
+         * @summary Adds or updates a translation for a specific prompt version in the project.
+         * @param {string} versionId ID of the version to translate (CUID)
+         * @param {string} promptName Parent prompt name (contextual)
+         * @param {string} projectId Project ID
          * @param {CreateOrUpdatePromptTranslationDto} createOrUpdatePromptTranslationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -7159,17 +6767,21 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createOrUpdatePromptTranslationDto, localVarRequestOptions, configuration)
 
             return {
@@ -7179,8 +6791,8 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Crea un nuevo prompt lógico dentro de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Creates a new logical prompt within a project
+         * @param {string} projectId Project ID
          * @param {CreatePromptDto} createPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -7199,17 +6811,21 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createPromptDto, localVarRequestOptions, configuration)
 
             return {
@@ -7219,52 +6835,8 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Crear una nueva versión para un prompt existente en el proyecto.
-         * @param {string} promptName Nombre del prompt padre dentro del proyecto
-         * @param {string} projectId ID del proyecto
-         * @param {CreatePromptVersionDto} createPromptVersionDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptControllerCreateVersion: async (promptName: string, projectId: string, createPromptVersionDto: CreatePromptVersionDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'promptName' is not null or undefined
-            assertParamExists('promptControllerCreateVersion', 'promptName', promptName)
-            // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('promptControllerCreateVersion', 'projectId', projectId)
-            // verify required parameter 'createPromptVersionDto' is not null or undefined
-            assertParamExists('promptControllerCreateVersion', 'createPromptVersionDto', createPromptVersionDto)
-            const localVarPath = `/api/projects/{projectId}/prompts/{promptName}/versions`
-                .replace(`{${"promptName"}}`, encodeURIComponent(String(promptName)))
-                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = serializeDataIfNeeded(createPromptVersionDto, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Obtiene todos los prompts lógicos de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets all logical prompts for a project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7280,15 +6852,19 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7297,9 +6873,9 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Obtiene un prompt lógico por su nombre dentro de un proyecto
-         * @param {string} promptName Nombre único del prompt dentro del proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets a logical prompt by its name within a project
+         * @param {string} promptName Unique name of the prompt within the project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7318,15 +6894,19 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7335,9 +6915,9 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Elimina un prompt lógico (y sus versiones asociadas por Cascade) dentro de un proyecto
-         * @param {string} promptName Nombre único del prompt a eliminar dentro del proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Deletes a logical prompt (and its associated versions via Cascade) within a project by name
+         * @param {string} promptName Name of the prompt to delete
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7356,15 +6936,19 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7373,10 +6957,10 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Actualiza metadatos de un prompt lógico (descripción, tactic, tags) dentro de un proyecto
-         * @param {string} promptName Nombre único del prompt a actualizar dentro del proyecto
-         * @param {string} projectId ID del proyecto
-         * @param {UpdatePromptDto} updatePromptDto 
+         * @summary Updates an existing prompt by its name for a specific project
+         * @param {string} promptName Name of the prompt to update
+         * @param {string} projectId Project ID
+         * @param {UpdatePromptDto} updatePromptDto Data to update the prompt
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7397,17 +6981,21 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updatePromptDto, localVarRequestOptions, configuration)
 
             return {
@@ -7422,15 +7010,15 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
  * PromptsApi - functional programming interface
  * @export
  */
-export const PromptsApiFp = function (configuration?: Configuration) {
+export const PromptsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PromptsApiAxiosParamCreator(configuration)
     return {
         /**
          * 
-         * @summary Añadir o actualizar una traducción para una versión específica de prompt en el proyecto.
-         * @param {string} versionId ID de la versión a traducir (CUID)
-         * @param {string} promptName Nombre del prompt padre (contextual)
-         * @param {string} projectId ID del proyecto
+         * @summary Adds or updates a translation for a specific prompt version in the project.
+         * @param {string} versionId ID of the version to translate (CUID)
+         * @param {string} promptName Parent prompt name (contextual)
+         * @param {string} projectId Project ID
          * @param {CreateOrUpdatePromptTranslationDto} createOrUpdatePromptTranslationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -7443,8 +7031,8 @@ export const PromptsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Crea un nuevo prompt lógico dentro de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Creates a new logical prompt within a project
+         * @param {string} projectId Project ID
          * @param {CreatePromptDto} createPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -7457,23 +7045,8 @@ export const PromptsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Crear una nueva versión para un prompt existente en el proyecto.
-         * @param {string} promptName Nombre del prompt padre dentro del proyecto
-         * @param {string} projectId ID del proyecto
-         * @param {CreatePromptVersionDto} createPromptVersionDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async promptControllerCreateVersion(promptName: string, projectId: string, createPromptVersionDto: CreatePromptVersionDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerCreateVersion(promptName, projectId, createPromptVersionDto, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerCreateVersion']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Obtiene todos los prompts lógicos de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets all logical prompts for a project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7485,9 +7058,9 @@ export const PromptsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Obtiene un prompt lógico por su nombre dentro de un proyecto
-         * @param {string} promptName Nombre único del prompt dentro del proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets a logical prompt by its name within a project
+         * @param {string} promptName Unique name of the prompt within the project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7499,9 +7072,9 @@ export const PromptsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Elimina un prompt lógico (y sus versiones asociadas por Cascade) dentro de un proyecto
-         * @param {string} promptName Nombre único del prompt a eliminar dentro del proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Deletes a logical prompt (and its associated versions via Cascade) within a project by name
+         * @param {string} promptName Name of the prompt to delete
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7513,14 +7086,14 @@ export const PromptsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Actualiza metadatos de un prompt lógico (descripción, tactic, tags) dentro de un proyecto
-         * @param {string} promptName Nombre único del prompt a actualizar dentro del proyecto
-         * @param {string} projectId ID del proyecto
-         * @param {UpdatePromptDto} updatePromptDto 
+         * @summary Updates an existing prompt by its name for a specific project
+         * @param {string} promptName Name of the prompt to update
+         * @param {string} projectId Project ID
+         * @param {UpdatePromptDto} updatePromptDto Data to update the prompt
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptControllerUpdate(promptName: string, projectId: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptDto>> {
+        async promptControllerUpdate(promptName: string, projectId: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerUpdate(promptName, projectId, updatePromptDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerUpdate']?.[localVarOperationServerIndex]?.url;
@@ -7538,10 +7111,10 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
     return {
         /**
          * 
-         * @summary Añadir o actualizar una traducción para una versión específica de prompt en el proyecto.
-         * @param {string} versionId ID de la versión a traducir (CUID)
-         * @param {string} promptName Nombre del prompt padre (contextual)
-         * @param {string} projectId ID del proyecto
+         * @summary Adds or updates a translation for a specific prompt version in the project.
+         * @param {string} versionId ID of the version to translate (CUID)
+         * @param {string} promptName Parent prompt name (contextual)
+         * @param {string} projectId Project ID
          * @param {CreateOrUpdatePromptTranslationDto} createOrUpdatePromptTranslationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -7551,8 +7124,8 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
-         * @summary Crea un nuevo prompt lógico dentro de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Creates a new logical prompt within a project
+         * @param {string} projectId Project ID
          * @param {CreatePromptDto} createPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -7562,20 +7135,8 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
-         * @summary Crear una nueva versión para un prompt existente en el proyecto.
-         * @param {string} promptName Nombre del prompt padre dentro del proyecto
-         * @param {string} projectId ID del proyecto
-         * @param {CreatePromptVersionDto} createPromptVersionDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptControllerCreateVersion(promptName: string, projectId: string, createPromptVersionDto: CreatePromptVersionDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.promptControllerCreateVersion(promptName, projectId, createPromptVersionDto, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Obtiene todos los prompts lógicos de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets all logical prompts for a project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7584,9 +7145,9 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
-         * @summary Obtiene un prompt lógico por su nombre dentro de un proyecto
-         * @param {string} promptName Nombre único del prompt dentro del proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Gets a logical prompt by its name within a project
+         * @param {string} promptName Unique name of the prompt within the project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7595,9 +7156,9 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
-         * @summary Elimina un prompt lógico (y sus versiones asociadas por Cascade) dentro de un proyecto
-         * @param {string} promptName Nombre único del prompt a eliminar dentro del proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Deletes a logical prompt (and its associated versions via Cascade) within a project by name
+         * @param {string} promptName Name of the prompt to delete
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7606,106 +7167,18 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
-         * @summary Actualiza metadatos de un prompt lógico (descripción, tactic, tags) dentro de un proyecto
-         * @param {string} promptName Nombre único del prompt a actualizar dentro del proyecto
-         * @param {string} projectId ID del proyecto
-         * @param {UpdatePromptDto} updatePromptDto 
+         * @summary Updates an existing prompt by its name for a specific project
+         * @param {string} promptName Name of the prompt to update
+         * @param {string} projectId Project ID
+         * @param {UpdatePromptDto} updatePromptDto Data to update the prompt
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerUpdate(promptName: string, projectId: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptDto> {
+        promptControllerUpdate(promptName: string, projectId: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.promptControllerUpdate(promptName, projectId, updatePromptDto, options).then((request) => request(axios, basePath));
         },
     };
 };
-
-/**
- * PromptsApi - interface
- * @export
- * @interface PromptsApi
- */
-export interface PromptsApiInterface {
-    /**
-     * 
-     * @summary Añadir o actualizar una traducción para una versión específica de prompt en el proyecto.
-     * @param {string} versionId ID de la versión a traducir (CUID)
-     * @param {string} promptName Nombre del prompt padre (contextual)
-     * @param {string} projectId ID del proyecto
-     * @param {CreateOrUpdatePromptTranslationDto} createOrUpdatePromptTranslationDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptsApiInterface
-     */
-    promptControllerAddOrUpdateTranslation(versionId: string, promptName: string, projectId: string, createOrUpdatePromptTranslationDto: CreateOrUpdatePromptTranslationDto, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Crea un nuevo prompt lógico dentro de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {CreatePromptDto} createPromptDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptsApiInterface
-     */
-    promptControllerCreate(projectId: string, createPromptDto: CreatePromptDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptDto>;
-
-    /**
-     * 
-     * @summary Crear una nueva versión para un prompt existente en el proyecto.
-     * @param {string} promptName Nombre del prompt padre dentro del proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {CreatePromptVersionDto} createPromptVersionDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptsApiInterface
-     */
-    promptControllerCreateVersion(promptName: string, projectId: string, createPromptVersionDto: CreatePromptVersionDto, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Obtiene todos los prompts lógicos de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptsApiInterface
-     */
-    promptControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreatePromptDto>>;
-
-    /**
-     * 
-     * @summary Obtiene un prompt lógico por su nombre dentro de un proyecto
-     * @param {string} promptName Nombre único del prompt dentro del proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptsApiInterface
-     */
-    promptControllerFindOne(promptName: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptDto>;
-
-    /**
-     * 
-     * @summary Elimina un prompt lógico (y sus versiones asociadas por Cascade) dentro de un proyecto
-     * @param {string} promptName Nombre único del prompt a eliminar dentro del proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptsApiInterface
-     */
-    promptControllerRemove(promptName: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Actualiza metadatos de un prompt lógico (descripción, tactic, tags) dentro de un proyecto
-     * @param {string} promptName Nombre único del prompt a actualizar dentro del proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {UpdatePromptDto} updatePromptDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptsApiInterface
-     */
-    promptControllerUpdate(promptName: string, projectId: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptDto>;
-
-}
 
 /**
  * PromptsApi - object-oriented interface
@@ -7713,13 +7186,13 @@ export interface PromptsApiInterface {
  * @class PromptsApi
  * @extends {BaseAPI}
  */
-export class PromptsApi extends BaseAPI implements PromptsApiInterface {
+export class PromptsApi extends BaseAPI {
     /**
      * 
-     * @summary Añadir o actualizar una traducción para una versión específica de prompt en el proyecto.
-     * @param {string} versionId ID de la versión a traducir (CUID)
-     * @param {string} promptName Nombre del prompt padre (contextual)
-     * @param {string} projectId ID del proyecto
+     * @summary Adds or updates a translation for a specific prompt version in the project.
+     * @param {string} versionId ID of the version to translate (CUID)
+     * @param {string} promptName Parent prompt name (contextual)
+     * @param {string} projectId Project ID
      * @param {CreateOrUpdatePromptTranslationDto} createOrUpdatePromptTranslationDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -7731,8 +7204,8 @@ export class PromptsApi extends BaseAPI implements PromptsApiInterface {
 
     /**
      * 
-     * @summary Crea un nuevo prompt lógico dentro de un proyecto
-     * @param {string} projectId ID del proyecto
+     * @summary Creates a new logical prompt within a project
+     * @param {string} projectId Project ID
      * @param {CreatePromptDto} createPromptDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -7744,22 +7217,8 @@ export class PromptsApi extends BaseAPI implements PromptsApiInterface {
 
     /**
      * 
-     * @summary Crear una nueva versión para un prompt existente en el proyecto.
-     * @param {string} promptName Nombre del prompt padre dentro del proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {CreatePromptVersionDto} createPromptVersionDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptsApi
-     */
-    public promptControllerCreateVersion(promptName: string, projectId: string, createPromptVersionDto: CreatePromptVersionDto, options?: RawAxiosRequestConfig) {
-        return PromptsApiFp(this.configuration).promptControllerCreateVersion(promptName, projectId, createPromptVersionDto, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Obtiene todos los prompts lógicos de un proyecto
-     * @param {string} projectId ID del proyecto
+     * @summary Gets all logical prompts for a project
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
@@ -7770,9 +7229,9 @@ export class PromptsApi extends BaseAPI implements PromptsApiInterface {
 
     /**
      * 
-     * @summary Obtiene un prompt lógico por su nombre dentro de un proyecto
-     * @param {string} promptName Nombre único del prompt dentro del proyecto
-     * @param {string} projectId ID del proyecto
+     * @summary Gets a logical prompt by its name within a project
+     * @param {string} promptName Unique name of the prompt within the project
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
@@ -7783,9 +7242,9 @@ export class PromptsApi extends BaseAPI implements PromptsApiInterface {
 
     /**
      * 
-     * @summary Elimina un prompt lógico (y sus versiones asociadas por Cascade) dentro de un proyecto
-     * @param {string} promptName Nombre único del prompt a eliminar dentro del proyecto
-     * @param {string} projectId ID del proyecto
+     * @summary Deletes a logical prompt (and its associated versions via Cascade) within a project by name
+     * @param {string} promptName Name of the prompt to delete
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
@@ -7796,10 +7255,10 @@ export class PromptsApi extends BaseAPI implements PromptsApiInterface {
 
     /**
      * 
-     * @summary Actualiza metadatos de un prompt lógico (descripción, tactic, tags) dentro de un proyecto
-     * @param {string} promptName Nombre único del prompt a actualizar dentro del proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {UpdatePromptDto} updatePromptDto 
+     * @summary Updates an existing prompt by its name for a specific project
+     * @param {string} promptName Name of the prompt to update
+     * @param {string} projectId Project ID
+     * @param {UpdatePromptDto} updatePromptDto Data to update the prompt
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
@@ -7839,17 +7298,21 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createRagDocumentMetadataDto, localVarRequestOptions, configuration)
 
             return {
@@ -7876,15 +7339,19 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7914,15 +7381,19 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7952,15 +7423,19 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7993,17 +7468,21 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
 
             return {
@@ -8018,7 +7497,7 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
  * RAGDocumentMetadataApi - functional programming interface
  * @export
  */
-export const RAGDocumentMetadataApiFp = function (configuration?: Configuration) {
+export const RAGDocumentMetadataApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = RAGDocumentMetadataApiAxiosParamCreator(configuration)
     return {
         /**
@@ -8160,75 +7639,12 @@ export const RAGDocumentMetadataApiFactory = function (configuration?: Configura
 };
 
 /**
- * RAGDocumentMetadataApi - interface
- * @export
- * @interface RAGDocumentMetadataApi
- */
-export interface RAGDocumentMetadataApiInterface {
-    /**
-     * 
-     * @summary Crear metadatos para un documento RAG dentro de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {CreateRagDocumentMetadataDto} createRagDocumentMetadataDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RAGDocumentMetadataApiInterface
-     */
-    ragDocumentMetadataControllerCreate(projectId: string, createRagDocumentMetadataDto: CreateRagDocumentMetadataDto, options?: RawAxiosRequestConfig): AxiosPromise<RagDocumentMetadataResponse>;
-
-    /**
-     * 
-     * @summary Obtener todos los metadatos de documentos RAG de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RAGDocumentMetadataApiInterface
-     */
-    ragDocumentMetadataControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<RagDocumentMetadataResponse>>;
-
-    /**
-     * 
-     * @summary Obtener metadatos por ID dentro de un proyecto
-     * @param {string} metadataId ID de los metadatos (CUID)
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RAGDocumentMetadataApiInterface
-     */
-    ragDocumentMetadataControllerFindOne(metadataId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<RagDocumentMetadataResponse>;
-
-    /**
-     * 
-     * @summary Eliminar metadatos por ID dentro de un proyecto
-     * @param {string} metadataId ID a eliminar
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RAGDocumentMetadataApiInterface
-     */
-    ragDocumentMetadataControllerRemove(metadataId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Actualizar metadatos por ID dentro de un proyecto
-     * @param {string} metadataId ID a actualizar
-     * @param {string} projectId ID del proyecto
-     * @param {object} body 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RAGDocumentMetadataApiInterface
-     */
-    ragDocumentMetadataControllerUpdate(metadataId: string, projectId: string, body: object, options?: RawAxiosRequestConfig): AxiosPromise<RagDocumentMetadataResponse>;
-
-}
-
-/**
  * RAGDocumentMetadataApi - object-oriented interface
  * @export
  * @class RAGDocumentMetadataApi
  * @extends {BaseAPI}
  */
-export class RAGDocumentMetadataApi extends BaseAPI implements RAGDocumentMetadataApiInterface {
+export class RAGDocumentMetadataApi extends BaseAPI {
     /**
      * 
      * @summary Crear metadatos para un documento RAG dentro de un proyecto
@@ -8298,6 +7714,120 @@ export class RAGDocumentMetadataApi extends BaseAPI implements RAGDocumentMetada
 
 
 /**
+ * RawExecutionApi - axios parameter creator
+ * @export
+ */
+export const RawExecutionApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Executes raw text using a specified System Prompt and AI Model ID.
+         * @param {ExecuteRawDto} executeRawDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        rawExecutionControllerExecuteRawText: async (executeRawDto: ExecuteRawDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'executeRawDto' is not null or undefined
+            assertParamExists('rawExecutionControllerExecuteRawText', 'executeRawDto', executeRawDto)
+            const localVarPath = `/api/execute-raw`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(executeRawDto, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * RawExecutionApi - functional programming interface
+ * @export
+ */
+export const RawExecutionApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = RawExecutionApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Executes raw text using a specified System Prompt and AI Model ID.
+         * @param {ExecuteRawDto} executeRawDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async rawExecutionControllerExecuteRawText(executeRawDto: ExecuteRawDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.rawExecutionControllerExecuteRawText(executeRawDto, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RawExecutionApi.rawExecutionControllerExecuteRawText']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * RawExecutionApi - factory interface
+ * @export
+ */
+export const RawExecutionApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = RawExecutionApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Executes raw text using a specified System Prompt and AI Model ID.
+         * @param {ExecuteRawDto} executeRawDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        rawExecutionControllerExecuteRawText(executeRawDto: ExecuteRawDto, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+            return localVarFp.rawExecutionControllerExecuteRawText(executeRawDto, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * RawExecutionApi - object-oriented interface
+ * @export
+ * @class RawExecutionApi
+ * @extends {BaseAPI}
+ */
+export class RawExecutionApi extends BaseAPI {
+    /**
+     * 
+     * @summary Executes raw text using a specified System Prompt and AI Model ID.
+     * @param {ExecuteRawDto} executeRawDto 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RawExecutionApi
+     */
+    public rawExecutionControllerExecuteRawText(executeRawDto: ExecuteRawDto, options?: RawAxiosRequestConfig) {
+        return RawExecutionApiFp(this.configuration).rawExecutionControllerExecuteRawText(executeRawDto, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * RegionsApi - axios parameter creator
  * @export
  */
@@ -8305,8 +7835,8 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
     return {
         /**
          * 
-         * @summary Crear una nueva región para un proyecto específico
-         * @param {string} projectId ID del proyecto
+         * @summary Creates a new region for a specific project
+         * @param {string} projectId Project ID
          * @param {CreateRegionDto} createRegionDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -8325,17 +7855,21 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createRegionDto, localVarRequestOptions, configuration)
 
             return {
@@ -8345,8 +7879,8 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Obtener todas las regiones para un proyecto específico
-         * @param {string} projectId ID del proyecto
+         * @summary Gets all regions for a specific project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -8362,15 +7896,19 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -8379,9 +7917,9 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Obtener una región específica dentro de un proyecto
-         * @param {string} languageCode Código de idioma (ID) de la región
-         * @param {string} projectId ID del proyecto
+         * @summary Gets a specific region within a project
+         * @param {string} languageCode Language code (ID) of the region
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -8400,15 +7938,19 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -8417,9 +7959,9 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Eliminar una región específica dentro de un proyecto
-         * @param {string} languageCode Código de idioma (ID) de la región a eliminar
-         * @param {string} projectId ID del proyecto
+         * @summary Deletes a specific region within a project
+         * @param {string} languageCode Language code (ID) of the region to delete
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -8438,15 +7980,19 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -8455,9 +8001,9 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Actualizar una región específica dentro de un proyecto
-         * @param {string} languageCode Código de idioma (ID) de la región a actualizar
-         * @param {string} projectId ID del proyecto
+         * @summary Updates a specific region within a project
+         * @param {string} languageCode Language code (ID) of the region to update
+         * @param {string} projectId Project ID
          * @param {UpdateRegionDto} updateRegionDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -8479,17 +8025,21 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateRegionDto, localVarRequestOptions, configuration)
 
             return {
@@ -8504,13 +8054,13 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
  * RegionsApi - functional programming interface
  * @export
  */
-export const RegionsApiFp = function (configuration?: Configuration) {
+export const RegionsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = RegionsApiAxiosParamCreator(configuration)
     return {
         /**
          * 
-         * @summary Crear una nueva región para un proyecto específico
-         * @param {string} projectId ID del proyecto
+         * @summary Creates a new region for a specific project
+         * @param {string} projectId Project ID
          * @param {CreateRegionDto} createRegionDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -8523,8 +8073,8 @@ export const RegionsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Obtener todas las regiones para un proyecto específico
-         * @param {string} projectId ID del proyecto
+         * @summary Gets all regions for a specific project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -8536,9 +8086,9 @@ export const RegionsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Obtener una región específica dentro de un proyecto
-         * @param {string} languageCode Código de idioma (ID) de la región
-         * @param {string} projectId ID del proyecto
+         * @summary Gets a specific region within a project
+         * @param {string} languageCode Language code (ID) of the region
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -8550,9 +8100,9 @@ export const RegionsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Eliminar una región específica dentro de un proyecto
-         * @param {string} languageCode Código de idioma (ID) de la región a eliminar
-         * @param {string} projectId ID del proyecto
+         * @summary Deletes a specific region within a project
+         * @param {string} languageCode Language code (ID) of the region to delete
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -8564,9 +8114,9 @@ export const RegionsApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Actualizar una región específica dentro de un proyecto
-         * @param {string} languageCode Código de idioma (ID) de la región a actualizar
-         * @param {string} projectId ID del proyecto
+         * @summary Updates a specific region within a project
+         * @param {string} languageCode Language code (ID) of the region to update
+         * @param {string} projectId Project ID
          * @param {UpdateRegionDto} updateRegionDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -8589,8 +8139,8 @@ export const RegionsApiFactory = function (configuration?: Configuration, basePa
     return {
         /**
          * 
-         * @summary Crear una nueva región para un proyecto específico
-         * @param {string} projectId ID del proyecto
+         * @summary Creates a new region for a specific project
+         * @param {string} projectId Project ID
          * @param {CreateRegionDto} createRegionDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -8600,8 +8150,8 @@ export const RegionsApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
-         * @summary Obtener todas las regiones para un proyecto específico
-         * @param {string} projectId ID del proyecto
+         * @summary Gets all regions for a specific project
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -8610,9 +8160,9 @@ export const RegionsApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
-         * @summary Obtener una región específica dentro de un proyecto
-         * @param {string} languageCode Código de idioma (ID) de la región
-         * @param {string} projectId ID del proyecto
+         * @summary Gets a specific region within a project
+         * @param {string} languageCode Language code (ID) of the region
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -8621,9 +8171,9 @@ export const RegionsApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
-         * @summary Eliminar una región específica dentro de un proyecto
-         * @param {string} languageCode Código de idioma (ID) de la región a eliminar
-         * @param {string} projectId ID del proyecto
+         * @summary Deletes a specific region within a project
+         * @param {string} languageCode Language code (ID) of the region to delete
+         * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -8632,9 +8182,9 @@ export const RegionsApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
-         * @summary Actualizar una región específica dentro de un proyecto
-         * @param {string} languageCode Código de idioma (ID) de la región a actualizar
-         * @param {string} projectId ID del proyecto
+         * @summary Updates a specific region within a project
+         * @param {string} languageCode Language code (ID) of the region to update
+         * @param {string} projectId Project ID
          * @param {UpdateRegionDto} updateRegionDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -8646,79 +8196,16 @@ export const RegionsApiFactory = function (configuration?: Configuration, basePa
 };
 
 /**
- * RegionsApi - interface
- * @export
- * @interface RegionsApi
- */
-export interface RegionsApiInterface {
-    /**
-     * 
-     * @summary Crear una nueva región para un proyecto específico
-     * @param {string} projectId ID del proyecto
-     * @param {CreateRegionDto} createRegionDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RegionsApiInterface
-     */
-    regionControllerCreate(projectId: string, createRegionDto: CreateRegionDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateRegionDto>;
-
-    /**
-     * 
-     * @summary Obtener todas las regiones para un proyecto específico
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RegionsApiInterface
-     */
-    regionControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateRegionDto>>;
-
-    /**
-     * 
-     * @summary Obtener una región específica dentro de un proyecto
-     * @param {string} languageCode Código de idioma (ID) de la región
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RegionsApiInterface
-     */
-    regionControllerFindOne(languageCode: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateRegionDto>;
-
-    /**
-     * 
-     * @summary Eliminar una región específica dentro de un proyecto
-     * @param {string} languageCode Código de idioma (ID) de la región a eliminar
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RegionsApiInterface
-     */
-    regionControllerRemove(languageCode: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Actualizar una región específica dentro de un proyecto
-     * @param {string} languageCode Código de idioma (ID) de la región a actualizar
-     * @param {string} projectId ID del proyecto
-     * @param {UpdateRegionDto} updateRegionDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RegionsApiInterface
-     */
-    regionControllerUpdate(languageCode: string, projectId: string, updateRegionDto: UpdateRegionDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateRegionDto>;
-
-}
-
-/**
  * RegionsApi - object-oriented interface
  * @export
  * @class RegionsApi
  * @extends {BaseAPI}
  */
-export class RegionsApi extends BaseAPI implements RegionsApiInterface {
+export class RegionsApi extends BaseAPI {
     /**
      * 
-     * @summary Crear una nueva región para un proyecto específico
-     * @param {string} projectId ID del proyecto
+     * @summary Creates a new region for a specific project
+     * @param {string} projectId Project ID
      * @param {CreateRegionDto} createRegionDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -8730,8 +8217,8 @@ export class RegionsApi extends BaseAPI implements RegionsApiInterface {
 
     /**
      * 
-     * @summary Obtener todas las regiones para un proyecto específico
-     * @param {string} projectId ID del proyecto
+     * @summary Gets all regions for a specific project
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof RegionsApi
@@ -8742,9 +8229,9 @@ export class RegionsApi extends BaseAPI implements RegionsApiInterface {
 
     /**
      * 
-     * @summary Obtener una región específica dentro de un proyecto
-     * @param {string} languageCode Código de idioma (ID) de la región
-     * @param {string} projectId ID del proyecto
+     * @summary Gets a specific region within a project
+     * @param {string} languageCode Language code (ID) of the region
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof RegionsApi
@@ -8755,9 +8242,9 @@ export class RegionsApi extends BaseAPI implements RegionsApiInterface {
 
     /**
      * 
-     * @summary Eliminar una región específica dentro de un proyecto
-     * @param {string} languageCode Código de idioma (ID) de la región a eliminar
-     * @param {string} projectId ID del proyecto
+     * @summary Deletes a specific region within a project
+     * @param {string} languageCode Language code (ID) of the region to delete
+     * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof RegionsApi
@@ -8768,9 +8255,9 @@ export class RegionsApi extends BaseAPI implements RegionsApiInterface {
 
     /**
      * 
-     * @summary Actualizar una región específica dentro de un proyecto
-     * @param {string} languageCode Código de idioma (ID) de la región a actualizar
-     * @param {string} projectId ID del proyecto
+     * @summary Updates a specific region within a project
+     * @param {string} languageCode Language code (ID) of the region to update
+     * @param {string} projectId Project ID
      * @param {UpdateRegionDto} updateRegionDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -8821,9 +8308,13 @@ export const ServePromptApiAxiosParamCreator = function (configuration?: Configu
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
             if (languageCode !== undefined) {
                 localVarQueryParameter['languageCode'] = languageCode;
@@ -8834,12 +8325,12 @@ export const ServePromptApiAxiosParamCreator = function (configuration?: Configu
             }
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(executePromptBodyDto, localVarRequestOptions, configuration)
 
             return {
@@ -8854,7 +8345,7 @@ export const ServePromptApiAxiosParamCreator = function (configuration?: Configu
  * ServePromptApi - functional programming interface
  * @export
  */
-export const ServePromptApiFp = function (configuration?: Configuration) {
+export const ServePromptApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ServePromptApiAxiosParamCreator(configuration)
     return {
         /**
@@ -8904,35 +8395,12 @@ export const ServePromptApiFactory = function (configuration?: Configuration, ba
 };
 
 /**
- * ServePromptApi - interface
- * @export
- * @interface ServePromptApi
- */
-export interface ServePromptApiInterface {
-    /**
-     * 
-     * @summary Assembles and prepares a specific prompt version for execution with provided variables
-     * @param {string} projectId Project ID
-     * @param {string} promptName The unique name of the prompt within the project
-     * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;)
-     * @param {ExecutePromptBodyDto} executePromptBodyDto Input variables for the prompt
-     * @param {string} [languageCode] Optional language code for translation (e.g., \&quot;es\&quot;)
-     * @param {string} [environmentName] Optional environment context (currently informational)
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ServePromptApiInterface
-     */
-    servePromptControllerExecutePrompt(projectId: string, promptName: string, versionTag: string, executePromptBodyDto: ExecutePromptBodyDto, languageCode?: string, environmentName?: string, options?: RawAxiosRequestConfig): AxiosPromise<any>;
-
-}
-
-/**
  * ServePromptApi - object-oriented interface
  * @export
  * @class ServePromptApi
  * @extends {BaseAPI}
  */
-export class ServePromptApi extends BaseAPI implements ServePromptApiInterface {
+export class ServePromptApi extends BaseAPI {
     /**
      * 
      * @summary Assembles and prepares a specific prompt version for execution with provided variables
@@ -8954,26 +8422,22 @@ export class ServePromptApi extends BaseAPI implements ServePromptApiInterface {
 
 
 /**
- * TacticsApi - axios parameter creator
+ * SystemPromptsApi - axios parameter creator
  * @export
  */
-export const TacticsApiAxiosParamCreator = function (configuration?: Configuration) {
+export const SystemPromptsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
          * 
-         * @summary Crea una nueva táctica conversacional dentro de un proyecto
-         * @param {string} projectId ID del proyecto
-         * @param {CreateTacticDto} createTacticDto 
+         * @summary Create a new system prompt (Admin Only - conceptually)
+         * @param {CreateSystemPromptDto} createSystemPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tacticControllerCreate: async (projectId: string, createTacticDto: CreateTacticDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('tacticControllerCreate', 'projectId', projectId)
-            // verify required parameter 'createTacticDto' is not null or undefined
-            assertParamExists('tacticControllerCreate', 'createTacticDto', createTacticDto)
-            const localVarPath = `/api/projects/{projectId}/tactics`
-                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
+        systemPromptControllerCreate: async (createSystemPromptDto: CreateSystemPromptDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createSystemPromptDto' is not null or undefined
+            assertParamExists('systemPromptControllerCreate', 'createSystemPromptDto', createSystemPromptDto)
+            const localVarPath = `/api/system-prompts`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -8981,18 +8445,22 @@ export const TacticsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = serializeDataIfNeeded(createTacticDto, localVarRequestOptions, configuration)
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createSystemPromptDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9001,16 +8469,12 @@ export const TacticsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Obtiene todas las tácticas conversacionales de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Get all system prompts
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tacticControllerFindAll: async (projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('tacticControllerFindAll', 'projectId', projectId)
-            const localVarPath = `/api/projects/{projectId}/tactics`
-                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
+        systemPromptControllerFindAll: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/system-prompts`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -9018,15 +8482,19 @@ export const TacticsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9035,20 +8503,16 @@ export const TacticsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Obtiene una táctica por su nombre (ID) dentro de un proyecto
-         * @param {string} tacticName Nombre único de la táctica
-         * @param {string} projectId ID del proyecto
+         * @summary Get a specific system prompt by name
+         * @param {string} name Unique name of the system prompt
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tacticControllerFindOne: async (tacticName: string, projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'tacticName' is not null or undefined
-            assertParamExists('tacticControllerFindOne', 'tacticName', tacticName)
-            // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('tacticControllerFindOne', 'projectId', projectId)
-            const localVarPath = `/api/projects/{projectId}/tactics/{tacticName}`
-                .replace(`{${"tacticName"}}`, encodeURIComponent(String(tacticName)))
-                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
+        systemPromptControllerFindOne: async (name: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('systemPromptControllerFindOne', 'name', name)
+            const localVarPath = `/api/system-prompts/{name}`
+                .replace(`{${"name"}}`, encodeURIComponent(String(name)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -9056,15 +8520,19 @@ export const TacticsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9073,20 +8541,16 @@ export const TacticsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Elimina una táctica dentro de un proyecto
-         * @param {string} tacticName Nombre único de la táctica a eliminar
-         * @param {string} projectId ID del proyecto
+         * @summary Delete a system prompt (Admin Only - conceptually)
+         * @param {string} name Unique name of the system prompt to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tacticControllerRemove: async (tacticName: string, projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'tacticName' is not null or undefined
-            assertParamExists('tacticControllerRemove', 'tacticName', tacticName)
-            // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('tacticControllerRemove', 'projectId', projectId)
-            const localVarPath = `/api/projects/{projectId}/tactics/{tacticName}`
-                .replace(`{${"tacticName"}}`, encodeURIComponent(String(tacticName)))
-                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
+        systemPromptControllerRemove: async (name: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('systemPromptControllerRemove', 'name', name)
+            const localVarPath = `/api/system-prompts/{name}`
+                .replace(`{${"name"}}`, encodeURIComponent(String(name)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -9094,15 +8558,19 @@ export const TacticsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9111,23 +8579,19 @@ export const TacticsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Actualiza una táctica existente dentro de un proyecto
-         * @param {string} tacticName Nombre único de la táctica a actualizar
-         * @param {string} projectId ID del proyecto
-         * @param {UpdateTacticDto} updateTacticDto 
+         * @summary Update an existing system prompt (Admin Only - conceptually)
+         * @param {string} name Unique name of the system prompt to update
+         * @param {UpdateSystemPromptDto} updateSystemPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tacticControllerUpdate: async (tacticName: string, projectId: string, updateTacticDto: UpdateTacticDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'tacticName' is not null or undefined
-            assertParamExists('tacticControllerUpdate', 'tacticName', tacticName)
-            // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('tacticControllerUpdate', 'projectId', projectId)
-            // verify required parameter 'updateTacticDto' is not null or undefined
-            assertParamExists('tacticControllerUpdate', 'updateTacticDto', updateTacticDto)
-            const localVarPath = `/api/projects/{projectId}/tactics/{tacticName}`
-                .replace(`{${"tacticName"}}`, encodeURIComponent(String(tacticName)))
-                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
+        systemPromptControllerUpdate: async (name: string, updateSystemPromptDto: UpdateSystemPromptDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('systemPromptControllerUpdate', 'name', name)
+            // verify required parameter 'updateSystemPromptDto' is not null or undefined
+            assertParamExists('systemPromptControllerUpdate', 'updateSystemPromptDto', updateSystemPromptDto)
+            const localVarPath = `/api/system-prompts/{name}`
+                .replace(`{${"name"}}`, encodeURIComponent(String(name)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -9135,18 +8599,22 @@ export const TacticsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = serializeDataIfNeeded(updateTacticDto, localVarRequestOptions, configuration)
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateSystemPromptDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9157,283 +8625,205 @@ export const TacticsApiAxiosParamCreator = function (configuration?: Configurati
 };
 
 /**
- * TacticsApi - functional programming interface
+ * SystemPromptsApi - functional programming interface
  * @export
  */
-export const TacticsApiFp = function (configuration?: Configuration) {
-    const localVarAxiosParamCreator = TacticsApiAxiosParamCreator(configuration)
+export const SystemPromptsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = SystemPromptsApiAxiosParamCreator(configuration)
     return {
         /**
          * 
-         * @summary Crea una nueva táctica conversacional dentro de un proyecto
-         * @param {string} projectId ID del proyecto
-         * @param {CreateTacticDto} createTacticDto 
+         * @summary Create a new system prompt (Admin Only - conceptually)
+         * @param {CreateSystemPromptDto} createSystemPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tacticControllerCreate(projectId: string, createTacticDto: CreateTacticDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TacticResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.tacticControllerCreate(projectId, createTacticDto, options);
+        async systemPromptControllerCreate(createSystemPromptDto: CreateSystemPromptDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.systemPromptControllerCreate(createSystemPromptDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['TacticsApi.tacticControllerCreate']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['SystemPromptsApi.systemPromptControllerCreate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * 
-         * @summary Obtiene todas las tácticas conversacionales de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Get all system prompts
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tacticControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TacticResponse>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.tacticControllerFindAll(projectId, options);
+        async systemPromptControllerFindAll(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.systemPromptControllerFindAll(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['TacticsApi.tacticControllerFindAll']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['SystemPromptsApi.systemPromptControllerFindAll']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * 
-         * @summary Obtiene una táctica por su nombre (ID) dentro de un proyecto
-         * @param {string} tacticName Nombre único de la táctica
-         * @param {string} projectId ID del proyecto
+         * @summary Get a specific system prompt by name
+         * @param {string} name Unique name of the system prompt
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tacticControllerFindOne(tacticName: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TacticResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.tacticControllerFindOne(tacticName, projectId, options);
+        async systemPromptControllerFindOne(name: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.systemPromptControllerFindOne(name, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['TacticsApi.tacticControllerFindOne']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['SystemPromptsApi.systemPromptControllerFindOne']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * 
-         * @summary Elimina una táctica dentro de un proyecto
-         * @param {string} tacticName Nombre único de la táctica a eliminar
-         * @param {string} projectId ID del proyecto
+         * @summary Delete a system prompt (Admin Only - conceptually)
+         * @param {string} name Unique name of the system prompt to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tacticControllerRemove(tacticName: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.tacticControllerRemove(tacticName, projectId, options);
+        async systemPromptControllerRemove(name: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.systemPromptControllerRemove(name, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['TacticsApi.tacticControllerRemove']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['SystemPromptsApi.systemPromptControllerRemove']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * 
-         * @summary Actualiza una táctica existente dentro de un proyecto
-         * @param {string} tacticName Nombre único de la táctica a actualizar
-         * @param {string} projectId ID del proyecto
-         * @param {UpdateTacticDto} updateTacticDto 
+         * @summary Update an existing system prompt (Admin Only - conceptually)
+         * @param {string} name Unique name of the system prompt to update
+         * @param {UpdateSystemPromptDto} updateSystemPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tacticControllerUpdate(tacticName: string, projectId: string, updateTacticDto: UpdateTacticDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TacticResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.tacticControllerUpdate(tacticName, projectId, updateTacticDto, options);
+        async systemPromptControllerUpdate(name: string, updateSystemPromptDto: UpdateSystemPromptDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.systemPromptControllerUpdate(name, updateSystemPromptDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['TacticsApi.tacticControllerUpdate']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['SystemPromptsApi.systemPromptControllerUpdate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
 };
 
 /**
- * TacticsApi - factory interface
+ * SystemPromptsApi - factory interface
  * @export
  */
-export const TacticsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = TacticsApiFp(configuration)
+export const SystemPromptsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = SystemPromptsApiFp(configuration)
     return {
         /**
          * 
-         * @summary Crea una nueva táctica conversacional dentro de un proyecto
-         * @param {string} projectId ID del proyecto
-         * @param {CreateTacticDto} createTacticDto 
+         * @summary Create a new system prompt (Admin Only - conceptually)
+         * @param {CreateSystemPromptDto} createSystemPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tacticControllerCreate(projectId: string, createTacticDto: CreateTacticDto, options?: RawAxiosRequestConfig): AxiosPromise<TacticResponse> {
-            return localVarFp.tacticControllerCreate(projectId, createTacticDto, options).then((request) => request(axios, basePath));
+        systemPromptControllerCreate(createSystemPromptDto: CreateSystemPromptDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.systemPromptControllerCreate(createSystemPromptDto, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @summary Obtiene todas las tácticas conversacionales de un proyecto
-         * @param {string} projectId ID del proyecto
+         * @summary Get all system prompts
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tacticControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<TacticResponse>> {
-            return localVarFp.tacticControllerFindAll(projectId, options).then((request) => request(axios, basePath));
+        systemPromptControllerFindAll(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.systemPromptControllerFindAll(options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @summary Obtiene una táctica por su nombre (ID) dentro de un proyecto
-         * @param {string} tacticName Nombre único de la táctica
-         * @param {string} projectId ID del proyecto
+         * @summary Get a specific system prompt by name
+         * @param {string} name Unique name of the system prompt
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tacticControllerFindOne(tacticName: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<TacticResponse> {
-            return localVarFp.tacticControllerFindOne(tacticName, projectId, options).then((request) => request(axios, basePath));
+        systemPromptControllerFindOne(name: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.systemPromptControllerFindOne(name, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @summary Elimina una táctica dentro de un proyecto
-         * @param {string} tacticName Nombre único de la táctica a eliminar
-         * @param {string} projectId ID del proyecto
+         * @summary Delete a system prompt (Admin Only - conceptually)
+         * @param {string} name Unique name of the system prompt to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tacticControllerRemove(tacticName: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.tacticControllerRemove(tacticName, projectId, options).then((request) => request(axios, basePath));
+        systemPromptControllerRemove(name: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.systemPromptControllerRemove(name, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @summary Actualiza una táctica existente dentro de un proyecto
-         * @param {string} tacticName Nombre único de la táctica a actualizar
-         * @param {string} projectId ID del proyecto
-         * @param {UpdateTacticDto} updateTacticDto 
+         * @summary Update an existing system prompt (Admin Only - conceptually)
+         * @param {string} name Unique name of the system prompt to update
+         * @param {UpdateSystemPromptDto} updateSystemPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tacticControllerUpdate(tacticName: string, projectId: string, updateTacticDto: UpdateTacticDto, options?: RawAxiosRequestConfig): AxiosPromise<TacticResponse> {
-            return localVarFp.tacticControllerUpdate(tacticName, projectId, updateTacticDto, options).then((request) => request(axios, basePath));
+        systemPromptControllerUpdate(name: string, updateSystemPromptDto: UpdateSystemPromptDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.systemPromptControllerUpdate(name, updateSystemPromptDto, options).then((request) => request(axios, basePath));
         },
     };
 };
 
 /**
- * TacticsApi - interface
+ * SystemPromptsApi - object-oriented interface
  * @export
- * @interface TacticsApi
- */
-export interface TacticsApiInterface {
-    /**
-     * 
-     * @summary Crea una nueva táctica conversacional dentro de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {CreateTacticDto} createTacticDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TacticsApiInterface
-     */
-    tacticControllerCreate(projectId: string, createTacticDto: CreateTacticDto, options?: RawAxiosRequestConfig): AxiosPromise<TacticResponse>;
-
-    /**
-     * 
-     * @summary Obtiene todas las tácticas conversacionales de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TacticsApiInterface
-     */
-    tacticControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<TacticResponse>>;
-
-    /**
-     * 
-     * @summary Obtiene una táctica por su nombre (ID) dentro de un proyecto
-     * @param {string} tacticName Nombre único de la táctica
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TacticsApiInterface
-     */
-    tacticControllerFindOne(tacticName: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<TacticResponse>;
-
-    /**
-     * 
-     * @summary Elimina una táctica dentro de un proyecto
-     * @param {string} tacticName Nombre único de la táctica a eliminar
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TacticsApiInterface
-     */
-    tacticControllerRemove(tacticName: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Actualiza una táctica existente dentro de un proyecto
-     * @param {string} tacticName Nombre único de la táctica a actualizar
-     * @param {string} projectId ID del proyecto
-     * @param {UpdateTacticDto} updateTacticDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TacticsApiInterface
-     */
-    tacticControllerUpdate(tacticName: string, projectId: string, updateTacticDto: UpdateTacticDto, options?: RawAxiosRequestConfig): AxiosPromise<TacticResponse>;
-
-}
-
-/**
- * TacticsApi - object-oriented interface
- * @export
- * @class TacticsApi
+ * @class SystemPromptsApi
  * @extends {BaseAPI}
  */
-export class TacticsApi extends BaseAPI implements TacticsApiInterface {
+export class SystemPromptsApi extends BaseAPI {
     /**
      * 
-     * @summary Crea una nueva táctica conversacional dentro de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {CreateTacticDto} createTacticDto 
+     * @summary Create a new system prompt (Admin Only - conceptually)
+     * @param {CreateSystemPromptDto} createSystemPromptDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof TacticsApi
+     * @memberof SystemPromptsApi
      */
-    public tacticControllerCreate(projectId: string, createTacticDto: CreateTacticDto, options?: RawAxiosRequestConfig) {
-        return TacticsApiFp(this.configuration).tacticControllerCreate(projectId, createTacticDto, options).then((request) => request(this.axios, this.basePath));
+    public systemPromptControllerCreate(createSystemPromptDto: CreateSystemPromptDto, options?: RawAxiosRequestConfig) {
+        return SystemPromptsApiFp(this.configuration).systemPromptControllerCreate(createSystemPromptDto, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @summary Obtiene todas las tácticas conversacionales de un proyecto
-     * @param {string} projectId ID del proyecto
+     * @summary Get all system prompts
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof TacticsApi
+     * @memberof SystemPromptsApi
      */
-    public tacticControllerFindAll(projectId: string, options?: RawAxiosRequestConfig) {
-        return TacticsApiFp(this.configuration).tacticControllerFindAll(projectId, options).then((request) => request(this.axios, this.basePath));
+    public systemPromptControllerFindAll(options?: RawAxiosRequestConfig) {
+        return SystemPromptsApiFp(this.configuration).systemPromptControllerFindAll(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @summary Obtiene una táctica por su nombre (ID) dentro de un proyecto
-     * @param {string} tacticName Nombre único de la táctica
-     * @param {string} projectId ID del proyecto
+     * @summary Get a specific system prompt by name
+     * @param {string} name Unique name of the system prompt
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof TacticsApi
+     * @memberof SystemPromptsApi
      */
-    public tacticControllerFindOne(tacticName: string, projectId: string, options?: RawAxiosRequestConfig) {
-        return TacticsApiFp(this.configuration).tacticControllerFindOne(tacticName, projectId, options).then((request) => request(this.axios, this.basePath));
+    public systemPromptControllerFindOne(name: string, options?: RawAxiosRequestConfig) {
+        return SystemPromptsApiFp(this.configuration).systemPromptControllerFindOne(name, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @summary Elimina una táctica dentro de un proyecto
-     * @param {string} tacticName Nombre único de la táctica a eliminar
-     * @param {string} projectId ID del proyecto
+     * @summary Delete a system prompt (Admin Only - conceptually)
+     * @param {string} name Unique name of the system prompt to delete
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof TacticsApi
+     * @memberof SystemPromptsApi
      */
-    public tacticControllerRemove(tacticName: string, projectId: string, options?: RawAxiosRequestConfig) {
-        return TacticsApiFp(this.configuration).tacticControllerRemove(tacticName, projectId, options).then((request) => request(this.axios, this.basePath));
+    public systemPromptControllerRemove(name: string, options?: RawAxiosRequestConfig) {
+        return SystemPromptsApiFp(this.configuration).systemPromptControllerRemove(name, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @summary Actualiza una táctica existente dentro de un proyecto
-     * @param {string} tacticName Nombre único de la táctica a actualizar
-     * @param {string} projectId ID del proyecto
-     * @param {UpdateTacticDto} updateTacticDto 
+     * @summary Update an existing system prompt (Admin Only - conceptually)
+     * @param {string} name Unique name of the system prompt to update
+     * @param {UpdateSystemPromptDto} updateSystemPromptDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof TacticsApi
+     * @memberof SystemPromptsApi
      */
-    public tacticControllerUpdate(tacticName: string, projectId: string, updateTacticDto: UpdateTacticDto, options?: RawAxiosRequestConfig) {
-        return TacticsApiFp(this.configuration).tacticControllerUpdate(tacticName, projectId, updateTacticDto, options).then((request) => request(this.axios, this.basePath));
+    public systemPromptControllerUpdate(name: string, updateSystemPromptDto: UpdateSystemPromptDto, options?: RawAxiosRequestConfig) {
+        return SystemPromptsApiFp(this.configuration).systemPromptControllerUpdate(name, updateSystemPromptDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -9467,17 +8857,21 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createTagDto, localVarRequestOptions, configuration)
 
             return {
@@ -9504,15 +8898,19 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9542,15 +8940,19 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9580,15 +8982,19 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9618,15 +9024,19 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9659,17 +9069,21 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateTagDto, localVarRequestOptions, configuration)
 
             return {
@@ -9684,7 +9098,7 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
  * TagsApi - functional programming interface
  * @export
  */
-export const TagsApiFp = function (configuration?: Configuration) {
+export const TagsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = TagsApiAxiosParamCreator(configuration)
     return {
         /**
@@ -9695,7 +9109,7 @@ export const TagsApiFp = function (configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tagControllerCreate(projectId: string, createTagDto: CreateTagDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateTagDto>> {
+        async tagControllerCreate(projectId: string, createTagDto: CreateTagDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TagDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tagControllerCreate(projectId, createTagDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TagsApi.tagControllerCreate']?.[localVarOperationServerIndex]?.url;
@@ -9708,7 +9122,7 @@ export const TagsApiFp = function (configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tagControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CreateTagDto>>> {
+        async tagControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TagDto>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tagControllerFindAll(projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TagsApi.tagControllerFindAll']?.[localVarOperationServerIndex]?.url;
@@ -9722,7 +9136,7 @@ export const TagsApiFp = function (configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tagControllerFindByName(name: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateTagDto>> {
+        async tagControllerFindByName(name: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TagDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tagControllerFindByName(name, projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TagsApi.tagControllerFindByName']?.[localVarOperationServerIndex]?.url;
@@ -9736,7 +9150,7 @@ export const TagsApiFp = function (configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tagControllerFindOne(tagId: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateTagDto>> {
+        async tagControllerFindOne(tagId: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TagDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tagControllerFindOne(tagId, projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TagsApi.tagControllerFindOne']?.[localVarOperationServerIndex]?.url;
@@ -9750,7 +9164,7 @@ export const TagsApiFp = function (configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tagControllerRemove(tagId: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateTagDto>> {
+        async tagControllerRemove(tagId: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TagDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tagControllerRemove(tagId, projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TagsApi.tagControllerRemove']?.[localVarOperationServerIndex]?.url;
@@ -9765,7 +9179,7 @@ export const TagsApiFp = function (configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tagControllerUpdate(tagId: string, projectId: string, updateTagDto: UpdateTagDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateTagDto>> {
+        async tagControllerUpdate(tagId: string, projectId: string, updateTagDto: UpdateTagDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TagDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tagControllerUpdate(tagId, projectId, updateTagDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TagsApi.tagControllerUpdate']?.[localVarOperationServerIndex]?.url;
@@ -9789,7 +9203,7 @@ export const TagsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tagControllerCreate(projectId: string, createTagDto: CreateTagDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto> {
+        tagControllerCreate(projectId: string, createTagDto: CreateTagDto, options?: RawAxiosRequestConfig): AxiosPromise<TagDto> {
             return localVarFp.tagControllerCreate(projectId, createTagDto, options).then((request) => request(axios, basePath));
         },
         /**
@@ -9799,7 +9213,7 @@ export const TagsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tagControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateTagDto>> {
+        tagControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<TagDto>> {
             return localVarFp.tagControllerFindAll(projectId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -9810,7 +9224,7 @@ export const TagsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tagControllerFindByName(name: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto> {
+        tagControllerFindByName(name: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<TagDto> {
             return localVarFp.tagControllerFindByName(name, projectId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -9821,7 +9235,7 @@ export const TagsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tagControllerFindOne(tagId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto> {
+        tagControllerFindOne(tagId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<TagDto> {
             return localVarFp.tagControllerFindOne(tagId, projectId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -9832,7 +9246,7 @@ export const TagsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tagControllerRemove(tagId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto> {
+        tagControllerRemove(tagId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<TagDto> {
             return localVarFp.tagControllerRemove(tagId, projectId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -9844,85 +9258,11 @@ export const TagsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tagControllerUpdate(tagId: string, projectId: string, updateTagDto: UpdateTagDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto> {
+        tagControllerUpdate(tagId: string, projectId: string, updateTagDto: UpdateTagDto, options?: RawAxiosRequestConfig): AxiosPromise<TagDto> {
             return localVarFp.tagControllerUpdate(tagId, projectId, updateTagDto, options).then((request) => request(axios, basePath));
         },
     };
 };
-
-/**
- * TagsApi - interface
- * @export
- * @interface TagsApi
- */
-export interface TagsApiInterface {
-    /**
-     * 
-     * @summary Crea una nueva etiqueta para un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {CreateTagDto} createTagDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TagsApiInterface
-     */
-    tagControllerCreate(projectId: string, createTagDto: CreateTagDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto>;
-
-    /**
-     * 
-     * @summary Obtiene todas las etiquetas de un proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TagsApiInterface
-     */
-    tagControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateTagDto>>;
-
-    /**
-     * 
-     * @summary Obtiene una etiqueta por su nombre dentro de un proyecto
-     * @param {string} name Nombre único de la etiqueta en el proyecto
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TagsApiInterface
-     */
-    tagControllerFindByName(name: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto>;
-
-    /**
-     * 
-     * @summary Obtiene una etiqueta por su ID dentro de un proyecto
-     * @param {string} tagId ID único de la etiqueta (CUID)
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TagsApiInterface
-     */
-    tagControllerFindOne(tagId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto>;
-
-    /**
-     * 
-     * @summary Elimina una etiqueta de un proyecto
-     * @param {string} tagId ID único de la etiqueta a eliminar (CUID)
-     * @param {string} projectId ID del proyecto
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TagsApiInterface
-     */
-    tagControllerRemove(tagId: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto>;
-
-    /**
-     * 
-     * @summary Actualiza una etiqueta existente en un proyecto
-     * @param {string} tagId ID único de la etiqueta a actualizar (CUID)
-     * @param {string} projectId ID del proyecto
-     * @param {UpdateTagDto} updateTagDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TagsApiInterface
-     */
-    tagControllerUpdate(tagId: string, projectId: string, updateTagDto: UpdateTagDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateTagDto>;
-
-}
 
 /**
  * TagsApi - object-oriented interface
@@ -9930,7 +9270,7 @@ export interface TagsApiInterface {
  * @class TagsApi
  * @extends {BaseAPI}
  */
-export class TagsApi extends BaseAPI implements TagsApiInterface {
+export class TagsApi extends BaseAPI {
     /**
      * 
      * @summary Crea una nueva etiqueta para un proyecto
@@ -10020,7 +9360,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
     return {
         /**
          * 
-         * @summary Crear un nuevo usuario
+         * @summary Create a new user
          * @param {CreateUserDto} createUserDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10036,17 +9376,17 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createUserDto, localVarRequestOptions, configuration)
 
             return {
@@ -10056,7 +9396,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
-         * @summary Obtener todos los usuarios
+         * @summary Get all users
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10069,15 +9409,15 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -10086,8 +9426,8 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
-         * @summary Obtener un usuario por ID
-         * @param {string} id ID del usuario
+         * @summary Get a user by ID
+         * @param {string} id User ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10103,15 +9443,15 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -10120,8 +9460,8 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
-         * @summary Eliminar un usuario por ID
-         * @param {string} id ID del usuario a eliminar
+         * @summary Delete a user by ID
+         * @param {string} id ID of the user to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10137,15 +9477,15 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -10154,8 +9494,8 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
-         * @summary Actualizar un usuario por ID
-         * @param {string} id ID del usuario a actualizar
+         * @summary Update a user by ID
+         * @param {string} id ID of the user to update
          * @param {object} body 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10174,17 +9514,17 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
 
             return {
@@ -10199,12 +9539,12 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
  * UsersApi - functional programming interface
  * @export
  */
-export const UsersApiFp = function (configuration?: Configuration) {
+export const UsersApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = UsersApiAxiosParamCreator(configuration)
     return {
         /**
          * 
-         * @summary Crear un nuevo usuario
+         * @summary Create a new user
          * @param {CreateUserDto} createUserDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10217,7 +9557,7 @@ export const UsersApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Obtener todos los usuarios
+         * @summary Get all users
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10229,8 +9569,8 @@ export const UsersApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Obtener un usuario por ID
-         * @param {string} id ID del usuario
+         * @summary Get a user by ID
+         * @param {string} id User ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10242,8 +9582,8 @@ export const UsersApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Eliminar un usuario por ID
-         * @param {string} id ID del usuario a eliminar
+         * @summary Delete a user by ID
+         * @param {string} id ID of the user to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10255,8 +9595,8 @@ export const UsersApiFp = function (configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Actualizar un usuario por ID
-         * @param {string} id ID del usuario a actualizar
+         * @summary Update a user by ID
+         * @param {string} id ID of the user to update
          * @param {object} body 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10279,7 +9619,7 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
     return {
         /**
          * 
-         * @summary Crear un nuevo usuario
+         * @summary Create a new user
          * @param {CreateUserDto} createUserDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10289,7 +9629,7 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Obtener todos los usuarios
+         * @summary Get all users
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10298,8 +9638,8 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Obtener un usuario por ID
-         * @param {string} id ID del usuario
+         * @summary Get a user by ID
+         * @param {string} id User ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10308,8 +9648,8 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Eliminar un usuario por ID
-         * @param {string} id ID del usuario a eliminar
+         * @summary Delete a user by ID
+         * @param {string} id ID of the user to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10318,8 +9658,8 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Actualizar un usuario por ID
-         * @param {string} id ID del usuario a actualizar
+         * @summary Update a user by ID
+         * @param {string} id ID of the user to update
          * @param {object} body 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10331,73 +9671,15 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
 };
 
 /**
- * UsersApi - interface
- * @export
- * @interface UsersApi
- */
-export interface UsersApiInterface {
-    /**
-     * 
-     * @summary Crear un nuevo usuario
-     * @param {CreateUserDto} createUserDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApiInterface
-     */
-    userControllerCreate(createUserDto: CreateUserDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateUserDto>;
-
-    /**
-     * 
-     * @summary Obtener todos los usuarios
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApiInterface
-     */
-    userControllerFindAll(options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateUserDto>>;
-
-    /**
-     * 
-     * @summary Obtener un usuario por ID
-     * @param {string} id ID del usuario
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApiInterface
-     */
-    userControllerFindOne(id: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateUserDto>;
-
-    /**
-     * 
-     * @summary Eliminar un usuario por ID
-     * @param {string} id ID del usuario a eliminar
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApiInterface
-     */
-    userControllerRemove(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-
-    /**
-     * 
-     * @summary Actualizar un usuario por ID
-     * @param {string} id ID del usuario a actualizar
-     * @param {object} body 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApiInterface
-     */
-    userControllerUpdate(id: string, body: object, options?: RawAxiosRequestConfig): AxiosPromise<CreateUserDto>;
-
-}
-
-/**
  * UsersApi - object-oriented interface
  * @export
  * @class UsersApi
  * @extends {BaseAPI}
  */
-export class UsersApi extends BaseAPI implements UsersApiInterface {
+export class UsersApi extends BaseAPI {
     /**
      * 
-     * @summary Crear un nuevo usuario
+     * @summary Create a new user
      * @param {CreateUserDto} createUserDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -10409,7 +9691,7 @@ export class UsersApi extends BaseAPI implements UsersApiInterface {
 
     /**
      * 
-     * @summary Obtener todos los usuarios
+     * @summary Get all users
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi
@@ -10420,8 +9702,8 @@ export class UsersApi extends BaseAPI implements UsersApiInterface {
 
     /**
      * 
-     * @summary Obtener un usuario por ID
-     * @param {string} id ID del usuario
+     * @summary Get a user by ID
+     * @param {string} id User ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi
@@ -10432,8 +9714,8 @@ export class UsersApi extends BaseAPI implements UsersApiInterface {
 
     /**
      * 
-     * @summary Eliminar un usuario por ID
-     * @param {string} id ID del usuario a eliminar
+     * @summary Delete a user by ID
+     * @param {string} id ID of the user to delete
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi
@@ -10444,8 +9726,8 @@ export class UsersApi extends BaseAPI implements UsersApiInterface {
 
     /**
      * 
-     * @summary Actualizar un usuario por ID
-     * @param {string} id ID del usuario a actualizar
+     * @summary Update a user by ID
+     * @param {string} id ID of the user to update
      * @param {object} body 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}

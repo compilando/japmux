@@ -49,7 +49,7 @@ const { status, data } = await apiInstance.ragDocumentMetadataControllerCreate(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -101,7 +101,7 @@ const { status, data } = await apiInstance.ragDocumentMetadataControllerFindAll(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -155,7 +155,7 @@ const { status, data } = await apiInstance.ragDocumentMetadataControllerFindOne(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -209,7 +209,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -267,7 +267,7 @@ const { status, data } = await apiInstance.ragDocumentMetadataControllerUpdate(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 

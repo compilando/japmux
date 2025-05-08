@@ -82,9 +82,46 @@ const promptTranslationsGeneratedApi = new generated.PromptTranslationsWithinPro
 const systemPromptsGeneratedApi = new generated.SystemPromptsApi(generatedApiConfig, undefined, apiClient);
 const rawExecutionGeneratedApi = new generated.RawExecutionApi(generatedApiConfig, undefined, apiClient);
 const tagsGeneratedApi = new generated.TagsApi(generatedApiConfig, undefined, apiClient);
+const environmentsGeneratedApi = new generated.EnvironmentsApi(generatedApiConfig, undefined, apiClient);
 // const authGeneratedApi = new generated.AuthenticationApi(generatedApiConfig, undefined, apiClient); // Si decides reemplazar authService
 
 // --- Servicios Manuales (Wrapper sobre los generados o lógica personalizada) ---
+
+// --- AI Model Service ---
+export const aiModelService = {
+    /**
+     * Fetches the available Langchain provider types.
+     * Uses a manual API call due to issues with the generated client function
+     * not correctly handling the projectId path parameter for this specific endpoint.
+     */
+    getProviderTypes: async (projectId: string): Promise<string[]> => {
+        // Manual call to ensure projectId is correctly inserted into the URL
+        const response = await apiClient.get<string[]>(`/api/projects/${projectId}/aimodels/providers/types`);
+        return response.data;
+    },
+    // Puedes añadir aquí otros métodos de aiModelsGeneratedApi que quieras exponer
+    // Por ejemplo, para crear un modelo:
+    create: async (projectId: string, payload: generated.CreateAiModelDto): Promise<generated.AiModelResponseDto> => {
+        const response = await aiModelsGeneratedApi.aiModelControllerCreate(projectId, payload);
+        return response.data;
+    },
+    findAll: async (projectId: string): Promise<generated.AiModelResponseDto[]> => {
+        const response = await aiModelsGeneratedApi.aiModelControllerFindAll(projectId);
+        return response.data;
+    },
+    findOne: async (projectId: string, aiModelId: string): Promise<generated.AiModelResponseDto> => {
+        const response = await aiModelsGeneratedApi.aiModelControllerFindOne(projectId, aiModelId);
+        return response.data;
+    },
+    update: async (projectId: string, aiModelId: string, payload: generated.UpdateAiModelDto): Promise<generated.AiModelResponseDto> => {
+        const response = await aiModelsGeneratedApi.aiModelControllerUpdate(projectId, aiModelId, payload);
+        return response.data;
+    },
+    remove: async (projectId: string, aiModelId: string): Promise<generated.AiModelResponseDto> => { // OpenAPI spec has this returning the deleted model
+        const response = await aiModelsGeneratedApi.aiModelControllerRemove(projectId, aiModelId);
+        return response.data;
+    }
+};
 
 // Servicio de Autenticación (Mantener manual por ahora, o reemplazar con generated.AuthenticationApi)
 export const authService = {
@@ -216,43 +253,42 @@ export const regionService = {
     },
 };
 
-// Servicio de Entornos (Mantener manual o reemplazar con generated.EnvironmentsApi)
+// Servicio de Entornos (Actualizado para usar generado)
 export const environmentService = {
-    findAll: async (projectId: string): Promise<generated.CreateEnvironmentDto[]> => { // Usar CreateEnvironmentDto
-        // Reemplazar con: const response = await environmentsGeneratedApi.environmentControllerFindAll(projectId); return response.data;
-        const response = await apiClient.get<generated.CreateEnvironmentDto[]>(`/api/projects/${projectId}/environments`);
+    findAll: async (projectId: string): Promise<generated.CreateEnvironmentDto[]> => {
+        const response = await environmentsGeneratedApi.environmentControllerFindAll(projectId);
         return response.data;
     },
-    findOne: async (projectId: string, environmentId: string): Promise<generated.CreateEnvironmentDto> => { // Usar CreateEnvironmentDto
-        // Reemplazar con: const response = await environmentsGeneratedApi.environmentControllerFindOne(environmentId, projectId); return response.data;
-        const response = await apiClient.get<generated.CreateEnvironmentDto>(`/api/projects/${projectId}/environments/${environmentId}`);
+    findOne: async (projectId: string, environmentId: string): Promise<generated.CreateEnvironmentDto> => {
+        const response = await environmentsGeneratedApi.environmentControllerFindOne(environmentId, projectId);
         return response.data;
     },
-    findByName: async (projectId: string, name: string): Promise<generated.CreateEnvironmentDto | null> => { // Usar CreateEnvironmentDto
-        // Reemplazar con: try { const response = await environmentsGeneratedApi.environmentControllerFindByName(name, projectId); return response.data; } catch (e) { if (e.response?.status === 404) return null; throw e; }
+    findByName: async (projectId: string, name: string): Promise<generated.CreateEnvironmentDto | null> => {
         try {
-            const response = await apiClient.get<generated.CreateEnvironmentDto>(`/api/projects/${projectId}/environments/by-name/${name}`);
+            const response = await environmentsGeneratedApi.environmentControllerFindByName(name, projectId);
             return response.data;
         } catch (error: any) {
+            // Asumiendo que AxiosError tiene 'response' y 404 indica no encontrado
             if (error.response && error.response.status === 404) {
                 return null; // No encontrado es un caso esperado aquí
             }
+            console.error(`[environmentService.findByName] Error: ${error.message}`, error);
+            showErrorToast(`Failed to find environment by name: ${name}`);
             throw error; // Relanzar otros errores
         }
     },
-    create: async (projectId: string, payload: generated.CreateEnvironmentDto): Promise<generated.CreateEnvironmentDto> => { // Usar CreateEnvironmentDto
-        // Reemplazar con: const response = await environmentsGeneratedApi.environmentControllerCreate(projectId, payload); return response.data;
-        const response = await apiClient.post<generated.CreateEnvironmentDto>(`/api/projects/${projectId}/environments`, payload);
+    create: async (projectId: string, payload: generated.CreateEnvironmentDto): Promise<generated.CreateEnvironmentDto> => {
+        const response = await environmentsGeneratedApi.environmentControllerCreate(projectId, payload);
         return response.data;
     },
-    update: async (projectId: string, environmentId: string, payload: generated.UpdateEnvironmentDto): Promise<generated.CreateEnvironmentDto> => { // Usar CreateEnvironmentDto como retorno
-        // Reemplazar con: const response = await environmentsGeneratedApi.environmentControllerUpdate(environmentId, projectId, payload); return response.data;
-        const response = await apiClient.patch<generated.CreateEnvironmentDto>(`/api/projects/${projectId}/environments/${environmentId}`, payload);
+    update: async (projectId: string, environmentId: string, payload: generated.UpdateEnvironmentDto): Promise<generated.CreateEnvironmentDto> => {
+        // La API generada devuelve CreateEnvironmentDto
+        const response = await environmentsGeneratedApi.environmentControllerUpdate(environmentId, projectId, payload);
         return response.data;
     },
     remove: async (projectId: string, environmentId: string): Promise<void> => {
-        // Reemplazar con: await environmentsGeneratedApi.environmentControllerRemove(environmentId, projectId);
-        await apiClient.delete(`/api/projects/${projectId}/environments/${environmentId}`);
+        // La API generada devuelve void
+        await environmentsGeneratedApi.environmentControllerRemove(environmentId, projectId);
     },
 };
 
@@ -283,18 +319,18 @@ export const tagService = {
 // Servicio de Prompts (Actualizado para usar generado donde aplique)
 export const promptService = {
     findAll: async (projectId: string): Promise<generated.CreatePromptDto[]> => { // Usar CreatePromptDto
-        // Reemplazar con: const response = await promptsGeneratedApi.promptControllerFindAll(projectId); return response.data;
-        const response = await apiClient.get<generated.CreatePromptDto[]>(`/api/projects/${projectId}/prompts`);
-        return response.data;
+        const response = await promptsGeneratedApi.promptControllerFindAll(projectId);
+        return response.data as generated.CreatePromptDto[]; // Asegurar el tipo
     },
-    findOne: async (projectId: string, promptName: string): Promise<generated.CreatePromptDto> => { // Usar CreatePromptDto
-        // Reemplazar con: const response = await promptsGeneratedApi.promptControllerFindOne(promptName, projectId); return response.data;
-        const response = await apiClient.get<generated.CreatePromptDto>(`/api/projects/${projectId}/prompts/${promptName}`);
-        return response.data;
+    // El servicio espera el nombre del prompt, que es su ID principal según CreatePromptDto.
+    findOne: async (projectId: string, promptName: string): Promise<generated.CreatePromptDto> => { // Parámetros en orden lógico para el servicio
+        // La API generada espera (promptName, projectId) por cómo construye la URL.
+        const response = await promptsGeneratedApi.promptControllerFindOne(promptName, projectId); // CORREGIDO: Orden de argumentos invertido para coincidir con la firma del método generado
+        return response.data as generated.CreatePromptDto;
     },
     create: async (projectId: string, payload: generated.CreatePromptDto): Promise<generated.CreatePromptDto> => { // Usar CreatePromptDto
-        // const response = await promptsGeneratedApi.promptControllerCreate(projectId, payload);
-        const response = await apiClient.post<generated.CreatePromptDto>(`/api/projects/${projectId}/prompts`, payload);
+        // Corregido para usar la instancia correcta y el método
+        const response = await promptsGeneratedApi.promptControllerCreate(projectId, payload);
         return response.data;
     },
     // La API generada para update (promptControllerUpdate) devuelve void, así que ajustamos el tipo de retorno
@@ -520,9 +556,9 @@ export const culturalDataService = {
         const response = await apiClient.get<generated.CulturalDataResponse[]>(`/api/projects/${projectId}/cultural-data`);
         return response.data;
     },
-    findOne: async (projectId: string, culturalDataId: string): Promise<generated.CulturalDataResponse> => {
-        // Reemplazar con: const response = await culturalDataGeneratedApi.culturalDataControllerFindOne(culturalDataId, projectId); return response.data;
-        const response = await apiClient.get<generated.CulturalDataResponse>(`/api/projects/${projectId}/cultural-data/${culturalDataId}`);
+    findOne: async (projectId: string, culturalDataKey: string): Promise<generated.CulturalDataResponse> => {
+        // Reemplazar con: const response = await culturalDataGeneratedApi.culturalDataControllerFindOne(culturalDataKey, projectId); return response.data;
+        const response = await apiClient.get<generated.CulturalDataResponse>(`/api/projects/${projectId}/cultural-data/${culturalDataKey}`);
         return response.data;
     },
     create: async (projectId: string, payload: generated.CreateCulturalDataDto): Promise<generated.CulturalDataResponse> => {
@@ -530,46 +566,18 @@ export const culturalDataService = {
         const response = await apiClient.post<generated.CulturalDataResponse>(`/api/projects/${projectId}/cultural-data`, payload);
         return response.data;
     },
-    update: async (projectId: string, culturalDataId: string, payload: generated.UpdateCulturalDataDto): Promise<generated.CulturalDataResponse> => {
-        // Reemplazar con: const response = await culturalDataGeneratedApi.culturalDataControllerUpdate(culturalDataId, projectId, payload); return response.data;
-        const response = await apiClient.patch<generated.CulturalDataResponse>(`/api/projects/${projectId}/cultural-data/${culturalDataId}`, payload);
+    update: async (projectId: string, culturalDataKey: string, payload: generated.UpdateCulturalDataDto): Promise<generated.CulturalDataResponse> => {
+        // Reemplazar con: const response = await culturalDataGeneratedApi.culturalDataControllerUpdate(culturalDataKey, projectId, payload); return response.data;
+        const response = await apiClient.patch<generated.CulturalDataResponse>(`/api/projects/${projectId}/cultural-data/${culturalDataKey}`, payload);
         return response.data;
     },
-    remove: async (projectId: string, culturalDataId: string): Promise<void> => {
-        // Reemplazar con: await culturalDataGeneratedApi.culturalDataControllerRemove(culturalDataId, projectId);
-        await apiClient.delete(`/api/projects/${projectId}/cultural-data/${culturalDataId}`);
+    remove: async (projectId: string, culturalDataKey: string): Promise<void> => {
+        // Reemplazar con: await culturalDataGeneratedApi.culturalDataControllerRemove(culturalDataKey, projectId);
+        await apiClient.delete(`/api/projects/${projectId}/cultural-data/${culturalDataKey}`);
     },
 };
 
 // --- Servicios Actualizados / Nuevos usando Generador ---
-
-// Servicio de AI Models (Actualizado para usar generado)
-export const aiModelService = {
-    findAll: async (projectId: string): Promise<generated.AiModelResponseDto[]> => {
-        const response = await aiModelsGeneratedApi.aiModelControllerFindAll(projectId);
-        // El tipo de retorno real del método generado ahora es Array<AiModelResponseDto>
-        return response.data;
-    },
-    findOne: async (projectId: string, id: string): Promise<generated.AiModelResponseDto> => {
-        const response = await aiModelsGeneratedApi.aiModelControllerFindOne(projectId, id);
-        // El tipo de retorno real es AiModelResponseDto
-        return response.data;
-    },
-    create: async (projectId: string, payload: generated.CreateAiModelDto): Promise<generated.AiModelResponseDto> => {
-        // El create sigue usando CreateAiModelDto como payload, pero devuelve AiModelResponseDto
-        const response = await aiModelsGeneratedApi.aiModelControllerCreate(projectId, payload);
-        return response.data;
-    },
-    update: async (projectId: string, id: string, payload: generated.UpdateAiModelDto): Promise<generated.AiModelResponseDto> => {
-        // El update sigue usando UpdateAiModelDto como payload, pero devuelve AiModelResponseDto
-        const response = await aiModelsGeneratedApi.aiModelControllerUpdate(projectId, id, payload);
-        return response.data;
-    },
-    remove: async (projectId: string, id: string): Promise<void> => {
-        // El método generado remove ahora devuelve AiModelResponseDto, pero lo ignoramos aquí.
-        await aiModelsGeneratedApi.aiModelControllerRemove(projectId, id);
-    },
-};
 
 // Servicio de LLM Execution (Actualizado para usar generado)
 export const llmExecutionService = {

@@ -132,7 +132,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new CulturalDataApi(configuration);
 
-let culturalDataId: string; //ID of the cultural data (default to undefined)
+let culturalDataId: string; //Key of the cultural data (e.g., direct-and-formal) (default to undefined)
 let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.culturalDataControllerFindOne(
@@ -145,7 +145,7 @@ const { status, data } = await apiInstance.culturalDataControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **culturalDataId** | [**string**] | ID of the cultural data | defaults to undefined|
+| **culturalDataId** | [**string**] | Key of the cultural data (e.g., direct-and-formal) | defaults to undefined|
 | **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
@@ -186,7 +186,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new CulturalDataApi(configuration);
 
-let culturalDataId: string; //ID to delete (default to undefined)
+let culturalDataId: string; //Key of the cultural data to delete (e.g., direct-and-formal) (default to undefined)
 let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.culturalDataControllerRemove(
@@ -199,7 +199,7 @@ const { status, data } = await apiInstance.culturalDataControllerRemove(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **culturalDataId** | [**string**] | ID to delete | defaults to undefined|
+| **culturalDataId** | [**string**] | Key of the cultural data to delete (e.g., direct-and-formal) | defaults to undefined|
 | **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
@@ -242,7 +242,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new CulturalDataApi(configuration);
 
-let culturalDataId: string; //ID to update (default to undefined)
+let culturalDataId: string; //Key of the cultural data to update (e.g., direct-and-formal) (default to undefined)
 let projectId: string; //Project ID (default to undefined)
 let updateCulturalDataDto: UpdateCulturalDataDto; //
 
@@ -258,7 +258,7 @@ const { status, data } = await apiInstance.culturalDataControllerUpdate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **updateCulturalDataDto** | **UpdateCulturalDataDto**|  | |
-| **culturalDataId** | [**string**] | ID to update | defaults to undefined|
+| **culturalDataId** | [**string**] | Key of the cultural data to update (e.g., direct-and-formal) | defaults to undefined|
 | **projectId** | [**string**] | Project ID | defaults to undefined|
 
 

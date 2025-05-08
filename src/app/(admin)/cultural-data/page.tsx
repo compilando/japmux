@@ -2,13 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-    CulturalData,
     culturalDataService,
     CreateCulturalDataDto,
     UpdateCulturalDataDto,
-    Project,
     projectService
 } from '@/services/api';
+import * as generated from '../../../../generated/japmux-api';
 import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import CulturalDataTable from '@/components/tables/CulturalDataTable';
@@ -17,17 +16,17 @@ import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 const CulturalDataPage: React.FC = () => {
-    const [culturalDataList, setCulturalDataList] = useState<CulturalData[]>([]);
+    const [culturalDataList, setCulturalDataList] = useState<generated.CulturalDataResponse[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
     // Estados para el modal/formulario
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingCulturalData, setEditingCulturalData] = useState<CulturalData | null>(null);
+    const [editingCulturalData, setEditingCulturalData] = useState<generated.CulturalDataResponse | null>(null);
     const { selectedProjectId } = useProjects();
 
     // Estados para breadcrumb
-    const [project, setProject] = useState<Project | null>(null);
+    const [project, setProject] = useState<generated.CreateProjectDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     const fetchData = async () => {
@@ -92,23 +91,24 @@ const CulturalDataPage: React.FC = () => {
         console.log("Add new cultural data");
     };
 
-    const handleEdit = (data: CulturalData) => {
+    const handleEdit = (data: generated.CulturalDataResponse) => {
         setEditingCulturalData(data);
         setIsModalOpen(true);
         console.log("Edit cultural data:", data);
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (itemKey: string) => {
         if (!selectedProjectId) {
-            alert("No project selected.");
+            showErrorToast("No project selected.");
             return;
         }
-        if (window.confirm('Are you sure you want to delete this cultural data?')) {
+        if (window.confirm(`Are you sure you want to delete cultural data with key: ${itemKey}?`)) {
             try {
-                await culturalDataService.remove(selectedProjectId, id);
+                await culturalDataService.remove(selectedProjectId, itemKey);
                 fetchData();
+                showSuccessToast("Cultural data deleted successfully.");
             } catch (err) {
-                setError('Failed to delete cultural data');
+                showErrorToast('Failed to delete cultural data.');
                 console.error(err);
             }
         }
@@ -116,25 +116,22 @@ const CulturalDataPage: React.FC = () => {
 
     const handleSave = async (payload: CreateCulturalDataDto | UpdateCulturalDataDto) => {
         if (!selectedProjectId) {
-            alert("No project selected.");
+            showErrorToast("No project selected.");
             return;
         }
         try {
-            if (editingCulturalData) {
-                await culturalDataService.update(selectedProjectId, editingCulturalData.id, payload as UpdateCulturalDataDto);
+            if (editingCulturalData && editingCulturalData.key) {
+                await culturalDataService.update(selectedProjectId, editingCulturalData.key, payload as UpdateCulturalDataDto);
+                showSuccessToast("Cultural data updated successfully.");
             } else {
                 await culturalDataService.create(selectedProjectId, payload as CreateCulturalDataDto);
+                showSuccessToast("Cultural data created successfully.");
             }
             setIsModalOpen(false);
             fetchData();
-        } catch (err) {
-            setError(`Failed to save cultural data: ${err instanceof Error ? err.message : String(err)}`);
+        } catch (err: any) {
+            showErrorToast(err.response?.data?.message || err.message || 'Failed to save cultural data.');
             console.error(err);
-            if (axios.isAxiosError(err)) {
-                alert(`Error saving: ${err.response?.data?.message || err.message}`);
-            } else if (err instanceof Error) {
-                alert(`Error saving: ${err.message}`);
-            }
         }
     };
 
@@ -182,7 +179,6 @@ const CulturalDataPage: React.FC = () => {
                                 onEdit={handleEdit}
                                 onDelete={handleDelete}
                             />
-                            {/* {culturalDataList.length === 0 && <p>No cultural data found.</p>} // Mensaje ya dentro de la tabla */}
                         </div>
                     )}
                 </>

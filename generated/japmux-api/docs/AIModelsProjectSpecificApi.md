@@ -7,6 +7,7 @@ All URIs are relative to *http://localhost*
 |[**aiModelControllerCreate**](#aimodelcontrollercreate) | **POST** /api/projects/{projectId}/aimodels | Create a new AI model for this project|
 |[**aiModelControllerFindAll**](#aimodelcontrollerfindall) | **GET** /api/projects/{projectId}/aimodels | Get all AI models for this project (includes global models)|
 |[**aiModelControllerFindOne**](#aimodelcontrollerfindone) | **GET** /api/projects/{projectId}/aimodels/{aiModelId} | Get a specific AI model by ID (must belong to project or be global)|
+|[**aiModelControllerGetProviderTypes**](#aimodelcontrollergetprovidertypes) | **GET** /api/projects/{projectId}/aimodels/providers/types | List available Langchain provider types|
 |[**aiModelControllerRemove**](#aimodelcontrollerremove) | **DELETE** /api/projects/{projectId}/aimodels/{aiModelId} | Delete an AI model by ID (must belong to project)|
 |[**aiModelControllerUpdate**](#aimodelcontrollerupdate) | **PATCH** /api/projects/{projectId}/aimodels/{aiModelId} | Update an AI model by ID (must belong to project)|
 
@@ -167,6 +168,49 @@ const { status, data } = await apiInstance.aiModelControllerFindOne(
 |-------------|-------------|------------------|
 |**200** | The found AI model record |  -  |
 |**404** | AI Model not found or not accessible for this project. |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **aiModelControllerGetProviderTypes**
+> Array<string> aiModelControllerGetProviderTypes()
+
+
+### Example
+
+```typescript
+import {
+    AIModelsProjectSpecificApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new AIModelsProjectSpecificApi(configuration);
+
+const { status, data } = await apiInstance.aiModelControllerGetProviderTypes();
+```
+
+### Parameters
+This endpoint does not have any parameters.
+
+
+### Return type
+
+**Array<string>**
+
+### Authorization
+
+[bearer](../README.md#bearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | A list of Langchain provider types. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

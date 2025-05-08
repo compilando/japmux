@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * JAPM API
- * API para la aplicación de Prompt Engineering JAPM
+ * API for the JAPM Prompt Engineering application
  *
  * The version of the OpenAPI document: 1.0
  * 

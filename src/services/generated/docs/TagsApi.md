@@ -12,7 +12,7 @@ All URIs are relative to *http://localhost*
 |[**tagControllerUpdate**](#tagcontrollerupdate) | **PATCH** /api/projects/{projectId}/tags/{tagId} | Actualiza una etiqueta existente en un proyecto|
 
 # **tagControllerCreate**
-> CreateTagDto tagControllerCreate(createTagDto)
+> TagDto tagControllerCreate(createTagDto)
 
 
 ### Example
@@ -46,11 +46,11 @@ const { status, data } = await apiInstance.tagControllerCreate(
 
 ### Return type
 
-**CreateTagDto**
+**TagDto**
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -69,7 +69,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tagControllerFindAll**
-> Array<CreateTagDto> tagControllerFindAll()
+> Array<TagDto> tagControllerFindAll()
 
 
 ### Example
@@ -99,11 +99,11 @@ const { status, data } = await apiInstance.tagControllerFindAll(
 
 ### Return type
 
-**Array<CreateTagDto>**
+**Array<TagDto>**
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -120,7 +120,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tagControllerFindByName**
-> CreateTagDto tagControllerFindByName()
+> TagDto tagControllerFindByName()
 
 
 ### Example
@@ -153,11 +153,11 @@ const { status, data } = await apiInstance.tagControllerFindByName(
 
 ### Return type
 
-**CreateTagDto**
+**TagDto**
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -174,7 +174,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tagControllerFindOne**
-> CreateTagDto tagControllerFindOne()
+> TagDto tagControllerFindOne()
 
 
 ### Example
@@ -207,11 +207,11 @@ const { status, data } = await apiInstance.tagControllerFindOne(
 
 ### Return type
 
-**CreateTagDto**
+**TagDto**
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -228,7 +228,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tagControllerRemove**
-> CreateTagDto tagControllerRemove()
+> TagDto tagControllerRemove()
 
 
 ### Example
@@ -261,11 +261,11 @@ const { status, data } = await apiInstance.tagControllerRemove(
 
 ### Return type
 
-**CreateTagDto**
+**TagDto**
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -283,7 +283,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tagControllerUpdate**
-> CreateTagDto tagControllerUpdate(updateTagDto)
+> TagDto tagControllerUpdate(updateTagDto)
 
 
 ### Example
@@ -320,11 +320,11 @@ const { status, data } = await apiInstance.tagControllerUpdate(
 
 ### Return type
 
-**CreateTagDto**
+**TagDto**
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 

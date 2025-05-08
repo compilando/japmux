@@ -4,13 +4,12 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**promptControllerAddOrUpdateTranslation**](#promptcontrolleraddorupdatetranslation) | **PUT** /api/projects/{projectId}/prompts/{promptName}/versions/{versionId}/translations | Añadir o actualizar una traducción para una versión específica de prompt en el proyecto.|
-|[**promptControllerCreate**](#promptcontrollercreate) | **POST** /api/projects/{projectId}/prompts | Crea un nuevo prompt lógico dentro de un proyecto|
-|[**promptControllerCreateVersion**](#promptcontrollercreateversion) | **POST** /api/projects/{projectId}/prompts/{promptName}/versions | Crear una nueva versión para un prompt existente en el proyecto.|
-|[**promptControllerFindAll**](#promptcontrollerfindall) | **GET** /api/projects/{projectId}/prompts | Obtiene todos los prompts lógicos de un proyecto|
-|[**promptControllerFindOne**](#promptcontrollerfindone) | **GET** /api/projects/{projectId}/prompts/{promptName} | Obtiene un prompt lógico por su nombre dentro de un proyecto|
-|[**promptControllerRemove**](#promptcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptName} | Elimina un prompt lógico (y sus versiones asociadas por Cascade) dentro de un proyecto|
-|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptName} | Actualiza metadatos de un prompt lógico (descripción, tags) dentro de un proyecto|
+|[**promptControllerAddOrUpdateTranslation**](#promptcontrolleraddorupdatetranslation) | **PUT** /api/projects/{projectId}/prompts/{promptName}/versions/{versionId}/translations | Adds or updates a translation for a specific prompt version in the project.|
+|[**promptControllerCreate**](#promptcontrollercreate) | **POST** /api/projects/{projectId}/prompts | Creates a new logical prompt within a project|
+|[**promptControllerFindAll**](#promptcontrollerfindall) | **GET** /api/projects/{projectId}/prompts | Gets all logical prompts for a project|
+|[**promptControllerFindOne**](#promptcontrollerfindone) | **GET** /api/projects/{projectId}/prompts/{promptName} | Gets a logical prompt by its name within a project|
+|[**promptControllerRemove**](#promptcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptName} | Deletes a logical prompt (and its associated versions via Cascade) within a project by name|
+|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptName} | Updates an existing prompt by its name for a specific project|
 
 # **promptControllerAddOrUpdateTranslation**
 > promptControllerAddOrUpdateTranslation(createOrUpdatePromptTranslationDto)
@@ -28,9 +27,9 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let versionId: string; //ID de la versión a traducir (CUID) (default to undefined)
-let promptName: string; //Nombre del prompt padre (contextual) (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let versionId: string; //ID of the version to translate (CUID) (default to undefined)
+let promptName: string; //Parent prompt name (contextual) (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 let createOrUpdatePromptTranslationDto: CreateOrUpdatePromptTranslationDto; //
 
 const { status, data } = await apiInstance.promptControllerAddOrUpdateTranslation(
@@ -46,9 +45,9 @@ const { status, data } = await apiInstance.promptControllerAddOrUpdateTranslatio
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **createOrUpdatePromptTranslationDto** | **CreateOrUpdatePromptTranslationDto**|  | |
-| **versionId** | [**string**] | ID de la versión a traducir (CUID) | defaults to undefined|
-| **promptName** | [**string**] | Nombre del prompt padre (contextual) | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **versionId** | [**string**] | ID of the version to translate (CUID) | defaults to undefined|
+| **promptName** | [**string**] | Parent prompt name (contextual) | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -57,7 +56,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -68,9 +67,9 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Traducción creada o actualizada. |  -  |
-|**400** | Datos inválidos. |  -  |
-|**404** | Proyecto o Versión no encontrada. |  -  |
+|**200** | Translation created or updated. |  -  |
+|**400** | Invalid data. |  -  |
+|**404** | Project or Version not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -90,7 +89,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let projectId: string; //ID del proyecto (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 let createPromptDto: CreatePromptDto; //
 
 const { status, data } = await apiInstance.promptControllerCreate(
@@ -104,7 +103,7 @@ const { status, data } = await apiInstance.promptControllerCreate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **createPromptDto** | **CreatePromptDto**|  | |
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -113,7 +112,7 @@ const { status, data } = await apiInstance.promptControllerCreate(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -124,70 +123,10 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**201** | Prompt creado. |  -  |
-|**400** | Datos inválidos (e.g., falta promptText inicial). |  -  |
-|**404** | Proyecto o Tag no encontrado. |  -  |
-|**409** | Conflicto, ya existe un prompt con ese nombre en el proyecto. |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **promptControllerCreateVersion**
-> promptControllerCreateVersion(createPromptVersionDto)
-
-
-### Example
-
-```typescript
-import {
-    PromptsApi,
-    Configuration,
-    CreatePromptVersionDto
-} from './api';
-
-const configuration = new Configuration();
-const apiInstance = new PromptsApi(configuration);
-
-let promptName: string; //Nombre del prompt padre dentro del proyecto (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
-let createPromptVersionDto: CreatePromptVersionDto; //
-
-const { status, data } = await apiInstance.promptControllerCreateVersion(
-    promptName,
-    projectId,
-    createPromptVersionDto
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **createPromptVersionDto** | **CreatePromptVersionDto**|  | |
-| **promptName** | [**string**] | Nombre del prompt padre dentro del proyecto | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
-
-
-### Return type
-
-void (empty response body)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: application/json
- - **Accept**: Not defined
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**201** | Nueva versión creada. |  -  |
-|**400** | Datos inválidos. |  -  |
-|**404** | Proyecto, Prompt padre, AssetVersion o Environment no encontrado. |  -  |
-|**409** | Conflicto (e.g., versionTag ya existe para este prompt). |  -  |
+|**201** | Prompt created. |  -  |
+|**400** | Invalid data (e.g., missing initial promptText). |  -  |
+|**404** | Project or Tag not found. |  -  |
+|**409** | Conflict, a prompt with this name already exists in the project. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -206,7 +145,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let projectId: string; //ID del proyecto (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.promptControllerFindAll(
     projectId
@@ -217,7 +156,7 @@ const { status, data } = await apiInstance.promptControllerFindAll(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -226,7 +165,7 @@ const { status, data } = await apiInstance.promptControllerFindAll(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -237,8 +176,8 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Lista de prompts. |  -  |
-|**404** | Proyecto no encontrado. |  -  |
+|**200** | List of prompts. |  -  |
+|**404** | Project not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -257,8 +196,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let promptName: string; //Nombre único del prompt dentro del proyecto (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let promptName: string; //Unique name of the prompt within the project (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.promptControllerFindOne(
     promptName,
@@ -270,8 +209,8 @@ const { status, data } = await apiInstance.promptControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **promptName** | [**string**] | Nombre único del prompt dentro del proyecto | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **promptName** | [**string**] | Unique name of the prompt within the project | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -280,7 +219,7 @@ const { status, data } = await apiInstance.promptControllerFindOne(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -291,8 +230,8 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Prompt encontrado. |  -  |
-|**404** | Proyecto o Prompt no encontrado. |  -  |
+|**200** | Prompt found. |  -  |
+|**404** | Project or Prompt not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -311,8 +250,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let promptName: string; //Nombre único del prompt a eliminar dentro del proyecto (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let promptName: string; //Name of the prompt to delete (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.promptControllerRemove(
     promptName,
@@ -324,8 +263,8 @@ const { status, data } = await apiInstance.promptControllerRemove(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **promptName** | [**string**] | Nombre único del prompt a eliminar dentro del proyecto | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **promptName** | [**string**] | Name of the prompt to delete | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -334,7 +273,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -345,14 +284,14 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Prompt eliminado. |  -  |
-|**404** | Proyecto o Prompt no encontrado. |  -  |
-|**409** | Conflicto al eliminar (revisar relaciones sin Cascade). |  -  |
+|**200** | Prompt deleted. |  -  |
+|**404** | Project or Prompt not found. |  -  |
+|**409** | Conflict on deletion (check non-cascading relations). |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **promptControllerUpdate**
-> CreatePromptDto promptControllerUpdate(updatePromptDto)
+> promptControllerUpdate(updatePromptDto)
 
 
 ### Example
@@ -367,9 +306,9 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let promptName: string; //Nombre único del prompt a actualizar dentro del proyecto (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
-let updatePromptDto: UpdatePromptDto; //
+let promptName: string; //Name of the prompt to update (default to undefined)
+let projectId: string; //Project ID (default to undefined)
+let updatePromptDto: UpdatePromptDto; //Data to update the prompt
 
 const { status, data } = await apiInstance.promptControllerUpdate(
     promptName,
@@ -382,31 +321,31 @@ const { status, data } = await apiInstance.promptControllerUpdate(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **updatePromptDto** | **UpdatePromptDto**|  | |
-| **promptName** | [**string**] | Nombre único del prompt a actualizar dentro del proyecto | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **updatePromptDto** | **UpdatePromptDto**| Data to update the prompt | |
+| **promptName** | [**string**] | Name of the prompt to update | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
 
-**CreatePromptDto**
+void (empty response body)
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Accept**: Not defined
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Prompt actualizado. |  -  |
-|**400** | Datos inválidos. |  -  |
-|**404** | Proyecto, Prompt o Tag no encontrado. |  -  |
+|**200** | Prompt updated successfully. |  -  |
+|**400** | Invalid data. |  -  |
+|**404** | Project, Prompt, or Tag not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

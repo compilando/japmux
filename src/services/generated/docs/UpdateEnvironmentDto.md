@@ -5,8 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**name** | **string** | Nuevo nombre único del entorno (opcional) | [optional] [default to undefined]
-**description** | **string** | Nueva descripción opcional del entorno | [optional] [default to undefined]
+**name** | **string** | New unique name for the environment (optional) | [optional] [default to undefined]
+**description** | **string** | New optional description for the environment | [optional] [default to undefined]
 
 ## Example
 

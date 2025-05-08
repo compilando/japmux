@@ -5,11 +5,11 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**name** | **string** | Nombre único del prompt (usado como ID) | [default to undefined]
-**description** | **string** | Descripción del propósito del prompt. | [optional] [default to undefined]
-**tags** | **Set&lt;string&gt;** | Lista de nombres de etiquetas a asociar. | [optional] [default to undefined]
-**promptText** | **string** | Texto base del prompt para la primera versión (v1.0.0) | [default to undefined]
-**initialTranslations** | [**Array&lt;InitialTranslationDto&gt;**](InitialTranslationDto.md) | Traducciones iniciales opcionales para la primera versión | [optional] [default to undefined]
+**name** | **string** | Unique prompt name (used as ID) | [default to undefined]
+**description** | **string** | Description of the prompt\&#39;s purpose. | [optional] [default to undefined]
+**tags** | **Set&lt;string&gt;** | List of tag names to associate. | [optional] [default to undefined]
+**promptText** | **string** | Base prompt text for the first version (v1.0.0) | [default to undefined]
+**initialTranslations** | [**Array&lt;InitialTranslationDto&gt;**](InitialTranslationDto.md) | Optional initial translations for the first version | [optional] [default to undefined]
 
 ## Example
 

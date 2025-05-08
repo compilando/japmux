@@ -1,28 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import {
-    CulturalData,
-    CreateCulturalDataDto,
-    UpdateCulturalDataDto,
-    Region,
+    // CulturalData, // Se reemplazará por generated.CulturalDataResponse
+    CreateCulturalDataDto, // Asumiendo que es re-exportado o igual a generated.CreateCulturalDataDto
+    UpdateCulturalDataDto, // Asumiendo que es re-exportado o igual a generated.UpdateCulturalDataDto
+    // Region, // Se reemplazará por generated.CreateRegionDto
     regionService
 } from '@/services/api';
+import * as generated from '../../../generated/japmux-api'; // Importar tipos generados
 import { useProjects } from '@/context/ProjectContext';
+import { showErrorToast } from '@/utils/toastUtils'; // Importar para consistencia
 
 interface CulturalDataFormProps {
-    initialData: CulturalData | null;
+    initialData: generated.CulturalDataResponse | null; // Cambiado a generated.CulturalDataResponse
     onSave: (data: CreateCulturalDataDto | UpdateCulturalDataDto) => void;
     onCancel: () => void;
 }
 
 const CulturalDataForm: React.FC<CulturalDataFormProps> = ({ initialData, onSave, onCancel }) => {
-    const [id, setId] = useState('');
+    const [itemKey, setItemKey] = useState('');
     const [regionId, setRegionId] = useState('');
     const [formalityLevel, setFormalityLevel] = useState<number | string>('');
     const [style, setStyle] = useState('');
     const [considerations, setConsiderations] = useState('');
     const [notes, setNotes] = useState('');
 
-    const [availableRegions, setAvailableRegions] = useState<Region[]>([]);
+    const [availableRegions, setAvailableRegions] = useState<generated.CreateRegionDto[]>([]); // Cambiado a generated.CreateRegionDto[]
     const [loadingRegions, setLoadingRegions] = useState<boolean>(false);
     const [regionError, setRegionError] = useState<string | null>(null);
     const { selectedProjectId } = useProjects();
@@ -61,14 +63,14 @@ const CulturalDataForm: React.FC<CulturalDataFormProps> = ({ initialData, onSave
 
     useEffect(() => {
         if (initialData) {
-            setId(initialData.id);
+            setItemKey(initialData.key);
             setRegionId(initialData.regionId);
             setFormalityLevel(initialData.formalityLevel ?? '');
             setStyle(initialData.style ?? '');
             setConsiderations(initialData.considerations ?? '');
             setNotes(initialData.notes ?? '');
         } else {
-            setId('');
+            setItemKey('');
             setRegionId('');
             setFormalityLevel('');
             setStyle('');
@@ -80,13 +82,15 @@ const CulturalDataForm: React.FC<CulturalDataFormProps> = ({ initialData, onSave
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
 
-        if (!isEditing && !id.trim()) {
-            alert('ID (Slug) is required.');
+        if (!isEditing && !itemKey.trim()) {
+            // alert('ID (Slug) is required.'); // Reemplazado con toast
+            showErrorToast('Key (Slug) is required.');
             return;
         }
 
         if (!isEditing && !regionId) {
-            alert('Please select a Region ID.');
+            // alert('Please select a Region ID.'); // Reemplazado con toast
+            showErrorToast('Please select a Region ID.');
             return;
         }
 
@@ -103,7 +107,7 @@ const CulturalDataForm: React.FC<CulturalDataFormProps> = ({ initialData, onSave
             } as UpdateCulturalDataDto;
         } else {
             payload = {
-                id: id.trim(),
+                key: itemKey.trim(),
                 regionId: regionId,
                 formalityLevel: formalityLevelValue,
                 style: style.trim() || undefined,
@@ -112,26 +116,34 @@ const CulturalDataForm: React.FC<CulturalDataFormProps> = ({ initialData, onSave
             } as CreateCulturalDataDto;
         }
 
+        console.log('[CulturalDataForm handleSubmit] Payload to be saved:', payload);
+        if ('key' in payload && payload.key !== undefined) {
+            console.log('[CulturalDataForm handleSubmit] Type of key:', typeof payload.key, 'Value:', payload.key);
+        }
+        if ('regionId' in payload && payload.regionId !== undefined) {
+            console.log('[CulturalDataForm handleSubmit] Type of regionId:', typeof payload.regionId, 'Value:', payload.regionId);
+        }
+
         onSave(payload);
     };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-                <label htmlFor="culturalDataId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    ID (Slug)
+                <label htmlFor="culturalDataKey" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Key (Slug)
                 </label>
                 <input
                     type="text"
-                    id="culturalDataId"
-                    value={id}
-                    onChange={(e) => setId(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
+                    id="culturalDataKey"
+                    value={itemKey}
+                    onChange={(e) => setItemKey(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
                     required={!isEditing}
                     disabled={isEditing}
                 />
                 {!isEditing && <p className="text-xs text-gray-500 mt-1">Use lowercase letters, numbers, and hyphens.</p>}
-                {isEditing && <p className="text-xs text-gray-500 mt-1">ID cannot be changed after creation.</p>}
+                {isEditing && <p className="text-xs text-gray-500 mt-1">Key cannot be changed after creation.</p>}
             </div>
 
             <div>

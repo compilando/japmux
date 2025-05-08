@@ -5,12 +5,12 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **string** | Unique ID for this cultural data (slug format) | [default to undefined]
-**regionId** | **string** | Associated region ID (xx-XX language code) | [default to undefined]
-**formalityLevel** | **number** | Formality level (optional) | [optional] [default to undefined]
-**style** | **string** | Communication style (optional) | [optional] [default to undefined]
-**considerations** | **string** | Cultural considerations (optional) | [optional] [default to undefined]
-**notes** | **string** | Additional notes (optional) | [optional] [default to undefined]
+**key** | **string** | Unique key for the cultural data within the project | [default to undefined]
+**regionId** | **string** | ID (CUID) of the Region this data applies to | [default to undefined]
+**formalityLevel** | **number** | Formality level (1-10) | [optional] [default to undefined]
+**style** | **string** | Description of the communication style | [optional] [default to undefined]
+**considerations** | **string** | Specific cultural considerations | [optional] [default to undefined]
+**notes** | **string** | General notes | [optional] [default to undefined]
 
 ## Example
 
@@ -18,7 +18,7 @@ Name | Type | Description | Notes
 import { CreateCulturalDataDto } from './api';
 
 const instance: CreateCulturalDataDto = {
-    id,
+    key,
     regionId,
     formalityLevel,
     style,

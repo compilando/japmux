@@ -1,11 +1,11 @@
 .gitignore
 .npmignore
-.openapi-generator-ignore
 api.ts
 base.ts
 common.ts
 configuration.ts
 docs/AIModelsProjectSpecificApi.md
+docs/AiModelResponseDto.md
 docs/AssetTranslationsWithinProjectAssetVersionApi.md
 docs/AssetVersionLinkDto.md
 docs/AuthenticationApi.md
@@ -23,6 +23,7 @@ docs/CreatePromptTranslationDto.md
 docs/CreatePromptVersionDto.md
 docs/CreateRagDocumentMetadataDto.md
 docs/CreateRegionDto.md
+docs/CreateSystemPromptDto.md
 docs/CreateTagDto.md
 docs/CreateUserDto.md
 docs/CulturalDataApi.md
@@ -30,6 +31,7 @@ docs/CulturalDataResponse.md
 docs/EnvironmentsApi.md
 docs/ExecuteLlmDto.md
 docs/ExecutePromptBodyDto.md
+docs/ExecuteRawDto.md
 docs/HealthApi.md
 docs/HealthControllerCheck200Response.md
 docs/HealthControllerCheck200ResponseInfoValue.md
@@ -47,9 +49,12 @@ docs/PromptVersionsWithinProjectPromptApi.md
 docs/PromptsApi.md
 docs/RAGDocumentMetadataApi.md
 docs/RagDocumentMetadataResponse.md
+docs/RawExecutionApi.md
 docs/RegionsApi.md
 docs/RegisterDto.md
 docs/ServePromptApi.md
+docs/SystemPromptsApi.md
+docs/TagDto.md
 docs/TagsApi.md
 docs/UpdateAiModelDto.md
 docs/UpdateAssetTranslationDto.md
@@ -63,6 +68,7 @@ docs/UpdatePromptDto.md
 docs/UpdatePromptTranslationDto.md
 docs/UpdatePromptVersionDto.md
 docs/UpdateRegionDto.md
+docs/UpdateSystemPromptDto.md
 docs/UpdateTagDto.md
 docs/UserProfileResponse.md
 docs/UsersApi.md

@@ -190,37 +190,37 @@ export interface CreateAssetTranslationDto {
  */
 export interface CreateCulturalDataDto {
     /**
-     * Unique ID for this cultural data (slug format)
+     * Unique key for the cultural data within the project
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
-    'id': string;
+    'key': string;
     /**
-     * Associated region ID (xx-XX language code)
+     * ID (CUID) of the Region this data applies to
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
     'regionId': string;
     /**
-     * Formality level (optional)
+     * Formality level (1-10)
      * @type {number}
      * @memberof CreateCulturalDataDto
      */
     'formalityLevel'?: number;
     /**
-     * Communication style (optional)
+     * Description of the communication style
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
     'style'?: string;
     /**
-     * Cultural considerations (optional)
+     * Specific cultural considerations
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
     'considerations'?: string;
     /**
-     * Additional notes (optional)
+     * General notes
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
@@ -283,11 +283,11 @@ export interface CreateProjectDto {
      */
     'description'?: string;
     /**
-     * Optional ID of the User who owns this project
+     * ID (CUID) of the User who owns this project
      * @type {string}
      * @memberof CreateProjectDto
      */
-    'ownerUserId'?: string;
+    'owner': string;
 }
 /**
  * 
@@ -394,19 +394,13 @@ export interface CreatePromptAssetLinkDto {
  */
 export interface CreatePromptAssetVersionDto {
     /**
-     * Key (slug) del asset lógico al que pertenece esta versión
-     * @type {string}
-     * @memberof CreatePromptAssetVersionDto
-     */
-    'assetId': string;
-    /**
-     * El valor del asset para esta versión
+     * El valor del asset para esta nueva versión
      * @type {string}
      * @memberof CreatePromptAssetVersionDto
      */
     'value': string;
     /**
-     * Etiqueta de versión (e.g., v1.0.0). Debe ser única por asset.
+     * Etiqueta de versión (e.g., v1.0.1, v1.1.0). Si no se provee, se podría auto-incrementar o requerir.
      * @type {string}
      * @memberof CreatePromptAssetVersionDto
      */
@@ -436,12 +430,6 @@ export interface CreatePromptDto {
      * @memberof CreatePromptDto
      */
     'description'?: string;
-    /**
-     * ID (name) of the associated conversational tactic.
-     * @type {string}
-     * @memberof CreatePromptDto
-     */
-    'tacticId'?: string;
     /**
      * List of tag names to associate.
      * @type {Set<string>}
@@ -691,37 +679,37 @@ export interface CreateUserDto {
  */
 export interface CulturalDataResponse {
     /**
-     * Unique ID for this cultural data (slug format)
+     * Unique key for the cultural data within the project
      * @type {string}
      * @memberof CulturalDataResponse
      */
-    'id': string;
+    'key': string;
     /**
-     * Associated region ID (xx-XX language code)
+     * ID (CUID) of the Region this data applies to
      * @type {string}
      * @memberof CulturalDataResponse
      */
     'regionId': string;
     /**
-     * Formality level (optional)
+     * Formality level (1-10)
      * @type {number}
      * @memberof CulturalDataResponse
      */
     'formalityLevel'?: number;
     /**
-     * Communication style (optional)
+     * Description of the communication style
      * @type {string}
      * @memberof CulturalDataResponse
      */
     'style'?: string;
     /**
-     * Cultural considerations (optional)
+     * Specific cultural considerations
      * @type {string}
      * @memberof CulturalDataResponse
      */
     'considerations'?: string;
     /**
-     * Additional notes (optional)
+     * General notes
      * @type {string}
      * @memberof CulturalDataResponse
      */
@@ -1098,25 +1086,25 @@ export interface UpdateAssetTranslationDto {
  */
 export interface UpdateCulturalDataDto {
     /**
-     * Formality level (optional)
+     * Formality level (1-10)
      * @type {number}
      * @memberof UpdateCulturalDataDto
      */
     'formalityLevel'?: number;
     /**
-     * Communication style (optional)
+     * Description of the communication style
      * @type {string}
      * @memberof UpdateCulturalDataDto
      */
     'style'?: string;
     /**
-     * Cultural considerations (optional)
+     * Specific cultural considerations
      * @type {string}
      * @memberof UpdateCulturalDataDto
      */
     'considerations'?: string;
     /**
-     * Additional notes (optional)
+     * General notes
      * @type {string}
      * @memberof UpdateCulturalDataDto
      */
@@ -1160,11 +1148,11 @@ export interface UpdateProjectDto {
      */
     'description'?: string;
     /**
-     * Optional ID of the User who owns this project
+     * ID (CUID) of the User who owns this project
      * @type {string}
      * @memberof UpdateProjectDto
      */
-    'ownerUserId'?: string;
+    'owner'?: string;
 }
 /**
  * 
@@ -1202,12 +1190,6 @@ export interface UpdatePromptAssetDto {
      * @memberof UpdatePromptAssetDto
      */
     'enabled'?: boolean;
-    /**
-     * ID opcional del proyecto al que pertenece el asset (null para desvincular)
-     * @type {string}
-     * @memberof UpdatePromptAssetDto
-     */
-    'projectId'?: string | null;
 }
 /**
  * 
@@ -1271,12 +1253,6 @@ export interface UpdatePromptDto {
      * @memberof UpdatePromptDto
      */
     'description'?: string;
-    /**
-     * ID of the tactic to associate, or null to disassociate.
-     * @type {string}
-     * @memberof UpdatePromptDto
-     */
-    'tacticId'?: string | null;
     /**
      * Complete list of Tag IDs to associate (replaces existing ones). Empty array to remove all.
      * @type {Array<string>}
@@ -1579,6 +1555,40 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
         },
         /**
          * 
+         * @summary List available Langchain provider types
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        aiModelControllerGetProviderTypes: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/projects/{projectId}/aimodels/providers/types`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Delete an AI model by ID (must belong to project)
          * @param {string} projectId Project ID
          * @param {string} aiModelId AI Model CUID
@@ -1720,6 +1730,18 @@ export const AIModelsProjectSpecificApiFp = function(configuration?: Configurati
         },
         /**
          * 
+         * @summary List available Langchain provider types
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async aiModelControllerGetProviderTypes(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.aiModelControllerGetProviderTypes(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AIModelsProjectSpecificApi.aiModelControllerGetProviderTypes']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Delete an AI model by ID (must belong to project)
          * @param {string} projectId Project ID
          * @param {string} aiModelId AI Model CUID
@@ -1791,6 +1813,15 @@ export const AIModelsProjectSpecificApiFactory = function (configuration?: Confi
         },
         /**
          * 
+         * @summary List available Langchain provider types
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        aiModelControllerGetProviderTypes(options?: RawAxiosRequestConfig): AxiosPromise<Array<string>> {
+            return localVarFp.aiModelControllerGetProviderTypes(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Delete an AI model by ID (must belong to project)
          * @param {string} projectId Project ID
          * @param {string} aiModelId AI Model CUID
@@ -1858,6 +1889,17 @@ export class AIModelsProjectSpecificApi extends BaseAPI {
      */
     public aiModelControllerFindOne(projectId: string, aiModelId: string, options?: RawAxiosRequestConfig) {
         return AIModelsProjectSpecificApiFp(this.configuration).aiModelControllerFindOne(projectId, aiModelId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List available Langchain provider types
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AIModelsProjectSpecificApi
+     */
+    public aiModelControllerGetProviderTypes(options?: RawAxiosRequestConfig) {
+        return AIModelsProjectSpecificApiFp(this.configuration).aiModelControllerGetProviderTypes(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -2741,7 +2783,7 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
         /**
          * 
          * @summary Gets cultural data by ID within a project
-         * @param {string} culturalDataId ID of the cultural data
+         * @param {string} culturalDataId Key of the cultural data (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2783,7 +2825,7 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
         /**
          * 
          * @summary Deletes cultural data by ID within a project
-         * @param {string} culturalDataId ID to delete
+         * @param {string} culturalDataId Key of the cultural data to delete (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2825,7 +2867,7 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
         /**
          * 
          * @summary Updates cultural data by ID within a project
-         * @param {string} culturalDataId ID to update
+         * @param {string} culturalDataId Key of the cultural data to update (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {UpdateCulturalDataDto} updateCulturalDataDto 
          * @param {*} [options] Override http request option.
@@ -2910,7 +2952,7 @@ export const CulturalDataApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Gets cultural data by ID within a project
-         * @param {string} culturalDataId ID of the cultural data
+         * @param {string} culturalDataId Key of the cultural data (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2924,7 +2966,7 @@ export const CulturalDataApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Deletes cultural data by ID within a project
-         * @param {string} culturalDataId ID to delete
+         * @param {string} culturalDataId Key of the cultural data to delete (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2938,7 +2980,7 @@ export const CulturalDataApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Updates cultural data by ID within a project
-         * @param {string} culturalDataId ID to update
+         * @param {string} culturalDataId Key of the cultural data to update (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {UpdateCulturalDataDto} updateCulturalDataDto 
          * @param {*} [options] Override http request option.
@@ -2984,7 +3026,7 @@ export const CulturalDataApiFactory = function (configuration?: Configuration, b
         /**
          * 
          * @summary Gets cultural data by ID within a project
-         * @param {string} culturalDataId ID of the cultural data
+         * @param {string} culturalDataId Key of the cultural data (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2995,7 +3037,7 @@ export const CulturalDataApiFactory = function (configuration?: Configuration, b
         /**
          * 
          * @summary Deletes cultural data by ID within a project
-         * @param {string} culturalDataId ID to delete
+         * @param {string} culturalDataId Key of the cultural data to delete (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3006,7 +3048,7 @@ export const CulturalDataApiFactory = function (configuration?: Configuration, b
         /**
          * 
          * @summary Updates cultural data by ID within a project
-         * @param {string} culturalDataId ID to update
+         * @param {string} culturalDataId Key of the cultural data to update (e.g., direct-and-formal)
          * @param {string} projectId Project ID
          * @param {UpdateCulturalDataDto} updateCulturalDataDto 
          * @param {*} [options] Override http request option.
@@ -3053,7 +3095,7 @@ export class CulturalDataApi extends BaseAPI {
     /**
      * 
      * @summary Gets cultural data by ID within a project
-     * @param {string} culturalDataId ID of the cultural data
+     * @param {string} culturalDataId Key of the cultural data (e.g., direct-and-formal)
      * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3066,7 +3108,7 @@ export class CulturalDataApi extends BaseAPI {
     /**
      * 
      * @summary Deletes cultural data by ID within a project
-     * @param {string} culturalDataId ID to delete
+     * @param {string} culturalDataId Key of the cultural data to delete (e.g., direct-and-formal)
      * @param {string} projectId Project ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3079,7 +3121,7 @@ export class CulturalDataApi extends BaseAPI {
     /**
      * 
      * @summary Updates cultural data by ID within a project
-     * @param {string} culturalDataId ID to update
+     * @param {string} culturalDataId Key of the cultural data to update (e.g., direct-and-formal)
      * @param {string} projectId Project ID
      * @param {UpdateCulturalDataDto} updateCulturalDataDto 
      * @param {*} [options] Override http request option.

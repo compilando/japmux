@@ -5,8 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**languageCode** | **string** | Código de idioma ISO (e.g., es, en) | [default to undefined]
-**promptText** | **string** | Texto traducido del prompt | [default to undefined]
+**languageCode** | **string** | ISO language code (e.g., es, en) | [default to undefined]
+**promptText** | **string** | Translated prompt text | [default to undefined]
 
 ## Example
 

@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**assetVersionId** | **string** | ID de la PromptAssetVersion a vincular. | [default to undefined]
-**usageContext** | **string** | Contexto de uso (opcional). | [optional] [default to undefined]
-**position** | **number** | Posición/orden (opcional). | [optional] [default to undefined]
+**assetVersionId** | **string** | ID of the PromptAssetVersion to link. | [default to undefined]
+**usageContext** | **string** | Usage context (optional). | [optional] [default to undefined]
+**position** | **number** | Position/order (optional). | [optional] [default to undefined]
 
 ## Example
 
