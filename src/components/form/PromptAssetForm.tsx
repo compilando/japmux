@@ -1,88 +1,135 @@
 import React, { useState, useEffect } from 'react';
-import { PromptAsset, CreatePromptAssetDto, UpdatePromptAssetDto } from '@/services/api';
+import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
+import { CreatePromptAssetDto, UpdatePromptAssetDto, regionService } from '@/services/api';
+import { useProjects } from '@/context/ProjectContext';
+import { CreateRegionDto } from '@/services/generated/api';
 
 interface PromptAssetFormProps {
-    initialData: PromptAsset | null;
+    initialData: PromptAssetData | null;
     onSave: (payload: CreatePromptAssetDto | UpdatePromptAssetDto) => void;
     onCancel: () => void;
+    existingKeys?: string[];
 }
 
-const PromptAssetForm: React.FC<PromptAssetFormProps> = ({ initialData, onSave, onCancel }) => {
+const PromptAssetForm: React.FC<PromptAssetFormProps> = ({ initialData, onSave, onCancel, existingKeys = [] }) => {
     const [key, setKey] = useState('');
     const [name, setName] = useState('');
     const [initialValue, setInitialValue] = useState('');
-    const [type, setType] = useState('');
-    const [description, setDescription] = useState('');
     const [category, setCategory] = useState('');
     const [enabled, setEnabled] = useState(true);
+    const [keyError, setKeyError] = useState<string | null>(null);
+    const [regionList, setRegionList] = useState<CreateRegionDto[]>([]);
+    const [loadingRegions, setLoadingRegions] = useState(false);
+    const { selectedProjectId } = useProjects();
 
     const isEditing = !!initialData;
+
+    useEffect(() => {
+        const fetchRegions = async () => {
+            if (!selectedProjectId) return;
+
+            setLoadingRegions(true);
+            try {
+                const data = await regionService.findAll(selectedProjectId);
+                if (Array.isArray(data)) {
+                    setRegionList(data);
+                }
+            } catch (error) {
+                console.error("Error fetching regions:", error);
+            } finally {
+                setLoadingRegions(false);
+            }
+        };
+
+        fetchRegions();
+    }, [selectedProjectId]);
 
     useEffect(() => {
         if (initialData) {
             setKey(initialData.key || '');
             setName(initialData.name || '');
-            setType(initialData.type || '');
-            setDescription(initialData.description || '');
             setCategory(initialData.category || '');
             setEnabled(initialData.enabled === undefined ? true : initialData.enabled);
             setInitialValue('');
+            setKeyError(null);
         } else {
             setKey('');
             setName('');
-            setType('');
-            setDescription('');
             setCategory('');
             setEnabled(true);
             setInitialValue('');
+            setKeyError(null);
         }
     }, [initialData]);
 
+    const handleKeyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newKey = e.target.value;
+        setKey(newKey);
+        if (!isEditing && existingKeys.includes(newKey)) {
+            setKeyError('Esta clave ya existe en el proyecto.');
+        } else {
+            setKeyError(null);
+        }
+    };
+
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        let payload: CreatePromptAssetDto | UpdatePromptAssetDto;
 
-        if (isEditing) {
-            payload = {
+        if (!isEditing && existingKeys.includes(key)) {
+            setKeyError('Esta clave ya existe en el proyecto.');
+            return;
+        }
+        setKeyError(null);
+
+        if (isEditing && initialData) {
+            let updatePayload: UpdatePromptAssetDto = {
                 name: name || undefined,
-                type: type || undefined,
-                description: description || undefined,
                 category: category || undefined,
                 enabled: enabled,
-            } as UpdatePromptAssetDto;
+            };
+            Object.keys(updatePayload).forEach(k => updatePayload[k as keyof UpdatePromptAssetDto] === undefined && delete updatePayload[k as keyof UpdatePromptAssetDto]);
+            onSave(updatePayload);
         } else {
-            payload = {
+            let createPayload: CreatePromptAssetDto = {
                 key,
                 name,
                 initialValue: initialValue,
-                initialVersionTag: 'v1.0.0',
-                type: type || undefined,
-                description: description || undefined,
                 category: category || undefined,
-            } as CreatePromptAssetDto;
-        }
+            };
+            Object.keys(createPayload).forEach(k => createPayload[k as keyof CreatePromptAssetDto] === undefined && delete createPayload[k as keyof CreatePromptAssetDto]);
 
-        onSave(payload);
+            if (!createPayload.key || !createPayload.name || !createPayload.initialValue) {
+                alert("Se requieren la clave, el nombre y el valor inicial para crear un nuevo asset.");
+                return;
+            }
+            onSave(createPayload);
+        }
     };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-                <label htmlFor="key" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Key (Unique ID)</label>
-                <input
-                    type="text"
+                <label htmlFor="key" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Región</label>
+                <select
                     id="key"
                     value={key}
-                    onChange={(e) => setKey(e.target.value)}
+                    onChange={handleKeyChange}
                     required
                     disabled={isEditing}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500 disabled:text-gray-400"
-                    placeholder="e.g., welcome_message_asset"
-                />
-                {!isEditing && <p className="text-xs text-gray-500 dark:text-gray-400">Cannot be changed after creation.</p>}
+                    className={`mt-1 block w-full px-3 py-2 border ${keyError ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500 disabled:text-gray-400`}
+                >
+                    <option value="">Selecciona una región</option>
+                    {regionList.map((region) => (
+                        <option key={region.languageCode} value={region.languageCode}>
+                            {region.languageCode} - {region.name}
+                        </option>
+                    ))}
+                </select>
+                {keyError && <p className="text-xs text-red-500 mt-1">{keyError}</p>}
+                {!isEditing && !keyError && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">No se puede cambiar después de la creación.</p>}
             </div>
             <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
                 <input
                     type="text"
                     id="name"
@@ -90,13 +137,13 @@ const PromptAssetForm: React.FC<PromptAssetFormProps> = ({ initialData, onSave, 
                     onChange={(e) => setName(e.target.value)}
                     required
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                    placeholder="e.g., Welcome Message Asset"
+                    placeholder="ej. Mensaje de Bienvenida"
                 />
             </div>
             {!isEditing && (
                 <>
                     <div>
-                        <label htmlFor="initialValue" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Initial Value (for v1.0.0)</label>
+                        <label htmlFor="initialValue" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Valor Inicial (para v1.0.0)</label>
                         <textarea
                             id="initialValue"
                             rows={3}
@@ -104,42 +151,20 @@ const PromptAssetForm: React.FC<PromptAssetFormProps> = ({ initialData, onSave, 
                             onChange={(e) => setInitialValue(e.target.value)}
                             required
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                            placeholder="Enter the content of the first version..."
+                            placeholder="Ingresa el contenido de la primera versión..."
                         />
                     </div>
                 </>
             )}
             <div>
-                <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type (Optional)</label>
-                <input
-                    type="text"
-                    id="type"
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                    placeholder="e.g., greeting, instruction"
-                />
-            </div>
-            <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description (Optional)</label>
-                <textarea
-                    id="description"
-                    rows={3}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                    placeholder="Describe the purpose of this asset..."
-                />
-            </div>
-            <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category (Optional)</label>
+                <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría (Opcional)</label>
                 <input
                     type="text"
                     id="category"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                    placeholder="e.g., marketing, support"
+                    placeholder="ej. marketing, soporte"
                 />
             </div>
             {isEditing && (
@@ -153,13 +178,13 @@ const PromptAssetForm: React.FC<PromptAssetFormProps> = ({ initialData, onSave, 
                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
                     />
                     <label htmlFor="enabled" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                        Enabled
+                        Habilitado
                     </label>
                 </div>
             )}
             <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200 dark:border-gray-500">Cancel</button>
-                <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{isEditing ? 'Save Changes' : 'Create Asset'}</button>
+                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200 dark:border-gray-500">Cancelar</button>
+                <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{isEditing ? 'Guardar Cambios' : 'Crear Asset'}</button>
             </div>
         </form>
     );

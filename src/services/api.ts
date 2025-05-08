@@ -4,6 +4,7 @@ import { showErrorToast } from '@/utils/toastUtils'; // Importar la utilidad
 import * as generated from '../../generated/japmux-api';
 // Eliminar esta importación, apiClient se define abajo
 // import { apiClient } from '../axiosClient';
+import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
 
 // --- Configuración Global de Axios ---
 
@@ -85,6 +86,10 @@ const tagsGeneratedApi = new generated.TagsApi(generatedApiConfig, undefined, ap
 const environmentsGeneratedApi = new generated.EnvironmentsApi(generatedApiConfig, undefined, apiClient);
 // Instanciar PromptAssetsApi aquí para que esté disponible para el servicio
 const promptAssetsGeneratedApi = new generated.PromptAssetsApi(generatedApiConfig, undefined, apiClient);
+// Instanciar PromptAssetVersionsApi aquí para que esté disponible para el servicio
+const promptAssetVersionsGeneratedApi = new generated.PromptAssetVersionsWithinProjectAssetApi(generatedApiConfig, undefined, apiClient);
+// Instanciar PromptAssetTranslationsApi aquí para que esté disponible para el servicio
+const promptAssetTranslationsGeneratedApi = new generated.AssetTranslationsWithinProjectAssetVersionApi(generatedApiConfig, undefined, apiClient);
 // const authGeneratedApi = new generated.AuthenticationApi(generatedApiConfig, undefined, apiClient); // Si decides reemplazar authService
 
 // --- Servicios Manuales (Wrapper sobre los generados o lógica personalizada) ---
@@ -421,17 +426,29 @@ export const promptTranslationService = {
 
 // Servicio de Prompt Assets (Corregido para usar generated.PromptAssetsApi)
 export const promptAssetService = {
-    findAll: async (projectId: string): Promise<generated.CreatePromptAssetDto[]> => {
+    findAll: async (projectId: string): Promise<PromptAssetData[]> => {
         // Forzar tipo 'any' para evitar linter, luego acceder a .data
         const response: any = await promptAssetsGeneratedApi.promptAssetControllerFindAll(projectId);
         // Asumimos que response.data existe y es del tipo correcto
-        return response.data as generated.CreatePromptAssetDto[];
+        // Asegurar que name y category se incluyen
+        return (response.data as generated.CreatePromptAssetDto[]).map(item => ({
+            ...item,
+            name: item.name || item.key, // Usar key como fallback para name
+            category: item.category || 'default', // Usar 'default' como fallback para category
+            enabled: true // Por defecto, todos los assets están habilitados
+        }));
     },
-    findOne: async (projectId: string, assetKey: string): Promise<generated.CreatePromptAssetDto> => {
+    findOne: async (projectId: string, assetKey: string): Promise<PromptAssetData> => {
         // Forzar tipo 'any' para evitar linter, luego acceder a .data
         const response: any = await promptAssetsGeneratedApi.promptAssetControllerFindOne(assetKey, projectId);
         // Asumimos que response.data existe y es del tipo correcto
-        return response.data as generated.CreatePromptAssetDto;
+        // Asegurar que name y category se incluyen
+        return {
+            ...response.data as generated.CreatePromptAssetDto,
+            name: response.data.name || assetKey, // Usar assetKey como fallback para name
+            category: response.data.category || 'default', // Usar 'default' como fallback para category
+            enabled: true // Por defecto, el asset está habilitado
+        };
     },
     create: async (projectId: string, payload: generated.CreatePromptAssetDto): Promise<void> => {
         await promptAssetsGeneratedApi.promptAssetControllerCreate(projectId, payload);
@@ -443,42 +460,42 @@ export const promptAssetService = {
         await promptAssetsGeneratedApi.promptAssetControllerRemove(assetKey, projectId);
     },
 
-    // --- Asset Versions --- (Aún pendientes de corregir para usar la API generada)
+    // --- Asset Versions --- (Actualizado para usar la API generada)
     findVersions: async (projectId: string, assetKey: string): Promise<generated.CreatePromptAssetVersionDto[]> => {
-        const response = await apiClient.get<generated.CreatePromptAssetVersionDto[]>(`/api/projects/${projectId}/assets/${assetKey}/versions`);
+        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerFindAll(projectId, assetKey);
+        return response.data;
+    },
+    findOneVersion: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
+        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerFindOneByTag(projectId, assetKey, versionTag);
         return response.data;
     },
     createVersion: async (projectId: string, assetKey: string, payload: generated.CreatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await apiClient.post<generated.CreatePromptAssetVersionDto>(`/api/projects/${projectId}/assets/${assetKey}/versions`, payload);
+        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerCreate(projectId, assetKey, payload);
         return response.data;
     },
     updateVersion: async (projectId: string, assetKey: string, versionTag: string, payload: generated.UpdatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await apiClient.patch<generated.CreatePromptAssetVersionDto>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}`, payload);
+        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerUpdate(projectId, assetKey, versionTag, payload);
         return response.data;
     },
     removeVersion: async (projectId: string, assetKey: string, versionTag: string): Promise<void> => {
-        await apiClient.delete(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}`);
-    },
-    findOneVersion: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await apiClient.get<generated.CreatePromptAssetVersionDto>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}`);
-        return response.data;
+        await promptAssetVersionsGeneratedApi.promptAssetVersionControllerRemove(projectId, assetKey, versionTag);
     },
 
-    // --- Asset Translations ---
+    // --- Asset Translations --- (Actualizado para usar la API generada)
     findAssetTranslations: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreateAssetTranslationDto[]> => {
-        const response = await apiClient.get<generated.CreateAssetTranslationDto[]>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations`);
+        const response = await apiClient.get<generated.CreateAssetTranslationDto[]>(`/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/translations`);
         return response.data;
     },
     createAssetTranslation: async (projectId: string, assetKey: string, versionTag: string, payload: generated.CreateAssetTranslationDto): Promise<generated.CreateAssetTranslationDto> => {
-        const response = await apiClient.post<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations`, payload);
+        const response = await apiClient.post<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/translations`, payload);
         return response.data;
     },
     updateAssetTranslation: async (projectId: string, assetKey: string, versionTag: string, languageCode: string, payload: generated.UpdateAssetTranslationDto): Promise<generated.CreateAssetTranslationDto> => {
-        const response = await apiClient.patch<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`, payload);
+        const response = await apiClient.patch<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`, payload);
         return response.data;
     },
     removeAssetTranslation: async (projectId: string, assetKey: string, versionTag: string, languageCode: string): Promise<void> => {
-        await apiClient.delete(`/api/projects/${projectId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`);
+        await apiClient.delete(`/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`);
     }
 };
 

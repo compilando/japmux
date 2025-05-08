@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { PromptTranslation, CreatePromptTranslationDto, UpdatePromptTranslationDto } from '@/services/api';
+import { CreatePromptTranslationDto, UpdatePromptTranslationDto, regionService } from '@/services/api';
+import { useProjects } from '@/context/ProjectContext';
+import { CreateRegionDto } from '@/services/generated/api';
+
+// Definir el tipo localmente ya que no está exportado desde api
+interface PromptTranslation {
+    languageCode: string;
+    promptText: string;
+}
 
 interface PromptTranslationFormProps {
     initialData: PromptTranslation | null;
@@ -11,8 +19,31 @@ interface PromptTranslationFormProps {
 const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialData, versionId, onSave, onCancel }) => {
     const [languageCode, setLanguageCode] = useState('');
     const [promptText, setPromptText] = useState('');
+    const [regionList, setRegionList] = useState<CreateRegionDto[]>([]);
+    const [loadingRegions, setLoadingRegions] = useState(false);
+    const { selectedProjectId } = useProjects();
 
     const isEditing = !!initialData;
+
+    useEffect(() => {
+        const fetchRegions = async () => {
+            if (!selectedProjectId) return;
+
+            setLoadingRegions(true);
+            try {
+                const data = await regionService.findAll(selectedProjectId);
+                if (Array.isArray(data)) {
+                    setRegionList(data);
+                }
+            } catch (error) {
+                console.error("Error fetching regions:", error);
+            } finally {
+                setLoadingRegions(false);
+            }
+        };
+
+        fetchRegions();
+    }, [selectedProjectId]);
 
     useEffect(() => {
         if (initialData) {
@@ -24,51 +55,8 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
         }
     }, [initialData]);
 
-    const handleLanguageCodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let value = e.target.value;
-
-        // Permitir solo letras y un guion, eliminar otros caracteres no deseados
-        value = value.replace(/[^a-zA-Z-]/g, '');
-
-        // Separar por guion si existe
-        const parts = value.split('-');
-        let langPart = parts[0] || '';
-        let regionPart = parts[1] || '';
-
-        // Formatear parte de idioma (dos primeras letras en minúscula)
-        langPart = langPart.slice(0, 2).toLowerCase();
-
-        // Formatear parte de región (dos primeras letras en mayúscula después del guion)
-        regionPart = regionPart.slice(0, 2).toUpperCase();
-
-        let formattedValue = langPart;
-        // Verificar si se debe añadir un guion
-        // Se añade si el usuario tecleó un guion, o si ya existe una parte de región,
-        // o si la parte de idioma tiene 2 caracteres y el usuario está añadiendo nuevo contenido (no borrando).
-        if (value.includes('-') || regionPart.length > 0 ||
-            (langPart.length === 2 && e.nativeEvent && typeof (e.nativeEvent as any).inputType === 'string' &&
-                !(e.nativeEvent as any).inputType.includes('delete'))) {
-            if (langPart.length > 0) { // Solo añadir guion si hay parte de idioma
-                formattedValue += '-';
-            }
-        }
-
-        if (regionPart.length > 0) {
-            formattedValue += regionPart;
-        }
-
-        // Limitar la longitud total a 5 caracteres (xx-XX)
-        if (formattedValue.length > 5 && formattedValue.indexOf('-') === 2) {
-            formattedValue = formattedValue.slice(0, 5);
-        }
-        // Si es como "esUS" (longitud 4 sin guion), la lógica anterior ya habrá insertado el guion: "es-US"
-
-        // Si el valor resultante es solo un guion (ej. el usuario borró todo menos el guion), limpiarlo.
-        if (formattedValue === '-') {
-            formattedValue = '';
-        }
-
-        setLanguageCode(formattedValue);
+    const handleLanguageCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setLanguageCode(e.target.value);
     };
 
     const handleSubmit = (event: React.FormEvent) => {
@@ -80,6 +68,10 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
                 promptText: promptText
             } as UpdatePromptTranslationDto;
         } else {
+            if (!languageCode) {
+                alert("Se requiere seleccionar una región.");
+                return;
+            }
             payload = {
                 languageCode,
                 promptText,
@@ -87,18 +79,12 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
             } as CreatePromptTranslationDto;
 
             if (!versionId) {
-                alert("Error: Missing version ID for creating translation.");
+                alert("Error: Falta el ID de la versión para crear la traducción.");
                 return;
             }
 
-            if (!languageCode || !promptText) {
-                alert("Language Code and Prompt Text are required!");
-                return;
-            }
-
-            const langCodePattern = /^[a-z]{2}-[A-Z]{2}$/;
-            if (!langCodePattern.test(languageCode)) {
-                alert("Language Code format must be xx-XX (e.g., en-US).");
+            if (!promptText) {
+                alert("El texto del prompt es requerido!");
                 return;
             }
         }
@@ -109,23 +95,26 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-                <label htmlFor="languageCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Language Code (e.g., es-ES)</label>
-                <input
-                    type="text"
+                <label htmlFor="languageCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Región</label>
+                <select
                     id="languageCode"
                     value={languageCode}
-                    onChange={handleLanguageCodeInputChange}
-                    required
-                    minLength={5}
-                    maxLength={5}
+                    onChange={handleLanguageCodeChange}
+                    required={!isEditing}
                     disabled={isEditing}
-                    pattern="^[a-z]{2}-[A-Z]{2}$"
-                    title="Format xx-XX (e.g., en-US)"
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500"
-                />
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500 disabled:text-gray-400"
+                >
+                    <option value="">Selecciona una región</option>
+                    {regionList.map((region) => (
+                        <option key={region.languageCode} value={region.languageCode}>
+                            {region.languageCode} - {region.name}
+                        </option>
+                    ))}
+                </select>
+                {isEditing && <p className="text-xs text-gray-500 dark:text-gray-400">No se puede cambiar después de la creación.</p>}
             </div>
             <div>
-                <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Translated Prompt Text</label>
+                <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Texto del Prompt Traducido</label>
                 <textarea
                     id="promptText"
                     rows={6}
@@ -133,12 +122,13 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
                     onChange={(e) => setPromptText(e.target.value)}
                     required
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                    placeholder="Ingresa el texto traducido del prompt..."
                 />
             </div>
 
             <div className="flex justify-end space-x-3">
-                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200 dark:border-gray-500">Cancel</button>
-                <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{isEditing ? 'Save Changes' : 'Create Translation'}</button>
+                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200 dark:border-gray-500">Cancelar</button>
+                <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{isEditing ? 'Guardar Cambios' : 'Crear Traducción'}</button>
             </div>
         </form>
     );

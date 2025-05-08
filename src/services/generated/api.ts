@@ -283,18 +283,6 @@ export interface CreatePromptAssetDto {
      */
     'name': string;
     /**
-     * Tipo de asset (e.g., texto, json, lista)
-     * @type {string}
-     * @memberof CreatePromptAssetDto
-     */
-    'type'?: string;
-    /**
-     * Descripción más detallada del propósito del asset
-     * @type {string}
-     * @memberof CreatePromptAssetDto
-     */
-    'description'?: string;
-    /**
      * Categoría para organizar assets (e.g., Saludos, Despedidas)
      * @type {string}
      * @memberof CreatePromptAssetDto
@@ -1086,18 +1074,6 @@ export interface UpdatePromptAssetDto {
      * @memberof UpdatePromptAssetDto
      */
     'name'?: string;
-    /**
-     * Tipo de asset (e.g., texto, json, lista)
-     * @type {string}
-     * @memberof UpdatePromptAssetDto
-     */
-    'type'?: string;
-    /**
-     * Descripción más detallada del propósito del asset
-     * @type {string}
-     * @memberof UpdatePromptAssetDto
-     */
-    'description'?: string;
     /**
      * Categoría para organizar assets (e.g., Saludos, Despedidas)
      * @type {string}

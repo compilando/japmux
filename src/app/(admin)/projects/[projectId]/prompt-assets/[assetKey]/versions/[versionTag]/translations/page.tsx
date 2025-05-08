@@ -8,6 +8,7 @@ import {
     CreateAssetTranslationDto,
     UpdateAssetTranslationDto,
 } from '@/services/generated/api';
+import * as generated from '@/services/generated/api';
 import {
     promptAssetService,
     projectService
@@ -19,6 +20,11 @@ import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 type AssetTranslationUIData = CreateAssetTranslationDto;
 
+// Extender el DTO para incluir el id que necesitamos para las traducciones
+interface PromptAssetVersionData extends generated.CreatePromptAssetVersionDto {
+    id: string; // ID necesario para las traducciones
+}
+
 const PromptAssetTranslationsPage: React.FC = () => {
     const [itemsList, setItemsList] = useState<AssetTranslationUIData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -28,6 +34,7 @@ const PromptAssetTranslationsPage: React.FC = () => {
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
     const [asset, setAsset] = useState<CreatePromptAssetDto | null>(null);
+    const [version, setVersion] = useState<PromptAssetVersionData | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     const params = useParams();
@@ -36,27 +43,46 @@ const PromptAssetTranslationsPage: React.FC = () => {
     const versionTag = params.versionTag as string;
 
     useEffect(() => {
-        if (!projectId || !assetKey) return;
+        if (!projectId || !assetKey || !versionTag) return;
         setBreadcrumbLoading(true);
         Promise.all([
             projectService.findOne(projectId),
-            promptAssetService.findOne(projectId, assetKey)
-        ]).then(([projectData, assetData]) => {
+            promptAssetService.findOne(projectId, assetKey),
+            promptAssetService.findVersions(projectId, assetKey)
+        ]).then(([projectData, assetData, versionsData]) => {
             setProject(projectData as CreateProjectDto);
             setAsset(assetData as CreatePromptAssetDto);
-        }).catch(err => {
-            console.error("Error fetching breadcrumb data (project/asset):", err);
-            showErrorToast("Failed to load project or asset details for breadcrumbs.");
+
+            const versionExists = versionsData.some(v => v.versionTag === versionTag);
+            if (!versionExists) {
+                throw new Error(`Version "${versionTag}" not found for asset "${assetKey}". Available versions: ${versionsData.map(v => v.versionTag).join(', ')}`);
+            }
+
+            return promptAssetService.findOneVersion(projectId, assetKey, versionTag);
+        }).then(versionData => {
+            setVersion(versionData as PromptAssetVersionData);
+        }).catch((err: unknown) => {
+            console.error("Error fetching breadcrumb data (project/asset/version):", err);
+            const apiErrorMessage = (err as any)?.response?.data?.message || (err as Error)?.message || 'Failed to load project, asset, or version details.';
+            showErrorToast(apiErrorMessage);
             setProject(null);
             setAsset(null);
+            setVersion(null);
+            setError(apiErrorMessage);
         }).finally(() => {
             setBreadcrumbLoading(false);
         });
-    }, [projectId, assetKey]);
+    }, [projectId, assetKey, versionTag]);
 
     const fetchData = useCallback(async () => {
         if (!projectId || !assetKey || !versionTag) {
             setError("Missing Project ID, Asset Key, or Version Tag in URL.");
+            setLoading(false);
+            setItemsList([]);
+            return;
+        }
+        if (!version) {
+            setError(`Asset version "${versionTag}" not found for asset "${assetKey}".`);
             setLoading(false);
             setItemsList([]);
             return;
@@ -70,10 +96,9 @@ const PromptAssetTranslationsPage: React.FC = () => {
             } else {
                 console.error("API response for asset translations is not an array:", data);
                 setError('Received invalid data format.');
-                setItemsList([]);
             }
-        } catch (err) {
-            const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to fetch asset translations.';
+        } catch (err: unknown) {
+            const apiErrorMessage = (err as any)?.response?.data?.message || (err as Error)?.message || 'Failed to fetch asset translations.';
             console.error("Error fetching asset translations:", err);
             setError(apiErrorMessage);
             showErrorToast(apiErrorMessage);
@@ -81,7 +106,7 @@ const PromptAssetTranslationsPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [projectId, assetKey, versionTag]);
+    }, [projectId, assetKey, versionTag, version]);
 
     useEffect(() => {
         if (projectId && assetKey && versionTag) {
@@ -129,7 +154,7 @@ const PromptAssetTranslationsPage: React.FC = () => {
             if (editingItem && editingItem.languageCode) {
                 const updatePayload: UpdateAssetTranslationDto = { value: (payloadFromForm as UpdateAssetTranslationDto).value };
                 await promptAssetService.updateAssetTranslation(projectId, assetKey, versionTag, editingItem.languageCode, updatePayload);
-                message = "Translation updated successfully!";
+                message = `Translation for ${editingItem.languageCode} updated successfully!`;
             } else {
                 const createPayload = payloadFromForm as CreateAssetTranslationDto;
                 if (!createPayload.languageCode || !createPayload.value) {
@@ -170,7 +195,7 @@ const PromptAssetTranslationsPage: React.FC = () => {
             if (versionTag) {
                 breadcrumbs.push({
                     label: `Version ${versionTag}`,
-                    href: `/projects/${projectId}/prompt-assets/${assetKey}/versions`
+                    href: `/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}`
                 });
                 breadcrumbs.push({ label: "Translations" });
             }
@@ -182,7 +207,7 @@ const PromptAssetTranslationsPage: React.FC = () => {
     }
     if (breadcrumbLoading || loading) return <p>Loading asset translation details...</p>;
     if (error) return <p className="text-red-500">{error}</p>;
-    if (!project || !asset) return <p className="text-red-500">Could not load project or asset details.</p>;
+    if (!project || !asset || !version) return <p className="text-red-500">Could not load project, asset, or version details.</p>;
 
     return (
         <>
@@ -196,7 +221,7 @@ const PromptAssetTranslationsPage: React.FC = () => {
 
             <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                 {itemsList.length === 0 && !loading ? (
-                    <p className="text-center py-4 text-gray-500 dark:text-gray-400">No translations found for asset {asset?.name || assetKey} version {versionTag}.</p>
+                    <p className="text-center text-gray-500 dark:text-gray-400">No translations found for this version.</p>
                 ) : (
                     <PromptAssetTranslationsTable
                         translations={itemsList}
@@ -208,15 +233,16 @@ const PromptAssetTranslationsPage: React.FC = () => {
             </div>
 
             {isModalOpen && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
-                    <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
-                        <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-                            {editingItem ? `Edit Translation (${editingItem.languageCode})` : 'Add New Translation'}
-                        </h3>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full">
+                        <h2 className="text-xl font-bold mb-4 dark:text-white">
+                            {editingItem ? 'Edit Translation' : 'Add New Translation'}
+                        </h2>
                         <PromptAssetTranslationForm
                             initialData={editingItem}
                             onSave={handleSave}
                             onCancel={() => setIsModalOpen(false)}
+                            versionId={version.id}
                         />
                     </div>
                 </div>

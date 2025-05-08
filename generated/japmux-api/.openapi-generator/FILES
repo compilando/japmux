@@ -16,7 +16,6 @@ docs/CreateEnvironmentDto.md
 docs/CreateOrUpdatePromptTranslationDto.md
 docs/CreateProjectDto.md
 docs/CreatePromptAssetDto.md
-docs/CreatePromptAssetLinkDto.md
 docs/CreatePromptAssetVersionDto.md
 docs/CreatePromptDto.md
 docs/CreatePromptTranslationDto.md
