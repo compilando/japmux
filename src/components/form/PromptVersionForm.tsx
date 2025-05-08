@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { CreatePromptVersionDto, UpdatePromptVersionDto } from '@/services/api';
+import React, { useState, useEffect, useRef } from 'react';
+import { CreatePromptVersionDto, UpdatePromptVersionDto, promptAssetService } from '@/services/api';
+import { useProjects } from '@/context/ProjectContext';
+import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
 
 interface PromptVersionFormProps {
     initialData: CreatePromptVersionDto | null;
@@ -44,7 +46,11 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
     const [promptText, setPromptText] = useState('');
     const [versionTag, setVersionTag] = useState('v1.0.0');
     const [changeMessage, setChangeMessage] = useState('');
-    // isActive is not in UpdateDto, might need a dedicated endpoint
+    const [assets, setAssets] = useState<PromptAssetData[]>([]);
+    const [showAssetMenu, setShowAssetMenu] = useState(false);
+    const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+    const editorRef = useRef<HTMLTextAreaElement>(null);
+    const { selectedProjectId } = useProjects();
 
     const isEditing = !!initialData;
 
@@ -54,14 +60,62 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
             setVersionTag(initialData.versionTag || 'v1.0.0');
             setChangeMessage(initialData.changeMessage || '');
         } else {
-            // Reset state
             setPromptText('');
-            // Calcular y establecer el tag sugerido
             const suggestedTag = calculateNextVersionTag(latestVersionTag);
             setVersionTag(suggestedTag);
             setChangeMessage('');
         }
     }, [initialData, latestVersionTag]);
+
+    useEffect(() => {
+        if (editorRef.current) {
+            editorRef.current.value = promptText;
+        }
+    }, [promptText]);
+
+    useEffect(() => {
+        const fetchAssets = async () => {
+            if (!selectedProjectId) return;
+            try {
+                const assetsData = await promptAssetService.findAll(selectedProjectId);
+                setAssets(assetsData);
+            } catch (error) {
+                console.error('Error al cargar los assets:', error);
+            }
+        };
+
+        fetchAssets();
+    }, [selectedProjectId]);
+
+    const handleContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setMenuPosition({ x: e.clientX, y: e.clientY });
+        setShowAssetMenu(true);
+    };
+
+    const handleAssetSelect = (asset: PromptAssetData) => {
+        if (editorRef.current) {
+            const textarea = editorRef.current;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const variable = `{{${asset.key}}}`;
+
+            const newText = text.substring(0, start) + variable + text.substring(end);
+            setPromptText(newText);
+
+            // Restaurar el cursor después de la variable insertada
+            setTimeout(() => {
+                textarea.focus();
+                textarea.setSelectionRange(start + variable.length, start + variable.length);
+            }, 0);
+        }
+        setShowAssetMenu(false);
+    };
+
+    const handleEditorChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setPromptText(e.target.value);
+    };
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -111,13 +165,17 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
             <div>
                 <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Prompt Text</label>
                 <textarea
-                    id="promptText"
-                    rows={8} // More space for prompt text
+                    ref={editorRef}
                     value={promptText}
-                    onChange={(e) => setPromptText(e.target.value)}
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                    onChange={handleEditorChange}
+                    onContextMenu={handleContextMenu}
+                    className="mt-1 block w-full min-h-[200px] p-3 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-white font-mono"
+                    style={{ resize: 'vertical' }}
                 />
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    Haz clic derecho en el editor para abrir el menú de assets (variables).
+                    Selecciona una variable para insertarla en el texto.
+                </p>
             </div>
             <div>
                 <label htmlFor="changeMessage" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Change Message (Optional)</label>
@@ -130,7 +188,29 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                 />
             </div>
 
-            {/* isActive might need a separate control or a dedicated button/endpoint */}
+            {showAssetMenu && (
+                <div
+                    className="fixed z-50 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700"
+                    style={{
+                        left: menuPosition.x,
+                        top: menuPosition.y,
+                        maxHeight: '300px',
+                        overflowY: 'auto'
+                    }}
+                >
+                    <div className="py-1">
+                        {assets.map((asset) => (
+                            <button
+                                key={asset.key}
+                                onClick={() => handleAssetSelect(asset)}
+                                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                                {asset.name} ({asset.key})
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="flex justify-end space-x-3">
                 <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200 dark:border-gray-500">Cancel</button>

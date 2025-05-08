@@ -109,13 +109,11 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
 
             if (result?.response) {
                 try {
-                    // Intentar obtener el objeto de respuesta
                     let parsedResponse;
                     if (typeof result.response === 'string') {
-                        // Limpiar caracteres de control no válidos antes de parsear
                         const cleanResponse = result.response
-                            .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Eliminar caracteres de control
-                            .replace(/\n\s+/g, '\n') // Limpiar espacios múltiples después de saltos de línea
+                            .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+                            .replace(/\n\s+/g, '\n')
                             .trim();
 
                         parsedResponse = JSON.parse(cleanResponse);
@@ -126,12 +124,11 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
                     console.log('Respuesta parseada:', parsedResponse);
 
                     if (parsedResponse.translatedText) {
-                        // Procesamos el texto traducido para manejar caracteres especiales y formato
                         const cleanText = parsedResponse.translatedText
-                            .split('\n') // Dividir por saltos de línea
-                            .map((line: string) => line.trim()) // Limpiar espacios en cada línea
-                            .filter((line: string) => line.length > 0) // Eliminar líneas vacías
-                            .join('\n'); // Unir con saltos de línea
+                            .split('\n')
+                            .map((line: string) => line.trim())
+                            .filter((line: string) => line.length > 0)
+                            .join('\n');
 
                         setPromptText(cleanText);
                     } else {
@@ -206,16 +203,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
                     {!initialData && languageCode && (
                         <button
                             type="button"
-                            onClick={() => {
-                                console.log('Botón de traducción clickeado');
-                                console.log('Estado actual:', {
-                                    languageCode,
-                                    versionText,
-                                    selectedProjectId,
-                                    defaultAiModelId
-                                });
-                                handleTranslate();
-                            }}
+                            onClick={handleTranslate}
                             disabled={isTranslating || !defaultAiModelId}
                             className="mt-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
                         >
@@ -231,12 +219,15 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
                 </label>
                 <textarea
                     id="promptText"
+                    rows={8}
                     value={promptText}
                     onChange={(e) => setPromptText(e.target.value)}
-                    rows={8}
-                    className="mt-1 block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                     required
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                 />
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    Escribe o pega aquí el texto traducido. Puedes usar el botón "Traducir" para obtener una traducción automática.
+                </p>
             </div>
 
             <div className="flex justify-end space-x-3">
