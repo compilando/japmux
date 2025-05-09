@@ -23,7 +23,7 @@ export default function AuthLayout({
               <div className="flex flex-col items-center max-w-xs">
                 <Link href="/">
                   <p className="text-center text-5xl text-white dark:text-white">
-                    JAPM
+                    japm.app
                   </p>
                 </Link>
               </div>

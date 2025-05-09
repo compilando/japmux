@@ -19,7 +19,7 @@ export default function Ecommerce() {
     <>
       <div className="mb-8">
         <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
-          Welcome to JAPM
+          Welcome to japm.app
         </h2>
         <p className="text-base font-medium">
           Select a section below to manage your prompts, projects, and system settings.

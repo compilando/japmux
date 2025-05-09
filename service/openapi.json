@@ -4538,8 +4538,8 @@
     }
   },
   "info": {
-    "title": "JAPM API",
-    "description": "API for the JAPM Prompt Engineering application",
+    "title": "japm.app API",
+    "description": "API for the japm.app Prompt Engineering application",
     "version": "1.0",
     "contact": {}
   },

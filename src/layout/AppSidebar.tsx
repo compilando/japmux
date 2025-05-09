@@ -22,12 +22,22 @@ import {
   ChatIcon,
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
+import SidebarNavItem from "./SidebarNavItem";
 
-type NavItem = {
+// Define SubItem type
+export type SubItem = {
+  name: string;
+  path: string;
+  icon?: React.ReactNode;
+  pro?: boolean;
+  new?: boolean;
+};
+
+export type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { name: string; path: string; icon?: React.ReactNode; pro?: boolean; new?: boolean }[];
+  subItems?: SubItem[]; // Use SubItem type here
 };
 
 const AppSidebar: React.FC = () => {
@@ -40,6 +50,7 @@ const AppSidebar: React.FC = () => {
     {
       icon: <GridIcon />,
       name: "Management",
+      path: "/management",
       subItems: [
         { name: "Users", path: "/users", icon: <UserCircleIcon /> },
         { icon: <FolderIcon />, name: "Projects", path: "/projects" }
@@ -48,6 +59,7 @@ const AppSidebar: React.FC = () => {
     {
       icon: <GridIcon />,
       name: "Current Project",
+      path: "/current-project",
       subItems: selectedProjectId ? [
         { name: "AI Models", path: "/ai-models", icon: <BoltIcon /> },
         { name: "Environments", path: "/environments", icon: <TableIcon /> },
@@ -59,6 +71,7 @@ const AppSidebar: React.FC = () => {
     {
       icon: <GridIcon />,
       name: "Prompt Management",
+      path: selectedProjectId ? `/projects/${selectedProjectId}/prompts` : undefined,
       subItems: selectedProjectId ? [
         { name: "Prompts", path: `/projects/${selectedProjectId}/prompts`, icon: <TaskIcon /> },
         { name: "Assets", path: `/projects/${selectedProjectId}/prompt-assets`, icon: <BoxCubeIcon /> },
@@ -79,19 +92,20 @@ const AppSidebar: React.FC = () => {
   const [subMenuHeight, setSubMenuHeight] = useState<Record<number, number>>({});
   const subMenuRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
-  // Calculate the correct submenu index based *only* on the current path
+  // Calculate the correct submenu index based on the current path
   const activeSubmenuIndexBasedOnPath = React.useMemo(() => {
-    // Check specifically for /current-project
-    if (pathname === '/current-project' && currentProjectIndex !== -1) {
-      return currentProjectIndex;
+    // 1. Check if the current pathname matches the path of a parent item that has subItems
+    let parentIndex = navItems.findIndex(nav => nav.path === pathname && nav.subItems && nav.subItems.length > 0);
+    if (parentIndex !== -1) {
+      return parentIndex;
     }
-    // Find the index of the first nav item whose subitem path matches the current pathname
-    const index = navItems.findIndex(nav =>
+
+    // 2. If not, check if the current pathname matches any subItem's path
+    parentIndex = navItems.findIndex(nav =>
       nav.subItems && nav.subItems.some(subItem => subItem.path === pathname)
     );
-    // Return the found index (-1 if not found)
-    return index;
-  }, [pathname, navItems, currentProjectIndex]);
+    return parentIndex; // -1 if no match
+  }, [pathname, navItems]);
 
   // Effect to synchronize the open submenu state with the calculated path index
   useEffect(() => {
@@ -123,111 +137,19 @@ const AppSidebar: React.FC = () => {
   const renderMenuItems = (itemsToRender: NavItem[]) => (
     <ul className="flex flex-col gap-4">
       {itemsToRender.map((nav, index) => (
-        <li key={`${nav.name}-${index}`}>
-          {nav.subItems && nav.subItems.length > 0 ? (
-            <button
-              onClick={() => handleSubmenuToggle(index)}
-              className={`menu-item group  ${(openSubmenu === index || (index === currentProjectIndex && pathname === '/current-project')) ? "menu-item-active" : "menu-item-inactive"
-                } cursor-pointer ${!isExpanded && !isHovered
-                  ? "lg:justify-center"
-                  : "lg:justify-start"
-                }`}
-            >
-              <span
-                className={`${(openSubmenu === index || (index === currentProjectIndex && pathname === '/current-project'))
-                  ? "menu-item-icon-active"
-                  : "menu-item-icon-inactive"
-                  }`}
-              >
-                {nav.icon}
-              </span>
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <span className={`menu-item-text`}>{nav.name}</span>
-              )}
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <ChevronDownIcon
-                  className={`ml-auto w-5 h-5 transition-transform duration-200  ${openSubmenu === index ? "rotate-180 text-brand-500" : ""
-                    }`}
-                />
-              )}
-            </button>
-          ) : (
-            nav.path && (
-              <Link
-                href={nav.path}
-                className={`menu-item group ${pathname === nav.path ? "menu-item-active" : "menu-item-inactive"
-                  }`}
-              >
-                <span
-                  className={`${pathname === nav.path
-                    ? "menu-item-icon-active"
-                    : "menu-item-icon-inactive"
-                    }`}
-                >
-                  {nav.icon}
-                </span>
-                {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className={`menu-item-text`}>{nav.name}</span>
-                )}
-              </Link>
-            )
-          )}
-          {nav.subItems && nav.subItems.length > 0 && (isExpanded || isHovered || isMobileOpen) && (
-            <div
-              ref={(el) => {
-                subMenuRefs.current[index] = el;
-              }}
-              className="overflow-hidden transition-all duration-300"
-              style={{
-                height:
-                  openSubmenu === index ? `${subMenuHeight[index]}px` : "0px",
-              }}
-            >
-              <ul className="mt-2 space-y-1 ml-9">
-                {nav.subItems.map((subItem) => (
-                  <li key={subItem.name}>
-                    <Link
-                      href={subItem.path}
-                      className={`menu-dropdown-item flex items-center gap-2 ${pathname === subItem.path
-                        ? "menu-dropdown-item-active"
-                        : "menu-dropdown-item-inactive"
-                        }`}
-                    >
-                      {subItem.icon && (
-                        <span className="inline-block w-5 h-5">
-                          {subItem.icon}
-                        </span>
-                      )}
-                      {subItem.name}
-                      <span className="flex items-center gap-1 ml-auto">
-                        {subItem.new && (
-                          <span
-                            className={`ml-auto ${pathname === subItem.path
-                              ? "menu-dropdown-badge-active"
-                              : "menu-dropdown-badge-inactive"
-                              } menu-dropdown-badge `}
-                          >
-                            new
-                          </span>
-                        )}
-                        {subItem.pro && (
-                          <span
-                            className={`ml-auto ${pathname === subItem.path
-                              ? "menu-dropdown-badge-active"
-                              : "menu-dropdown-badge-inactive"
-                              } menu-dropdown-badge `}
-                          >
-                            pro
-                          </span>
-                        )}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </li>
+        <SidebarNavItem
+          key={`${nav.name}-${index}`}
+          nav={nav}
+          index={index}
+          openSubmenu={openSubmenu}
+          pathname={pathname}
+          isExpanded={isExpanded}
+          isHovered={isHovered}
+          isMobileOpen={isMobileOpen}
+          handleSubmenuToggle={handleSubmenuToggle}
+          subMenuHeight={subMenuHeight}
+          subMenuRefs={subMenuRefs}
+        />
       ))}
     </ul>
   );
@@ -260,7 +182,7 @@ const AppSidebar: React.FC = () => {
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <h1 style={{ fontSize: "24px", fontWeight: "bold" }}>JAPM</h1>
+              <h1 style={{ fontSize: "24px", fontWeight: "bold" }}>japm.app</h1>
             </>
           ) : (
             <Image
