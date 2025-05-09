@@ -2,8 +2,8 @@ import SignUpForm from "@/components/auth/SignUpForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "JAPM SignUp Page",
-  description: "This is NextJAPM SignUp Page",
+  title: "japm.app SignUp Page",
+  description: "This is Nextjapm.app SignUp Page",
   // other metadata
 };
 

@@ -1,4 +1,4 @@
-# JAPM
+# japm.app
 
 This project is an Prompt Manager built with Next.js and Tailwind CSS, designed to interact with a backend API to manage various application data.
 

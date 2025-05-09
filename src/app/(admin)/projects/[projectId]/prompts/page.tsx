@@ -183,6 +183,16 @@ const PromptsPage: React.FC = () => {
         <>
             <Breadcrumb crumbs={breadcrumbs} />
 
+            {/* Page Title and Subtitle */}
+            <div className="my-6">
+                <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
+                    Prompts for {project?.name || selectedProjectId}
+                </h2>
+                <p className="text-base font-medium dark:text-white">
+                    Create, view, and manage all prompts and prompt assets associated with this project.
+                </p>
+            </div>
+
             <div className="flex justify-end mb-4">
                 <button
                     onClick={handleAdd}
