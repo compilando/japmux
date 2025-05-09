@@ -27,7 +27,7 @@ export default function SignInForm() {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    const success = await login({ email, password });
+    const success = await login({ email, password }, isChecked);
 
     if (success) {
       router.push('/');

@@ -182,7 +182,7 @@ const AppSidebar: React.FC = () => {
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <h1 style={{ fontSize: "24px", fontWeight: "bold" }}>japm.app</h1>
+              <h1 style={{ fontSize: "24px", fontWeight: "bold" }} className="dark:text-white">japm.app</h1>
             </>
           ) : (
             <Image

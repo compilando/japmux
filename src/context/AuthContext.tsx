@@ -15,7 +15,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean; // To know if the initial token is being verified
     error: string | null; // For login/registration errors
-    login: (credentials: LoginDto) => Promise<boolean>;
+    login: (credentials: LoginDto, rememberMe?: boolean) => Promise<boolean>;
     logout: () => void;
     register: (data: RegisterDto) => Promise<boolean>;
 }
@@ -58,12 +58,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         fetchUserProfile();
     }, [fetchUserProfile]);
 
-    const login = async (credentials: LoginDto): Promise<boolean> => {
-        console.log('AuthProvider: login called'); // Log inicio login
+    const login = async (credentials: LoginDto, rememberMe: boolean = false): Promise<boolean> => {
+        console.log('AuthProvider: login called, rememberMe:', rememberMe); // Log inicio login
         setError(null);
         setIsLoading(true);
         try {
-            await authService.login(credentials);
+            await authService.login(credentials, rememberMe);
             console.log('AuthProvider: login successful, calling fetchUserProfile...'); // Log post-login
             await fetchUserProfile();
             setIsLoading(false); // Ensure isLoading is set to false here

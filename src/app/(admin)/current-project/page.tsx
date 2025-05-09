@@ -24,7 +24,7 @@ export default function CurrentProjectPage() {
         <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
           Current Project Context
         </h2>
-        <p className="text-base font-medium">
+        <p className="text-base font-medium dark:text-white">
           Manage settings and data specific to the active project.
         </p>
       </div>
@@ -34,7 +34,7 @@ export default function CurrentProjectPage() {
         <Link href="/ai-models" className="col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3">
           <div className="group h-full rounded-lg border border-stroke bg-white p-6 shadow-lg transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-2xl hover:border-indigo-500 dark:border-strokedark dark:bg-boxdark dark:hover:border-indigo-500 border-t-4 border-t-indigo-600">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 transition-colors duration-300 group-hover:bg-indigo-500 dark:bg-indigo-800 dark:group-hover:bg-indigo-600">
-              <PaperPlaneIcon className="h-7 w-7 fill-indigo-500 transition-colors duration-300 group-hover:fill-white dark:fill-indigo-300 dark:group-hover:fill-white" />
+              <PaperPlaneIcon className="h-7 w-7 fill-indigo-500 transition-colors duration-300 group-hover:fill-white dark:fill-white dark:group-hover:fill-white" />
             </div>
             <h3 className="mb-2 text-xl font-bold text-black dark:text-gray-700">
               AI Models
@@ -47,7 +47,7 @@ export default function CurrentProjectPage() {
         <Link href="/environments" className="col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3">
           <div className="group h-full rounded-lg border border-stroke bg-white p-6 shadow-lg transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-2xl hover:border-teal-500 dark:border-strokedark dark:bg-boxdark dark:hover:border-teal-500 border-t-4 border-t-teal-600">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 transition-colors duration-300 group-hover:bg-teal-500 dark:bg-teal-800 dark:group-hover:bg-teal-600">
-              <TableIcon className="h-7 w-7 fill-teal-500 transition-colors duration-300 group-hover:fill-white dark:fill-teal-300 dark:group-hover:fill-white" />
+              <TableIcon className="h-7 w-7 fill-teal-500 transition-colors duration-300 group-hover:fill-white dark:fill-white dark:group-hover:fill-white" />
             </div>
             <h3 className="mb-2 text-xl font-bold text-black dark:text-gray-700">
               Environments
@@ -60,7 +60,7 @@ export default function CurrentProjectPage() {
         <Link href="/regions" className="col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3">
           <div className="group h-full rounded-lg border border-stroke bg-white p-6 shadow-lg transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-2xl hover:border-sky-500 dark:border-strokedark dark:bg-boxdark dark:hover:border-sky-500 border-t-4 border-t-sky-600">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-sky-100 transition-colors duration-300 group-hover:bg-sky-500 dark:bg-sky-800 dark:group-hover:bg-sky-600">
-              <ListIcon className="h-7 w-7 fill-sky-500 transition-colors duration-300 group-hover:fill-white dark:fill-sky-300 dark:group-hover:fill-white" />
+              <ListIcon className="h-7 w-7 fill-sky-500 transition-colors duration-300 group-hover:fill-white dark:fill-white dark:group-hover:fill-white" />
             </div>
             <h3 className="mb-2 text-xl font-bold text-black dark:text-gray-700">
               Regions
@@ -73,7 +73,7 @@ export default function CurrentProjectPage() {
         <Link href="/cultural-data" className="col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3">
           <div className="group h-full rounded-lg border border-stroke bg-white p-6 shadow-lg transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-2xl hover:border-indigo-500 dark:border-strokedark dark:bg-boxdark dark:hover:border-indigo-500 border-t-4 border-t-indigo-600">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 transition-colors duration-300 group-hover:bg-indigo-500 dark:bg-indigo-800 dark:group-hover:bg-indigo-600">
-              <EyeIcon className="h-7 w-7 fill-indigo-500 transition-colors duration-300 group-hover:fill-white dark:fill-indigo-300 dark:group-hover:fill-white" />
+              <EyeIcon className="h-7 w-7 fill-indigo-500 transition-colors duration-300 group-hover:fill-white dark:fill-white dark:group-hover:fill-white" />
             </div>
             <h3 className="mb-2 text-xl font-bold text-black dark:text-gray-700">
               Cultural Data
@@ -86,7 +86,7 @@ export default function CurrentProjectPage() {
         <Link href="/tags" className="col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3">
           <div className="group h-full rounded-lg border border-stroke bg-white p-6 shadow-lg transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-2xl hover:border-teal-500 dark:border-strokedark dark:bg-boxdark dark:hover:border-teal-500 border-t-4 border-t-teal-600">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 transition-colors duration-300 group-hover:bg-teal-500 dark:bg-teal-800 dark:group-hover:bg-teal-600">
-              <ChatIcon className="h-7 w-7 fill-teal-500 transition-colors duration-300 group-hover:fill-white dark:fill-teal-300 dark:group-hover:fill-white" />
+              <ChatIcon className="h-7 w-7 fill-teal-500 transition-colors duration-300 group-hover:fill-white dark:fill-white dark:group-hover:fill-white" />
             </div>
             <h3 className="mb-2 text-xl font-bold text-black dark:text-gray-700">
               Tags

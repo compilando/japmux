@@ -23,8 +23,18 @@ apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         console.log('[Interceptor Request] Running for URL:', config.url);
         if (typeof window !== 'undefined') {
-            const token = localStorage.getItem(AUTH_TOKEN_KEY);
-            console.log('[Interceptor Request] Token found in localStorage:', token ? 'Yes' : 'No');
+            let token = localStorage.getItem(AUTH_TOKEN_KEY);
+            if (!token) {
+                token = sessionStorage.getItem(AUTH_TOKEN_KEY);
+                if (token) {
+                    console.log('[Interceptor Request] Token found in sessionStorage.');
+                } else {
+                    console.log('[Interceptor Request] Token not found in localStorage or sessionStorage.');
+                }
+            } else {
+                console.log('[Interceptor Request] Token found in localStorage.');
+            }
+
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
                 console.log('[Interceptor Request] Authorization header SET.');
@@ -32,7 +42,7 @@ apiClient.interceptors.request.use(
                 console.log('[Interceptor Request] Authorization header NOT set (no token).');
             }
         } else {
-            console.log('[Interceptor Request] Cannot access localStorage (not window).');
+            console.log('[Interceptor Request] Cannot access storage (not window).');
         }
         return config;
     },
@@ -52,6 +62,7 @@ apiClient.interceptors.response.use(
             // No mostrar toast para 401, la redirección es suficiente
             if (typeof window !== 'undefined') {
                 localStorage.removeItem(AUTH_TOKEN_KEY);
+                sessionStorage.removeItem(AUTH_TOKEN_KEY); // Also remove from sessionStorage
                 // Considerar si la redirección debe hacerse aquí o en AuthContext
                 // window.location.href = '/signin';
             }
@@ -139,13 +150,18 @@ export const authService = {
         const response = await apiClient.post<generated.UserProfileResponse>('/api/auth/register', payload);
         return response.data;
     },
-    login: async (payload: generated.LoginDto): Promise<generated.LoginResponse> => {
+    login: async (payload: generated.LoginDto, rememberMe: boolean = false): Promise<generated.LoginResponse> => {
         // Podrías reemplazar esto con:
         // const response = await authGeneratedApi.authControllerLogin(payload);
         const response = await apiClient.post<generated.LoginResponse>('/api/auth/login', payload);
-        // Guardar token después del login exitoso
         if (response.data.access_token && typeof window !== 'undefined') {
-            localStorage.setItem(AUTH_TOKEN_KEY, response.data.access_token);
+            if (rememberMe) {
+                localStorage.setItem(AUTH_TOKEN_KEY, response.data.access_token);
+                console.log('authService: Token stored in localStorage (rememberMe=true).');
+            } else {
+                sessionStorage.setItem(AUTH_TOKEN_KEY, response.data.access_token);
+                console.log('authService: Token stored in sessionStorage (rememberMe=false).');
+            }
         }
         return response.data;
     },
@@ -156,16 +172,18 @@ export const authService = {
         return response.data;
     },
     logout: () => {
-        // Simplemente elimina el token localmente
         if (typeof window !== 'undefined') {
             localStorage.removeItem(AUTH_TOKEN_KEY);
+            sessionStorage.removeItem(AUTH_TOKEN_KEY); // Also remove from sessionStorage
+            console.log('authService: Token removed from localStorage and sessionStorage.');
         }
-        // No hay llamada API para logout en la spec, asumir que es solo local
     },
     isAuthenticated: (): boolean => {
         if (typeof window === 'undefined') return false;
-        const token = localStorage.getItem(AUTH_TOKEN_KEY);
-        return !!token; // Devuelve true si el token existe
+        let token = localStorage.getItem(AUTH_TOKEN_KEY);
+        if (token) return true;
+        token = sessionStorage.getItem(AUTH_TOKEN_KEY); // Check sessionStorage if not in localStorage
+        return !!token;
     },
 };
 
