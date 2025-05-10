@@ -52,12 +52,18 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
         // }
 
         // Check for token directly (alternative if no AuthContext)
-        if (typeof window !== 'undefined' && !localStorage.getItem('authToken')) {
-            console.log("No auth token found, skipping project fetch.");
-            setProjects([]);
-            setSelectedProjectIdState(null);
-            setIsLoading(false);
-            return;
+        if (typeof window !== 'undefined') {
+            let token = localStorage.getItem('authToken');
+            if (!token) {
+                token = sessionStorage.getItem('authToken');
+            }
+            if (!token) {
+                console.log("No auth token found, skipping project fetch.");
+                setProjects([]);
+                setSelectedProjectIdState(null);
+                setIsLoading(false);
+                return;
+            }
         }
 
         setIsLoading(true);

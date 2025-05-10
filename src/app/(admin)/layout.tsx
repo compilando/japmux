@@ -37,8 +37,8 @@ export default function AdminLayout({
   const mainContentMargin = isMobileOpen
     ? "ml-0"
     : isExpanded || isHovered
-      ? "lg:ml-[290px]"
-      : "lg:ml-[90px]";
+      ? "lg:ml-[350px]"
+      : "lg:ml-[120px]";
 
   return (
     <ProjectProvider>
@@ -47,10 +47,10 @@ export default function AdminLayout({
           <AppSidebar />
           <Backdrop />
           <div
-            className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}
+            className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin} w-full`}
           >
             <AppHeader />
-            <div className="p-4 mx-auto w-[96%] md:p-6">{children}</div>
+            <div className="p-6 mx-auto w-[95%] md:p-8">{children}</div>
           </div>
         </div>
       </PromptProvider>

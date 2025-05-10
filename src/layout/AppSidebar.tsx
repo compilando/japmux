@@ -25,20 +25,21 @@ import SidebarWidget from "./SidebarWidget";
 import SidebarNavItem from "./SidebarNavItem";
 
 // Define SubItem type
-export type SubItem = {
+export interface SubItem {
   name: string;
   path: string;
   icon?: React.ReactNode;
-  pro?: boolean;
   new?: boolean;
-};
+  pro?: boolean;
+}
 
-export type NavItem = {
-  name: string;
+export interface NavItem {
   icon: React.ReactNode;
+  name: string;
   path?: string;
-  subItems?: SubItem[]; // Use SubItem type here
-};
+  subItems?: SubItem[];
+  pro?: boolean;
+}
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
@@ -48,7 +49,7 @@ const AppSidebar: React.FC = () => {
   // Define navItems first
   const navItems: NavItem[] = [
     {
-      icon: <GridIcon />,
+      icon: <UserCircleIcon />,
       name: "Management",
       path: "/management",
       subItems: [
@@ -57,7 +58,7 @@ const AppSidebar: React.FC = () => {
       ],
     },
     {
-      icon: <GridIcon />,
+      icon: <BoltIcon />,
       name: "Current Project",
       path: "/current-project",
       subItems: selectedProjectId ? [
@@ -69,7 +70,7 @@ const AppSidebar: React.FC = () => {
       ] : [],
     },
     {
-      icon: <GridIcon />,
+      icon: <TaskIcon />,
       name: "Prompt Management",
       path: selectedProjectId ? `/projects/${selectedProjectId}/prompts` : undefined,
       subItems: selectedProjectId ? [
@@ -78,9 +79,10 @@ const AppSidebar: React.FC = () => {
       ] : [],
     },
     {
-      icon: <BoltIcon />,
+      icon: <PaperPlaneIcon />,
       name: "Serve Prompts",
       path: "/serveprompt",
+      pro: true
     }
   ].filter(item => !(item.subItems && item.subItems.length === 0 && (item.name === "Current Project" || item.name === "Prompt Management")));
 
@@ -163,21 +165,20 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-8 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${isExpanded || isMobileOpen
-          ? "w-[290px]"
+          ? "w-[350px]"
           : isHovered
-            ? "w-[290px]"
-            : "w-[90px]"
+            ? "w-[350px]"
+            : "w-[120px]"
         }
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0`}
+        lg:translate-x-0 lg:left-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-8 flex  ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-          }`}
+        className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}
       >
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
@@ -194,7 +195,7 @@ const AppSidebar: React.FC = () => {
           )}
         </Link>
       </div>
-      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+      <div className="flex flex-col duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>
@@ -205,7 +206,7 @@ const AppSidebar: React.FC = () => {
                   }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
+                  ""
                 ) : (
                   <HorizontaLDots />
                 )}
