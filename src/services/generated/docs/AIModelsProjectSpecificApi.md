@@ -186,11 +186,18 @@ import {
 const configuration = new Configuration();
 const apiInstance = new AIModelsProjectSpecificApi(configuration);
 
-const { status, data } = await apiInstance.aiModelControllerGetProviderTypes();
+let projectId: string; //The ID of the project (used for context/authorization, though the list is global) (default to undefined)
+
+const { status, data } = await apiInstance.aiModelControllerGetProviderTypes(
+    projectId
+);
 ```
 
 ### Parameters
-This endpoint does not have any parameters.
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **projectId** | [**string**] | The ID of the project (used for context/authorization, though the list is global) | defaults to undefined|
 
 
 ### Return type

@@ -1,21 +1,19 @@
-# CreateProjectDto
+# GeneratePromptStructureDto
 
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**name** | **string** | Name of the project | [default to undefined]
-**description** | **string** | Optional description for the project | [optional] [default to undefined]
+**userPrompt** | **string** | The user prompt text to be analyzed and structured. | [default to undefined]
 
 ## Example
 
 ```typescript
-import { CreateProjectDto } from './api';
+import { GeneratePromptStructureDto } from './api';
 
-const instance: CreateProjectDto = {
-    name,
-    description,
+const instance: GeneratePromptStructureDto = {
+    userPrompt,
 };
 ```
 

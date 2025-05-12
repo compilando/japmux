@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **userText** | **string** | The raw text input from the user. | [default to undefined]
 **systemPromptName** | **string** | The unique name of the SystemPrompt to use. | [default to undefined]
 **aiModelId** | **string** | The unique ID (CUID) of the AIModel to use for execution. | [default to undefined]
+**variables** | **object** | Optional variables to substitute in the system prompt. | [optional] [default to undefined]
 
 ## Example
 
@@ -18,6 +19,7 @@ const instance: ExecuteRawDto = {
     userText,
     systemPromptName,
     aiModelId,
+    variables,
 };
 ```
 

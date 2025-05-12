@@ -369,21 +369,20 @@ export const promptService = {
         // await promptsGeneratedApi.promptControllerRemove(promptName, projectId);
         await apiClient.delete(`/api/projects/${projectId}/prompts/${promptName}`);
     },
-    // <<< ESTOS MÉTODOS AHORA ESTARÁN EN SUS PROPIOS SERVICIOS >>>
-    /*
-    findVersions: async (projectId: string, promptName: string): Promise<generated.PromptVersion[]> => { ... },
-    findVersionByTag: async (projectId: string, promptName: string, versionTag: string): Promise<generated.PromptVersion> => { ... },
-    createVersion: async (projectId: string, promptName: string, payload: generated.CreatePromptVersionDto): Promise<generated.PromptVersion> => { ... },
-    updateVersion: async (projectId: string, promptName: string, versionTag: string, payload: generated.UpdatePromptVersionDto): Promise<generated.PromptVersion> => { ... },
-    removeVersion: async (projectId: string, promptName: string, versionTag: string): Promise<void> => { ... },
-    activateVersion: async (projectId: string, promptName: string, versionTag: string, payload: generated.ActivatePromptVersionDto): Promise<void> => { ... },
-    findTranslations: async (projectId: string, promptName: string, versionTag: string): Promise<generated.PromptTranslation[]> => { ... },
-    findTranslationByLanguage: async (projectId: string, promptName: string, versionTag: string, languageCode: string): Promise<generated.PromptTranslation> => { ... },
-    createTranslation: async (projectId: string, promptName: string, versionTag: string, payload: generated.CreatePromptTranslationDto): Promise<generated.PromptTranslation> => { ... },
-    updateTranslation: async (projectId: string, promptName: string, versionTag: string, languageCode: string, payload: generated.UpdatePromptTranslationDto): Promise<generated.PromptTranslation> => { ... },
-    removeTranslation: async (projectId: string, promptName: string, versionTag: string, languageCode: string): Promise<void> => { ... },
-    addOrUpdateTranslation: async (projectId: string, promptName: string, versionId: string, payload: generated.CreateOrUpdatePromptTranslationDto): Promise<void> => { ... },
-    */
+    // --- FUNCIÓN ACTUALIZADA (POST con userPrompt) ---
+    /**
+     * Llama al endpoint para generar la estructura del prompt usando POST.
+     * Requiere el userPrompt en el cuerpo.
+     * Devuelve un objeto JSON (tipo 'any' por ahora).
+     */
+    generatePromptStructure: async (projectId: string, userPrompt: string): Promise<any> => {
+        // Cambiado a POST, ruta correcta y enviando el userPrompt en el cuerpo
+        const payload = { userPrompt: userPrompt };
+        // Revertido a la ruta original 'generate-structure'
+        const response = await apiClient.post(`/api/projects/${projectId}/prompts/generate-structure`, payload);
+        return response.data;
+    },
+    // --- FIN FUNCIÓN ACTUALIZADA ---
 };
 
 // Servicio para Versiones de Prompt

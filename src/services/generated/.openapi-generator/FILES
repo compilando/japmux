@@ -12,7 +12,6 @@ docs/CreateAiModelDto.md
 docs/CreateAssetTranslationDto.md
 docs/CreateCulturalDataDto.md
 docs/CreateEnvironmentDto.md
-docs/CreateOrUpdatePromptTranslationDto.md
 docs/CreateProjectDto.md
 docs/CreatePromptAssetDto.md
 docs/CreatePromptAssetVersionDto.md
@@ -30,6 +29,7 @@ docs/EnvironmentsApi.md
 docs/ExecuteLlmDto.md
 docs/ExecutePromptBodyDto.md
 docs/ExecuteRawDto.md
+docs/GeneratePromptStructureDto.md
 docs/HealthApi.md
 docs/HealthControllerCheck200Response.md
 docs/HealthControllerCheck200ResponseInfoValue.md
@@ -41,6 +41,7 @@ docs/LoginResponse.md
 docs/ProjectsApi.md
 docs/PromptAssetVersionsWithinProjectAssetApi.md
 docs/PromptAssetsApi.md
+docs/PromptDto.md
 docs/PromptTranslationsWithinProjectPromptVersionApi.md
 docs/PromptVersionsWithinProjectPromptApi.md
 docs/PromptsApi.md

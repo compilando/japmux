@@ -20,6 +20,7 @@ import {
   ListIcon,
   EyeIcon,
   ChatIcon,
+  ShootingStarIcon,
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
 import SidebarNavItem from "./SidebarNavItem";
@@ -83,6 +84,11 @@ const AppSidebar: React.FC = () => {
       name: "Serve Prompts",
       path: "/serveprompt",
       pro: true
+    },
+    {
+      icon: <ShootingStarIcon />,
+      name: "Prompt Wizard",
+      path: "/prompt-wizard",
     }
   ].filter(item => !(item.subItems && item.subItems.length === 0 && (item.name === "Current Project" || item.name === "Prompt Management")));
 

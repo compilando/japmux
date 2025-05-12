@@ -4,75 +4,12 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**promptControllerAddOrUpdateTranslation**](#promptcontrolleraddorupdatetranslation) | **PUT** /api/projects/{projectId}/prompts/versions/{versionIdCuid}/translations | Adds or updates a translation for a specific prompt version (identified by CUID) in the project.|
-|[**promptControllerCreate**](#promptcontrollercreate) | **POST** /api/projects/{projectId}/prompts | Creates a new logical prompt (with ID as slug) within a project|
-|[**promptControllerFindAll**](#promptcontrollerfindall) | **GET** /api/projects/{projectId}/prompts | Gets all logical prompts for a project|
-|[**promptControllerFindOne**](#promptcontrollerfindone) | **GET** /api/projects/{projectId}/prompts/{promptId} | Gets a logical prompt by its ID (slug) within a project|
-|[**promptControllerRemove**](#promptcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptId} | Deletes a logical prompt (and its associated versions via Cascade) within a project by ID (slug)|
-|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptId} | Updates an existing prompt by its ID (slug) for a specific project|
-
-# **promptControllerAddOrUpdateTranslation**
-> promptControllerAddOrUpdateTranslation(createOrUpdatePromptTranslationDto)
-
-
-### Example
-
-```typescript
-import {
-    PromptsApi,
-    Configuration,
-    CreateOrUpdatePromptTranslationDto
-} from './api';
-
-const configuration = new Configuration();
-const apiInstance = new PromptsApi(configuration);
-
-let versionIdCuid: string; //ID of the version to translate (CUID) (default to undefined)
-let projectId: string; //Project ID (slug) (default to undefined)
-let createOrUpdatePromptTranslationDto: CreateOrUpdatePromptTranslationDto; //
-
-const { status, data } = await apiInstance.promptControllerAddOrUpdateTranslation(
-    versionIdCuid,
-    projectId,
-    createOrUpdatePromptTranslationDto
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **createOrUpdatePromptTranslationDto** | **CreateOrUpdatePromptTranslationDto**|  | |
-| **versionIdCuid** | [**string**] | ID of the version to translate (CUID) | defaults to undefined|
-| **projectId** | [**string**] | Project ID (slug) | defaults to undefined|
-
-
-### Return type
-
-void (empty response body)
-
-### Authorization
-
-[bearer](../README.md#bearer)
-
-### HTTP request headers
-
- - **Content-Type**: application/json
- - **Accept**: Not defined
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Translation created or updated. |  -  |
-|**400** | Invalid data. |  -  |
-|**403** | Forbidden (Version not in Project). |  -  |
-|**404** | Project or Version not found. |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+|[**promptControllerCreate**](#promptcontrollercreate) | **POST** /projects/{projectId}/prompts | Create a new prompt within a project|
+|[**promptControllerGenerateStructure**](#promptcontrollergeneratestructure) | **POST** /projects/{projectId}/prompts/generate-structure | Analyzes a user prompt using an LLM and suggests a structure based on project entities.|
+|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /projects/{projectId}/prompts/{promptName} | Update an existing prompt by name|
 
 # **promptControllerCreate**
-> CreatePromptDto promptControllerCreate(createPromptDto)
+> PromptDto promptControllerCreate(createPromptDto)
 
 
 ### Example
@@ -87,7 +24,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let projectId: string; //Project ID (slug) (default to undefined)
+let projectId: string; // (default to undefined)
 let createPromptDto: CreatePromptDto; //
 
 const { status, data } = await apiInstance.promptControllerCreate(
@@ -101,12 +38,12 @@ const { status, data } = await apiInstance.promptControllerCreate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **createPromptDto** | **CreatePromptDto**|  | |
-| **projectId** | [**string**] | Project ID (slug) | defaults to undefined|
+| **projectId** | [**string**] |  | defaults to undefined|
 
 
 ### Return type
 
-**CreatePromptDto**
+**PromptDto**
 
 ### Authorization
 
@@ -121,66 +58,15 @@ const { status, data } = await apiInstance.promptControllerCreate(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**201** | Prompt created. |  -  |
-|**400** | Invalid data. |  -  |
-|**404** | Project or Tag not found. |  -  |
-|**409** | Conflict, the generated slug for this prompt name already exists globally. |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **promptControllerFindAll**
-> Array<CreatePromptDto> promptControllerFindAll()
-
-
-### Example
-
-```typescript
-import {
-    PromptsApi,
-    Configuration
-} from './api';
-
-const configuration = new Configuration();
-const apiInstance = new PromptsApi(configuration);
-
-let projectId: string; //Project ID (slug) (default to undefined)
-
-const { status, data } = await apiInstance.promptControllerFindAll(
-    projectId
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **projectId** | [**string**] | Project ID (slug) | defaults to undefined|
-
-
-### Return type
-
-**Array<CreatePromptDto>**
-
-### Authorization
-
-[bearer](../README.md#bearer)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | List of prompts. |  -  |
+|**201** | The prompt has been successfully created. |  -  |
+|**400** | Bad Request. |  -  |
+|**401** | Unauthorized. |  -  |
 |**404** | Project not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **promptControllerFindOne**
-> CreatePromptDto promptControllerFindOne()
+# **promptControllerGenerateStructure**
+> object promptControllerGenerateStructure(generatePromptStructureDto)
 
 
 ### Example
@@ -188,18 +74,19 @@ const { status, data } = await apiInstance.promptControllerFindAll(
 ```typescript
 import {
     PromptsApi,
-    Configuration
+    Configuration,
+    GeneratePromptStructureDto
 } from './api';
 
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let promptId: string; //ID (slug) of the prompt (default to undefined)
-let projectId: string; //Project ID (slug) (default to undefined)
+let projectId: string; //The ID of the project. (default to undefined)
+let generatePromptStructureDto: GeneratePromptStructureDto; //
 
-const { status, data } = await apiInstance.promptControllerFindOne(
-    promptId,
-    projectId
+const { status, data } = await apiInstance.promptControllerGenerateStructure(
+    projectId,
+    generatePromptStructureDto
 );
 ```
 
@@ -207,13 +94,13 @@ const { status, data } = await apiInstance.promptControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **promptId** | [**string**] | ID (slug) of the prompt | defaults to undefined|
-| **projectId** | [**string**] | Project ID (slug) | defaults to undefined|
+| **generatePromptStructureDto** | **GeneratePromptStructureDto**|  | |
+| **projectId** | [**string**] | The ID of the project. | defaults to undefined|
 
 
 ### Return type
 
-**CreatePromptDto**
+**object**
 
 ### Authorization
 
@@ -221,75 +108,23 @@ const { status, data } = await apiInstance.promptControllerFindOne(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Prompt found. |  -  |
-|**404** | Project or Prompt not found. |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **promptControllerRemove**
-> promptControllerRemove()
-
-
-### Example
-
-```typescript
-import {
-    PromptsApi,
-    Configuration
-} from './api';
-
-const configuration = new Configuration();
-const apiInstance = new PromptsApi(configuration);
-
-let promptId: string; //ID (slug) of the prompt to delete (default to undefined)
-let projectId: string; //Project ID (slug) (default to undefined)
-
-const { status, data } = await apiInstance.promptControllerRemove(
-    promptId,
-    projectId
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **promptId** | [**string**] | ID (slug) of the prompt to delete | defaults to undefined|
-| **projectId** | [**string**] | Project ID (slug) | defaults to undefined|
-
-
-### Return type
-
-void (empty response body)
-
-### Authorization
-
-[bearer](../README.md#bearer)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: Not defined
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Prompt deleted. |  -  |
-|**404** | Project or Prompt not found. |  -  |
-|**409** | Conflict on deletion (check non-cascading relations). |  -  |
+|**200** | Returns the suggested JSON structure. |  -  |
+|**400** | Bad Request (e.g., missing user prompt). |  -  |
+|**401** | Unauthorized. |  -  |
+|**404** | Project not found. |  -  |
+|**500** | Internal Server Error (LLM failure, file read error, etc.). |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **promptControllerUpdate**
-> promptControllerUpdate(updatePromptDto)
+> PromptDto promptControllerUpdate(updatePromptDto)
 
 
 ### Example
@@ -304,13 +139,13 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let promptId: string; //ID (slug) of the prompt to update (default to undefined)
-let projectId: string; //Project ID (slug) (default to undefined)
-let updatePromptDto: UpdatePromptDto; //Data to update the prompt
+let projectId: string; // (default to undefined)
+let promptName: string; // (default to undefined)
+let updatePromptDto: UpdatePromptDto; //
 
 const { status, data } = await apiInstance.promptControllerUpdate(
-    promptId,
     projectId,
+    promptName,
     updatePromptDto
 );
 ```
@@ -319,14 +154,14 @@ const { status, data } = await apiInstance.promptControllerUpdate(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **updatePromptDto** | **UpdatePromptDto**| Data to update the prompt | |
-| **promptId** | [**string**] | ID (slug) of the prompt to update | defaults to undefined|
-| **projectId** | [**string**] | Project ID (slug) | defaults to undefined|
+| **updatePromptDto** | **UpdatePromptDto**|  | |
+| **projectId** | [**string**] |  | defaults to undefined|
+| **promptName** | [**string**] |  | defaults to undefined|
 
 
 ### Return type
 
-void (empty response body)
+**PromptDto**
 
 ### Authorization
 
@@ -335,15 +170,16 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Prompt updated successfully. |  -  |
-|**400** | Invalid data. |  -  |
-|**404** | Project, Prompt, or Tag not found. |  -  |
+|**200** | The prompt has been successfully updated. |  -  |
+|**400** | Bad Request. |  -  |
+|**401** | Unauthorized. |  -  |
+|**404** | Prompt or Project not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
