@@ -1817,7 +1817,7 @@
     },
     "/serve-prompt/execute/{projectId}/{promptName}/{versionTag}": {
       "post": {
-        "operationId": "ServePromptController_executePrompt",
+        "operationId": "ServePromptController_executePromptWithoutLanguage",
         "parameters": [
           {
             "name": "projectId",
@@ -1849,17 +1849,7 @@
           {
             "name": "languageCode",
             "required": false,
-            "in": "query",
-            "description": "Optional language code for translation (e.g., \"es\")",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "environmentName",
-            "required": false,
-            "in": "query",
-            "description": "Optional environment context (currently informational)",
+            "in": "path",
             "schema": {
               "type": "string"
             }
@@ -1911,7 +1901,100 @@
             "bearer": []
           }
         ],
-        "summary": "Assembles and prepares a specific prompt version for execution with provided variables",
+        "summary": "Assembles and prepares a specific prompt version (base language) for execution with provided variables",
+        "tags": [
+          "Serve Prompt"
+        ]
+      }
+    },
+    "/serve-prompt/execute/{projectId}/{promptName}/{versionTag}/{languageCode}": {
+      "post": {
+        "operationId": "ServePromptController_executePromptWithLanguage",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptName",
+            "required": true,
+            "in": "path",
+            "description": "The unique name of the prompt within the project",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionTag",
+            "required": true,
+            "in": "path",
+            "description": "Specific version tag (e.g., \"v1.2.0\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "languageCode",
+            "required": true,
+            "in": "path",
+            "description": "Language code for translation (e.g., \"es\")",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Input variables for the prompt",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecutePromptBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Processed prompt text ready for execution and metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "processedPrompt": "string",
+                    "metadata": {}
+                  }
+                }
+              }
+            }
+          },
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "description": "Invalid parameters or failed template rendering."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden Access to Project."
+          },
+          "404": {
+            "description": "Project, Prompt, or Version not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assembles and prepares a specific prompt version (specific language) for execution with provided variables",
         "tags": [
           "Serve Prompt"
         ]
@@ -4576,11 +4659,17 @@
             "minLength": 6,
             "example": "password123",
             "description": "User's password"
+          },
+          "tenantId": {
+            "type": "string",
+            "example": "tenant-cuid-xxxx",
+            "description": "ID del tenant al que pertenece este usuario"
           }
         },
         "required": [
           "email",
-          "password"
+          "password",
+          "tenantId"
         ]
       },
       "UpdateUserDto": {
@@ -4902,11 +4991,17 @@
             "items": {
               "$ref": "#/components/schemas/InitialTranslationDto"
             }
+          },
+          "tenantId": {
+            "type": "string",
+            "description": "ID del tenant al que pertenece este prompt",
+            "example": "tenant-cuid-xxxx"
           }
         },
         "required": [
           "name",
-          "promptText"
+          "promptText",
+          "tenantId"
         ]
       },
       "UpdatePromptDto": {
@@ -5004,12 +5099,18 @@
             "minLength": 25,
             "maxLength": 25,
             "description": "ID opcional del proyecto al que pertenece el asset"
+          },
+          "tenantId": {
+            "type": "string",
+            "description": "ID del tenant al que pertenece este asset",
+            "example": "tenant-cuid-xxxx"
           }
         },
         "required": [
           "key",
           "name",
-          "initialValue"
+          "initialValue",
+          "tenantId"
         ]
       },
       "UpdatePromptAssetDto": {
@@ -5019,6 +5120,11 @@
             "type": "string",
             "description": "Categoría para organizar assets (e.g., Saludos, Despedidas)",
             "example": "Saludos"
+          },
+          "tenantId": {
+            "type": "string",
+            "description": "ID del tenant al que pertenece este asset",
+            "example": "tenant-cuid-xxxx"
           },
           "enabled": {
             "type": "boolean",
@@ -5145,11 +5251,17 @@
             "type": "string",
             "description": "ID (CUID) of the User who owns this project",
             "example": "user-cuid-xxxx"
+          },
+          "tenantId": {
+            "type": "string",
+            "description": "ID del tenant al que pertenece este proyecto",
+            "example": "tenant-cuid-xxxx"
           }
         },
         "required": [
           "name",
-          "owner"
+          "owner",
+          "tenantId"
         ]
       },
       "UpdateProjectDto": {
@@ -5169,6 +5281,11 @@
             "type": "string",
             "description": "ID (CUID) of the User who owns this project",
             "example": "user-cuid-xxxx"
+          },
+          "tenantId": {
+            "type": "string",
+            "description": "ID del tenant al que pertenece este proyecto",
+            "example": "tenant-cuid-xxxx"
           }
         }
       },
@@ -5310,10 +5427,16 @@
             "type": "string",
             "description": "Descripción opcional de la etiqueta",
             "example": "Etiquetas relacionadas con comentarios de clientes."
+          },
+          "tenantId": {
+            "type": "string",
+            "description": "ID del tenant al que pertenece este tag",
+            "example": "tenant-cuid-xxxx"
           }
         },
         "required": [
-          "name"
+          "name",
+          "tenantId"
         ]
       },
       "TagDto": {
@@ -5360,6 +5483,11 @@
             "type": "string",
             "description": "Nueva descripción opcional de la etiqueta",
             "example": "Comentarios generales de los usuarios."
+          },
+          "tenantId": {
+            "type": "string",
+            "description": "ID del tenant al que pertenece este tag",
+            "example": "tenant-cuid-xxxx"
           }
         }
       },

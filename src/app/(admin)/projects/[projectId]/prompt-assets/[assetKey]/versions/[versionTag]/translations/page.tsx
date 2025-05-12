@@ -233,18 +233,17 @@ const PromptAssetTranslationsPage: React.FC = () => {
             </div>
 
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full">
-                        <h2 className="text-xl font-bold mb-4 dark:text-white">
-                            {editingItem ? 'Edit Translation' : 'Add New Translation'}
-                        </h2>
-                        <PromptAssetTranslationForm
-                            initialData={editingItem}
-                            onSave={handleSave}
-                            onCancel={() => setIsModalOpen(false)}
-                            versionId={version.id}
-                            versionText={version.value}
-                        />
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+                    <div className="relative top-20 mx-auto p-5 border w-[800px] shadow-lg rounded-md bg-white dark:bg-gray-800">
+                        <div className="mt-3">
+                            <PromptAssetTranslationForm
+                                initialData={editingItem}
+                                onSave={handleSave}
+                                onCancel={() => setIsModalOpen(false)}
+                                versionId={version.id}
+                                versionText={version.value}
+                            />
+                        </div>
                     </div>
                 </div>
             )}

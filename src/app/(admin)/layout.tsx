@@ -43,14 +43,14 @@ export default function AdminLayout({
   return (
     <ProjectProvider>
       <PromptProvider>
-        <div className="min-h-screen xl:flex">
+        <div className="min-h-screen xl:flex bg-white dark:bg-gray-900">
           <AppSidebar />
           <Backdrop />
           <div
-            className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin} w-full`}
+            className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin} w-full bg-white dark:bg-gray-900`}
           >
             <AppHeader />
-            <div className="p-6 mx-auto w-[95%] md:p-8">{children}</div>
+            <div className="p-6 mx-auto w-[95%] md:p-8 bg-white dark:bg-gray-900">{children}</div>
           </div>
         </div>
       </PromptProvider>
