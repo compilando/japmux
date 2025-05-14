@@ -128,6 +128,17 @@ const AiModelsPage: React.FC = () => {
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
+
+            {/* Page Title and Subtitle */}
+            <div className="my-6">
+                <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
+                    AI Models
+                </h2>
+                <p className="text-base font-medium dark:text-white">
+                    Create, view, and manage all AI Models in the system.
+                </p>
+            </div>
+
             {!selectedProjectId && !loading && (
                 <p className="text-yellow-600 dark:text-yellow-400">Please select a project to manage AI Models.</p>
             )}

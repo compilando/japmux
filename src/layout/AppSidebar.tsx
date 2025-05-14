@@ -81,7 +81,7 @@ const AppSidebar: React.FC = () => {
     },
     {
       icon: <PaperPlaneIcon />,
-      name: "Serve Prompts",
+      name: "Prompt Execution",
       path: "/serveprompt",
       pro: true
     },
@@ -221,7 +221,6 @@ const AppSidebar: React.FC = () => {
             </div>
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
       </div>
     </aside>
   );

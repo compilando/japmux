@@ -1,6 +1,7 @@
 import React from 'react';
 import { PromptTranslation } from '@/services/api';
 import CopyButton from '../common/CopyButton';
+import { TrashBinIcon, PencilIcon } from "@/icons";
 
 interface PromptTranslationsTableProps {
     promptTranslations: PromptTranslation[];
@@ -39,8 +40,22 @@ const PromptTranslationsTable: React.FC<PromptTranslationsTableProps> = ({ promp
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 truncate max-w-xs">{item.promptText}</td>
                             {/* TODO: Add cells for PromptTranslation fields */}
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button onClick={() => onEdit(item)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 mr-3">Edit</button>
-                                <button onClick={() => onDelete(item)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">Delete</button>
+                                <div className="flex items-center justify-end gap-3">
+                                    <button
+                                        onClick={() => onEdit(item)}
+                                        className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        aria-label="Edit Translation"
+                                    >
+                                        <PencilIcon className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => onDelete(item)}
+                                        className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        aria-label="Delete Translation"
+                                    >
+                                        <TrashBinIcon className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     ))}

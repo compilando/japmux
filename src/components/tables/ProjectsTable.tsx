@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../ui/table';
 import { Project, User } from '@/services/api';
-import { TrashBinIcon } from "@/icons";
+import { TrashBinIcon, PencilIcon } from "@/icons";
 import CopyButton from '../common/CopyButton';
 
 interface ProjectsTableProps {
@@ -57,7 +57,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({ projects, users, loading,
                                                 aria-label="Edit Project"
                                                 disabled={loading}
                                             >
-                                                Edit
+                                                <PencilIcon className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={() => onDelete(project.id)}

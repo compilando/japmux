@@ -141,6 +141,17 @@ const TagsPage: React.FC = () => {
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
+
+            {/* Page Title and Subtitle */}
+            <div className="my-6">
+                <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
+                    Tags
+                </h2>
+                <p className="text-base font-medium dark:text-white">
+                    Create, view, and manage all Tags in the system.
+                </p>
+            </div>
+
             {!selectedProjectId ? (
                 <p className="text-center text-red-500">Please select a project from the header dropdown to manage tags.</p>
             ) : (

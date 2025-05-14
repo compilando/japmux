@@ -105,6 +105,17 @@ const UsersPage: React.FC = () => {
         <>
             {/* Usar la prop crumbs */}
             <Breadcrumb crumbs={breadcrumbs} />
+
+            {/* Page Title and Subtitle */}
+            <div className="my-6">
+                <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
+                    Users
+                </h2>
+                <p className="text-base font-medium dark:text-white">
+                    Manage all user accounts in the system.
+                </p>
+            </div>
+
             <div className="flex justify-end mb-4">
                 <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
                     Add User

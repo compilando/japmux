@@ -3,6 +3,7 @@ import { PromptDto } from '@/services/generated/api';
 import Link from 'next/link';
 import { usePrompts } from '@/context/PromptContext';
 import CopyButton from '../common/CopyButton';
+import { TrashBinIcon, PencilIcon } from "@/icons";
 
 interface PromptsTableProps {
     prompts: PromptDto[];
@@ -46,8 +47,22 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                                         Versions
                                     </Link>
                                 )}
-                                <button onClick={() => onEdit(item)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600">Edit</button>
-                                <button onClick={() => onDelete(item.id)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">Delete</button>
+                                <div className="inline-flex items-center gap-3">
+                                    <button
+                                        onClick={() => onEdit(item)}
+                                        className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        aria-label="Edit Prompt"
+                                    >
+                                        <PencilIcon className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => onDelete(item.id)}
+                                        className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        aria-label="Delete Prompt"
+                                    >
+                                        <TrashBinIcon className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     ))}

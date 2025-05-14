@@ -1,6 +1,7 @@
 import React from 'react';
 import { Environment } from '@/services/api'; // Make sure the path is correct
 import CopyButton from '../common/CopyButton';
+import { TrashBinIcon, PencilIcon } from "@/icons"; // Added PencilIcon and TrashBinIcon
 
 interface EnvironmentsTableProps {
     environments: Environment[];
@@ -40,12 +41,22 @@ const EnvironmentsTable: React.FC<EnvironmentsTableProps> = ({ environments, onE
                             </td>
                             {/* TODO: Add more data cells based on Environment fields */}
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button onClick={() => onEdit(environment)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 mr-3">
-                                    Edit
-                                </button>
-                                <button onClick={() => onDelete(environment.id)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">
-                                    Delete
-                                </button>
+                                <div className="flex items-center justify-end gap-3">
+                                    <button
+                                        onClick={() => onEdit(environment)}
+                                        className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        aria-label="Edit Environment"
+                                    >
+                                        <PencilIcon className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => onDelete(environment.id)}
+                                        className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        aria-label="Delete Environment"
+                                    >
+                                        <TrashBinIcon className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     ))}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../ui/table';
 import { CulturalDataResponse } from '@/services/generated/api'; // Importación directa de CulturalDataResponse
-import { TrashBinIcon } from "@/icons";
+import { TrashBinIcon, PencilIcon } from "@/icons";
 import CopyButton from '../common/CopyButton'; // Importar CopyButton
 
 interface CulturalDataTableProps {
@@ -56,15 +56,15 @@ const CulturalDataTable: React.FC<CulturalDataTableProps> = ({ culturalDataList,
                                             <button
                                                 type="button"
                                                 onClick={() => onEdit(item)}
-                                                className="text-blue-500 hover:text-blue-700 p-1"
+                                                className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 aria-label="Edit Cultural Data"
                                             >
-                                                Edit
+                                                <PencilIcon className="w-4 h-4" />
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => onDelete(item.key)}
-                                                className="text-red-500 hover:text-red-700 p-1"
+                                                className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 aria-label="Delete Cultural Data"
                                             >
                                                 <TrashBinIcon className="w-4 h-4" />

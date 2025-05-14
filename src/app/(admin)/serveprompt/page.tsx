@@ -353,33 +353,23 @@ const ServePromptPage: React.FC = () => {
 
     // --- Render ---
     return (
-        <div className={styles.servePromptContainer}>
-            {error && <div className={styles.errorBanner}>{error}</div>}
+        <div className={`${styles.servePromptContainer} bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen`}>
+            <h1 className="text-2xl font-bold text-black dark:text-white">Serve Prompt</h1>
 
-            {/* --- INICIO: Selector de Tamaño de Fuente --- */}
-            <div className={styles.fontSizeSelectorContainer}>
-                <span className={styles.fontSizeSelectorLabel}>Font Size:</span>
-                <div className={styles.fontSizeSelector}>
-                    {fontSizes.map(size => (
-                        <button
-                            key={size}
-                            onClick={() => handleFontSizeChange(size)}
-                            className={`${styles.fontSizeButton} ${selectedFontSize === size ? styles.active : ''}`}
-                        >
-                            {size.toUpperCase()}
-                        </button>
-                    ))}
+            {error && (
+                <div className={`${styles.errorBanner} bg-yellow-100 border-yellow-400 text-yellow-700 dark:bg-yellow-700 dark:text-yellow-100 dark:border-yellow-600`}>
+                    Error: {error}
                 </div>
-            </div>
-            {/* --- FIN: Selector de Tamaño de Fuente --- */}
+            )}
 
+            {/* Selectors Grid */}
             <div className={styles.selectorsGrid}>
-                {/* Selector Proyecto (asumiendo que viene del contexto) */}
-                <input id="project-select" type="hidden" value={selectedProjectId || 'No Project Selected'} readOnly disabled className={styles.inputDisplay} />
+                {/* Project Selector (si se decide añadirlo o si selectedProjectId no fuera global) */}
+                <input id="project-select" type="hidden" value={selectedProjectId || 'No Project Selected'} readOnly disabled className={`${styles.inputDisplay} bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300`} />
 
                 {/* Selector Prompt */}
                 <div>
-                    <label htmlFor="prompt-select">Prompt</label>
+                    <label htmlFor="prompt-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Prompt:</label>
                     <div className={styles.selectWrapper}>
                         <Select
                             id="prompt-select"
@@ -397,7 +387,7 @@ const ServePromptPage: React.FC = () => {
 
                 {/* Selector Versión */}
                 <div>
-                    <label htmlFor="version-select">Version</label>
+                    <label htmlFor="version-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Version:</label>
                     <div className={styles.selectWrapper}>
                         <Select
                             id="version-select"
@@ -415,7 +405,7 @@ const ServePromptPage: React.FC = () => {
 
                 {/* Selector Idioma */}
                 <div>
-                    <label htmlFor="language-select">Language / Text</label>
+                    <label htmlFor="language-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Language or Base Text:</label>
                     <div className={styles.selectWrapper}>
                         <Select
                             id="language-select"
@@ -433,7 +423,7 @@ const ServePromptPage: React.FC = () => {
 
                 {/* Selector AI Model */}
                 <div>
-                    <label htmlFor="ai-model-select">AI Model</label>
+                    <label htmlFor="ai-model-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select AI Model:</label>
                     <div className={styles.selectWrapper}>
                         <Select
                             id="ai-model-select"
@@ -450,75 +440,80 @@ const ServePromptPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* ---- INICIO: Nuevo Contenedor para Detalles y Resultados ---- */}
-            <div className={styles.detailsResultsContainer}>
-                {/* Sección de Texto del Prompt y Variables */}
-                {loadingText && <div className={styles.loadingIndicator}>Loading prompt text...</div>}
-                {currentPromptText && !loadingText && (
-                    <div className={styles.promptDetailsSection}>
-                        <h2>Prompt Text & Variables</h2>
+            {isClient && selectedPrompt && selectedVersion && (
+                <div className={`${styles.detailsResultsContainer} md:grid md:grid-cols-2 md:gap-6`}>
+                    <div className={`${styles.promptDetailsSection} bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow`}>
+                        <h2 className="text-xl font-semibold mb-3 text-black dark:text-white">Prompt Details & Variables</h2>
+
+                        <div className="mb-4">
+                            <label htmlFor="font-size-selector" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Text Size:</label>
+                            <div className={styles.fontSizeSelectorContainer}>
+                                <span className={`${styles.fontSizeSelectorLabel} text-gray-700 dark:text-gray-300`}>Font Size:</span>
+                                <div className={styles.fontSizeSelector}>
+                                    {fontSizes.map(size => (
+                                        <button
+                                            key={size}
+                                            onClick={() => handleFontSizeChange(size)}
+                                            className={`${styles.fontSizeButton} ${selectedFontSize === size ? styles.active : 'dark:bg-gray-600 dark:text-gray-200'}`}
+                                        >
+                                            {size.toUpperCase()}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
                         <textarea
-                            // Añadir clase de tamaño dinámicamente
-                            className={`${styles.promptPreview} ${getFontSizeClass(selectedFontSize)}`}
-                            value={currentPromptText}
-                            // Quitar readOnly para permitir edición
-                            onChange={(e) => setCurrentPromptText(e.target.value)}
-                            rows={20}
+                            id="prompt-preview"
+                            readOnly
+                            value={currentPromptText || "Loading prompt text..."}
+                            className={`${styles.promptPreview} ${getFontSizeClass(selectedFontSize)} w-full p-3 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500`}
+                            rows={10}
                         />
 
                         {Object.keys(promptVariables).length > 0 && (
-                            <div className={styles.variablesSection}>
-                                <h3>Variables</h3>
-                                {Object.keys(promptVariables).map(varName => (
-                                    <div key={varName} className={styles.variableInput}>
-                                        <label htmlFor={`var-${varName}`}>{`{{${varName}}}`}</label>
+                            <div className={`${styles.variablesSection} mt-4 pt-4 border-t border-gray-300 dark:border-gray-600`}>
+                                <h3 className="text-lg font-medium mb-2 text-black dark:text-white">Variables:</h3>
+                                {Object.entries(promptVariables).map(([varName, defaultValue]) => (
+                                    <div key={varName} className={`${styles.variableInput} mb-3`}>
+                                        <label htmlFor={`var-${varName}`} className={`${styles.variableLabel} font-mono font-semibold text-sm text-gray-700 dark:text-gray-300`}>{`{{${varName}}}:`}</label>
                                         <input
                                             type="text"
                                             id={`var-${varName}`}
                                             value={variableInputs[varName] || ''}
                                             onChange={(e) => handleVariableInputChange(varName, e.target.value)}
-                                            placeholder={`Enter value for ${varName}`}
+                                            placeholder={`Enter value for ${varName}${defaultValue ? ` (default: ${defaultValue})` : ''}`}
+                                            className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
                                         />
                                     </div>
                                 ))}
                             </div>
                         )}
+                        <button
+                            onClick={handleExecute}
+                            disabled={isExecuting || !selectedAiModel || !currentPromptText}
+                            className={`${styles.executeButton} mt-6 w-full py-2 px-4 rounded-md text-white font-semibold transition-colors duration-150 ease-in-out bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-gray-500`}
+                        >
+                            {isExecuting ? 'Executing...' : 'Execute Prompt'}
+                        </button>
                     </div>
-                )}
 
-                {/* Sección de Resultados */}
-                {isExecuting && <div className={styles.loadingIndicator}>Executing... Please wait.</div>}
-                {executionResult && !isExecuting && (
-                    <div className={styles.resultsSection}>
-                        <h2>Execution Result</h2>
-                        <div className={styles.metadataContainer}>
-                            {executionResult.modelUsed && (
-                                <p><span className={styles.infoLabel}>Model Used:</span> {executionResult.modelUsed}</p>
-                            )}
-                            {executionResult.providerUsed && (
-                                <p><span className={styles.infoLabel}>Provider Used:</span> {executionResult.providerUsed}</p>
-                            )}
-                        </div>
-                        <textarea
-                            // Añadir clase de tamaño dinámicamente
-                            className={`${styles.resultTextarea} ${getFontSizeClass(selectedFontSize)}`}
-                            value={formattedPromptResult} // Usar el valor formateado
-                            readOnly
-                            rows={17} // Aumentar filas por defecto
-                        />
+                    <div className={`${styles.resultsSection} bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow`}>
+                        <h2 className="text-xl font-semibold mb-3 text-black dark:text-white">Execution Results</h2>
+                        {executionResult && (
+                            <div className={`${styles.metadataContainer} text-gray-600 dark:text-gray-400`}>
+                                {executionResult.modelUsed && (
+                                    <p><span className={`${styles.infoLabel} text-gray-800 dark:text-gray-200`}>Model Used:</span> {executionResult.modelUsed}</p>
+                                )}
+                                {executionResult.providerUsed && (
+                                    <p><span className={`${styles.infoLabel} text-gray-800 dark:text-gray-200`}>Provider Used:</span> {executionResult.providerUsed}</p>
+                                )}
+                            </div>
+                        )}
+                        {/* El resultTextarea ya está estilizado para dark mode desde el CSS Module */}
                     </div>
-                )}
-            </div>
-            {/* ---- FIN: Nuevo Contenedor ---- */}
-
-            {/* Botón de Ejecución */}
-            <button
-                onClick={handleExecute}
-                disabled={isExecuting || !selectedProjectId || !selectedPrompt || !selectedVersion || !selectedLanguage || !selectedAiModel || loadingText}
-                className={styles.executeButton}
-            >
-                {isExecuting ? 'Executing...' : 'Execute Prompt'}
-            </button>
+                </div>
+            )}
         </div>
     );
 };

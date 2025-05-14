@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../ui/table';
 import { AiModelResponseDto as AiModel } from '@/services/generated/api';
-import { TrashBinIcon } from "@/icons";
+import { TrashBinIcon, PencilIcon } from "@/icons";
 import CopyButton from '../common/CopyButton';
 
 interface AiModelsTableProps {
@@ -41,8 +41,18 @@ const AiModelsTable: React.FC<AiModelsTableProps> = ({ aiModels, onEdit, onDelet
                                     <TableCell className="px-5 py-4 text-start text-gray-500 dark:text-gray-400 text-theme-sm">{model.description ?? 'N/A'}</TableCell>
                                     <TableCell className="px-5 py-4 text-center">
                                         <div className="flex items-center justify-center gap-3">
-                                            <button onClick={() => onEdit(model)} className="text-blue-500 hover:text-blue-700 p-1" aria-label="Edit AI Model">Edit</button>
-                                            <button onClick={() => onDelete(model.id)} className="text-red-500 hover:text-red-700 p-1" aria-label="Delete AI Model">
+                                            <button
+                                                onClick={() => onEdit(model)}
+                                                className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                aria-label="Edit AI Model"
+                                            >
+                                                <PencilIcon className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => onDelete(model.id)}
+                                                className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                aria-label="Delete AI Model"
+                                            >
                                                 <TrashBinIcon className="w-4 h-4" />
                                             </button>
                                         </div>

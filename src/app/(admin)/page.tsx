@@ -27,6 +27,20 @@ export default function Ecommerce() {
       </div>
 
       <div className="grid grid-cols-12 gap-4 md:gap-6">
+        <Link href="/prompt-wizard" className="col-span-12 md:col-span-6 lg:col-span-3">
+          <div className="group h-full rounded-lg border border-stroke bg-white p-6 shadow-lg transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-2xl hover:border-purple-500 dark:border-strokedark dark:bg-boxdark dark:hover:border-purple-500 border-t-4 border-t-purple-600">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 transition-colors duration-300 group-hover:bg-purple-500 dark:bg-purple-800 dark:group-hover:bg-purple-600">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7 fill-purple-500 transition-colors duration-300 group-hover:fill-white dark:fill-white dark:group-hover:fill-white">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.82.61l-4.725-2.885a.562.562 0 0 0-.652 0l-4.725 2.885a.562.562 0 0 1-.82-.61l1.285-5.385a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+              </svg>
+            </div>
+            <h3 className="mb-2 text-xl font-bold text-black dark:text-gray-700">
+              Prompt Wizard
+            </h3>
+            <p className="text-sm font-medium">Guided prompt creation process.</p>
+          </div>
+        </Link>
+
         <Link href="/management" className="col-span-12 md:col-span-6 lg:col-span-3">
           <div className="group h-full rounded-lg border border-stroke bg-white p-6 shadow-lg transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-2xl hover:border-indigo-500 dark:border-strokedark dark:bg-boxdark dark:hover:border-indigo-500 border-t-4 border-t-indigo-600">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 transition-colors duration-300 group-hover:bg-indigo-500 dark:bg-indigo-800 dark:group-hover:bg-indigo-600">

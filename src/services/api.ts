@@ -587,12 +587,4 @@ export default apiClient;
 // Considera importar explícitamente lo necesario o usar alias.
 export * from './generated';
 
-// --- Servicios Manuales (Wrapper sobre los generados o lógica personalizada) ---
-// ... existing code ...
 
-/*
-// Servicio de "Serve Prompt" (Mantener manual o reemplazar con generated.ServePromptApi)
-export const servePromptService = {
-    // ... todo el contenido comentado ...
-};
-*/

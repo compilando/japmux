@@ -126,6 +126,17 @@ const ProjectsPage: React.FC = () => {
         <>
             {/* Use the crumbs prop */}
             <Breadcrumb crumbs={breadcrumbs} />
+
+            {/* Page Title and Subtitle */}
+            <div className="my-6">
+                <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
+                    Projects
+                </h2>
+                <p className="text-base font-medium dark:text-white">
+                    Create, view, and manage all projects in the system.
+                </p>
+            </div>
+
             <div className="flex justify-end mb-4">
                 <button
                     onClick={handleAdd}
