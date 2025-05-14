@@ -8,14 +8,16 @@ import {
     UpdatePromptTranslationDto,
     projectService,
     promptService,
-    promptVersionService
+    promptVersionService,
+    CreateProjectDto,
+    PromptDto,
+    CreatePromptVersionDto
 } from '@/services/api';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptTranslationsTable from '@/components/tables/PromptTranslationsTable';
 import PromptTranslationForm from '@/components/form/PromptTranslationForm';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
-import { CreateProjectDto, PromptDto } from '@/services/generated/api';
 
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
     if (axios.isAxiosError(error)) {
@@ -167,7 +169,7 @@ const PromptTranslationsPage: React.FC = () => {
         setLoading(true);
         try {
             let message = "";
-            if (editingItem) {
+            if (editingItem && editingItem.languageCode) {
                 await promptTranslationService.update(projectId, promptId, versionTag, editingItem.languageCode, payload as UpdatePromptTranslationDto);
                 message = `Translation for ${editingItem.languageCode} updated.`;
             } else {
@@ -191,37 +193,48 @@ const PromptTranslationsPage: React.FC = () => {
         { label: "Projects", href: "/projects" },
         { label: breadcrumbLoading ? projectId : (project?.name || projectId), href: `/projects/${projectId}/prompts` },
         { label: breadcrumbLoading ? promptId : (prompt?.name || promptId), href: `/projects/${projectId}/prompts/${promptId}/versions` },
-        { label: `Version ${versionTag}`, href: `/projects/${projectId}/prompts/${promptId}/versions/${versionTag}/translations` },
+        { label: `Version ${versionTag}` },
         { label: "Translations" }
     ];
 
     if (!projectId || !promptId || !versionTag) {
         return <p className="text-red-500">Error: Missing Project, Prompt or Version Tag in URL.</p>;
     }
-    if (breadcrumbLoading || loading) return <p>Loading translation details...</p>;
-    if (error) return <p className="text-red-500">{error}</p>;
+    if (breadcrumbLoading) return <p>Loading page details...</p>;
+    if (error && !itemsList.length) return <p className="text-red-500">{error}</p>;
 
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
+            {error && <p className="text-red-500 py-2">Error loading translations: {error}</p>}
 
-            <div className="flex justify-end mb-4">
-                <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600" disabled={breadcrumbLoading || loading}>
+            <div className="my-4 p-4 border rounded-md shadow bg-white dark:bg-gray-800">
+                <h3 className="text-lg font-semibold mb-1 text-black dark:text-white">Original Prompt Text (Version: {versionTag})</h3>
+                <pre className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 rounded text-sm text-black dark:text-gray-200 whitespace-pre-wrap">
+                    {versionText || 'Loading original text...'}
+                </pre>
+            </div>
+
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-black dark:text-white">Translations for Version: {versionTag}</h2>
+                <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600" disabled={loading || breadcrumbLoading}>
                     Add Prompt Translation
                 </button>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                {itemsList.length === 0 && !loading ? (
-                    <p className="text-center py-4 text-gray-500 dark:text-gray-400">No translations found for this version.</p>
-                ) : (
+            {loading && <p>Loading translations...</p>}
+            {!loading && itemsList.length === 0 && (
+                <p className="text-center py-4 text-gray-500 dark:text-gray-400">No translations found for this version.</p>
+            )}
+            {!loading && itemsList.length > 0 && (
+                <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                     <PromptTranslationsTable
                         promptTranslations={itemsList}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                     />
-                )}
-            </div>
+                </div>
+            )}
 
             {isModalOpen && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">

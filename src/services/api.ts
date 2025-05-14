@@ -392,6 +392,19 @@ export const promptVersionService = {
     remove: async (projectId: string, promptId: string, versionTag: string): Promise<void> => {
         await promptVersionsGeneratedApi.promptVersionControllerRemove(projectId, promptId, versionTag);
     },
+    // Nuevos métodos para Marketplace
+    requestPublish: async (projectId: string, promptId: string, versionTag: string): Promise<generated.CreatePromptVersionDto> => {
+        const response = await apiClient.post<generated.CreatePromptVersionDto>(
+            `/api/projects/${projectId}/prompts/${promptId}/versions/${versionTag}/request-publish`
+        );
+        return response.data; // Asume que la API devuelve la versión actualizada
+    },
+    unpublish: async (projectId: string, promptId: string, versionTag: string): Promise<generated.CreatePromptVersionDto> => {
+        const response = await apiClient.post<generated.CreatePromptVersionDto>(
+            `/api/projects/${projectId}/prompts/${promptId}/versions/${versionTag}/unpublish`
+        );
+        return response.data; // Asume que la API devuelve la versión actualizada (o al menos el nuevo status)
+    },
 };
 
 // Servicio para Traducciones de Prompt
@@ -464,6 +477,19 @@ export const promptAssetService = {
     },
     removeVersion: async (projectId: string, assetKey: string, versionTag: string): Promise<void> => {
         await promptAssetVersionsGeneratedApi.promptAssetVersionControllerRemove(projectId, assetKey, versionTag);
+    },
+    // Nuevos métodos para Marketplace de Asset Version
+    requestPublishVersion: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
+        const response = await apiClient.post<generated.CreatePromptAssetVersionDto>(
+            `/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/request-publish`
+        );
+        return response.data; // Asume que la API devuelve la versión actualizada
+    },
+    unpublishVersion: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
+        const response = await apiClient.post<generated.CreatePromptAssetVersionDto>(
+            `/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/unpublish`
+        );
+        return response.data; // Asume que la API devuelve la versión actualizada
     },
     findAssetTranslations: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreateAssetTranslationDto[]> => {
         const response = await apiClient.get<generated.CreateAssetTranslationDto[]>(`/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/translations`);

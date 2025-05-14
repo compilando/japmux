@@ -36,8 +36,14 @@ const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
 // Exportar esta interfaz para poder usarla en el componente hijo (Table)
 export interface PromptVersionData extends CreatePromptVersionDto {
     id: string;
+    versionTag: string; // Asumimos que versionTag SIEMPRE debe existir para una versión existente
     isActive: boolean;
     promptId: string;
+}
+
+// Nueva interfaz para detalles del marketplace, extendiendo PromptVersionData
+export interface PromptVersionMarketplaceDetails extends PromptVersionData {
+    marketplaceStatus?: 'NOT_PUBLISHED' | 'PENDING_APPROVAL' | 'PUBLISHED' | 'REJECTED' | string;
 }
 
 // --- Helper para versionado (simplificado) ---
@@ -76,13 +82,14 @@ const getLatestVersionTag = (versions: PromptVersionData[]): string | null => {
 
 const PromptVersionsPage: React.FC = () => {
     // Use local extended type
-    const [itemsList, setItemsList] = useState<PromptVersionData[]>([]);
+    const [itemsList, setItemsList] = useState<PromptVersionMarketplaceDetails[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     // Use local extended type if editing
     const [editingItem, setEditingItem] = useState<PromptVersionData | null>(null);
     const [latestVersionTagForForm, setLatestVersionTagForForm] = useState<string | null>(null);
+    const [marketplaceActionLoading, setMarketplaceActionLoading] = useState<Record<string, boolean>>({});
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
     const [prompt, setPrompt] = useState<PromptDto | null>(null);
@@ -149,8 +156,18 @@ const PromptVersionsPage: React.FC = () => {
         try {
             const data = await promptVersionService.findAll(projectId, promptId);
             if (Array.isArray(data)) {
-                // Cast to local interface that includes isActive
-                const versionsData = data as PromptVersionData[];
+                // Cast to local interface that includes isActive and potentially marketplaceStatus from API
+                const versionsData = data.map(v_any => { // Renombrar v a v_any para casteo explícito
+                    const v = v_any as any; // Tratar v como 'any' para acceder a campos potencialmente no declarados en CreatePromptVersionDto
+                    return {
+                        ...v, // Spread original data from API
+                        id: v.id || v.versionTag || String(Date.now() + Math.random()),
+                        versionTag: v.versionTag || 'N/A', // Asegurar que versionTag exista, default a N/A si no
+                        isActive: v.isActive || false,
+                        promptId: promptId,
+                        // marketplaceStatus vendrá de 'v' si la API lo envía.
+                    };
+                }) as PromptVersionMarketplaceDetails[];
                 setItemsList(versionsData);
                 // Calcular el último tag después de obtener los datos
                 const latestTag = getLatestVersionTag(versionsData);
@@ -187,8 +204,9 @@ const PromptVersionsPage: React.FC = () => {
     };
 
     const handleDelete = async (itemToDelete: PromptVersionData) => {
-        if (!projectId || !promptId || !itemToDelete.versionTag) {
-            showErrorToast("Cannot delete: version data is incomplete.");
+        // No es necesario verificar itemToDelete.versionTag aquí si PromptVersionData lo garantiza
+        if (!projectId || !promptId || !itemToDelete.versionTag) { // Pero la guarda no hace daño
+            showErrorToast("Cannot delete: version data is incomplete (missing versionTag).");
             return;
         }
         if (window.confirm(`Are you sure you want to delete version tag "${itemToDelete.versionTag}"?`)) {
@@ -212,8 +230,9 @@ const PromptVersionsPage: React.FC = () => {
         setLoading(true);
         try {
             let message = "";
+            // No es necesario verificar editingItem.versionTag si PromptVersionData lo garantiza
             if (editingItem && editingItem.versionTag) {
-                await promptVersionService.update(projectId, promptId, editingItem.versionTag!, payload as UpdatePromptVersionDto);
+                await promptVersionService.update(projectId, promptId, editingItem.versionTag, payload as UpdatePromptVersionDto);
                 message = `Version ${editingItem.versionTag} updated successfully!`;
             } else {
                 await promptVersionService.create(projectId, promptId, payload as CreatePromptVersionDto);
@@ -232,8 +251,9 @@ const PromptVersionsPage: React.FC = () => {
     };
 
     const handleToggleActive = async (itemToToggle: PromptVersionData) => {
+        // No es necesario verificar itemToToggle.versionTag si PromptVersionData lo garantiza
         if (!projectId || !promptId || typeof itemToToggle.isActive === 'undefined' || !itemToToggle.versionTag) {
-            showErrorToast('Cannot toggle status: item data is incomplete.');
+            showErrorToast('Cannot toggle status: item data is incomplete (missing versionTag).');
             return;
         }
         const updatePayload = { isActive: !itemToToggle.isActive };
@@ -248,6 +268,49 @@ const PromptVersionsPage: React.FC = () => {
             setError(getApiErrorMessage(err, defaultMsg));
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Handlers para acciones de Marketplace (copiados y adaptados de translations/page.tsx y asset versions)
+    const handleRequestPublish = async (versionTag: string) => {
+        if (!projectId || !promptId || !versionTag) return;
+        setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: true }));
+        try {
+            const updatedVersion = await promptVersionService.requestPublish(projectId, promptId, versionTag);
+            setItemsList(prevList =>
+                prevList.map(item =>
+                    item.versionTag === versionTag
+                        ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as any).marketplaceStatus || 'PENDING_APPROVAL' }
+                        : item
+                )
+            );
+            showSuccessToast(`Solicitud de publicación para la versión ${versionTag} enviada.`);
+        } catch (err) {
+            console.error(`Error requesting publish for version ${versionTag}:`, err);
+            showErrorToast(getApiErrorMessage(err, `Error al solicitar publicación para ${versionTag}.`));
+        } finally {
+            setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: false }));
+        }
+    };
+
+    const handleUnpublish = async (versionTag: string) => {
+        if (!projectId || !promptId || !versionTag) return;
+        setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: true }));
+        try {
+            const updatedVersion = await promptVersionService.unpublish(projectId, promptId, versionTag);
+            setItemsList(prevList =>
+                prevList.map(item =>
+                    item.versionTag === versionTag
+                        ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as any).marketplaceStatus || 'NOT_PUBLISHED' }
+                        : item
+                )
+            );
+            showSuccessToast(`Versión ${versionTag} retirada del marketplace.`);
+        } catch (err) {
+            console.error(`Error unpublishing version ${versionTag}:`, err);
+            showErrorToast(getApiErrorMessage(err, `Error al retirar ${versionTag} del marketplace.`));
+        } finally {
+            setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: false }));
         }
     };
 
@@ -291,7 +354,11 @@ const PromptVersionsPage: React.FC = () => {
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onToggleActive={handleToggleActive}
+                        onRequestPublish={handleRequestPublish}
+                        onUnpublish={handleUnpublish}
+                        marketplaceActionLoading={marketplaceActionLoading}
                         projectId={projectId}
+                        promptIdForTable={promptId}
                     />
                 )
                 }

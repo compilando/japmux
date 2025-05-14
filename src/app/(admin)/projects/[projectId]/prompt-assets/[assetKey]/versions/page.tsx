@@ -39,6 +39,11 @@ export interface AssetVersionUIData extends CreatePromptAssetVersionDto {
     // value y changeMessage ya están en CreatePromptAssetVersionDto (opcionales)
 }
 
+// Nueva interfaz para detalles del marketplace
+export interface PromptAssetVersionMarketplaceDetails extends AssetVersionUIData {
+    marketplaceStatus?: 'NOT_PUBLISHED' | 'PENDING_APPROVAL' | 'PUBLISHED' | 'REJECTED' | string;
+}
+
 // Helper para versionado (simplificado) - similar al de PromptVersionForm
 const getLatestAssetVersionTag = (versions: AssetVersionUIData[]): string | null => {
     if (!versions || versions.length === 0) return null;
@@ -51,12 +56,13 @@ const getLatestAssetVersionTag = (versions: AssetVersionUIData[]): string | null
 };
 
 const PromptAssetVersionsPage: React.FC = () => {
-    const [itemsList, setItemsList] = useState<AssetVersionUIData[]>([]);
+    const [itemsList, setItemsList] = useState<PromptAssetVersionMarketplaceDetails[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingItem, setEditingItem] = useState<AssetVersionUIData | null>(null);
     const [latestVersionTagForForm, setLatestVersionTagForForm] = useState<string | null>(null);
+    const [marketplaceActionLoading, setMarketplaceActionLoading] = useState<Record<string, boolean>>({});
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
     const [asset, setAsset] = useState<CreatePromptAssetDto | null>(null);
@@ -101,7 +107,15 @@ const PromptAssetVersionsPage: React.FC = () => {
         try {
             const data = await promptAssetService.findVersions(projectId, assetKey);
             if (Array.isArray(data)) {
-                const versionsData = data as AssetVersionUIData[];
+                // Asumimos que la API ahora puede devolver marketplaceStatus o lo manejamos como undefined
+                const versionsData = data.map(v => ({
+                    ...v,
+                    // Si CreatePromptAssetVersionDto no tiene 'id', no podemos hacer v.id
+                    // AssetVersionUIData requiere 'id', así que debemos proporcionarlo.
+                    // Usar versionTag si está disponible y es un string.
+                    id: typeof v.versionTag === 'string' ? v.versionTag : String(Date.now() + Math.random()), // Corregido para no acceder a v.id
+                    versionTag: typeof v.versionTag === 'string' ? v.versionTag : 'N/A',
+                })) as PromptAssetVersionMarketplaceDetails[];
                 setItemsList(versionsData);
                 const latestTag = getLatestAssetVersionTag(versionsData);
                 setLatestVersionTagForForm(latestTag);
@@ -128,6 +142,47 @@ const PromptAssetVersionsPage: React.FC = () => {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    // Handlers para acciones de Marketplace
+    const handleRequestPublish = async (versionTag: string) => {
+        if (!projectId || !assetKey || !versionTag) return;
+        setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: true }));
+        try {
+            const updatedVersion = await promptAssetService.requestPublishVersion(projectId, assetKey, versionTag);
+            // Actualizar el item en la lista
+            setItemsList(prevList =>
+                prevList.map(item =>
+                    item.versionTag === versionTag ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as any).marketplaceStatus || 'PENDING_APPROVAL' } : item
+                )
+            );
+            showSuccessToast(`Solicitud de publicación para la versión ${versionTag} enviada.`);
+        } catch (err) {
+            console.error(`Error requesting publish for version ${versionTag}:`, err);
+            showErrorToast(getApiErrorMessage(err, `Error al solicitar publicación para ${versionTag}.`));
+        } finally {
+            setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: false }));
+        }
+    };
+
+    const handleUnpublish = async (versionTag: string) => {
+        if (!projectId || !assetKey || !versionTag) return;
+        setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: true }));
+        try {
+            const updatedVersion = await promptAssetService.unpublishVersion(projectId, assetKey, versionTag);
+            // Actualizar el item en la lista
+            setItemsList(prevList =>
+                prevList.map(item =>
+                    item.versionTag === versionTag ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as any).marketplaceStatus || 'NOT_PUBLISHED' } : item
+                )
+            );
+            showSuccessToast(`Versión ${versionTag} retirada del marketplace.`);
+        } catch (err) {
+            console.error(`Error unpublishing version ${versionTag}:`, err);
+            showErrorToast(getApiErrorMessage(err, `Error al retirar ${versionTag} del marketplace.`));
+        } finally {
+            setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: false }));
+        }
+    };
 
     // Handlers CRUD para versiones
     const handleAdd = () => {
@@ -241,6 +296,10 @@ const PromptAssetVersionsPage: React.FC = () => {
                         projectId={projectId} // Pasar props necesarios a la tabla
                         assetKey={assetKey}
                         loading={loading}
+                        // Nuevos handlers para marketplace
+                        onRequestPublish={handleRequestPublish}
+                        onUnpublish={handleUnpublish}
+                        marketplaceActionLoading={marketplaceActionLoading}
                     />
                 )}
             </div>
