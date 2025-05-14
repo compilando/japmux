@@ -5,7 +5,6 @@ import {
     tagService,
     CreateTagDto,
     UpdateTagDto,
-    projectService
 } from '@/services/api';
 import * as generated from '../../../../generated/japmux-api';
 import { useProjects } from '@/context/ProjectContext';
@@ -21,27 +20,12 @@ const TagsPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingTag, setEditingTag] = useState<generated.TagDto | null>(null);
-    const { selectedProjectId } = useProjects();
 
-    const [project, setProject] = useState<generated.CreateProjectDto | null>(null);
-    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
-
-    useEffect(() => {
-        if (selectedProjectId) {
-            setBreadcrumbLoading(true);
-            projectService.findOne(selectedProjectId)
-                .then(data => setProject(data))
-                .catch(err => {
-                    console.error("Error fetching project for breadcrumbs:", err);
-                    showErrorToast("Failed to load project details for breadcrumbs.");
-                    setProject(null);
-                })
-                .finally(() => setBreadcrumbLoading(false));
-        } else {
-            setProject(null);
-            setBreadcrumbLoading(false);
-        }
-    }, [selectedProjectId]);
+    const {
+        selectedProjectId,
+        selectedProjectFull,
+        isLoadingSelectedProjectFull
+    } = useProjects();
 
     const fetchData = async () => {
         if (!selectedProjectId) {
@@ -55,7 +39,7 @@ const TagsPage: React.FC = () => {
         try {
             const data = await tagService.findAll(selectedProjectId);
             if (Array.isArray(data)) {
-                setTagsList(data);
+                setTagsList(data as generated.TagDto[]);
             } else {
                 console.error("API response for /tags is not an array:", data);
                 setError('Received invalid data format for tags.');
@@ -71,7 +55,13 @@ const TagsPage: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchData();
+        if (selectedProjectId) {
+            fetchData();
+        } else {
+            setTagsList([]);
+            setLoading(false);
+            setError("Please select a project to manage tags.");
+        }
     }, [selectedProjectId]);
 
     const handleAdd = () => {
@@ -90,13 +80,15 @@ const TagsPage: React.FC = () => {
             return;
         }
         if (window.confirm('Are you sure you want to delete this tag?')) {
+            setLoading(true);
             try {
                 await tagService.delete(selectedProjectId, id);
                 showSuccessToast("Tag deleted successfully.");
                 fetchData();
             } catch (err: any) {
-                showErrorToast(err.response?.data?.message || err.message || 'Failed to delete tag.');
-                console.error(err);
+                console.error("Error deleting tag:", err);
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -106,19 +98,23 @@ const TagsPage: React.FC = () => {
             showErrorToast("No project selected.");
             return;
         }
+        setLoading(true);
         try {
-            if (editingTag) {
+            let message = "";
+            if (editingTag && editingTag.id) {
                 await tagService.update(selectedProjectId, editingTag.id, payload as UpdateTagDto);
-                showSuccessToast("Tag updated successfully.");
+                message = "Tag updated successfully.";
             } else {
                 await tagService.create(selectedProjectId, payload as CreateTagDto);
-                showSuccessToast("Tag created successfully.");
+                message = "Tag created successfully.";
             }
             setIsModalOpen(false);
+            showSuccessToast(message);
             fetchData();
         } catch (err: any) {
-            showErrorToast(err.response?.data?.message || err.message || 'Failed to save tag.');
-            console.error(err);
+            console.error("Error saving tag:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -126,16 +122,12 @@ const TagsPage: React.FC = () => {
         { label: "Home", href: "/" },
     ];
     if (selectedProjectId) {
-        breadcrumbs = [
-            ...breadcrumbs,
-            { label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId), href: `/projects/${selectedProjectId}/prompts` },
-            { label: "Tags" }
-        ];
+        breadcrumbs.push({
+            label: isLoadingSelectedProjectFull ? selectedProjectId : (selectedProjectFull?.name || selectedProjectId),
+        });
+        breadcrumbs.push({ label: "Tags" });
     } else {
-        breadcrumbs = [
-            ...breadcrumbs,
-            { label: "Tags (Select Project)" }
-        ];
+        breadcrumbs.push({ label: "Tags (Select Project)" });
     }
 
     return (
@@ -153,7 +145,7 @@ const TagsPage: React.FC = () => {
             </div>
 
             {!selectedProjectId ? (
-                <p className="text-center text-red-500">Please select a project from the header dropdown to manage tags.</p>
+                <p className="text-center text-yellow-500 dark:text-yellow-400">Please select a project from the header dropdown to manage tags.</p>
             ) : (
                 <>
                     <div className="flex justify-end mb-4">
@@ -161,9 +153,9 @@ const TagsPage: React.FC = () => {
                             Add Tag
                         </button>
                     </div>
-                    {loading && <p>Loading tags...</p>}
+                    {(loading || isLoadingSelectedProjectFull) && <p>Loading tags...</p>}
                     {error && <p className="text-red-500">{error}</p>}
-                    {!loading && !error && (
+                    {!loading && !error && !isLoadingSelectedProjectFull && (
                         <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                             <TagsTable
                                 tags={tagsList}

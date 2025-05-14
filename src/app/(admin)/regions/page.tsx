@@ -23,27 +23,23 @@ const RegionsPage: React.FC = () => {
     // Estados para el modal/formulario
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingRegion, setEditingRegion] = useState<generated.CreateRegionDto | null>(null);
-    const { selectedProjectId } = useProjects();
-
-    // Estados para breadcrumb
-    const [project, setProject] = useState<generated.CreateProjectDto | null>(null);
-    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
+    const { selectedProjectId, selectedProjectFull, isLoadingSelectedProjectFull } = useProjects();
 
     // Efecto para cargar nombre del proyecto
     useEffect(() => {
         if (selectedProjectId) {
-            setBreadcrumbLoading(true);
+            setLoading(true);
             projectService.findOne(selectedProjectId)
-                .then(data => setProject(data))
+                .then(data => {
+                    console.log("API response for project received:", data);
+                })
                 .catch(err => {
                     console.error("Error fetching project for breadcrumbs:", err);
                     showErrorToast("Failed to load project details for breadcrumbs.");
-                    setProject(null);
                 })
-                .finally(() => setBreadcrumbLoading(false));
+                .finally(() => setLoading(false));
         } else {
-            setProject(null);
-            setBreadcrumbLoading(false);
+            setLoading(false);
         }
     }, [selectedProjectId]);
 
@@ -62,7 +58,7 @@ const RegionsPage: React.FC = () => {
             const data = await regionService.findAll(selectedProjectId);
             console.log("API response for regions received:", data);
             if (Array.isArray(data)) {
-                setRegions(data);
+                setRegions(data as generated.CreateRegionDto[]);
             } else {
                 console.error("API response for /regions is not an array:", data);
                 setError('Received invalid data format for regions.');
@@ -81,8 +77,14 @@ const RegionsPage: React.FC = () => {
     }, [selectedProjectId]);
 
     useEffect(() => {
-        fetchRegions();
-    }, [fetchRegions]); // fetchRegions es ahora estable gracias a useCallback
+        if (selectedProjectId) {
+            fetchRegions();
+        } else {
+            setRegions([]);
+            setLoading(false);
+            setError("Please select a project to manage regions.");
+        }
+    }, [selectedProjectId, fetchRegions]);
 
     const handleAdd = () => {
         if (!selectedProjectId) {
@@ -105,12 +107,15 @@ const RegionsPage: React.FC = () => {
             return;
         }
         if (window.confirm(`Are you sure you want to delete the region for ${languageCode}?`)) {
+            setLoading(true);
             try {
                 await regionService.remove(selectedProjectId, languageCode);
+                showSuccessToast('Region deleted successfully!');
                 fetchRegions();
             } catch (err) {
-                setError('Failed to delete region');
-                console.error(err);
+                console.error("Error deleting region:", err);
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -120,17 +125,23 @@ const RegionsPage: React.FC = () => {
             showErrorToast("No project selected.");
             return;
         }
+        setLoading(true);
         try {
-            if (editingRegion) {
+            let message = "";
+            if (editingRegion && editingRegion.languageCode) {
                 await regionService.update(selectedProjectId, editingRegion.languageCode, payload as UpdateRegionDto);
+                message = 'Region updated successfully!';
             } else {
                 await regionService.create(selectedProjectId, payload as CreateRegionDto);
+                message = 'Region created successfully!';
             }
             setIsModalOpen(false);
+            showSuccessToast(message);
             fetchRegions();
         } catch (err) {
-            setError('Failed to save region');
-            console.error(err);
+            console.error("Error saving region:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -141,7 +152,7 @@ const RegionsPage: React.FC = () => {
     if (selectedProjectId) {
         breadcrumbs = [
             ...breadcrumbs,
-            { label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId), href: `/projects/${selectedProjectId}/regions` },
+            { label: isLoadingSelectedProjectFull ? selectedProjectId : (selectedProjectFull?.name || selectedProjectId) },
             { label: "Regions" }
         ];
     } else {
@@ -166,7 +177,7 @@ const RegionsPage: React.FC = () => {
             </div>
 
             {!selectedProjectId ? (
-                <p className="text-center text-red-500">Please select a project from the header dropdown to manage regions.</p>
+                <p className="text-center text-yellow-500 dark:text-yellow-400">Please select a project from the header dropdown to manage regions.</p>
             ) : (
                 <>
                     <div className="flex justify-end mb-4">
@@ -177,9 +188,9 @@ const RegionsPage: React.FC = () => {
                             Add Region
                         </button>
                     </div>
-                    {loading && <p>Loading regions...</p>}
+                    {(loading || isLoadingSelectedProjectFull) && <p>Loading regions...</p>}
                     {error && <p className="text-red-500">{error}</p>}
-                    {!loading && !error && (
+                    {!loading && !error && !isLoadingSelectedProjectFull && (
                         <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                             <RegionsTable
                                 regions={regions}

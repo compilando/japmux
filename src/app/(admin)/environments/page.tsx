@@ -22,29 +22,7 @@ const EnvironmentsPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingEnvironment, setEditingEnvironment] = useState<Environment | null>(null);
-    const { selectedProjectId } = useProjects();
-
-    // Estados para breadcrumb
-    const [project, setProject] = useState<Project | null>(null);
-    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
-
-    // Efecto para cargar nombre del proyecto
-    useEffect(() => {
-        if (selectedProjectId) {
-            setBreadcrumbLoading(true);
-            projectService.findOne(selectedProjectId)
-                .then(data => setProject(data))
-                .catch(err => {
-                    console.error("Error fetching project for breadcrumbs:", err);
-                    showErrorToast("Failed to load project details for breadcrumbs.");
-                    setProject(null);
-                })
-                .finally(() => setBreadcrumbLoading(false));
-        } else {
-            setProject(null);
-            setBreadcrumbLoading(false);
-        }
-    }, [selectedProjectId]);
+    const { selectedProjectId, selectedProjectFull, isLoadingSelectedProjectFull } = useProjects();
 
     const fetchData = async () => {
         if (!selectedProjectId) {
@@ -77,7 +55,13 @@ const EnvironmentsPage: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchData();
+        if (selectedProjectId) {
+            fetchData();
+        } else {
+            setEnvironmentsList([]);
+            setLoading(false);
+            setError("Please select a project to manage environments.");
+        }
     }, [selectedProjectId]);
 
     const handleAdd = () => {
@@ -92,64 +76,58 @@ const EnvironmentsPage: React.FC = () => {
 
     const handleDelete = async (id: string) => {
         if (!selectedProjectId) {
-            alert("No project selected.");
+            showErrorToast("No project selected.");
             return;
         }
         if (window.confirm('Are you sure you want to delete this environment?')) {
+            setLoading(true);
             try {
                 await environmentService.remove(selectedProjectId, id);
+                showSuccessToast('Environment deleted successfully!');
                 fetchData();
             } catch (err) {
-                setError('Failed to delete environment');
-                console.error(err);
-                if (axios.isAxiosError(err)) {
-                    alert(`Error deleting: ${err.response?.data?.message || err.message}`);
-                } else if (err instanceof Error) {
-                    alert(`Error deleting: ${err.message}`);
-                }
+                console.error("Error deleting environment:", err);
+            } finally {
+                setLoading(false);
             }
         }
     };
 
     const handleSave = async (payload: CreateEnvironmentDto | UpdateEnvironmentDto) => {
         if (!selectedProjectId) {
-            alert("No project selected.");
+            showErrorToast("No project selected.");
             return;
         }
+        setLoading(true);
         try {
-            if (editingEnvironment) {
+            let message = "";
+            if (editingEnvironment && editingEnvironment.id) {
                 await environmentService.update(selectedProjectId, editingEnvironment.id, payload as UpdateEnvironmentDto);
+                message = 'Environment updated successfully!';
             } else {
                 await environmentService.create(selectedProjectId, payload as CreateEnvironmentDto);
+                message = 'Environment created successfully!';
             }
             setIsModalOpen(false);
+            showSuccessToast(message);
             fetchData();
         } catch (err) {
-            setError('Failed to save environment');
-            console.error(err);
-            if (axios.isAxiosError(err)) {
-                alert(`Error saving: ${err.response?.data?.message || err.message}`);
-            } else if (err instanceof Error) {
-                alert(`Error saving: ${err.message}`);
-            }
+            console.error("Error saving environment:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
-    // Definir crumbs con estructura explícita
     let breadcrumbs: { label: string; href?: string }[] = [
         { label: "Home", href: "/" },
     ];
     if (selectedProjectId) {
-        breadcrumbs = [
-            ...breadcrumbs,
-            { label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId), href: `/projects/${selectedProjectId}/environments` }, // Penúltimo con href
-            { label: "Environments" } // Último sin href
-        ];
+        breadcrumbs.push({
+            label: isLoadingSelectedProjectFull ? selectedProjectId : (selectedProjectFull?.name || selectedProjectId),
+        });
+        breadcrumbs.push({ label: "Environments" });
     } else {
-        breadcrumbs = [
-            ...breadcrumbs,
-            { label: "Environments (Select Project)" } // Último sin href
-        ];
+        breadcrumbs.push({ label: "Environments (Select Project)" });
     }
 
     return (
@@ -167,7 +145,7 @@ const EnvironmentsPage: React.FC = () => {
             </div>
 
             {!selectedProjectId ? (
-                <p className="text-center text-red-500">Please select a project from the header dropdown to manage environments.</p>
+                <p className="text-center text-yellow-500 dark:text-yellow-400">Please select a project from the header dropdown to manage environments.</p>
             ) : (
                 <>
                     <div className="flex justify-end mb-4">
@@ -175,9 +153,9 @@ const EnvironmentsPage: React.FC = () => {
                             Add Environment
                         </button>
                     </div>
-                    {loading && <p>Loading environments...</p>}
+                    {(loading || isLoadingSelectedProjectFull) && <p>Loading environments...</p>}
                     {error && <p className="text-red-500">{error}</p>}
-                    {!loading && !error && (
+                    {!loading && !error && !isLoadingSelectedProjectFull && (
                         <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                             <EnvironmentsTable
                                 environments={environmentsList}

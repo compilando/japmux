@@ -3,14 +3,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     // Prompt, // Does not exist or is not used directly
-    CreateProjectDto,
     CreatePromptDto,
     UpdatePromptDto,
     PromptDto,
 } from '@/services/generated/api';
 import {
     promptService,
-    projectService
+    // projectService // Ya no es necesario aquí
 } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import { useAuth } from '@/context/AuthContext';
@@ -27,34 +26,13 @@ const PromptsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingItem, setEditingItem] = useState<PromptDto | null>(null);
 
-    const [project, setProject] = useState<CreateProjectDto | null>(null);
-    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
-
-    const { selectedProjectId, isLoading: isLoadingProject, projects: projectList } = useProjects();
+    const {
+        selectedProjectId,
+        isLoading: isLoadingProjectsList, // Renombrado para claridad
+        selectedProjectFull,
+        isLoadingSelectedProjectFull
+    } = useProjects();
     const { isAuthenticated } = useAuth();
-
-    useEffect(() => {
-        if (selectedProjectId && Array.isArray(projectList) && projectList.length > 0) {
-            setBreadcrumbLoading(true);
-            const currentProject = projectList.find(p => p.id === selectedProjectId);
-            if (currentProject) {
-                setProject(currentProject as CreateProjectDto);
-                setBreadcrumbLoading(false);
-            } else {
-                projectService.findOne(selectedProjectId)
-                    .then(data => setProject(data as CreateProjectDto))
-                    .catch(err => {
-                        console.error("Error fetching project for breadcrumbs:", err);
-                        showErrorToast("Failed to load project details for breadcrumbs.");
-                        setProject(null);
-                    })
-                    .finally(() => setBreadcrumbLoading(false));
-            }
-        } else if (!selectedProjectId) {
-            setProject(null);
-            setBreadcrumbLoading(false);
-        }
-    }, [selectedProjectId, projectList]);
 
     const fetchData = useCallback(async () => {
         setError(null);
@@ -86,12 +64,12 @@ const PromptsPage: React.FC = () => {
     useEffect(() => {
         if (selectedProjectId && isAuthenticated) {
             fetchData();
-        } else if (!isLoadingProject && !selectedProjectId) {
+        } else if (!isLoadingProjectsList && !selectedProjectId) { // Usar isLoadingProjectsList
             setItemsList([]);
             setLoading(false);
             setError("Please select a project to view prompts.");
         }
-    }, [selectedProjectId, fetchData, isAuthenticated, isLoadingProject]);
+    }, [selectedProjectId, fetchData, isAuthenticated, isLoadingProjectsList]);
 
     const handleAdd = () => {
         if (!selectedProjectId) {
@@ -109,7 +87,8 @@ const PromptsPage: React.FC = () => {
         }
         setLoading(true);
         try {
-            const detailedPrompt = await promptService.findOne(selectedProjectId, item.id);
+            // Asumimos que item.id es el nombre/key del prompt para findOne en este servicio
+            const detailedPrompt = await promptService.findOne(selectedProjectId, (item as any).name || item.id);
             setEditingItem(detailedPrompt);
             setIsModalOpen(true);
         } catch (err) {
@@ -128,11 +107,12 @@ const PromptsPage: React.FC = () => {
             return;
         }
         const promptToDelete = itemsList.find(p => p.id === promptId);
-        const promptNameToConfirm = promptToDelete ? promptToDelete.name : promptId;
+        const promptNameToConfirm = promptToDelete ? (promptToDelete as any).name : promptId;
 
-        if (window.confirm(`Are you sure you want to delete prompt "${promptNameToConfirm}"?`)) {
+        if (window.confirm(`Are you sure you want to delete prompt \"${promptNameToConfirm}\"?`)) {
             setLoading(true);
             try {
+                // Asumimos que promptService.remove usa el id (o nombre si es el identificador)
                 await promptService.remove(selectedProjectId, promptId);
                 showSuccessToast(`Prompt ${promptNameToConfirm} deleted successfully!`);
                 fetchData();
@@ -156,8 +136,9 @@ const PromptsPage: React.FC = () => {
         try {
             let message = "";
             if (editingItem && editingItem.id) {
-                await promptService.update(selectedProjectId, editingItem.name, payload as UpdatePromptDto);
-                message = `Prompt ${editingItem.name} updated successfully!`;
+                // Asumimos que editingItem.name es el identificador para update si es necesario
+                await promptService.update(selectedProjectId, (editingItem as any).name || editingItem.id, payload as UpdatePromptDto);
+                message = `Prompt ${(editingItem as any).name || editingItem.id} updated successfully!`;
             } else {
                 await promptService.create(selectedProjectId, payload as CreatePromptDto);
                 const promptNameFromPayload = (payload as CreatePromptDto).name;
@@ -184,14 +165,16 @@ const PromptsPage: React.FC = () => {
     ];
     if (selectedProjectId) {
         breadcrumbs.push({
-            label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId),
+            // Usar nombre del proyecto del contexto si está disponible y no cargando
+            label: isLoadingSelectedProjectFull ? selectedProjectId : (selectedProjectFull?.name || selectedProjectId),
         });
         breadcrumbs.push({ label: "Prompts" });
     } else {
         breadcrumbs.push({ label: "Prompts (Select Project)" });
     }
 
-    if (isLoadingProject) {
+    // Usar isLoadingProjectsList para el estado general de carga del contexto de proyectos
+    if (isLoadingProjectsList) {
         return <p>Loading project context...</p>;
     }
 
@@ -202,7 +185,8 @@ const PromptsPage: React.FC = () => {
             {/* Page Title and Subtitle */}
             <div className="my-6">
                 <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
-                    Prompts for {project?.name || selectedProjectId}
+                    {/* Usar nombre del proyecto del contexto */}
+                    Prompts for {selectedProjectFull?.name || selectedProjectId}
                 </h2>
                 <p className="text-base font-medium dark:text-white">
                     Create, view, and manage all prompts and prompt assets associated with this project.
@@ -214,23 +198,27 @@ const PromptsPage: React.FC = () => {
                     onClick={handleAdd}
                     className={`px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 ${!selectedProjectId ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
-                    disabled={!selectedProjectId || loading || breadcrumbLoading}
+                    // Deshabilitar si la lista de prompts está cargando O el proyecto seleccionado aún no está completamente cargado.
+                    disabled={!selectedProjectId || loading || isLoadingSelectedProjectFull}
                     title={!selectedProjectId ? "Select a project to add a prompt" : "Add New Prompt"}
                 >
                     Add Prompt
                 </button>
             </div>
 
-            {!selectedProjectId && !isLoadingProject && (
+            {!selectedProjectId && !isLoadingProjectsList && (
                 <p className="text-yellow-600 dark:text-yellow-400">Please select a project from the dropdown above to see its prompts.</p>
             )}
-            {selectedProjectId && loading && <p>Loading prompts...</p>}
+            {/* Mensaje de carga para la lista de prompts (loading) o para el proyecto seleccionado (isLoadingSelectedProjectFull) */}
+            {selectedProjectId && (loading || isLoadingSelectedProjectFull) && <p>Loading prompts...</p>}
             {selectedProjectId && error && <p className="text-red-500">{error}</p>}
 
-            {selectedProjectId && !loading && !error && (
+            {selectedProjectId && !loading && !error && !isLoadingSelectedProjectFull && (
                 <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                     {itemsList.length === 0 ? (
-                        <p className="text-center py-4 text-gray-500 dark:text-gray-400">No prompts found for project {project?.name || selectedProjectId}.</p>
+                        <p className="text-center py-4 text-gray-500 dark:text-gray-400">
+                            No prompts found for project {selectedProjectFull?.name || selectedProjectId}.
+                        </p>
                     ) : (
                         <PromptsTable
                             prompts={itemsList}
@@ -249,12 +237,11 @@ const PromptsPage: React.FC = () => {
                             {editingItem ? 'Edit Prompt' : 'Add New Prompt'}
                         </h3>
                         <PromptForm
-                            initialData={editingItem}
-                            onSave={handleSave}
+                            initialData={editingItem} // PromptDto
+                            onSave={handleSave} // UpdatePromptDto | CreatePromptDto
                             onCancel={() => setIsModalOpen(false)}
-                            projectId={selectedProjectId}
+                            projectId={selectedProjectId} // Requerido por PromptForm
                         />
-                        {loading && <p className="text-sm text-center mt-2">Saving...</p>}
                     </div>
                 </div>
             )}

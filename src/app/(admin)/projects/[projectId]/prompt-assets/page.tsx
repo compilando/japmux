@@ -5,11 +5,9 @@ import { useParams } from 'next/navigation';
 import {
     CreatePromptAssetDto,
     UpdatePromptAssetDto,
-    CreateProjectDto,
 } from '@/services/generated/api';
 import {
     promptAssetService,
-    projectService
 } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb, { Crumb } from '@/components/common/PageBreadCrumb';
@@ -24,33 +22,18 @@ const PromptAssetsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingItem, setEditingItem] = useState<PromptAssetData | null>(null);
 
-    const [project, setProject] = useState<CreateProjectDto | null>(null);
-    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
-
     const params = useParams();
-    const { selectedProjectId } = useProjects();
+    const {
+        selectedProjectId,
+        selectedProjectFull,
+        isLoadingSelectedProjectFull,
+        isLoading: isLoadingProjectsList
+    } = useProjects();
 
-    const projectId = selectedProjectId || params.projectId as string;
-
-    useEffect(() => {
-        if (projectId) {
-            setBreadcrumbLoading(true);
-            projectService.findOne(projectId)
-                .then(data => setProject(data as CreateProjectDto))
-                .catch(err => {
-                    console.error("Error fetching project for breadcrumbs:", err);
-                    showErrorToast("Failed to load project details for breadcrumbs.");
-                    setProject(null);
-                })
-                .finally(() => setBreadcrumbLoading(false));
-        } else {
-            setProject(null);
-            setBreadcrumbLoading(false);
-        }
-    }, [projectId]);
+    const currentProjectId = selectedProjectId || params.projectId as string;
 
     const fetchData = useCallback(async () => {
-        if (!projectId) {
+        if (!currentProjectId) {
             setError("Project ID is missing.");
             setLoading(false);
             setItemsList([]);
@@ -59,7 +42,7 @@ const PromptAssetsPage: React.FC = () => {
         setError(null);
         setLoading(true);
         try {
-            const data = await promptAssetService.findAll(projectId);
+            const data = await promptAssetService.findAll(currentProjectId);
             if (Array.isArray(data)) {
                 setItemsList(data as PromptAssetData[]);
             } else {
@@ -75,14 +58,16 @@ const PromptAssetsPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [projectId]);
+    }, [currentProjectId]);
 
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        if (currentProjectId) {
+            fetchData();
+        }
+    }, [fetchData, currentProjectId]);
 
     const handleAdd = () => {
-        if (!projectId) {
+        if (!currentProjectId) {
             showErrorToast("Please select a project first.");
             return;
         }
@@ -91,7 +76,7 @@ const PromptAssetsPage: React.FC = () => {
     };
 
     const handleEdit = (item: PromptAssetData) => {
-        if (!projectId) {
+        if (!currentProjectId) {
             showErrorToast("Cannot edit, no project selected.");
             return;
         }
@@ -100,14 +85,14 @@ const PromptAssetsPage: React.FC = () => {
     };
 
     const handleDelete = async (assetKey: string) => {
-        if (!projectId) {
+        if (!currentProjectId) {
             showErrorToast("No project selected.");
             return;
         }
         if (window.confirm(`Are you sure you want to delete asset "${assetKey}"?`)) {
             setLoading(true);
             try {
-                await promptAssetService.remove(projectId, assetKey);
+                await promptAssetService.remove(currentProjectId, assetKey);
                 showSuccessToast(`Asset ${assetKey} deleted successfully!`);
                 fetchData();
             } catch (err) {
@@ -122,7 +107,7 @@ const PromptAssetsPage: React.FC = () => {
     };
 
     const handleSave = async (payload: CreatePromptAssetDto | UpdatePromptAssetDto) => {
-        if (!projectId) {
+        if (!currentProjectId) {
             showErrorToast("Cannot save, no project selected.");
             return;
         }
@@ -130,7 +115,7 @@ const PromptAssetsPage: React.FC = () => {
         try {
             let message = "";
             if (editingItem && editingItem.key) {
-                await promptAssetService.update(projectId, editingItem.key, payload as UpdatePromptAssetDto);
+                await promptAssetService.update(currentProjectId, editingItem.key, payload as UpdatePromptAssetDto);
                 message = `Asset ${editingItem.key} updated successfully!`;
             } else {
                 const createPayload = payload as CreatePromptAssetDto;
@@ -139,7 +124,7 @@ const PromptAssetsPage: React.FC = () => {
                     setLoading(false);
                     return;
                 }
-                await promptAssetService.create(projectId, createPayload);
+                await promptAssetService.create(currentProjectId, createPayload);
                 message = `Asset ${createPayload.key} created successfully!`;
             }
             setIsModalOpen(false);
@@ -159,21 +144,25 @@ const PromptAssetsPage: React.FC = () => {
         { label: "Home", href: "/" },
         { label: "Projects", href: "/projects" },
     ];
-    if (projectId) {
+    if (currentProjectId) {
         breadcrumbs.push({
-            label: breadcrumbLoading ? projectId : (project?.name || projectId),
-            href: `/projects/${projectId}/prompts`
+            label: isLoadingSelectedProjectFull ? currentProjectId : (selectedProjectFull?.name || currentProjectId),
+            href: `/projects/${currentProjectId}/prompts`
         });
         breadcrumbs.push({ label: "Assets" });
     } else {
         breadcrumbs.push({ label: "Assets (Select Project)" });
     }
 
-    if (!projectId) {
+    if (isLoadingProjectsList || (currentProjectId && isLoadingSelectedProjectFull)) {
+        return <p>Loading project details...</p>;
+    }
+
+    if (!currentProjectId) {
         return <p className="text-yellow-600 dark:text-yellow-400">Please select a project to view assets.</p>;
     }
-    if (loading || breadcrumbLoading) return <p>Loading assets...</p>;
-    if (error) return <p className="text-red-500">{error}</p>;
+    if (loading && currentProjectId) return <p>Loading assets...</p>;
+    if (error && currentProjectId) return <p className="text-red-500">{error}</p>;
 
     return (
         <>
@@ -182,7 +171,7 @@ const PromptAssetsPage: React.FC = () => {
             {/* Page Title and Subtitle */}
             <div className="my-6">
                 <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
-                    Prompt Assets for {project?.name || projectId}
+                    Prompt Assets for {selectedProjectFull?.name || currentProjectId}
                 </h2>
                 <p className="text-base font-medium dark:text-white">
                     Create, view, and manage all prompts and prompt assets associated with this project.
@@ -193,7 +182,7 @@ const PromptAssetsPage: React.FC = () => {
                 <button
                     onClick={handleAdd}
                     className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
-                    disabled={loading}
+                    disabled={loading || isLoadingSelectedProjectFull}
                     title="Add New Prompt Asset"
                 >
                     Add Asset
@@ -202,19 +191,19 @@ const PromptAssetsPage: React.FC = () => {
 
             <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                 {itemsList.length === 0 ? (
-                    <p className="text-center py-4 text-gray-500 dark:text-gray-400">No prompt assets found for this project.</p>
+                    <p className="text-center py-4 text-gray-500 dark:text-gray-400">No prompt assets found for project {selectedProjectFull?.name || currentProjectId}.</p>
                 ) : (
                     <PromptAssetsTable
                         promptAssets={itemsList}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
-                        projectId={projectId}
+                        projectId={currentProjectId}
                         loading={loading}
                     />
                 )}
             </div>
 
-            {isModalOpen && (
+            {isModalOpen && currentProjectId && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
                     <div className="relative p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white dark:bg-gray-900">
                         <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">

@@ -23,11 +23,7 @@ const CulturalDataPage: React.FC = () => {
     // Estados para el modal/formulario
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingCulturalData, setEditingCulturalData] = useState<generated.CulturalDataResponse | null>(null);
-    const { selectedProjectId } = useProjects();
-
-    // Estados para breadcrumb
-    const [project, setProject] = useState<generated.CreateProjectDto | null>(null);
-    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
+    const { selectedProjectId, selectedProjectFull, isLoadingSelectedProjectFull } = useProjects();
 
     const fetchData = async () => {
         if (!selectedProjectId) {
@@ -45,7 +41,7 @@ const CulturalDataPage: React.FC = () => {
             console.log(`API response for /projects/${selectedProjectId}/cultural-data received:`, data);
 
             if (Array.isArray(data)) {
-                setCulturalDataList(data);
+                setCulturalDataList(data as generated.CulturalDataResponse[]);
             } else {
                 console.error("API response for /cultural-data is not an array:", data);
                 setError('Received invalid data format for cultural data.');
@@ -64,24 +60,12 @@ const CulturalDataPage: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchData();
-    }, [selectedProjectId]);
-
-    // Efecto para cargar nombre del proyecto
-    useEffect(() => {
         if (selectedProjectId) {
-            setBreadcrumbLoading(true);
-            projectService.findOne(selectedProjectId)
-                .then(data => setProject(data))
-                .catch(err => {
-                    console.error("Error fetching project for breadcrumbs:", err);
-                    showErrorToast("Failed to load project details for breadcrumbs.");
-                    setProject(null);
-                })
-                .finally(() => setBreadcrumbLoading(false));
+            fetchData();
         } else {
-            setProject(null);
-            setBreadcrumbLoading(false);
+            setCulturalDataList([]);
+            setLoading(false);
+            setError("Please select a project to manage cultural data.");
         }
     }, [selectedProjectId]);
 
@@ -103,13 +87,15 @@ const CulturalDataPage: React.FC = () => {
             return;
         }
         if (window.confirm(`Are you sure you want to delete cultural data with key: ${itemKey}?`)) {
+            setLoading(true);
             try {
                 await culturalDataService.remove(selectedProjectId, itemKey);
                 fetchData();
                 showSuccessToast("Cultural data deleted successfully.");
             } catch (err) {
-                showErrorToast('Failed to delete cultural data.');
-                console.error(err);
+                console.error("Error deleting cultural data:", err);
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -119,19 +105,23 @@ const CulturalDataPage: React.FC = () => {
             showErrorToast("No project selected.");
             return;
         }
+        setLoading(true);
         try {
+            let message = "";
             if (editingCulturalData && editingCulturalData.key) {
                 await culturalDataService.update(selectedProjectId, editingCulturalData.key, payload as UpdateCulturalDataDto);
-                showSuccessToast("Cultural data updated successfully.");
+                message = "Cultural data updated successfully.";
             } else {
                 await culturalDataService.create(selectedProjectId, payload as CreateCulturalDataDto);
-                showSuccessToast("Cultural data created successfully.");
+                message = "Cultural data created successfully.";
             }
             setIsModalOpen(false);
+            showSuccessToast(message);
             fetchData();
         } catch (err: any) {
-            showErrorToast(err.response?.data?.message || err.message || 'Failed to save cultural data.');
-            console.error(err);
+            console.error("Error saving cultural data:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -140,16 +130,12 @@ const CulturalDataPage: React.FC = () => {
         { label: "Home", href: "/" },
     ];
     if (selectedProjectId) {
-        breadcrumbs = [
-            ...breadcrumbs,
-            { label: breadcrumbLoading ? selectedProjectId : (project?.name || selectedProjectId), href: `/projects/${selectedProjectId}/cultural-data` },
-            { label: "Cultural Data" }
-        ];
+        breadcrumbs.push({
+            label: isLoadingSelectedProjectFull ? selectedProjectId : (selectedProjectFull?.name || selectedProjectId),
+        });
+        breadcrumbs.push({ label: "Cultural Data" });
     } else {
-        breadcrumbs = [
-            ...breadcrumbs,
-            { label: "Cultural Data (Select Project)" }
-        ];
+        breadcrumbs.push({ label: "Cultural Data (Select Project)" });
     }
 
     return (
@@ -167,7 +153,7 @@ const CulturalDataPage: React.FC = () => {
             </div>
 
             {!selectedProjectId ? (
-                <p className="text-center text-red-500">Please select a project from the header dropdown to manage cultural data.</p>
+                <p className="text-center text-yellow-500 dark:text-yellow-400">Please select a project from the header dropdown to manage cultural data.</p>
             ) : (
                 <>
                     <div className="flex justify-end mb-4">
@@ -179,10 +165,10 @@ const CulturalDataPage: React.FC = () => {
                         </button>
                     </div>
 
-                    {loading && <p>Loading cultural data...</p>}
+                    {(loading || isLoadingSelectedProjectFull) && <p>Loading cultural data...</p>}
                     {error && <p className="text-red-500">{error}</p>}
 
-                    {!loading && !error && (
+                    {!loading && !error && !isLoadingSelectedProjectFull && (
                         <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                             <CulturalDataTable
                                 culturalDataList={culturalDataList}

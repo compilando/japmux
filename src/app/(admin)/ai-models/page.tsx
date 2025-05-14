@@ -12,6 +12,7 @@ import Breadcrumb from '@/components/common/PageBreadCrumb';
 import AiModelsTable from '@/components/tables/AiModelsTable';
 import AiModelForm from '@/components/form/AiModelForm';
 import axios from 'axios';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 const AiModelsPage: React.FC = () => {
     const [aiModelsList, setAiModelsList] = useState<AiModelResponseDto[]>([]);
@@ -19,7 +20,12 @@ const AiModelsPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingModel, setEditingModel] = useState<AiModelResponseDto | null>(null);
-    const { selectedProjectId } = useProjects();
+
+    const {
+        selectedProjectId,
+        selectedProjectFull,
+        isLoadingSelectedProjectFull
+    } = useProjects();
 
     const fetchData = async (projectId: string) => {
         setLoading(true);
@@ -73,57 +79,65 @@ const AiModelsPage: React.FC = () => {
 
     const handleDelete = async (id: string) => {
         if (!selectedProjectId) {
-            setError("Cannot delete model without a selected project.");
+            showErrorToast("Cannot delete model without a selected project.");
             return;
         }
         if (window.confirm('Are you sure you want to delete this AI model?')) {
+            setLoading(true);
             try {
                 await aiModelService.remove(selectedProjectId, id);
+                showSuccessToast('AI Model deleted successfully!');
                 if (selectedProjectId) {
                     fetchData(selectedProjectId);
                 }
             } catch (err) {
-                setError('Failed to delete AI model');
-                console.error(err);
-            }
-            setIsModalOpen(false);
-            if (selectedProjectId) {
-                fetchData(selectedProjectId);
+                console.error("Error deleting AI Model:", err);
+            } finally {
+                setIsModalOpen(false);
+                setLoading(false);
             }
         }
     };
 
     const handleSave = async (payload: CreateAiModelDto | UpdateAiModelDto) => {
         if (!selectedProjectId) {
-            setError("Cannot save model without a selected project.");
+            showErrorToast("Cannot save model without a selected project.");
             setIsModalOpen(false);
             return;
         }
+        setLoading(true);
         try {
+            let message = "";
             if (editingModel && editingModel.id) {
                 await aiModelService.update(selectedProjectId, editingModel.id, payload as UpdateAiModelDto);
+                message = 'AI Model updated successfully!';
             } else {
                 await aiModelService.create(selectedProjectId, payload as CreateAiModelDto);
+                message = 'AI Model created successfully!';
             }
             setIsModalOpen(false);
+            showSuccessToast(message);
             if (selectedProjectId) {
                 fetchData(selectedProjectId);
             }
         } catch (err) {
-            setError(`Failed to save AI model: ${err instanceof Error ? err.message : String(err)}`);
-            console.error(err);
-            if (axios.isAxiosError(err)) {
-                alert(`Error saving: ${err.response?.data?.message || err.message}`);
-            } else if (err instanceof Error) {
-                alert(`Error saving: ${err.message}`);
-            }
+            console.error("Error saving AI Model:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const breadcrumbs = [
+    const breadcrumbs: { label: string; href?: string }[] = [
         { label: "Home", href: "/" },
-        { label: "AI Models" }
     ];
+    if (selectedProjectId) {
+        breadcrumbs.push({
+            label: isLoadingSelectedProjectFull ? selectedProjectId : (selectedProjectFull?.name || selectedProjectId),
+        });
+        breadcrumbs.push({ label: "AI Models" });
+    } else {
+        breadcrumbs.push({ label: "AI Models (Select Project)" });
+    }
 
     return (
         <>
@@ -149,9 +163,9 @@ const AiModelsPage: React.FC = () => {
                             Add AI Model
                         </button>
                     </div>
-                    {loading && <p>Loading AI models...</p>}
+                    {(loading || (selectedProjectId && isLoadingSelectedProjectFull)) && <p>Loading AI models...</p>}
                     {error && <p className="text-red-500">{error}</p>}
-                    {!loading && !error && (
+                    {!loading && !error && (!selectedProjectId || !isLoadingSelectedProjectFull) && (
                         <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                             <AiModelsTable
                                 aiModels={aiModelsList}
