@@ -1,4 +1,4 @@
-import axios, { AxiosError, InternalAxiosRequestConfig, AxiosInstance } from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { showErrorToast } from '@/utils/toastUtils'; // Importar la utilidad
 // Importar todo lo exportado por el cliente generado
 import * as generated from './generated';
@@ -52,10 +52,12 @@ apiClient.interceptors.request.use(
 // Interceptor de Response: Manejo global de errores
 apiClient.interceptors.response.use(
     (response) => response,
-    (error: AxiosError<any>) => { // Tipar el error si es posible
-        const errorMessage = error.response?.data?.message || // Intentar obtener mensaje de la API
-            (error.response?.data as any)?.error || // Otra posible estructura de error
-            error.message; // Fallback al mensaje genérico del error
+    (error: AxiosError<unknown>) => { // Tipar el error si es posible
+        const errorMessage = error.response?.data && typeof error.response.data === 'object' && 'message' in error.response.data
+            ? String(error.response.data.message)
+            : error.response?.data && typeof error.response.data === 'object' && 'error' in error.response.data
+                ? String(error.response.data.error)
+                : error.message; // Fallback al mensaje genérico del error
 
         if (error.response?.status === 401) {
             console.error('API Error: Unauthorized (401).');
@@ -100,7 +102,8 @@ const promptAssetsGeneratedApi = new generated.PromptAssetsApi(generatedApiConfi
 // Instanciar PromptAssetVersionsApi aquí para que esté disponible para el servicio
 const promptAssetVersionsGeneratedApi = new generated.PromptAssetVersionsWithinProjectAssetApi(generatedApiConfig, undefined, apiClient);
 // Instanciar PromptAssetTranslationsApi aquí para que esté disponible para el servicio
-const promptAssetTranslationsGeneratedApi = new generated.AssetTranslationsWithinProjectAssetVersionApi(generatedApiConfig, undefined, apiClient);
+// Esta constante no se utiliza actualmente, podría ser necesaria en el futuro
+// const promptAssetTranslationsGeneratedApi = new generated.AssetTranslationsWithinProjectAssetVersionApi(generatedApiConfig, undefined, apiClient);
 // const authGeneratedApi = new generated.AuthenticationApi(generatedApiConfig, undefined, apiClient); // Si decides reemplazar authService
 
 // --- Servicios Manuales (Wrapper sobre los generados o lógica personalizada) ---
@@ -296,14 +299,16 @@ export const environmentService = {
     // findByName se mantiene si existe y se usa, la API generada parece tenerlo.
     findByName: async (projectId: string, name: string): Promise<generated.CreateEnvironmentDto | null> => {
         try {
-            // El generado usa (name, projectId)
             const response = await environmentsGeneratedApi.environmentControllerFindByName(name, projectId);
             return response.data;
-        } catch (error: any) {
-            if (error.response && error.response.status === 404) {
-                return null;
+        } catch (error) {
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as AxiosError;
+                if (axiosError.response && axiosError.response.status === 404) {
+                    return null;
+                }
             }
-            console.error(`[environmentService.findByName] Error: ${error.message}`, error);
+            console.error(`[environmentService.findByName] Error: ${error instanceof Error ? error.message : 'Unknown error'}`, error);
             showErrorToast(`Failed to find environment by name: ${name}`);
             throw error;
         }
@@ -364,7 +369,7 @@ export const promptService = {
     remove: async (projectId: string, promptName: string): Promise<void> => {
         await apiClient.delete(`/api/projects/${projectId}/prompts/${promptName}`);
     },
-    generatePromptStructure: async (projectId: string, userPrompt: string): Promise<any> => {
+    generatePromptStructure: async (projectId: string, userPrompt: string): Promise<unknown> => {
         const payload = { userPrompt: userPrompt };
         const response = await apiClient.post(`/api/projects/${projectId}/prompts/generate-structure`, payload);
         return response.data;
@@ -433,22 +438,41 @@ export const promptTranslationService = {
 // Servicio de Prompt Assets (Corregido para usar generated.PromptAssetsApi)
 export const promptAssetService = {
     findAll: async (projectId: string): Promise<PromptAssetData[]> => {
-        const response: any = await promptAssetsGeneratedApi.promptAssetControllerFindAll(projectId);
-        return (response.data as generated.CreatePromptAssetDto[]).map(item => ({
-            ...item,
-            name: item.name || item.key,
-            category: item.category || 'default',
-            enabled: true
-        }));
+        try {
+            const response = await promptAssetsGeneratedApi.promptAssetControllerFindAll(projectId);
+            // Verificamos si la respuesta existe
+            const assets = response && response.data ? response.data : [];
+            return (assets as generated.CreatePromptAssetDto[]).map(item => ({
+                ...item,
+                name: item.name || item.key,
+                category: item.category || 'default',
+                enabled: true
+            }));
+        } catch (error) {
+            console.error('Error fetching prompt assets:', error);
+            showErrorToast('Failed to fetch prompt assets.');
+            return [];
+        }
     },
     findOne: async (projectId: string, assetKey: string): Promise<PromptAssetData> => {
-        const response: any = await promptAssetsGeneratedApi.promptAssetControllerFindOne(assetKey, projectId);
-        return {
-            ...response.data as generated.CreatePromptAssetDto,
-            name: response.data.name || assetKey,
-            category: response.data.category || 'default',
-            enabled: true
-        };
+        try {
+            const response = await promptAssetsGeneratedApi.promptAssetControllerFindOne(assetKey, projectId);
+            // Verificamos si la respuesta existe
+            if (!response || !response.data) {
+                throw new Error(`Asset with key ${assetKey} not found`);
+            }
+            const asset = response.data as generated.CreatePromptAssetDto;
+            return {
+                ...asset,
+                name: asset.name || assetKey,
+                category: asset.category || 'default',
+                enabled: true
+            };
+        } catch (error) {
+            console.error(`Error fetching prompt asset ${assetKey}:`, error);
+            showErrorToast(`Failed to fetch prompt asset ${assetKey}.`);
+            throw error;
+        }
     },
     create: async (projectId: string, payload: generated.CreatePromptAssetDto): Promise<void> => {
         await promptAssetsGeneratedApi.promptAssetControllerCreate(projectId, payload);
@@ -551,7 +575,7 @@ export const culturalDataService = {
 
 // Servicio de LLM Execution (Actualizado para usar generado)
 export const llmExecutionService = {
-    execute: async (payload: generated.ExecuteLlmDto): Promise<any> => {
+    execute: async (payload: generated.ExecuteLlmDto): Promise<unknown> => {
         const response = await llmExecutionGeneratedApi.llmExecutionControllerExecuteLlm(payload);
         return response.data;
     },
@@ -561,7 +585,8 @@ export const llmExecutionService = {
 export const systemPromptService = {
     findAll: async (): Promise<generated.CreateSystemPromptDto[]> => {
         try {
-            const response: any = await systemPromptsGeneratedApi.systemPromptControllerFindAll();
+            const response = await systemPromptsGeneratedApi.systemPromptControllerFindAll();
+            // Verificamos si la respuesta existe y tiene data
             if (response && response.data) {
                 return response.data as generated.CreateSystemPromptDto[];
             }
@@ -575,15 +600,19 @@ export const systemPromptService = {
     },
     findOne: async (name: string): Promise<generated.CreateSystemPromptDto | null> => {
         try {
-            const response: any = await systemPromptsGeneratedApi.systemPromptControllerFindOne(name);
+            const response = await systemPromptsGeneratedApi.systemPromptControllerFindOne(name);
+            // Verificamos si la respuesta existe y tiene data
             if (response && response.data) {
                 return response.data as generated.CreateSystemPromptDto;
             }
             console.warn(`systemPromptControllerFindOne(${name}) did not return data.`);
             return null;
-        } catch (error: any) {
-            if (error.response && error.response.status === 404) {
-                return null;
+        } catch (error) {
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as AxiosError;
+                if (axiosError.response && axiosError.response.status === 404) {
+                    return null;
+                }
             }
             console.error(`Error fetching system prompt ${name}:`, error);
             showErrorToast(`Failed to fetch system prompt ${name}.`);
@@ -603,7 +632,7 @@ export const systemPromptService = {
 
 // Añadir función para execute-raw (podría ir en llmExecutionService o uno nuevo)
 export const rawExecutionService = {
-    executeRaw: async (payload: generated.ExecuteRawDto & { variables?: Record<string, any> }): Promise<any> => {
+    executeRaw: async (payload: generated.ExecuteRawDto & { variables?: Record<string, string> }): Promise<unknown> => {
         const response = await rawExecutionGeneratedApi.rawExecutionControllerExecuteRawText(payload);
         return response.data;
     }

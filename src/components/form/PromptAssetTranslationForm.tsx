@@ -3,7 +3,6 @@ import {
     CreateAssetTranslationDto,
     UpdateAssetTranslationDto,
     regionService,
-    promptAssetService,
     rawExecutionService,
     aiModelService
 } from '@/services/api';

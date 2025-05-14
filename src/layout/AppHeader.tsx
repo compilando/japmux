@@ -1,12 +1,15 @@
 "use client";
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
-import NotificationDropdown from "@/components/header/NotificationDropdown";
 import UserDropdown from "@/components/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
 import { useProjects } from "@/context/ProjectContext";
-import Image from "next/image";
-import Link from "next/link";
+import { CreateProjectDto } from "@/services/generated/api";
 import React, { useState, useEffect, useRef } from "react";
+
+// Interfaz extendida para incluir la propiedad id en los proyectos
+interface ProjectWithId extends CreateProjectDto {
+  id: string;
+}
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -119,11 +122,14 @@ const AppHeader: React.FC = () => {
                 className="h-9 rounded border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 focus:border-brand-300 focus:outline-none focus:ring-1 focus:ring-brand-500/50 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90 dark:focus:border-brand-700"
                 aria-label="Select Project"
               >
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
+                {projects.map((project) => {
+                  const typedProject = project as ProjectWithId;
+                  return (
+                    <option key={typedProject.id} value={typedProject.id}>
+                      {typedProject.name}
+                    </option>
+                  );
+                })}
               </select>
             ) : (
               <span className="text-sm text-gray-500 dark:text-gray-400">No projects found</span>

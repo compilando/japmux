@@ -152,7 +152,7 @@ const PromptAssetVersionsPage: React.FC = () => {
             // Actualizar el item en la lista
             setItemsList(prevList =>
                 prevList.map(item =>
-                    item.versionTag === versionTag ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as any).marketplaceStatus || 'PENDING_APPROVAL' } : item
+                    item.versionTag === versionTag ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as PromptAssetVersionMarketplaceDetails).marketplaceStatus || 'PENDING_APPROVAL' } : item
                 )
             );
             showSuccessToast(`Solicitud de publicación para la versión ${versionTag} enviada.`);
@@ -172,7 +172,7 @@ const PromptAssetVersionsPage: React.FC = () => {
             // Actualizar el item en la lista
             setItemsList(prevList =>
                 prevList.map(item =>
-                    item.versionTag === versionTag ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as any).marketplaceStatus || 'NOT_PUBLISHED' } : item
+                    item.versionTag === versionTag ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as PromptAssetVersionMarketplaceDetails).marketplaceStatus || 'NOT_PUBLISHED' } : item
                 )
             );
             showSuccessToast(`Versión ${versionTag} retirada del marketplace.`);

@@ -32,13 +32,29 @@ interface SelectOption { value: string; label: string; }
 type FontSize = 's' | 'm' | 'l' | 'xl';
 const fontSizes: FontSize[] = ['s', 'm', 'l', 'xl'];
 
+// Interface for the expected structure of LLM execution results
+interface LlmExecutionResponse {
+    result: string;
+    modelUsed?: string;
+    providerUsed?: string;
+    // Add other potential properties if known
+}
+
+// Interface to represent version data as expected for select options
+// CreatePromptVersionDto might not have id/versionTag if it's strictly for creation payloads.
+// Data fetched from API for listing versions usually includes these.
+interface PromptVersionForSelect extends CreatePromptVersionDto {
+    id?: string; // Often present in fetched data
+    versionTag: string; // Should be present and non-optional for selection logic based on current code
+}
+
 const ServePromptPage: React.FC = () => {
     const { selectedProjectId } = useProjects();
     const [isClient, setIsClient] = useState(false); // Estado para saber si estamos en cliente
 
     // --- Estados para Selecciones (usar PromptDto) ---
     const [selectedPrompt, setSelectedPrompt] = useState<SingleValue<SelectOption>>(null);
-    const [versions, setVersions] = useState<CreatePromptVersionDto[]>([]);
+    const [versions, setVersions] = useState<PromptVersionForSelect[]>([]); // Use extended type
     const [selectedVersion, setSelectedVersion] = useState<SingleValue<SelectOption>>(null);
     const [translations, setTranslations] = useState<CreatePromptTranslationDto[]>([]);
     const [selectedLanguage, setSelectedLanguage] = useState<SingleValue<SelectOption>>(null);
@@ -51,7 +67,7 @@ const ServePromptPage: React.FC = () => {
     const [variableInputs, setVariableInputs] = useState<StringMap>({});
 
     // --- Estados para Ejecución ---
-    const [executionResult, setExecutionResult] = useState<any>(null);
+    const [executionResult, setExecutionResult] = useState<LlmExecutionResponse | null>(null); // Use defined interface
     const [isExecuting, setIsExecuting] = useState<boolean>(false);
 
     // --- Estado para Tamaño de Fuente ---
@@ -60,7 +76,6 @@ const ServePromptPage: React.FC = () => {
     // --- Estados UI/Generales ---
     const [loadingVersions, setLoadingVersions] = useState<boolean>(false);
     const [loadingTranslations, setLoadingTranslations] = useState<boolean>(false);
-    const [loadingText, setLoadingText] = useState<boolean>(false);
     const [loadingAiModels, setLoadingAiModels] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -106,7 +121,12 @@ const ServePromptPage: React.FC = () => {
     };
 
     // --- Opciones para Selects (Memoizadas) ---
-    const versionOptions: SelectOption[] = useMemo(() => versions.map(v => ({ value: (v as any).versionTag || (v as any).id || '', label: (v as any).versionTag || (v as any).id || 'Unknown Version' })), [versions]);
+    const versionOptions: SelectOption[] = useMemo(() =>
+        versions.map(v => ({
+            value: v.versionTag || v.id || String(Date.now() + Math.random()), // Prioritize versionTag, then id, then fallback
+            label: v.versionTag || v.id || 'Unknown Version'
+        })),
+        [versions]);
     const languageOptions: SelectOption[] = useMemo(() => [
         { value: '__BASE__', label: 'Base Text' }, // Opción para usar el texto base
         ...translations.map(t => ({ value: t.languageCode, label: t.languageCode }))
@@ -167,7 +187,7 @@ const ServePromptPage: React.FC = () => {
         setLoadingVersions(true);
         promptVersionService.findAll(selectedProjectId, selectedPrompt.value)
             .then((data: CreatePromptVersionDto[]) => {
-                setVersions(Array.isArray(data) ? data : []);
+                setVersions(Array.isArray(data) ? (data as PromptVersionForSelect[]) : []);
             })
             .catch((err: Error) => {
                 console.error("Error fetching versions:", err);
@@ -250,8 +270,7 @@ const ServePromptPage: React.FC = () => {
             return;
         }
 
-        setLoadingText(true);
-        let fetchPromise: Promise<any>;
+        let fetchPromise: Promise<CreatePromptVersionDto | CreatePromptTranslationDto | null | undefined>;
 
         if (selectedLanguage.value === '__BASE__') {
             fetchPromise = promptVersionService.findOne(selectedProjectId, selectedPrompt.value, selectedVersion.value);
@@ -260,14 +279,20 @@ const ServePromptPage: React.FC = () => {
         }
 
         fetchPromise
-            .then((data: CreatePromptVersionDto | CreatePromptTranslationDto) => {
-                const text = data?.promptText || '';
-                setCurrentPromptText(text);
-                const vars = extractVariables(text);
-                const initialVarInputs: StringMap = {};
-                vars.forEach(v => { initialVarInputs[v] = ''; });
-                setPromptVariables(initialVarInputs);
-                setVariableInputs(initialVarInputs);
+            .then((data: CreatePromptVersionDto | CreatePromptTranslationDto | null | undefined) => {
+                if (data) {
+                    const text = data.promptText || '';
+                    setCurrentPromptText(text);
+                    const vars = extractVariables(text);
+                    const initialVarInputs: StringMap = {};
+                    vars.forEach(v => { initialVarInputs[v] = ''; });
+                    setPromptVariables(initialVarInputs);
+                    setVariableInputs(initialVarInputs);
+                } else {
+                    setCurrentPromptText('');
+                    setPromptVariables({});
+                    setVariableInputs({});
+                }
             })
             .catch((err: Error) => {
                 console.error("Error fetching prompt text:", err);
@@ -276,8 +301,7 @@ const ServePromptPage: React.FC = () => {
                 setCurrentPromptText('');
                 setPromptVariables({});
                 setVariableInputs({});
-            })
-            .finally(() => setLoadingText(false));
+            });
 
     }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage]);
 
@@ -306,7 +330,7 @@ const ServePromptPage: React.FC = () => {
         }
 
         const activeVariables = Object.entries(variableInputs)
-            .filter(([_, val]) => val.trim() !== '') // Solo incluir variables con valor
+            .filter(([, val]) => val.trim() !== '') // Usando coma sin nombre para valor no utilizado
             .reduce((obj, [key, val]) => {
                 obj[key] = val;
                 return obj;
@@ -324,7 +348,7 @@ const ServePromptPage: React.FC = () => {
 
         setCurlCommand(command);
 
-    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, selectedAiModel, variableInputs]);
+    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, selectedAiModel, variableInputs, currentPromptText]);
 
     // --- Handler para actualizar input de variable ---
     const handleVariableInputChange = (varName: string, value: string) => {
@@ -385,30 +409,23 @@ const ServePromptPage: React.FC = () => {
         };
 
         try {
-            const result = await llmExecutionService.execute(executionDto);
+            const result: LlmExecutionResponse = await llmExecutionService.execute(executionDto);
             setExecutionResult(result); // Guardar TODO el resultado
             showSuccessToast("Prompt executed successfully!");
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error executing prompt:", err);
-            const errorMessage = err.response?.data?.message || err.message || 'Failed to execute prompt.';
+            let errorMessage = 'Failed to execute prompt.';
+            if (axios.isAxiosError(err) && err.response?.data?.message) {
+                errorMessage = err.response.data.message;
+            } else if (err instanceof Error) {
+                errorMessage = err.message;
+            }
             setError(errorMessage);
             showErrorToast(errorMessage);
         } finally {
             setIsExecuting(false);
         }
-    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, selectedAiModel, variableInputs]);
-
-    // --- Limpiar resultado del prompt formateado (extraer de ```) ---
-    const formattedPromptResult = useMemo(() => {
-        if (!executionResult || typeof executionResult.result !== 'string') {
-            return '';
-        }
-        let content = executionResult.result;
-        // Quitar ```<lang> y ``` si existen
-        content = content.replace(/^```[a-zA-Z]*\\n/, ''); // Inicio
-        content = content.replace(/\\n```$/, ''); // Final
-        return content.trim();
-    }, [executionResult]);
+    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, selectedAiModel, variableInputs, currentPromptText]);
 
     // --- Render ---
     return (

@@ -226,7 +226,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                 />
                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    Escribe o pega aquí el texto traducido. Puedes usar el botón "Traducir" para obtener una traducción automática.
+                    Escribe o pega aquí el texto traducido. Puedes usar el botón &apos;Traducir&apos; para obtener una traducción automática.
                 </p>
             </div>
 

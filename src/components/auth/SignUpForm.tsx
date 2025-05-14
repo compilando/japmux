@@ -6,7 +6,6 @@ import Button from "@/components/ui/button/Button";
 import { useAuth } from "@/context/AuthContext";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
 import React, { useState, FormEvent } from "react";
 
 export default function SignUpForm() {
@@ -18,7 +17,6 @@ export default function SignUpForm() {
   const [isChecked, setIsChecked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, error: authError } = useAuth();
-  const router = useRouter();
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {

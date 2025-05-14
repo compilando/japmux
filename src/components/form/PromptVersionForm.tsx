@@ -3,8 +3,14 @@ import { CreatePromptVersionDto, UpdatePromptVersionDto, promptAssetService } fr
 import { useProjects } from '@/context/ProjectContext';
 import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
 
+// Interface local para los datos del formulario, incluyendo versionTag
+export interface PromptVersionFormData extends CreatePromptVersionDto {
+    versionTag?: string; // Hacerlo opcional para que coincida con la creación, pero presente en edición
+    // promptText y changeMessage ya están en CreatePromptVersionDto
+}
+
 interface PromptVersionFormProps {
-    initialData: CreatePromptVersionDto | null;
+    initialData: PromptVersionFormData | null; // Usar la interfaz local
     onSave: (payload: CreatePromptVersionDto | UpdatePromptVersionDto) => void;
     onCancel: () => void;
     latestVersionTag?: string;
@@ -126,7 +132,7 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                 promptText: promptText ? promptText : undefined,
                 changeMessage: changeMessage ? changeMessage : undefined,
             } as UpdatePromptVersionDto;
-            payload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v !== undefined)) as UpdatePromptVersionDto;
+            payload = Object.fromEntries(Object.entries(payload).filter(([, v]) => v !== undefined)) as UpdatePromptVersionDto;
 
         } else {
             payload = {

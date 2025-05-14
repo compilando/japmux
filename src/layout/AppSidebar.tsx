@@ -1,17 +1,14 @@
 "use client";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { useProjects } from "../context/ProjectContext";
 import {
-  ChevronDownIcon,
-  GridIcon,
   HorizontaLDots,
   TableIcon,
   UserCircleIcon,
-  DocsIcon,
   BoltIcon,
   FolderIcon,
   TaskIcon,
@@ -22,7 +19,6 @@ import {
   ChatIcon,
   ShootingStarIcon,
 } from "../icons/index";
-import SidebarWidget from "./SidebarWidget";
 import SidebarNavItem from "./SidebarNavItem";
 
 // Define SubItem type
@@ -92,8 +88,7 @@ const AppSidebar: React.FC = () => {
     }
   ].filter(item => !(item.subItems && item.subItems.length === 0 && (item.name === "Current Project" || item.name === "Prompt Management")));
 
-  // Now find the index
-  const currentProjectIndex = navItems.findIndex(item => item.name === "Current Project");
+  // Índice removido por no ser utilizado
 
   // State for submenu toggle and height calculation
   const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);

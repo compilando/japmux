@@ -158,14 +158,15 @@ const PromptVersionsPage: React.FC = () => {
             if (Array.isArray(data)) {
                 // Cast to local interface that includes isActive and potentially marketplaceStatus from API
                 const versionsData = data.map(v_any => { // Renombrar v a v_any para casteo explícito
-                    const v = v_any as any; // Tratar v como 'any' para acceder a campos potencialmente no declarados en CreatePromptVersionDto
+                    // Tipo más específico para v en lugar de 'any'
+                    const v = v_any as CreatePromptVersionDto & Partial<{ id: string, versionTag: string, isActive: boolean, marketplaceStatus: string, promptId: string }>;
                     return {
-                        ...v, // Spread original data from API
+                        ...v, // Spread original data from API. Esto es seguro si los campos de Partial coinciden o son adicionales
                         id: v.id || v.versionTag || String(Date.now() + Math.random()),
                         versionTag: v.versionTag || 'N/A', // Asegurar que versionTag exista, default a N/A si no
                         isActive: v.isActive || false,
-                        promptId: promptId,
-                        // marketplaceStatus vendrá de 'v' si la API lo envía.
+                        promptId: v.promptId || promptId, // Usar promptId de v si existe, sino el de la página
+                        marketplaceStatus: v.marketplaceStatus, // Será undefined si no está en v
                     };
                 }) as PromptVersionMarketplaceDetails[];
                 setItemsList(versionsData);
@@ -280,7 +281,7 @@ const PromptVersionsPage: React.FC = () => {
             setItemsList(prevList =>
                 prevList.map(item =>
                     item.versionTag === versionTag
-                        ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as any).marketplaceStatus || 'PENDING_APPROVAL' }
+                        ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as PromptVersionMarketplaceDetails).marketplaceStatus || 'PENDING_APPROVAL' }
                         : item
                 )
             );
@@ -301,7 +302,7 @@ const PromptVersionsPage: React.FC = () => {
             setItemsList(prevList =>
                 prevList.map(item =>
                     item.versionTag === versionTag
-                        ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as any).marketplaceStatus || 'NOT_PUBLISHED' }
+                        ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as PromptVersionMarketplaceDetails).marketplaceStatus || 'NOT_PUBLISHED' }
                         : item
                 )
             );

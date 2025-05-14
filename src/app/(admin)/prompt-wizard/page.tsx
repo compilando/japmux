@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import { promptService } from '@/services/api';
 import { loadPromptStructure } from '@/services/promptApi';
@@ -8,10 +8,42 @@ import { LoadPromptStructureDto } from '@/types/prompt-structure';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 import { useProjects } from '@/context/ProjectContext'; // Importar contexto de proyectos
 
+// Definir interfaces para los datos generados
+interface PromptInfo {
+    name: string;
+    description: string;
+}
+
+interface Translation {
+    languageCode: string;
+    promptText?: string;
+    value?: string;
+}
+
+interface VersionInfo {
+    promptText: string;
+    changeMessage?: string;
+    assets?: string[];
+    translations?: Translation[];
+}
+
+interface AssetInfo {
+    key: string;
+    value: string;
+    changeMessage?: string;
+    translations?: Translation[];
+}
+
+interface StructureData {
+    prompt?: PromptInfo;
+    version?: VersionInfo;
+    assets?: AssetInfo[];
+}
+
 const PromptWizardPage: React.FC = () => {
     const { selectedProjectId } = useProjects(); // Obtener projectId del contexto
     const [promptContent, setPromptContent] = useState<string>('');
-    const [generatedJson, setGeneratedJson] = useState<any>(null);
+    const [generatedJson, setGeneratedJson] = useState<StructureData | null>(null);
     const [isLoadingGenerate, setIsLoadingGenerate] = useState<boolean>(false);
     const [errorGenerate, setErrorGenerate] = useState<string | null>(null);
 
@@ -19,7 +51,7 @@ const PromptWizardPage: React.FC = () => {
     const [jsonToLoadInput, setJsonToLoadInput] = useState<string>('');
     const [isLoadingLoad, setIsLoadingLoad] = useState<boolean>(false);
     const [loadStatusMessage, setLoadStatusMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-    
+
     const breadcrumbs = [
         { label: "Home", href: "/" },
         { label: "Prompt Wizard" }
@@ -40,12 +72,19 @@ const PromptWizardPage: React.FC = () => {
         setGeneratedJson(null);
         try {
             const result = await promptService.generatePromptStructure(selectedProjectId, promptContent);
-            setGeneratedJson(result);
+            setGeneratedJson(result as StructureData);
             setJsonToLoadInput(JSON.stringify(result, null, 2));
             showSuccessToast('Estructura generada exitosamente a partir del prompt.');
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Error generando estructura:", err);
-            const apiErrorMessage = (err as any)?.response?.data?.message || 'Error al generar la estructura del prompt.';
+            let apiErrorMessage = 'Error al generar la estructura del prompt.';
+            if (err && typeof err === 'object' && 'response' in err &&
+                err.response && typeof err.response === 'object' &&
+                'data' in err.response && err.response.data &&
+                typeof err.response.data === 'object' &&
+                'message' in err.response.data) {
+                apiErrorMessage = String(err.response.data.message);
+            }
             setErrorGenerate(apiErrorMessage);
             showErrorToast(apiErrorMessage);
         } finally {
@@ -53,18 +92,10 @@ const PromptWizardPage: React.FC = () => {
         }
     };
 
-    const handleFinalGeneration = () => {
-        if (!generatedJson) {
-            showErrorToast('Primero genera la estructura del prompt.');
-            return;
-        }
-        console.log("Generar Prompt Completo clickeado. Datos a usar:", generatedJson);
-        // Aquí irá la lógica para la generación final usando 'generatedJson'
-        showErrorToast('La funcionalidad de "Generar Prompt Completo" aún no está implementada.');
-    };
+    // Función eliminada: handleFinalGeneration
 
     // Componente para visualización bonita del JSON
-    const GeneratedStructureDisplay = ({ data }: { data: any }) => {
+    const GeneratedStructureDisplay = ({ data }: { data: StructureData }) => {
         if (!data) return null;
 
         const renderBlock = (title: string, content: React.ReactNode, bgColorClass: string) => (
@@ -74,14 +105,14 @@ const PromptWizardPage: React.FC = () => {
             </div>
         );
 
-        const renderKeyValue = (key: string, value: any) => (
+        const renderKeyValue = (key: string, value: unknown) => (
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
                 <span className="font-medium text-gray-700 dark:text-gray-200">{key}: </span>
-                {typeof value === 'object' ? JSON.stringify(value) : value}
+                {typeof value === 'object' ? JSON.stringify(value) : String(value)}
             </p>
         );
-        
-        const renderList = (items: any[], renderItem: (item: any, index: number) => React.ReactNode) => (
+
+        const renderList = <T,>(items: T[], renderItem: (item: T, index: number) => React.ReactNode) => (
             <ul className="list-disc list-inside pl-4 space-y-1">
                 {items.map((item, index) => (
                     <li key={index} className="text-sm text-gray-600 dark:text-gray-300">
@@ -94,7 +125,7 @@ const PromptWizardPage: React.FC = () => {
         return (
             <div className="mt-6 bg-gray-50 dark:bg-gray-700 p-6 rounded-lg shadow-inner">
                 <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Visualización de la Estructura:</h2>
-                
+
                 {data.prompt && renderBlock("Detalles del Prompt", <>
                     {renderKeyValue("Nombre", data.prompt.name)}
                     {renderKeyValue("Descripción", data.prompt.description)}
@@ -105,28 +136,28 @@ const PromptWizardPage: React.FC = () => {
                     {renderKeyValue("Mensaje de Cambio", data.version.changeMessage)}
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mt-2 mb-1">Assets Referenciados:</p>
                     {data.version.assets && data.version.assets.length > 0 ? renderList(data.version.assets, (assetName: string) => <span className="font-mono bg-gray-200 dark:bg-gray-600 px-1 rounded">{assetName}</span>) : <p className="text-xs text-gray-500 dark:text-gray-400">Ninguno</p>}
-                    
+
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mt-2 mb-1">Traducciones de la Versión:</p>
-                    {data.version.translations && data.version.translations.length > 0 ? renderList(data.version.translations, (trans: any) => (
+                    {data.version.translations && data.version.translations.length > 0 ? renderList(data.version.translations, (trans: Translation) => (
                         <><strong>{trans.languageCode}:</strong> {trans.promptText}</>
                     )) : <p className="text-xs text-gray-500 dark:text-gray-400">Ninguna</p>}
                 </>, "bg-teal-50 dark:bg-teal-800/30")}
 
-                {data.assets && data.assets.length > 0 && renderBlock("Assets Definidos", 
+                {data.assets && data.assets.length > 0 && renderBlock("Assets Definidos",
                     <div className="space-y-3">
-                        {data.assets.map((asset: any, index: number) => (
+                        {data.assets.map((asset: AssetInfo, index: number) => (
                             <div key={index} className="p-3 border border-gray-300 dark:border-gray-500 rounded-md bg-white dark:bg-gray-800">
                                 {renderKeyValue("Key", asset.key)}
                                 {renderKeyValue("Valor por Defecto", asset.value)}
                                 {renderKeyValue("Mensaje de Cambio", asset.changeMessage)}
                                 <p className="text-xs font-medium text-gray-700 dark:text-gray-200 mt-1 mb-0.5">Traducciones del Asset:</p>
-                                {asset.translations && asset.translations.length > 0 ? renderList(asset.translations, (trans: any) => (
-                                   <><strong>{trans.languageCode}:</strong> {trans.value}</>
+                                {asset.translations && asset.translations.length > 0 ? renderList(asset.translations, (trans: Translation) => (
+                                    <><strong>{trans.languageCode}:</strong> {trans.value}</>
                                 )) : <p className="text-xs text-gray-500 dark:text-gray-400">Ninguna</p>}
                             </div>
                         ))}
                     </div>
-                )}
+                    , "bg-indigo-50 dark:bg-indigo-800/30")}
             </div>
         );
     };
@@ -147,7 +178,7 @@ const PromptWizardPage: React.FC = () => {
         let parsedJson: LoadPromptStructureDto;
         try {
             parsedJson = JSON.parse(jsonToLoadInput);
-        } catch (error) {
+        } catch {
             showErrorToast('El texto ingresado no es un JSON válido.');
             setLoadStatusMessage({ type: 'error', message: 'Error: Formato JSON inválido.' });
             return;
@@ -162,17 +193,19 @@ const PromptWizardPage: React.FC = () => {
                 const successMessage = result.message || 'Estructura JSON cargada exitosamente.';
                 showSuccessToast(successMessage);
                 setLoadStatusMessage({ type: 'success', message: successMessage });
-                setGeneratedJson(parsedJson);
+                setGeneratedJson(parsedJson as StructureData);
             } else {
                 let detailedErrorMessage = result.message || 'Error al cargar la estructura JSON.';
                 if (result.errorDetails) {
-                    const detailsString = typeof result.errorDetails === 'string' ? result.errorDetails : JSON.stringify(result.errorDetails, null, 2);
+                    const detailsString = typeof result.errorDetails === 'string'
+                        ? result.errorDetails
+                        : JSON.stringify(result.errorDetails, null, 2);
                     detailedErrorMessage += `\nDetalles: ${detailsString}`;
                 }
                 showErrorToast(detailedErrorMessage);
                 setLoadStatusMessage({ type: 'error', message: `KO. ${detailedErrorMessage}` });
             }
-        } catch (err) {
+        } catch (err: unknown) {
             // Este catch es para errores inesperados en la propia función loadPromptStructure o de red, no errores de API manejados
             console.error("Error inesperado llamando a loadPromptStructure:", err);
             const unexpectedError = (err instanceof Error) ? err.message : 'Error inesperado en la operación de carga.';

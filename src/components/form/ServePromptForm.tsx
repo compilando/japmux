@@ -35,9 +35,13 @@ const ServePromptForm: React.FC = () => {
             }
             const data = await response.text(); // API returns a string directly
             setResultPrompt(data);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error fetching prompt:", err);
-            setError(err.message || 'Failed to fetch prompt.');
+            let message = 'Failed to fetch prompt.';
+            if (err instanceof Error) {
+                message = err.message;
+            }
+            setError(message);
         } finally {
             setIsLoading(false);
         }
@@ -82,7 +86,7 @@ const ServePromptForm: React.FC = () => {
                         placeholder="e.g., v1.2.1"
                         disabled={useLatestActive || !!promptId} // Disable if using latest active or promptId is set
                     />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Ignored if 'Use Latest Active' is checked.</p>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Ignored if &apos;Use Latest Active&apos; is checked.</p>
 
                 </div>
                 <div className="flex items-center col-span-1 md:col-span-2">

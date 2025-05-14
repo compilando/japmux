@@ -95,7 +95,7 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
         } else {
             console.log("[GeneratePromptModal Effect FetchSystemPrompts] Modal closed, skipping fetch.");
         }
-    }, [isOpen]);
+    }, [isOpen, selectedSystemPromptName]);
 
     useEffect(() => {
         console.log(`[GeneratePromptModal Effect FetchAiModels] isOpen: ${isOpen}, projectId: ${projectId}`);
@@ -138,7 +138,7 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
         } else {
             console.log("[GeneratePromptModal Effect FetchAiModels] Modal closed or no projectId, skipping fetch.");
         }
-    }, [isOpen, projectId]);
+    }, [isOpen, projectId, selectedAiModelValue]);
 
     // --- Memoized Options for Selects ---
 
@@ -211,7 +211,20 @@ const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({
             showSuccessToast("Text generated successfully!");
         } catch (error) {
             console.error("Error executing raw text:", error);
-            const apiErrorMessage = (error as any)?.response?.data?.message || 'Failed to generate text.';
+            let apiErrorMessage = 'Failed to generate text.';
+
+            // Verificar si error es un objeto con una estructura específica
+            if (error && typeof error === 'object' &&
+                'response' in error &&
+                error.response &&
+                typeof error.response === 'object' &&
+                'data' in error.response &&
+                error.response.data &&
+                typeof error.response.data === 'object' &&
+                'message' in error.response.data) {
+                apiErrorMessage = String(error.response.data.message);
+            }
+
             showErrorToast(apiErrorMessage);
             setGeneratedText('');
         } finally {

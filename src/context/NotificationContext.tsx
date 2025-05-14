@@ -1,14 +1,11 @@
 'use client';
 
 import React, { createContext, useContext, ReactNode, useEffect } from 'react';
-import { toast, ToastOptions } from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { setToastImplementation } from '@/utils/toastUtils'; // Import the utility
 
-interface NotificationContextType {
-    // We could add specific functions if we wanted to use them from React components
-    // notifySuccess: (message: string) => void;
-    // notifyError: (message: string) => void;
-}
+// Definimos el tipo con Record<never, never> en lugar de {} vacío
+type NotificationContextType = Record<string, never>;
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
@@ -31,8 +28,8 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     // const notifySuccess = (message: string) => toast.success(message);
     // const notifyError = (message: string) => toast.error(message);
 
-    // The context value can be empty if we only use it to initialize the utility
-    const contextValue = {};
+    // El contexto es vacío porque solo inicializamos la utilidad
+    const contextValue = {} as NotificationContextType;
 
     return (
         <NotificationContext.Provider value={contextValue}>

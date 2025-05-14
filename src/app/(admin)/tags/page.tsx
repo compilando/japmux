@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     tagService,
     CreateTagDto,
@@ -11,8 +11,14 @@ import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import TagsTable from '@/components/tables/TagsTable';
 import TagForm from '@/components/form/TagForm';
-import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+
+const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
+    if (typeof error === 'object' && error !== null && 'message' in error) {
+        return String((error as { message: string }).message) || defaultMessage;
+    }
+    return defaultMessage;
+};
 
 const TagsPage: React.FC = () => {
     const [tagsList, setTagsList] = useState<generated.TagDto[]>([]);
@@ -27,7 +33,7 @@ const TagsPage: React.FC = () => {
         isLoadingSelectedProjectFull
     } = useProjects();
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         if (!selectedProjectId) {
             setLoading(false);
             setError("Please select a project first.");
@@ -47,12 +53,12 @@ const TagsPage: React.FC = () => {
             }
         } catch (err) {
             console.error("Error fetching tags:", err);
-            showErrorToast('Failed to fetch tags.');
+            setError(getApiErrorMessage(err, 'Failed to fetch tags.'));
             setTagsList([]);
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedProjectId]);
 
     useEffect(() => {
         if (selectedProjectId) {
@@ -62,7 +68,7 @@ const TagsPage: React.FC = () => {
             setLoading(false);
             setError("Please select a project to manage tags.");
         }
-    }, [selectedProjectId]);
+    }, [selectedProjectId, fetchData]);
 
     const handleAdd = () => {
         setEditingTag(null);
@@ -85,8 +91,9 @@ const TagsPage: React.FC = () => {
                 await tagService.delete(selectedProjectId, id);
                 showSuccessToast("Tag deleted successfully.");
                 fetchData();
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error("Error deleting tag:", err);
+                showErrorToast(getApiErrorMessage(err, "Failed to delete tag."));
             } finally {
                 setLoading(false);
             }
@@ -111,14 +118,15 @@ const TagsPage: React.FC = () => {
             setIsModalOpen(false);
             showSuccessToast(message);
             fetchData();
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error saving tag:", err);
+            showErrorToast(getApiErrorMessage(err, "Failed to save tag."));
         } finally {
             setLoading(false);
         }
     };
 
-    let breadcrumbs: { label: string; href?: string }[] = [
+    const breadcrumbs: { label: string; href?: string }[] = [
         { label: "Home", href: "/" },
     ];
     if (selectedProjectId) {

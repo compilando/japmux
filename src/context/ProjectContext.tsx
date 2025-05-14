@@ -9,6 +9,11 @@ import { projectService } from '@/services/api';
 // Import your authentication context if you have one, to react to login/logout changes
 // import { useAuth } from './AuthContext'; 
 
+// Interfaz extendida para incluir la propiedad id en los proyectos
+interface ProjectWithId extends CreateProjectDto {
+    id: string;
+}
+
 interface ProjectContextType {
     projects: CreateProjectDto[];
     selectedProjectId: string | null;
@@ -81,13 +86,13 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
             setProjects(userProjects);
 
             const currentSelectedId = localStorage.getItem(SELECTED_PROJECT_ID_KEY);
-            const selectedProjectExists = currentSelectedId && userProjects.some(p => (p as any).id === currentSelectedId);
+            const selectedProjectExists = currentSelectedId && userProjects.some(p => (p as ProjectWithId).id === currentSelectedId);
 
             if (selectedProjectExists && currentSelectedId) {
                 setSelectedProjectIdState(currentSelectedId);
                 // setSelectedProjectFull will be set by the other useEffect
             } else if (userProjects.length > 0) {
-                const defaultProjectId = (userProjects[0] as any).id;
+                const defaultProjectId = (userProjects[0] as ProjectWithId).id;
                 setSelectedProjectIdState(defaultProjectId);
                 localStorage.setItem(SELECTED_PROJECT_ID_KEY, defaultProjectId);
                 // setSelectedProjectFull will be set by the other useEffect
@@ -96,7 +101,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
                 setSelectedProjectFull(null); // No projects, so no full project
                 localStorage.removeItem(SELECTED_PROJECT_ID_KEY);
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error fetching projects:", err);
             setError("Failed to load projects.");
             setProjects([]);
@@ -116,7 +121,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     useEffect(() => {
         if (selectedProjectId && projects.length > 0) {
             setIsLoadingSelectedProjectFull(true);
-            const project = projects.find(p => (p as any).id === selectedProjectId);
+            const project = projects.find(p => (p as ProjectWithId).id === selectedProjectId);
             if (project) {
                 setSelectedProjectFull(project);
             } else {

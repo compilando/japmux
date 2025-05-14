@@ -1,6 +1,5 @@
 import React from 'react';
 import { PromptVersionData, PromptVersionMarketplaceDetails } from '@/app/(admin)/projects/[projectId]/prompts/[promptId]/versions/page';
-import { CreatePromptVersionDto } from '@/services/api';
 import CopyButton from '../common/CopyButton';
 import Link from 'next/link';
 import { TrashBinIcon, PencilIcon } from "@/icons";

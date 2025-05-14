@@ -11,7 +11,6 @@ import {
     promptVersionService,
     CreateProjectDto,
     PromptDto,
-    CreatePromptVersionDto
 } from '@/services/api';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptTranslationsTable from '@/components/tables/PromptTranslationsTable';

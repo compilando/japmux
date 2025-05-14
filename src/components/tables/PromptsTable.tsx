@@ -10,10 +10,15 @@ interface PromptsTableProps {
     onEdit: (item: PromptDto) => void;
     onDelete: (id: string) => void;
     projectId?: string;
+    loading?: boolean;
 }
 
-const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, projectId }) => {
+const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, projectId, loading }) => {
     const { selectPrompt } = usePrompts();
+
+    if (loading && prompts.length === 0) {
+        return <p className="text-center py-4 text-gray-500 dark:text-gray-400">Loading prompts...</p>;
+    }
 
     return (
         <div className="overflow-x-auto">
@@ -68,7 +73,7 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                     ))}
                 </tbody>
             </table>
-            {prompts.length === 0 && (
+            {prompts.length === 0 && !loading && (
                 <p className="text-center py-4 text-gray-500 dark:text-gray-400">No prompts found.</p>
             )}
         </div>

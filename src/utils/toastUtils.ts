@@ -1,4 +1,5 @@
-import { toast, ToastOptions } from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
+import type { ToastOptions } from 'react-hot-toast';
 
 // Referencia global (o usa un sistema de eventos)
 let toastFunction: (message: string, options?: ToastOptions) => string = toast;

@@ -19,7 +19,6 @@ const PromptAssetForm: React.FC<PromptAssetFormProps> = ({ initialData, onSave, 
     const [enabled, setEnabled] = useState(true);
     const [keyError, setKeyError] = useState<string | null>(null);
     const [regionList, setRegionList] = useState<CreateRegionDto[]>([]);
-    const [loadingRegions, setLoadingRegions] = useState(false);
     const { selectedProjectId } = useProjects();
 
     const isEditing = !!initialData;
@@ -28,7 +27,6 @@ const PromptAssetForm: React.FC<PromptAssetFormProps> = ({ initialData, onSave, 
         const fetchRegions = async () => {
             if (!selectedProjectId) return;
 
-            setLoadingRegions(true);
             try {
                 const data = await regionService.findAll(selectedProjectId);
                 if (Array.isArray(data)) {
@@ -36,8 +34,6 @@ const PromptAssetForm: React.FC<PromptAssetFormProps> = ({ initialData, onSave, 
                 }
             } catch (error) {
                 console.error("Error fetching regions:", error);
-            } finally {
-                setLoadingRegions(false);
             }
         };
 
@@ -82,7 +78,7 @@ const PromptAssetForm: React.FC<PromptAssetFormProps> = ({ initialData, onSave, 
         setKeyError(null);
 
         if (isEditing && initialData) {
-            let updatePayload: UpdatePromptAssetDto = {
+            const updatePayload: UpdatePromptAssetDto = {
                 name: name || undefined,
                 category: category || undefined,
                 enabled: enabled,
@@ -90,7 +86,7 @@ const PromptAssetForm: React.FC<PromptAssetFormProps> = ({ initialData, onSave, 
             Object.keys(updatePayload).forEach(k => updatePayload[k as keyof UpdatePromptAssetDto] === undefined && delete updatePayload[k as keyof UpdatePromptAssetDto]);
             onSave(updatePayload);
         } else {
-            let createPayload: CreatePromptAssetDto = {
+            const createPayload: CreatePromptAssetDto = {
                 key,
                 name,
                 initialValue: initialValue,

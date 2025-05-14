@@ -5,8 +5,6 @@ import {
     environmentService,
     CreateEnvironmentDto,
     UpdateEnvironmentDto,
-    // Project, // Eliminado
-    // projectService // Eliminado
 } from '@/services/api';
 // Ya no necesitamos EnvironmentResponseDto, usaremos CreateEnvironmentDto de @/services/api
 // import { EnvironmentResponseDto } from '@/services/generated/api'; 
@@ -14,7 +12,7 @@ import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import EnvironmentsTable from '@/components/tables/EnvironmentsTable';
 import EnvironmentForm from '@/components/form/EnvironmentForm';
-import axios from 'axios'; // Mantener axios si se usa directamente en el catch, sino se puede eliminar si no hay otro uso.
+// import axios from 'axios'; // Eliminado
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 // Interfaz local para el Environment que incluye el ID y otros campos esperados del backend

@@ -4,7 +4,6 @@ import React, { createContext, useState, useEffect, useContext, ReactNode, useCa
 import { useRouter } from 'next/navigation'; // For redirection
 import {
     authService,
-    userService, // Assuming we need userService to get profile
     LoginDto,
     RegisterDto,
     UserProfileResponse
@@ -69,9 +68,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setIsLoading(false); // Ensure isLoading is set to false here
             console.log('AuthProvider: login finished successfully');
             return true;
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("AuthProvider: Login failed:", err);
-            setError(err.response?.data?.message || "Login failed. Please check your credentials.");
+            // Verificar si err tiene estructura esperada
+            let errorMessage = "Login failed. Please check your credentials.";
+            if (err && typeof err === 'object' && 'response' in err &&
+                err.response && typeof err.response === 'object' &&
+                'data' in err.response && err.response.data &&
+                typeof err.response.data === 'object' &&
+                'message' in err.response.data) {
+                errorMessage = String(err.response.data.message);
+            }
+            setError(errorMessage);
             setUser(null);
             authService.logout();
             setIsLoading(false);
@@ -91,9 +99,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setIsLoading(false);
             // Consider if you want to log the user in immediately or redirect to login
             return true;
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("AuthProvider: Registration failed:", err);
-            setError(err.response?.data?.message || "Registration failed.");
+            // Verificar si err tiene estructura esperada
+            let errorMessage = "Registration failed.";
+            if (err && typeof err === 'object' && 'response' in err &&
+                err.response && typeof err.response === 'object' &&
+                'data' in err.response && err.response.data &&
+                typeof err.response.data === 'object' &&
+                'message' in err.response.data) {
+                errorMessage = String(err.response.data.message);
+            }
+            setError(errorMessage);
             setIsLoading(false);
             return false;
         }
