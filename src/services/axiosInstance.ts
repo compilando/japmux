@@ -1,9 +1,9 @@
 // src/services/axiosInstance.ts
 import axios from 'axios';
 
-// Obtén la URL base de la API desde las variables de entorno
-// Asegúrate de tener NEXT_PUBLIC_API_BASE_URL definida en tu .env.local o similar
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api'; // Fallback a localhost
+// Usa la variable de entorno correcta: NEXT_PUBLIC_API_URL
+// Y asegúrate que el fallback sea solo la URL base del backend, sin /api si el backend no lo necesita en su raíz.
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'; // Asumiendo backend en 3001 sin /api en su base
 
 const axiosInstance = axios.create({
   baseURL: apiBaseUrl,
@@ -15,19 +15,37 @@ const axiosInstance = axios.create({
 // --- Interceptor de Solicitud (Ejemplo: Añadir Token de Autenticación) ---
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Intenta obtener el token (ej: desde localStorage, sessionStorage, o un estado global)
-    // ¡IMPORTANTE! El acceso directo a localStorage no funciona en Server Components
-    // Si necesitas autenticación, asegúrate de que el token se maneje de forma segura
-    // y accesible tanto en cliente como en servidor si es necesario.
-    // Para Client Components puros, localStorage puede funcionar:
-    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    console.log('[Interceptor Request axiosInstance] Running for URL:', config.url); // Log distintivo
+    let token: string | null = null;
+    const AUTH_TOKEN_KEY = 'authToken'; // Definir la clave para consistencia
+
+    if (typeof window !== 'undefined') {
+      token = localStorage.getItem(AUTH_TOKEN_KEY);
+      if (token) {
+        console.log('[Interceptor Request axiosInstance] Token found in localStorage.');
+      } else {
+        token = sessionStorage.getItem(AUTH_TOKEN_KEY);
+        if (token) {
+          console.log('[Interceptor Request axiosInstance] Token found in sessionStorage.');
+        } else {
+          console.log('[Interceptor Request axiosInstance] Token not found in localStorage or sessionStorage.');
+        }
+      }
+    } else {
+      console.log('[Interceptor Request axiosInstance] Cannot access storage (not window).');
+    }
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('Interceptor: Adding auth token to request headers');
+      console.log('[Interceptor Request axiosInstance] Authorization header SET with token.');
     } else {
-      console.log('Interceptor: No auth token found');
+      console.log('[Interceptor Request axiosInstance] Authorization header NOT set (no token found).');
     }
+    // Si la baseURL no incluye /api, y las rutas de API sí lo necesitan, 
+    // podrías prefijar config.url aquí si no se hace en cada llamada de servicio.
+    // Ejemplo: if (config.url && !config.url.startsWith('/api')) {
+    //   config.url = '/api' + config.url;
+    // }
     return config;
   },
   (error) => {
@@ -59,6 +77,5 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 
 export default axiosInstance;

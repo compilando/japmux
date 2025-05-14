@@ -21,28 +21,28 @@ const apiClient = axios.create({
 // Interceptor de Request: Añade token de autenticación
 apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        console.log('[Interceptor Request] Running for URL:', config.url);
+        console.log('[Interceptor Request apiClient] Running for URL:', config.url); // Log distintivo
         if (typeof window !== 'undefined') {
             let token = localStorage.getItem(AUTH_TOKEN_KEY);
             if (!token) {
                 token = sessionStorage.getItem(AUTH_TOKEN_KEY);
                 if (token) {
-                    console.log('[Interceptor Request] Token found in sessionStorage.');
+                    console.log('[Interceptor Request apiClient] Token found in sessionStorage.');
                 } else {
-                    console.log('[Interceptor Request] Token not found in localStorage or sessionStorage.');
+                    console.log('[Interceptor Request apiClient] Token not found in localStorage or sessionStorage.');
                 }
             } else {
-                console.log('[Interceptor Request] Token found in localStorage.');
+                console.log('[Interceptor Request apiClient] Token found in localStorage.');
             }
 
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
-                console.log('[Interceptor Request] Authorization header SET.');
+                console.log('[Interceptor Request apiClient] Authorization header SET.');
             } else {
-                console.log('[Interceptor Request] Authorization header NOT set (no token).');
+                console.log('[Interceptor Request apiClient] Authorization header NOT set (no token).');
             }
         } else {
-            console.log('[Interceptor Request] Cannot access storage (not window).');
+            console.log('[Interceptor Request apiClient] Cannot access storage (not window).');
         }
         return config;
     },
