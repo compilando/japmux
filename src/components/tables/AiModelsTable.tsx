@@ -1,7 +1,8 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../ui/table';
-import { AiModel } from '@/services/api';
+import { AiModelResponseDto as AiModel } from '@/services/generated/api';
 import { TrashBinIcon } from "@/icons";
+import CopyButton from '../common/CopyButton';
 
 interface AiModelsTableProps {
     aiModels: AiModel[];
@@ -28,7 +29,12 @@ const AiModelsTable: React.FC<AiModelsTableProps> = ({ aiModels, onEdit, onDelet
                         <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                             {aiModels.map((model) => (
                                 <TableRow key={model.id}>
-                                    <TableCell className="px-5 py-4 text-start text-gray-800 dark:text-white/90 text-theme-sm">{model.id}</TableCell>
+                                    <TableCell className="px-5 py-4 text-start text-gray-800 dark:text-white/90 text-theme-sm">
+                                        <div className="flex items-center">
+                                            <span className="mr-2" title={model.id}>{model.id}...</span>
+                                            {model.id && <CopyButton textToCopy={model.id} />}
+                                        </div>
+                                    </TableCell>
                                     <TableCell className="px-5 py-4 text-start text-gray-800 dark:text-white/90 text-theme-sm">{model.name}</TableCell>
                                     <TableCell className="px-5 py-4 text-start text-gray-500 dark:text-gray-400 text-theme-sm">{model.provider ?? 'N/A'}</TableCell>
                                     <TableCell className="px-5 py-4 text-start text-gray-500 dark:text-gray-400 text-theme-sm">{model.apiIdentifier ?? 'N/A'}</TableCell>

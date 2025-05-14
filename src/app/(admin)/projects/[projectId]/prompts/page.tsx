@@ -6,6 +6,7 @@ import {
     CreateProjectDto,
     CreatePromptDto,
     UpdatePromptDto,
+    PromptDto,
 } from '@/services/generated/api';
 import {
     promptService,
@@ -20,11 +21,11 @@ import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 const PromptsPage: React.FC = () => {
-    const [itemsList, setItemsList] = useState<CreatePromptDto[]>([]);
+    const [itemsList, setItemsList] = useState<PromptDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingItem, setEditingItem] = useState<CreatePromptDto | null>(null);
+    const [editingItem, setEditingItem] = useState<PromptDto | null>(null);
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
@@ -66,7 +67,7 @@ const PromptsPage: React.FC = () => {
         try {
             const data = await promptService.findAll(selectedProjectId);
             if (Array.isArray(data)) {
-                setItemsList(data as CreatePromptDto[]);
+                setItemsList(data as PromptDto[]);
             } else {
                 console.error("API response for /prompts is not an array:", data);
                 setError('Received invalid data format.');
@@ -101,25 +102,39 @@ const PromptsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (item: CreatePromptDto) => {
+    const handleEdit = async (item: PromptDto) => {
         if (!selectedProjectId) {
             showErrorToast("Cannot edit, no project selected.");
             return;
         }
-        setEditingItem(item);
-        setIsModalOpen(true);
+        setLoading(true);
+        try {
+            const detailedPrompt = await promptService.findOne(selectedProjectId, item.id);
+            setEditingItem(detailedPrompt);
+            setIsModalOpen(true);
+        } catch (err) {
+            console.error("Error fetching prompt details for edit:", err);
+            showErrorToast("Failed to load prompt details for editing.");
+            setEditingItem(null);
+            setIsModalOpen(false);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleDelete = async (promptName: string) => {
+    const handleDelete = async (promptId: string) => {
         if (!selectedProjectId) {
             showErrorToast("No project selected.");
             return;
         }
-        if (window.confirm(`Are you sure you want to delete prompt "${promptName}"?`)) {
+        const promptToDelete = itemsList.find(p => p.id === promptId);
+        const promptNameToConfirm = promptToDelete ? promptToDelete.name : promptId;
+
+        if (window.confirm(`Are you sure you want to delete prompt "${promptNameToConfirm}"?`)) {
             setLoading(true);
             try {
-                await promptService.remove(selectedProjectId, promptName);
-                showSuccessToast(`Prompt ${promptName} deleted successfully!`);
+                await promptService.remove(selectedProjectId, promptId);
+                showSuccessToast(`Prompt ${promptNameToConfirm} deleted successfully!`);
                 fetchData();
             } catch (err) {
                 setError('Failed to delete item');
@@ -132,7 +147,7 @@ const PromptsPage: React.FC = () => {
         }
     };
 
-    const handleSave = async (payload: CreatePromptDto | UpdatePromptDto) => {
+    const handleSave = async (payload: UpdatePromptDto | CreatePromptDto) => {
         if (!selectedProjectId) {
             showErrorToast("Cannot save, no project selected.");
             return;
@@ -140,12 +155,13 @@ const PromptsPage: React.FC = () => {
         setLoading(true);
         try {
             let message = "";
-            if (editingItem) {
+            if (editingItem && editingItem.id) {
                 await promptService.update(selectedProjectId, editingItem.name, payload as UpdatePromptDto);
                 message = `Prompt ${editingItem.name} updated successfully!`;
             } else {
                 await promptService.create(selectedProjectId, payload as CreatePromptDto);
-                message = "Prompt created successfully!";
+                const promptNameFromPayload = (payload as CreatePromptDto).name;
+                message = `Prompt ${promptNameFromPayload || 'new prompt'} created successfully!`;
             }
             setIsModalOpen(false);
             showSuccessToast(message);

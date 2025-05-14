@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig, AxiosInstance } from 'axios';
 import { showErrorToast } from '@/utils/toastUtils'; // Importar la utilidad
 // Importar todo lo exportado por el cliente generado
-import * as generated from '../../generated/japmux-api';
+import * as generated from './generated';
 // Eliminar esta importación, apiClient se define abajo
 // import { apiClient } from '../axiosClient';
 import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
@@ -343,128 +343,95 @@ export const tagService = {
 
 // Servicio de Prompts (Actualizado para usar generado donde aplique)
 export const promptService = {
-    findAll: async (projectId: string): Promise<generated.CreatePromptDto[]> => { // Usar CreatePromptDto
-        const response = await promptsGeneratedApi.promptControllerFindAll(projectId);
-        return response.data as generated.CreatePromptDto[]; // Asegurar el tipo
+    findAll: async (projectId: string): Promise<generated.PromptDto[]> => {
+        const response = await apiClient.get<generated.PromptDto[]>(`/api/projects/${projectId}/prompts`);
+        return response.data;
     },
-    // El servicio espera el nombre del prompt, que es su ID principal según CreatePromptDto.
-    findOne: async (projectId: string, promptName: string): Promise<generated.CreatePromptDto> => { // Parámetros en orden lógico para el servicio
-        // La API generada espera (promptName, projectId) por cómo construye la URL.
-        const response = await promptsGeneratedApi.promptControllerFindOne(promptName, projectId); // CORREGIDO: Orden de argumentos invertido para coincidir con la firma del método generado
-        return response.data as generated.CreatePromptDto;
+    findOne: async (projectId: string, promptNameOrId: string): Promise<generated.PromptDto> => {
+        const response = await apiClient.get<generated.PromptDto>(`/api/projects/${projectId}/prompts/${promptNameOrId}`);
+        return response.data;
     },
-    create: async (projectId: string, payload: generated.CreatePromptDto): Promise<generated.CreatePromptDto> => { // Usar CreatePromptDto
-        // Corregido para usar la instancia correcta y el método
+    create: async (projectId: string, payload: generated.CreatePromptDto): Promise<generated.PromptDto> => {
         const response = await promptsGeneratedApi.promptControllerCreate(projectId, payload);
         return response.data;
     },
-    // La API generada para update (promptControllerUpdate) devuelve void, así que ajustamos el tipo de retorno
     update: async (projectId: string, promptName: string, payload: generated.UpdatePromptDto): Promise<void> => {
-        // const response = await promptsGeneratedApi.promptControllerUpdate(promptName, projectId, payload);
         await apiClient.patch<void>(`/api/projects/${projectId}/prompts/${promptName}`, payload);
-        // return response.data; // No hay data que devolver
     },
-    // La API generada para remove (promptControllerRemove) devuelve void
     remove: async (projectId: string, promptName: string): Promise<void> => {
-        // await promptsGeneratedApi.promptControllerRemove(promptName, projectId);
         await apiClient.delete(`/api/projects/${projectId}/prompts/${promptName}`);
     },
-    // --- FUNCIÓN ACTUALIZADA (POST con userPrompt) ---
-    /**
-     * Llama al endpoint para generar la estructura del prompt usando POST.
-     * Requiere el userPrompt en el cuerpo.
-     * Devuelve un objeto JSON (tipo 'any' por ahora).
-     */
     generatePromptStructure: async (projectId: string, userPrompt: string): Promise<any> => {
-        // Cambiado a POST, ruta correcta y enviando el userPrompt en el cuerpo
         const payload = { userPrompt: userPrompt };
-        // Revertido a la ruta original 'generate-structure'
         const response = await apiClient.post(`/api/projects/${projectId}/prompts/generate-structure`, payload);
         return response.data;
     },
-    // --- FIN FUNCIÓN ACTUALIZADA ---
 };
 
 // Servicio para Versiones de Prompt
 export const promptVersionService = {
-    findAll: async (projectId: string, promptId: string): Promise<generated.CreatePromptVersionDto[]> => { // Usar CreatePromptVersionDto
+    findAll: async (projectId: string, promptId: string): Promise<generated.CreatePromptVersionDto[]> => {
         const response = await promptVersionsGeneratedApi.promptVersionControllerFindAll(projectId, promptId);
-        // Ajustar tipo si el generado devuelve CreatePromptVersionDto[]
-        return response.data as generated.CreatePromptVersionDto[]; // El tipo devuelto ya es correcto
+        return response.data as generated.CreatePromptVersionDto[];
     },
-    findOne: async (projectId: string, promptId: string, versionTag: string): Promise<generated.CreatePromptVersionDto> => { // Usar CreatePromptVersionDto
+    findOne: async (projectId: string, promptId: string, versionTag: string): Promise<generated.CreatePromptVersionDto> => {
         const response = await promptVersionsGeneratedApi.promptVersionControllerFindOneByTag(projectId, promptId, versionTag);
-        // Ajustar tipo si el generado devuelve CreatePromptVersionDto
-        return response.data as generated.CreatePromptVersionDto; // El tipo devuelto ya es correcto
+        return response.data as generated.CreatePromptVersionDto;
     },
-    create: async (projectId: string, promptId: string, payload: generated.CreatePromptVersionDto): Promise<generated.CreatePromptVersionDto> => { // Usar CreatePromptVersionDto
+    create: async (projectId: string, promptId: string, payload: generated.CreatePromptVersionDto): Promise<generated.CreatePromptVersionDto> => {
         const response = await promptVersionsGeneratedApi.promptVersionControllerCreate(projectId, promptId, payload);
-        // Ajustar tipo si el generado devuelve CreatePromptVersionDto
-        return response.data as generated.CreatePromptVersionDto; // El tipo devuelto ya es correcto
+        return response.data as generated.CreatePromptVersionDto;
     },
-    update: async (projectId: string, promptId: string, versionTag: string, payload: generated.UpdatePromptVersionDto): Promise<generated.CreatePromptVersionDto> => { // Usar CreatePromptVersionDto como retorno
+    update: async (projectId: string, promptId: string, versionTag: string, payload: generated.UpdatePromptVersionDto): Promise<generated.CreatePromptVersionDto> => {
         const response = await promptVersionsGeneratedApi.promptVersionControllerUpdate(projectId, promptId, versionTag, payload);
-        // Ajustar tipo si el generado devuelve CreatePromptVersionDto
-        return response.data as generated.CreatePromptVersionDto; // El tipo devuelto ya es correcto
+        return response.data as generated.CreatePromptVersionDto;
     },
     remove: async (projectId: string, promptId: string, versionTag: string): Promise<void> => {
         await promptVersionsGeneratedApi.promptVersionControllerRemove(projectId, promptId, versionTag);
     },
-    // activate: async (...) => { ... } // Añadir si existe método generado para activar
 };
 
 // Servicio para Traducciones de Prompt
 export const promptTranslationService = {
-    findAll: async (projectId: string, promptId: string, versionTag: string): Promise<generated.CreatePromptTranslationDto[]> => { // Usar CreatePromptTranslationDto
+    findAll: async (projectId: string, promptId: string, versionTag: string): Promise<generated.CreatePromptTranslationDto[]> => {
         const response = await promptTranslationsGeneratedApi.promptTranslationControllerFindAll(projectId, promptId, versionTag);
-        // Ajustar tipo si el generado devuelve CreatePromptTranslationDto[]
-        return response.data as generated.CreatePromptTranslationDto[]; // El tipo devuelto ya es correcto
+        return response.data as generated.CreatePromptTranslationDto[];
     },
-    findByLanguage: async (projectId: string, promptId: string, versionTag: string, languageCode: string): Promise<generated.CreatePromptTranslationDto> => { // Usar CreatePromptTranslationDto
+    findByLanguage: async (projectId: string, promptId: string, versionTag: string, languageCode: string): Promise<generated.CreatePromptTranslationDto> => {
         const response = await promptTranslationsGeneratedApi.promptTranslationControllerFindOneByLanguage(projectId, promptId, versionTag, languageCode);
-        // Ajustar tipo si el generado devuelve CreatePromptTranslationDto
-        return response.data as generated.CreatePromptTranslationDto; // El tipo devuelto ya es correcto
+        return response.data as generated.CreatePromptTranslationDto;
     },
-    create: async (projectId: string, promptId: string, versionTag: string, payload: generated.CreatePromptTranslationDto): Promise<generated.CreatePromptTranslationDto> => { // Usar CreatePromptTranslationDto
+    create: async (projectId: string, promptId: string, versionTag: string, payload: generated.CreatePromptTranslationDto): Promise<generated.CreatePromptTranslationDto> => {
         const response = await promptTranslationsGeneratedApi.promptTranslationControllerCreate(projectId, promptId, versionTag, payload);
-        // Ajustar tipo si el generado devuelve CreatePromptTranslationDto
-        return response.data as generated.CreatePromptTranslationDto; // El tipo devuelto ya es correcto
+        return response.data as generated.CreatePromptTranslationDto;
     },
-    update: async (projectId: string, promptId: string, versionTag: string, languageCode: string, payload: generated.UpdatePromptTranslationDto): Promise<generated.CreatePromptTranslationDto> => { // Usar CreatePromptTranslationDto como retorno
+    update: async (projectId: string, promptId: string, versionTag: string, languageCode: string, payload: generated.UpdatePromptTranslationDto): Promise<generated.CreatePromptTranslationDto> => {
         const response = await promptTranslationsGeneratedApi.promptTranslationControllerUpdate(projectId, promptId, versionTag, languageCode, payload);
-        // Ajustar tipo si el generado devuelve CreatePromptTranslationDto
-        return response.data as generated.CreatePromptTranslationDto; // El tipo devuelto ya es correcto
+        return response.data as generated.CreatePromptTranslationDto;
     },
     remove: async (projectId: string, promptId: string, versionTag: string, languageCode: string): Promise<void> => {
         await promptTranslationsGeneratedApi.promptTranslationControllerRemove(projectId, promptId, versionTag, languageCode);
     },
-    // addOrUpdate: async (...) => { ... } // Añadir si existe método generado
 };
 
 // Servicio de Prompt Assets (Corregido para usar generated.PromptAssetsApi)
 export const promptAssetService = {
     findAll: async (projectId: string): Promise<PromptAssetData[]> => {
-        // Forzar tipo 'any' para evitar linter, luego acceder a .data
         const response: any = await promptAssetsGeneratedApi.promptAssetControllerFindAll(projectId);
-        // Asumimos que response.data existe y es del tipo correcto
-        // Asegurar que name y category se incluyen
         return (response.data as generated.CreatePromptAssetDto[]).map(item => ({
             ...item,
-            name: item.name || item.key, // Usar key como fallback para name
-            category: item.category || 'default', // Usar 'default' como fallback para category
-            enabled: true // Por defecto, todos los assets están habilitados
+            name: item.name || item.key,
+            category: item.category || 'default',
+            enabled: true
         }));
     },
     findOne: async (projectId: string, assetKey: string): Promise<PromptAssetData> => {
-        // Forzar tipo 'any' para evitar linter, luego acceder a .data
         const response: any = await promptAssetsGeneratedApi.promptAssetControllerFindOne(assetKey, projectId);
-        // Asumimos que response.data existe y es del tipo correcto
-        // Asegurar que name y category se incluyen
         return {
             ...response.data as generated.CreatePromptAssetDto,
-            name: response.data.name || assetKey, // Usar assetKey como fallback para name
-            category: response.data.category || 'default', // Usar 'default' como fallback para category
-            enabled: true // Por defecto, el asset está habilitado
+            name: response.data.name || assetKey,
+            category: response.data.category || 'default',
+            enabled: true
         };
     },
     create: async (projectId: string, payload: generated.CreatePromptAssetDto): Promise<void> => {
@@ -476,8 +443,6 @@ export const promptAssetService = {
     remove: async (projectId: string, assetKey: string): Promise<void> => {
         await promptAssetsGeneratedApi.promptAssetControllerRemove(assetKey, projectId);
     },
-
-    // --- Asset Versions --- (Actualizado para usar la API generada)
     findVersions: async (projectId: string, assetKey: string): Promise<generated.CreatePromptAssetVersionDto[]> => {
         const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerFindAll(projectId, assetKey);
         return response.data;
@@ -497,8 +462,6 @@ export const promptAssetService = {
     removeVersion: async (projectId: string, assetKey: string, versionTag: string): Promise<void> => {
         await promptAssetVersionsGeneratedApi.promptAssetVersionControllerRemove(projectId, assetKey, versionTag);
     },
-
-    // --- Asset Translations --- (Actualizado para usar la API generada)
     findAssetTranslations: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreateAssetTranslationDto[]> => {
         const response = await apiClient.get<generated.CreateAssetTranslationDto[]>(`/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/translations`);
         return response.data;
@@ -622,9 +585,9 @@ export default apiClient;
 
 // Re-exportar puede causar conflictos si hay nombres duplicados o no deseados.
 // Considera importar explícitamente lo necesario o usar alias.
-export * from '../../generated/japmux-api';
+export * from './generated';
 
-// YA NO SON NECESARIAS LAS INTERFACES MANUALES PARA LLM EXECUTION
+// --- Servicios Manuales (Wrapper sobre los generados o lógica personalizada) ---
 // ... existing code ...
 
 /*

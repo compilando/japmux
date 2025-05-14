@@ -1,13 +1,13 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../ui/table';
-// import { CulturalData } from '@/services/api'; // Ya no se usa
-import * as generated from '../../../generated/japmux-api'; // Importar tipos generados
+import { CulturalDataResponse } from '@/services/generated/api'; // Importación directa de CulturalDataResponse
 import { TrashBinIcon } from "@/icons";
+import CopyButton from '../common/CopyButton'; // Importar CopyButton
 
 interface CulturalDataTableProps {
-    culturalDataList: generated.CulturalDataResponse[]; // Cambiado a generated.CulturalDataResponse[]
-    onEdit: (culturalData: generated.CulturalDataResponse) => void; // Cambiado a generated.CulturalDataResponse
-    onDelete: (key: string) => void; // Cambiado nombre de parámetro id a key (el tipo sigue siendo string)
+    culturalDataList: CulturalDataResponse[]; // Usar el tipo importado directamente
+    onEdit: (culturalData: CulturalDataResponse) => void; // Usar el tipo importado directamente
+    onDelete: (key: string) => void;
 }
 
 const CulturalDataTable: React.FC<CulturalDataTableProps> = ({ culturalDataList, onEdit, onDelete }) => {
@@ -18,7 +18,7 @@ const CulturalDataTable: React.FC<CulturalDataTableProps> = ({ culturalDataList,
                     <Table>
                         <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                             <TableRow>
-                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Key (Slug)</TableCell> {/* Cambiado cabecera */}
+                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Key (Slug)</TableCell>
                                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Region ID</TableCell>
                                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Formality</TableCell>
                                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Style</TableCell>
@@ -29,9 +29,12 @@ const CulturalDataTable: React.FC<CulturalDataTableProps> = ({ culturalDataList,
                         </TableHeader>
                         <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                             {culturalDataList.map((item) => (
-                                <TableRow key={item.key}> {/* Cambiado de item.id a item.key */}
+                                <TableRow key={item.key}>
                                     <TableCell className="px-5 py-4 text-start text-gray-800 dark:text-white/90 text-theme-sm">
-                                        {item.key} {/* Cambiado de item.id a item.key */}
+                                        <div className="flex items-center">
+                                            <span className="mr-2" title={item.key}>{item.key}</span>
+                                            {item.key && <CopyButton textToCopy={item.key} />}
+                                        </div>
                                     </TableCell>
                                     <TableCell className="px-5 py-4 text-start text-gray-800 dark:text-white/90 text-theme-sm">
                                         {item.regionId}
