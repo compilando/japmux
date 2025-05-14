@@ -3,10 +3,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useProjects } from '@/context/ProjectContext';
 import {
-    CreatePromptDto,
+    PromptDto,
     CreatePromptVersionDto,
     CreatePromptTranslationDto,
-    CreateAiModelDto,
+    AiModelResponseDto,
     ExecuteLlmDto
 } from '@/services/generated/api';
 import {
@@ -17,21 +17,15 @@ import {
     llmExecutionService,
 } from '@/services/api';
 import Select, { SingleValue } from 'react-select';
+import AsyncSelect from 'react-select/async'; // Import AsyncSelect
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import axios from 'axios';
 import styles from './ServePromptPage.module.css'; // Importar CSS Modules
+import CopyButton from '@/components/common/CopyButton'; // Importar CopyButton
 
 interface StringMap { [key: string]: string; }
 
-// Reintroducir interfaz para asegurar que tenemos el ID de la BD
-// Asumimos que la API devuelve 'id' (CUID) además de los campos de CreatePromptDto
-interface PromptData extends CreatePromptDto {
-    id: string; // El ID real de la base de datos (e.g., CUID)
-}
-
-// Usar CreateAiModelDto directamente si el ID está en el DTO (o añadirlo si no)
-// (OpenAPI Generator a veces incluye 'id' en DTOs de respuesta aunque no en los de creación)
-// Vamos a asumir que CreateAiModelDto devuelto por findAll SÍ tiene id para el Select
+// Restaurar SelectOption
 interface SelectOption { value: string; label: string; }
 
 // Define los tamaños posibles
@@ -42,14 +36,13 @@ const ServePromptPage: React.FC = () => {
     const { selectedProjectId } = useProjects();
     const [isClient, setIsClient] = useState(false); // Estado para saber si estamos en cliente
 
-    // --- Estados para Selecciones (usar PromptData) ---
-    const [prompts, setPrompts] = useState<PromptData[]>([]);
+    // --- Estados para Selecciones (usar PromptDto) ---
     const [selectedPrompt, setSelectedPrompt] = useState<SingleValue<SelectOption>>(null);
     const [versions, setVersions] = useState<CreatePromptVersionDto[]>([]);
     const [selectedVersion, setSelectedVersion] = useState<SingleValue<SelectOption>>(null);
     const [translations, setTranslations] = useState<CreatePromptTranslationDto[]>([]);
     const [selectedLanguage, setSelectedLanguage] = useState<SingleValue<SelectOption>>(null);
-    const [aiModels, setAiModels] = useState<CreateAiModelDto[]>([]);
+    const [aiModels, setAiModels] = useState<AiModelResponseDto[]>([]);
     const [selectedAiModel, setSelectedAiModel] = useState<SingleValue<SelectOption>>(null);
 
     // --- Estados para Datos del Prompt ---
@@ -65,12 +58,14 @@ const ServePromptPage: React.FC = () => {
     const [selectedFontSize, setSelectedFontSize] = useState<FontSize>('m'); // Default 'm'
 
     // --- Estados UI/Generales ---
-    const [loadingPrompts, setLoadingPrompts] = useState<boolean>(false);
     const [loadingVersions, setLoadingVersions] = useState<boolean>(false);
     const [loadingTranslations, setLoadingTranslations] = useState<boolean>(false);
     const [loadingText, setLoadingText] = useState<boolean>(false);
     const [loadingAiModels, setLoadingAiModels] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+
+    // --- Nuevo Estado para el Comando cURL ---
+    const [curlCommand, setCurlCommand] = useState<string>('');
 
     // --- Efecto para detectar montaje en cliente ---
     useEffect(() => {
@@ -85,14 +80,14 @@ const ServePromptPage: React.FC = () => {
                 setSelectedFontSize(storedSize);
             }
         }
-    }, [isClient]); // Depende de isClient
+    }, [isClient]);
 
     // --- Efecto para guardar tamaño de fuente (SOLO en cliente) ---
     useEffect(() => {
         if (isClient) { // Asegurarse de ejecutar solo en cliente
             localStorage.setItem('promptFontSize', selectedFontSize);
         }
-    }, [selectedFontSize, isClient]); // Depende de cambio de tamaño Y de estar en cliente
+    }, [selectedFontSize, isClient]);
 
     // --- Helper para obtener la clase CSS del tamaño de fuente ---
     const getFontSizeClass = (size: FontSize): string => {
@@ -111,13 +106,12 @@ const ServePromptPage: React.FC = () => {
     };
 
     // --- Opciones para Selects (Memoizadas) ---
-    const promptOptions: SelectOption[] = useMemo(() => prompts.map(p => ({ value: p.id, label: p.name })), [prompts]);
-    const versionOptions: SelectOption[] = useMemo(() => versions.map(v => ({ value: v.versionTag, label: v.versionTag })), [versions]);
+    const versionOptions: SelectOption[] = useMemo(() => versions.map(v => ({ value: (v as any).versionTag || (v as any).id || '', label: (v as any).versionTag || (v as any).id || 'Unknown Version' })), [versions]);
     const languageOptions: SelectOption[] = useMemo(() => [
         { value: '__BASE__', label: 'Base Text' }, // Opción para usar el texto base
         ...translations.map(t => ({ value: t.languageCode, label: t.languageCode }))
     ], [translations]);
-    const aiModelOptions: SelectOption[] = useMemo(() => aiModels.map(m => ({ value: (m as any).id, label: m.name })), [aiModels]);
+    const aiModelOptions: SelectOption[] = useMemo(() => aiModels.map(m => ({ value: m.id, label: m.name })), [aiModels]);
 
     // --- Función para extraer variables del texto ---
     const extractVariables = (text: string): string[] => {
@@ -130,31 +124,33 @@ const ServePromptPage: React.FC = () => {
         return Array.from(vars);
     };
 
-    // --- Efecto para cargar Prompts ---
-    useEffect(() => {
+    // --- Función para cargar Prompts Asíncronamente ---
+    const loadPromptOptions = async (inputValue: string): Promise<SelectOption[]> => {
         if (!selectedProjectId) {
-            setPrompts([]);
-            setSelectedPrompt(null);
-            setError('Please select a project first.');
-            return;
+            return [];
         }
-        setLoadingPrompts(true);
-        setError(null);
-        promptService.findAll(selectedProjectId)
-            .then(data => {
-                // Usar PromptData[] y asegurar que data tiene 'id'
-                // Puede ser necesario ajustar el cast si la API no devuelve 'id' explícitamente
-                setPrompts(Array.isArray(data) ? (data as PromptData[]) : []);
-                setSelectedPrompt(null);
-            })
-            .catch(err => {
-                console.error("Error fetching prompts:", err);
-                setError('Failed to fetch prompts.');
-                showErrorToast('Failed to fetch prompts.');
-                setPrompts([]);
-            })
-            .finally(() => setLoadingPrompts(false));
-    }, [selectedProjectId]);
+        try {
+            // promptService.findAll no toma un segundo argumento para búsqueda/filtrado.
+            // AsyncSelect cargará todos y filtrará en el cliente.
+            const fetchedPrompts = await promptService.findAll(selectedProjectId);
+            let options: PromptDto[] = [];
+            if (Array.isArray(fetchedPrompts)) {
+                options = fetchedPrompts as PromptDto[];
+            }
+
+            // Filtrar opciones basadas en inputValue si es necesario (filtrado del lado del cliente)
+            const filteredOptions = options.filter(option =>
+                option.name.toLowerCase().includes(inputValue.toLowerCase())
+            );
+
+            return filteredOptions.map(p => ({ value: p.id, label: p.name }));
+
+        } catch (err) {
+            console.error("Error fetching prompts for async select:", err);
+            showErrorToast('Failed to load prompts.');
+            return []; // Devuelve un array vacío en caso de error para que AsyncSelect no se rompa
+        }
+    };
 
     // --- Efecto para cargar Versiones ---
     useEffect(() => {
@@ -230,7 +226,7 @@ const ServePromptPage: React.FC = () => {
         setLoadingAiModels(true);
         setError(null); // Limpiar error previo
         aiModelService.findAll(selectedProjectId) // Pasar projectId
-            .then((data: CreateAiModelDto[]) => {
+            .then((data: AiModelResponseDto[]) => {
                 // data ya es CreateAiModelDto[]
                 setAiModels(Array.isArray(data) ? data : []);
             })
@@ -241,7 +237,7 @@ const ServePromptPage: React.FC = () => {
                 setAiModels([]);
             })
             .finally(() => setLoadingAiModels(false));
-    }, [selectedProjectId]); // Añadir dependencia
+    }, [selectedProjectId]);
 
     // --- Efecto para cargar Texto del Prompt y extraer Variables ---
     useEffect(() => {
@@ -285,6 +281,50 @@ const ServePromptPage: React.FC = () => {
 
     }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage]);
 
+    // --- Efecto para generar el comando cURL ---
+    useEffect(() => {
+        if (!selectedProjectId || !selectedPrompt?.value || !selectedVersion?.value || !selectedAiModel?.value) {
+            setCurlCommand('# Select a project, prompt, version, and AI model to see the cURL command.');
+            return;
+        }
+
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || '/api'; // Usar la misma base que apiClient
+        // Asegurarse de que no haya doble /api si apiBaseUrl ya lo contiene
+        const cleanApiBaseUrl = apiBaseUrl.endsWith('/api') ? apiBaseUrl.substring(0, apiBaseUrl.length - 4) : apiBaseUrl;
+        const endpoint = `${cleanApiBaseUrl}/api/projects/${selectedProjectId}/prompts/${selectedPrompt.value}/versions/${selectedVersion.value}/serve/${selectedAiModel.value}`;
+
+        let command = `curl -X POST "${window.location.origin}${endpoint}" \
+     -H "Authorization: Bearer YOUR_AUTH_TOKEN" \
+     -H "Content-Type: application/json"`;
+
+        const body: { languageCode?: string; variables?: StringMap } = {};
+        let hasBody = false;
+
+        if (selectedLanguage?.value && selectedLanguage.value !== '__BASE__') {
+            body.languageCode = selectedLanguage.value;
+            hasBody = true;
+        }
+
+        const activeVariables = Object.entries(variableInputs)
+            .filter(([_, val]) => val.trim() !== '') // Solo incluir variables con valor
+            .reduce((obj, [key, val]) => {
+                obj[key] = val;
+                return obj;
+            }, {} as StringMap);
+
+        if (Object.keys(activeVariables).length > 0) {
+            body.variables = activeVariables;
+            hasBody = true;
+        }
+
+        if (hasBody) {
+            command += ` \
+     -d '${JSON.stringify(body, null, 2)}'`; // pretty print JSON body
+        }
+
+        setCurlCommand(command);
+
+    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, selectedAiModel, variableInputs]);
 
     // --- Handler para actualizar input de variable ---
     const handleVariableInputChange = (varName: string, value: string) => {
@@ -292,18 +332,39 @@ const ServePromptPage: React.FC = () => {
     };
 
     // --- Handlers para cambios en Select --- (Usan SingleValue)
-    const handlePromptChange = (selectedOption: SingleValue<SelectOption>) => {
+    const handlePromptChange = useCallback((selectedOption: SingleValue<SelectOption>) => {
         setSelectedPrompt(selectedOption);
-    };
-    const handleVersionChange = (selectedOption: SingleValue<SelectOption>) => {
+        // Resetear selecciones dependientes
+        setSelectedVersion(null);
+        setVersions([]);
+        setSelectedLanguage(null);
+        setTranslations([]);
+        setCurrentPromptText('');
+        setPromptVariables({});
+        setVariableInputs({});
+        setExecutionResult(null);
+    }, [setSelectedPrompt, setSelectedVersion, setVersions, setSelectedLanguage, setTranslations, setCurrentPromptText, setPromptVariables, setVariableInputs, setExecutionResult]);
+
+    const handleVersionChange = useCallback((selectedOption: SingleValue<SelectOption>) => {
         setSelectedVersion(selectedOption);
-    };
-    const handleLanguageChange = (selectedOption: SingleValue<SelectOption>) => {
+        // Resetear selecciones dependientes
+        setSelectedLanguage(null);
+        setTranslations([]);
+        setCurrentPromptText('');
+        setPromptVariables({});
+        setVariableInputs({});
+        setExecutionResult(null);
+    }, [setSelectedVersion, setSelectedLanguage, setTranslations, setCurrentPromptText, setPromptVariables, setVariableInputs, setExecutionResult]);
+
+    const handleLanguageChange = useCallback((selectedOption: SingleValue<SelectOption>) => {
         setSelectedLanguage(selectedOption);
-    };
-    const handleAiModelChange = (selectedOption: SingleValue<SelectOption>) => {
+        setExecutionResult(null); // Limpiar resultado al cambiar idioma
+    }, [setSelectedLanguage, setExecutionResult]);
+
+    const handleAiModelChange = useCallback((selectedOption: SingleValue<SelectOption>) => {
         setSelectedAiModel(selectedOption);
-    };
+        setExecutionResult(null); // Limpiar resultado al cambiar modelo AI
+    }, [setSelectedAiModel, setExecutionResult]);
 
     // --- Handler para Ejecución ---
     const handleExecute = useCallback(async () => {
@@ -337,7 +398,6 @@ const ServePromptPage: React.FC = () => {
         }
     }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, selectedAiModel, variableInputs]);
 
-
     // --- Limpiar resultado del prompt formateado (extraer de ```) ---
     const formattedPromptResult = useMemo(() => {
         if (!executionResult || typeof executionResult.result !== 'string') {
@@ -350,11 +410,10 @@ const ServePromptPage: React.FC = () => {
         return content.trim();
     }, [executionResult]);
 
-
     // --- Render ---
     return (
         <div className={`${styles.servePromptContainer} bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen`}>
-            <h1 className="text-2xl font-bold text-black dark:text-white">Serve Prompt</h1>
+            <h1 className="text-2xl font-bold text-black dark:text-white mb-6">Serve & Test Prompt</h1>
 
             {error && (
                 <div className={`${styles.errorBanner} bg-yellow-100 border-yellow-400 text-yellow-700 dark:bg-yellow-700 dark:text-yellow-100 dark:border-yellow-600`}>
@@ -362,81 +421,92 @@ const ServePromptPage: React.FC = () => {
                 </div>
             )}
 
+            {/* --- Caja de Comando cURL --- */}
+            <div className="mb-6 p-4 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Direct API cURL Command:</label>
+                <div className="relative">
+                    <pre className="p-3 bg-gray-100 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 rounded-md overflow-x-auto whitespace-pre-wrap break-all">
+                        {curlCommand}
+                    </pre>
+                    {isClient && curlCommand && !curlCommand.startsWith('#') && (
+                        <CopyButton textToCopy={curlCommand} className="absolute top-2 right-2" />
+                    )}
+                </div>
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    Note: Replace <code>YOUR_AUTH_TOKEN</code> with your actual authentication token.
+                    The base URL (<code>{typeof window !== 'undefined' ? window.location.origin : ''}</code>) assumes the API is served from the same domain. Adjust if your API is elsewhere.
+                </p>
+            </div>
+
             {/* Selectors Grid */}
             <div className={styles.selectorsGrid}>
                 {/* Project Selector (si se decide añadirlo o si selectedProjectId no fuera global) */}
                 <input id="project-select" type="hidden" value={selectedProjectId || 'No Project Selected'} readOnly disabled className={`${styles.inputDisplay} bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300`} />
 
-                {/* Selector Prompt */}
-                <div>
-                    <label htmlFor="prompt-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Prompt:</label>
-                    <div className={styles.selectWrapper}>
-                        <Select
-                            id="prompt-select"
-                            options={promptOptions}
-                            value={selectedPrompt}
-                            onChange={handlePromptChange}
-                            isLoading={loadingPrompts}
-                            isDisabled={!selectedProjectId || loadingPrompts}
-                            placeholder="Select a prompt..."
-                            isClearable
-                            classNamePrefix="react-select"
-                        />
-                    </div>
+                {/* Prompt Selector (Async) */}
+                <div className={styles.selectWrapper}>
+                    <label htmlFor="prompt-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">1. Select Prompt:</label>
+                    <AsyncSelect
+                        id="prompt-select"
+                        cacheOptions // Opcional: cachea las opciones cargadas
+                        defaultOptions // Opcional: carga un conjunto inicial de opciones
+                        loadOptions={loadPromptOptions}
+                        value={selectedPrompt}
+                        onChange={handlePromptChange}
+                        isDisabled={!selectedProjectId} // Se deshabilita si no hay proyecto
+                        placeholder={selectedProjectId ? "Type to search prompts..." : "Select a project first"}
+                        classNamePrefix="react-select"
+                        className="react-select-container dark:react-select-container-dark"
+                    // key={selectedProjectId} // Forzar recarga si cambia el proyecto y queremos limpiar caché/defaultOptions
+                    />
                 </div>
 
-                {/* Selector Versión */}
-                <div>
-                    <label htmlFor="version-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Version:</label>
-                    <div className={styles.selectWrapper}>
-                        <Select
-                            id="version-select"
-                            options={versionOptions}
-                            value={selectedVersion}
-                            onChange={handleVersionChange}
-                            isLoading={loadingVersions}
-                            isDisabled={!selectedPrompt || loadingVersions}
-                            placeholder="Select a version..."
-                            isClearable
-                            classNamePrefix="react-select"
-                        />
-                    </div>
+                {/* Version Selector */}
+                <div className={styles.selectWrapper}>
+                    <label htmlFor="version-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">2. Select Version:</label>
+                    <Select
+                        id="version-select"
+                        options={versionOptions}
+                        value={selectedVersion}
+                        onChange={handleVersionChange}
+                        isLoading={loadingVersions}
+                        isDisabled={!selectedPrompt || loadingVersions}
+                        placeholder={selectedPrompt ? "Select version..." : "Select prompt first"}
+                        classNamePrefix="react-select"
+                        className="react-select-container dark:react-select-container-dark"
+                    />
                 </div>
 
-                {/* Selector Idioma */}
-                <div>
-                    <label htmlFor="language-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Language or Base Text:</label>
-                    <div className={styles.selectWrapper}>
-                        <Select
-                            id="language-select"
-                            options={languageOptions}
-                            value={selectedLanguage}
-                            onChange={handleLanguageChange}
-                            isLoading={loadingTranslations}
-                            isDisabled={!selectedVersion || loadingTranslations}
-                            placeholder="Select language or Base Text..."
-                            isClearable
-                            classNamePrefix="react-select"
-                        />
-                    </div>
+                {/* Language Selector */}
+                <div className={styles.selectWrapper}>
+                    <label htmlFor="language-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">3. Select Language:</label>
+                    <Select
+                        id="language-select"
+                        options={languageOptions}
+                        value={selectedLanguage}
+                        onChange={handleLanguageChange}
+                        isLoading={loadingTranslations}
+                        isDisabled={!selectedVersion || loadingTranslations}
+                        placeholder={selectedVersion ? "Select language (or base)..." : "Select version first"}
+                        classNamePrefix="react-select"
+                        className="react-select-container dark:react-select-container-dark"
+                    />
                 </div>
 
-                {/* Selector AI Model */}
-                <div>
-                    <label htmlFor="ai-model-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select AI Model:</label>
-                    <div className={styles.selectWrapper}>
-                        <Select
-                            id="ai-model-select"
-                            options={aiModelOptions}
-                            value={selectedAiModel}
-                            onChange={handleAiModelChange}
-                            isLoading={loadingAiModels}
-                            isDisabled={!selectedProjectId || loadingAiModels} // Depende de proyecto
-                            placeholder="Select an AI Model..."
-                            isClearable
-                            classNamePrefix="react-select"
-                        />
-                    </div>
+                {/* AI Model Selector */}
+                <div className={styles.selectWrapper}>
+                    <label htmlFor="aimodel-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">4. Select AI Model:</label>
+                    <Select
+                        id="aimodel-select"
+                        options={aiModelOptions}
+                        value={selectedAiModel}
+                        onChange={handleAiModelChange}
+                        isLoading={loadingAiModels}
+                        isDisabled={loadingAiModels || !selectedProjectId} // Habilitar si hay proyecto
+                        placeholder={selectedProjectId ? "Select AI Model..." : "Select a project first"}
+                        classNamePrefix="react-select"
+                        className="react-select-container dark:react-select-container-dark"
+                    />
                 </div>
             </div>
 

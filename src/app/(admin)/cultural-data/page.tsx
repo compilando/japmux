@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     culturalDataService,
     CreateCulturalDataDto,
     UpdateCulturalDataDto,
-    projectService
 } from '@/services/api';
 import * as generated from '../../../../generated/japmux-api';
 import { useProjects } from '@/context/ProjectContext';
@@ -25,7 +24,7 @@ const CulturalDataPage: React.FC = () => {
     const [editingCulturalData, setEditingCulturalData] = useState<generated.CulturalDataResponse | null>(null);
     const { selectedProjectId, selectedProjectFull, isLoadingSelectedProjectFull } = useProjects();
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         if (!selectedProjectId) {
             setCulturalDataList([]);
             setError("Please select a project to view cultural data.");
@@ -57,7 +56,7 @@ const CulturalDataPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedProjectId]);
 
     useEffect(() => {
         if (selectedProjectId) {
@@ -67,7 +66,7 @@ const CulturalDataPage: React.FC = () => {
             setLoading(false);
             setError("Please select a project to manage cultural data.");
         }
-    }, [selectedProjectId]);
+    }, [selectedProjectId, fetchData]);
 
     const handleAdd = () => {
         setEditingCulturalData(null);
@@ -118,7 +117,7 @@ const CulturalDataPage: React.FC = () => {
             setIsModalOpen(false);
             showSuccessToast(message);
             fetchData();
-        } catch (err: any) {
+        } catch (err) {
             console.error("Error saving cultural data:", err);
         } finally {
             setLoading(false);
@@ -126,7 +125,7 @@ const CulturalDataPage: React.FC = () => {
     };
 
     // Definir crumbs
-    let breadcrumbs: { label: string; href?: string }[] = [
+    const breadcrumbs: { label: string; href?: string }[] = [
         { label: "Home", href: "/" },
     ];
     if (selectedProjectId) {

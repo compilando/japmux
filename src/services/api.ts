@@ -280,41 +280,44 @@ export const regionService = {
 
 // Servicio de Entornos (Actualizado para usar generado)
 export const environmentService = {
+    create: async (projectId: string, payload: generated.CreateEnvironmentDto): Promise<generated.CreateEnvironmentDto> => {
+        const response = await environmentsGeneratedApi.environmentControllerCreate(projectId, payload);
+        return response.data;
+    },
     findAll: async (projectId: string): Promise<generated.CreateEnvironmentDto[]> => {
         const response = await environmentsGeneratedApi.environmentControllerFindAll(projectId);
         return response.data;
     },
     findOne: async (projectId: string, environmentId: string): Promise<generated.CreateEnvironmentDto> => {
-        const response = await environmentsGeneratedApi.environmentControllerFindOne(environmentId, projectId);
+        // Asegurar el orden correcto de parámetros para el servicio generado si es diferente
+        const response = await environmentsGeneratedApi.environmentControllerFindOne(environmentId, projectId); // El generado usa (environmentId, projectId)
         return response.data;
     },
+    // findByName se mantiene si existe y se usa, la API generada parece tenerlo.
     findByName: async (projectId: string, name: string): Promise<generated.CreateEnvironmentDto | null> => {
         try {
+            // El generado usa (name, projectId)
             const response = await environmentsGeneratedApi.environmentControllerFindByName(name, projectId);
             return response.data;
         } catch (error: any) {
-            // Asumiendo que AxiosError tiene 'response' y 404 indica no encontrado
             if (error.response && error.response.status === 404) {
-                return null; // No encontrado es un caso esperado aquí
+                return null;
             }
             console.error(`[environmentService.findByName] Error: ${error.message}`, error);
             showErrorToast(`Failed to find environment by name: ${name}`);
-            throw error; // Relanzar otros errores
+            throw error;
         }
     },
-    create: async (projectId: string, payload: generated.CreateEnvironmentDto): Promise<generated.CreateEnvironmentDto> => {
-        const response = await environmentsGeneratedApi.environmentControllerCreate(projectId, payload);
-        return response.data;
-    },
     update: async (projectId: string, environmentId: string, payload: generated.UpdateEnvironmentDto): Promise<generated.CreateEnvironmentDto> => {
-        // La API generada devuelve CreateEnvironmentDto
-        const response = await environmentsGeneratedApi.environmentControllerUpdate(environmentId, projectId, payload);
+        // Asegurar el orden correcto de parámetros para el servicio generado si es diferente
+        const response = await environmentsGeneratedApi.environmentControllerUpdate(environmentId, projectId, payload); // El generado usa (environmentId, projectId, payload)
         return response.data;
     },
-    remove: async (projectId: string, environmentId: string): Promise<void> => {
-        // La API generada devuelve void
-        await environmentsGeneratedApi.environmentControllerRemove(environmentId, projectId);
-    },
+    remove: async (projectId: string, environmentId: string): Promise<generated.CreateEnvironmentDto> => {
+        // Asegurar el orden correcto de parámetros para el servicio generado si es diferente
+        const response = await environmentsGeneratedApi.environmentControllerRemove(environmentId, projectId); // El generado usa (environmentId, projectId)
+        return response.data;
+    }
 };
 
 // Servicio de Tags (Actualizado para usar generado y TagDto con ID)

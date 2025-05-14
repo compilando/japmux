@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import {
     CreateProjectDto,
-    CreatePromptDto,
+    PromptDto,
     CreatePromptVersionDto,
     UpdatePromptVersionDto,
 } from '@/services/generated/api';
@@ -21,27 +21,53 @@ import PromptVersionForm from '@/components/form/PromptVersionForm';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
+// Helper para extraer mensajes de error de forma segura
+const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
+    if (axios.isAxiosError(error)) {
+        return error.response?.data?.message || error.message || defaultMessage;
+    }
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return defaultMessage;
+};
+
 // --- Interfaces Locales Extendidas ---
 // Exportar esta interfaz para poder usarla en el componente hijo (Table)
 export interface PromptVersionData extends CreatePromptVersionDto {
-    id: string; // Asumir que ID siempre está presente en la respuesta
-    isActive: boolean; // El campo que ya se asumía
-    promptId: string; // Añadir promptId, necesario para links en la tabla
+    id: string;
+    isActive: boolean;
+    promptId: string;
 }
 
 // --- Helper para versionado (simplificado) ---
 const getLatestVersionTag = (versions: PromptVersionData[]): string | null => {
     if (!versions || versions.length === 0) return null;
-    // Ordenar por versionTag (asume formato vX.Y.Z y orden lexicográfico simple)
-    // Una implementación robusta usaría librerías semver
-    const sorted = [...versions].sort((a, b) => {
-        // Comparación básica asumiendo prefijo 'v'
-        const tagA = a.versionTag?.startsWith('v') ? a.versionTag.substring(1) : a.versionTag;
-        const tagB = b.versionTag?.startsWith('v') ? b.versionTag.substring(1) : b.versionTag;
-        // Simple comparación lexicográfica (puede fallar con v1.10.0 vs v1.2.0)
-        return (tagB || '').localeCompare(tagA || ''); // Orden descendente
+
+    const sortedVersions = [...versions].sort((a, b) => {
+        // Extraer y normalizar tags, manejando undefined
+        const tagAValue = a.versionTag;
+        const tagBValue = b.versionTag;
+
+        const normalizedTagA = typeof tagAValue === 'string' && tagAValue.startsWith('v')
+            ? tagAValue.substring(1)
+            : tagAValue;
+        const normalizedTagB = typeof tagBValue === 'string' && tagBValue.startsWith('v')
+            ? tagBValue.substring(1)
+            : tagBValue;
+
+        // Comparar, tratando undefined/null como string vacío para consistencia
+        const valA = normalizedTagA || '';
+        const valB = normalizedTagB || '';
+
+        return valB.localeCompare(valA); // Orden descendente
     });
-    return sorted[0].versionTag || null;
+
+    // El primer elemento después de ordenar, si existe y tiene versionTag
+    if (sortedVersions.length > 0 && typeof sortedVersions[0].versionTag === 'string') {
+        return sortedVersions[0].versionTag;
+    }
+    return null;
 };
 
 // Type for the update payload, allowing isActive
@@ -59,11 +85,10 @@ const PromptVersionsPage: React.FC = () => {
     const [latestVersionTagForForm, setLatestVersionTagForForm] = useState<string | null>(null);
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
-    const [prompt, setPrompt] = useState<CreatePromptDto | null>(null);
+    const [prompt, setPrompt] = useState<PromptDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     const params = useParams();
-    const router = useRouter();
     const { selectedProjectId } = useProjects();
     const { selectedPromptId } = usePrompts();
 
@@ -76,16 +101,16 @@ const PromptVersionsPage: React.FC = () => {
         const fetchBreadcrumbData = async () => {
             setBreadcrumbLoading(true);
             try {
-                console.log('[fetchBreadcrumbData] Attempting to fetch with projectId:', projectId, 'and promptId (actually promptName):', promptId);
-                const [projectData, promptData] = await Promise.all([
+                const [projectData, promptDataFromService] = await Promise.all([
                     projectService.findOne(projectId),
                     promptService.findOne(projectId, promptId)
                 ]);
                 setProject(projectData);
-                setPrompt(promptData);
-            } catch (error) {
-                console.error("Error fetching breadcrumb data:", error);
-                showErrorToast("Failed to load project or prompt details for breadcrumbs.");
+                setPrompt(promptDataFromService);
+            } catch (err: unknown) {
+                console.error("Error fetching breadcrumb data:", err);
+                const defaultMsg = "Failed to load project or prompt details for breadcrumbs.";
+                showErrorToast(getApiErrorMessage(err, defaultMsg));
                 setProject(null);
                 setPrompt(null);
             } finally {
@@ -136,13 +161,10 @@ const PromptVersionsPage: React.FC = () => {
                 setItemsList([]);
                 setLatestVersionTagForForm(null);
             }
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Error fetching items:", err);
-            if (axios.isAxiosError(err)) {
-                console.error("Axios error details:", err.response?.status, err.response?.data);
-            }
-            setError('Failed to fetch items.');
-            showErrorToast('Failed to fetch prompt versions.');
+            const defaultMsg = 'Failed to fetch prompt versions.';
+            setError(getApiErrorMessage(err, defaultMsg));
             setItemsList([]);
             setLatestVersionTagForForm(null);
         } finally {
@@ -165,18 +187,20 @@ const PromptVersionsPage: React.FC = () => {
     };
 
     const handleDelete = async (itemToDelete: PromptVersionData) => {
-        if (!projectId || !promptId) return;
+        if (!projectId || !promptId || !itemToDelete.versionTag) {
+            showErrorToast("Cannot delete: version data is incomplete.");
+            return;
+        }
         if (window.confirm(`Are you sure you want to delete version tag "${itemToDelete.versionTag}"?`)) {
             setLoading(true);
             try {
-                await promptVersionService.remove(projectId, promptId, itemToDelete.versionTag);
+                await promptVersionService.remove(projectId, promptId, itemToDelete.versionTag!);
                 showSuccessToast(`Version ${itemToDelete.versionTag} deleted successfully!`);
                 fetchData();
-            } catch (err) {
-                setError('Failed to delete item');
-                console.error(err);
-                const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to delete version.';
-                showErrorToast(apiErrorMessage);
+            } catch (err: unknown) {
+                console.error("Error deleting version:", err);
+                const defaultMsg = 'Failed to delete version.';
+                setError(getApiErrorMessage(err, defaultMsg));
             } finally {
                 setLoading(false);
             }
@@ -188,8 +212,8 @@ const PromptVersionsPage: React.FC = () => {
         setLoading(true);
         try {
             let message = "";
-            if (editingItem) {
-                await promptVersionService.update(projectId, promptId, editingItem.versionTag, payload as UpdatePromptVersionDto);
+            if (editingItem && editingItem.versionTag) {
+                await promptVersionService.update(projectId, promptId, editingItem.versionTag!, payload as UpdatePromptVersionDto);
                 message = `Version ${editingItem.versionTag} updated successfully!`;
             } else {
                 await promptVersionService.create(projectId, promptId, payload as CreatePromptVersionDto);
@@ -198,41 +222,31 @@ const PromptVersionsPage: React.FC = () => {
             setIsModalOpen(false);
             showSuccessToast(message);
             fetchData();
-        } catch (err) {
-            setError('Failed to save item');
-            console.error(err);
-            const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to save version.';
-            showErrorToast(apiErrorMessage);
+        } catch (err: unknown) {
+            console.error("Error saving version:", err);
+            const defaultMsg = 'Failed to save version.';
+            setError(getApiErrorMessage(err, defaultMsg));
         } finally {
             setLoading(false);
         }
     };
 
     const handleToggleActive = async (itemToToggle: PromptVersionData) => {
-        console.log("[handleToggleActive] Called with item:", JSON.stringify(itemToToggle, null, 2));
-        if (!projectId || !promptId || typeof itemToToggle.isActive === 'undefined') {
-            console.error("[handleToggleActive] Missing IDs or isActive property on item");
-            showErrorToast('Cannot toggle status: item data is incomplete.')
+        if (!projectId || !promptId || typeof itemToToggle.isActive === 'undefined' || !itemToToggle.versionTag) {
+            showErrorToast('Cannot toggle status: item data is incomplete.');
             return;
         }
-
-        const payload = { isActive: !itemToToggle.isActive };
-        console.log("[handleToggleActive] Payload prepared for UPDATE:", payload);
-
+        const updatePayload = { isActive: !itemToToggle.isActive };
         setLoading(true);
         try {
-            console.log("[handleToggleActive] Entering try block, about to call UPDATE service...");
-            await promptVersionService.update(projectId, promptId, itemToToggle.versionTag, payload as UpdatePromptVersionDto);
-            console.log("[handleToggleActive] UPDATE Service call successful (apparently).");
+            await promptVersionService.update(projectId, promptId, itemToToggle.versionTag!, updatePayload as UpdatePromptVersionDto);
             showSuccessToast(`Version ${itemToToggle.versionTag} active status toggled.`);
             fetchData();
-        } catch (err) {
-            console.error("[handleToggleActive] Caught error during UPDATE:", err);
-            setError('Failed to toggle active state');
-            const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to toggle active status.';
-            showErrorToast(apiErrorMessage);
+        } catch (err: unknown) {
+            console.error("Error toggling active state:", err);
+            const defaultMsg = 'Failed to toggle active status.';
+            setError(getApiErrorMessage(err, defaultMsg));
         } finally {
-            console.log("[handleToggleActive] Entering finally block.");
             setLoading(false);
         }
     };

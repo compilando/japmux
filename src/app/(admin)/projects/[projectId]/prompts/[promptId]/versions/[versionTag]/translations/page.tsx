@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import {
     promptTranslationService,
     CreatePromptTranslationDto,
@@ -10,13 +10,22 @@ import {
     promptService,
     promptVersionService
 } from '@/services/api';
-import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptTranslationsTable from '@/components/tables/PromptTranslationsTable';
 import PromptTranslationForm from '@/components/form/PromptTranslationForm';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
-import { CreateProjectDto, CreatePromptDto, CreatePromptVersionDto } from '@/services/generated/api';
+import { CreateProjectDto, PromptDto } from '@/services/generated/api';
+
+const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
+    if (axios.isAxiosError(error)) {
+        return error.response?.data?.message || error.message || defaultMessage;
+    }
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return defaultMessage;
+};
 
 const PromptTranslationsPage: React.FC = () => {
     const [itemsList, setItemsList] = useState<CreatePromptTranslationDto[]>([]);
@@ -27,12 +36,10 @@ const PromptTranslationsPage: React.FC = () => {
     const [versionText, setVersionText] = useState<string>('');
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
-    const [prompt, setPrompt] = useState<CreatePromptDto | null>(null);
+    const [prompt, setPrompt] = useState<PromptDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     const searchParams = useSearchParams();
-    const router = useRouter();
-    const { selectedProjectId } = useProjects();
     const params = useParams();
 
     const projectId = params.projectId as string;
@@ -58,9 +65,10 @@ const PromptTranslationsPage: React.FC = () => {
                 ]);
                 setProject(projectData);
                 setPrompt(promptData);
-            } catch (error) {
-                console.error("Error fetching breadcrumb data:", error);
-                showErrorToast("Failed to load project or prompt details for breadcrumbs.");
+            } catch (err: unknown) {
+                console.error("Error fetching breadcrumb data:", err);
+                const defaultMsg = "Failed to load project or prompt details for breadcrumbs.";
+                showErrorToast(getApiErrorMessage(err, defaultMsg));
                 setProject(null);
                 setPrompt(null);
             } finally {
@@ -79,8 +87,8 @@ const PromptTranslationsPage: React.FC = () => {
                 if (version?.promptText) {
                     setVersionText(version.promptText);
                 }
-            } catch (error) {
-                console.error('Error fetching version text:', error);
+            } catch (err: unknown) {
+                console.error('Error fetching version text:', err);
             }
         };
 
@@ -106,10 +114,10 @@ const PromptTranslationsPage: React.FC = () => {
                 setError('Received invalid data format.');
                 setItemsList([]);
             }
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Error fetching items:", err);
-            setError('Failed to fetch items.');
-            showErrorToast('Failed to fetch translations.');
+            const defaultMsg = 'Failed to fetch translations.';
+            setError(getApiErrorMessage(err, defaultMsg));
             setItemsList([]);
         } finally {
             setLoading(false);
@@ -138,11 +146,10 @@ const PromptTranslationsPage: React.FC = () => {
                 await promptTranslationService.remove(projectId, promptId, versionTag, itemToDelete.languageCode);
                 showSuccessToast(`Translation for ${itemToDelete.languageCode} deleted.`);
                 fetchData();
-            } catch (err) {
-                setError('Failed to delete item');
-                console.error(err);
-                const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to delete translation.';
-                showErrorToast(apiErrorMessage);
+            } catch (err: unknown) {
+                console.error("Error deleting translation:", err);
+                const defaultMsg = 'Failed to delete translation.';
+                setError(getApiErrorMessage(err, defaultMsg));
             } finally {
                 setLoading(false);
             }
@@ -151,9 +158,10 @@ const PromptTranslationsPage: React.FC = () => {
 
     const handleSave = async (payload: CreatePromptTranslationDto | UpdatePromptTranslationDto) => {
         if (!projectId || !promptId || !versionTag) return;
-        let finalPayload: any = payload;
+
+        let finalPayload: CreatePromptTranslationDto | UpdatePromptTranslationDto = payload;
         if (!editingItem && currentVersionId && !(payload as CreatePromptTranslationDto).versionId) {
-            finalPayload = { ...payload, versionId: currentVersionId };
+            finalPayload = { ...payload, versionId: currentVersionId } as CreatePromptTranslationDto;
         }
 
         setLoading(true);
@@ -164,16 +172,15 @@ const PromptTranslationsPage: React.FC = () => {
                 message = `Translation for ${editingItem.languageCode} updated.`;
             } else {
                 await promptTranslationService.create(projectId, promptId, versionTag, finalPayload as CreatePromptTranslationDto);
-                message = `Translation for ${finalPayload.languageCode} created.`;
+                message = `Translation for ${(finalPayload as CreatePromptTranslationDto).languageCode} created.`;
             }
             setIsModalOpen(false);
             showSuccessToast(message);
             fetchData();
-        } catch (err) {
-            setError('Failed to save item');
-            console.error(err);
-            const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to save translation.';
-            showErrorToast(apiErrorMessage);
+        } catch (err: unknown) {
+            console.error("Error saving translation:", err);
+            const defaultMsg = 'Failed to save translation.';
+            setError(getApiErrorMessage(err, defaultMsg));
         } finally {
             setLoading(false);
         }

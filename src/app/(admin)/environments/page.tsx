@@ -1,30 +1,39 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-    Environment,
     environmentService,
     CreateEnvironmentDto,
     UpdateEnvironmentDto,
-    Project,
-    projectService
+    // Project, // Eliminado
+    // projectService // Eliminado
 } from '@/services/api';
+// Ya no necesitamos EnvironmentResponseDto, usaremos CreateEnvironmentDto de @/services/api
+// import { EnvironmentResponseDto } from '@/services/generated/api'; 
 import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import EnvironmentsTable from '@/components/tables/EnvironmentsTable';
 import EnvironmentForm from '@/components/form/EnvironmentForm';
-import axios from 'axios';
+import axios from 'axios'; // Mantener axios si se usa directamente en el catch, sino se puede eliminar si no hay otro uso.
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
+// Interfaz local para el Environment que incluye el ID y otros campos esperados del backend
+interface EnvironmentWithId extends CreateEnvironmentDto {
+    id: string;
+    projectId: string; // Asumiendo que el backend también devuelve projectId
+    // createdAt?: string; // Descomentar si es necesario
+    // updatedAt?: string; // Descomentar si es necesario
+}
+
 const EnvironmentsPage: React.FC = () => {
-    const [environmentsList, setEnvironmentsList] = useState<Environment[]>([]);
+    const [environmentsList, setEnvironmentsList] = useState<EnvironmentWithId[]>([]); // Usar EnvironmentWithId
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingEnvironment, setEditingEnvironment] = useState<Environment | null>(null);
+    const [editingEnvironment, setEditingEnvironment] = useState<EnvironmentWithId | null>(null); // Usar EnvironmentWithId
     const { selectedProjectId, selectedProjectFull, isLoadingSelectedProjectFull } = useProjects();
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         if (!selectedProjectId) {
             setLoading(false);
             setError("Please select a project first.");
@@ -36,7 +45,7 @@ const EnvironmentsPage: React.FC = () => {
         try {
             const data = await environmentService.findAll(selectedProjectId);
             if (Array.isArray(data)) {
-                setEnvironmentsList(data);
+                setEnvironmentsList(data as EnvironmentWithId[]);
             } else {
                 console.error("API response for /environments is not an array:", data);
                 setError('Received invalid data format for environments.');
@@ -44,15 +53,12 @@ const EnvironmentsPage: React.FC = () => {
             }
         } catch (err) {
             console.error("Error fetching environments:", err);
-            if (axios.isAxiosError(err)) {
-                console.error("Axios error details:", err.response?.status, err.response?.data);
-            }
             setError('Failed to fetch environments.');
             setEnvironmentsList([]);
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedProjectId]);
 
     useEffect(() => {
         if (selectedProjectId) {
@@ -62,14 +68,14 @@ const EnvironmentsPage: React.FC = () => {
             setLoading(false);
             setError("Please select a project to manage environments.");
         }
-    }, [selectedProjectId]);
+    }, [selectedProjectId, fetchData]);
 
     const handleAdd = () => {
         setEditingEnvironment(null);
         setIsModalOpen(true);
     };
 
-    const handleEdit = (environment: Environment) => {
+    const handleEdit = (environment: EnvironmentWithId) => { // Usar EnvironmentWithId
         setEditingEnvironment(environment);
         setIsModalOpen(true);
     };
@@ -84,9 +90,10 @@ const EnvironmentsPage: React.FC = () => {
             try {
                 await environmentService.remove(selectedProjectId, id);
                 showSuccessToast('Environment deleted successfully!');
-                fetchData();
+                fetchData(); // Volver a cargar datos
             } catch (err) {
                 console.error("Error deleting environment:", err);
+                // El interceptor de Axios debería manejar el showErrorToast para errores de API
             } finally {
                 setLoading(false);
             }
@@ -101,7 +108,7 @@ const EnvironmentsPage: React.FC = () => {
         setLoading(true);
         try {
             let message = "";
-            if (editingEnvironment && editingEnvironment.id) {
+            if (editingEnvironment && editingEnvironment.id) { // Ahora .id es válido
                 await environmentService.update(selectedProjectId, editingEnvironment.id, payload as UpdateEnvironmentDto);
                 message = 'Environment updated successfully!';
             } else {
@@ -110,15 +117,16 @@ const EnvironmentsPage: React.FC = () => {
             }
             setIsModalOpen(false);
             showSuccessToast(message);
-            fetchData();
+            fetchData(); // Volver a cargar datos
         } catch (err) {
             console.error("Error saving environment:", err);
+            // El interceptor de Axios debería manejar el showErrorToast para errores de API
         } finally {
             setLoading(false);
         }
     };
 
-    let breadcrumbs: { label: string; href?: string }[] = [
+    const breadcrumbs: { label: string; href?: string }[] = [
         { label: "Home", href: "/" },
     ];
     if (selectedProjectId) {
@@ -173,7 +181,7 @@ const EnvironmentsPage: React.FC = () => {
                             {editingEnvironment ? 'Edit Environment' : 'Add New Environment'}
                         </h3>
                         <EnvironmentForm
-                            initialData={editingEnvironment}
+                            initialData={editingEnvironment} // Pasa EnvironmentWithId | null
                             onSave={handleSave}
                             onCancel={() => setIsModalOpen(false)}
                         />

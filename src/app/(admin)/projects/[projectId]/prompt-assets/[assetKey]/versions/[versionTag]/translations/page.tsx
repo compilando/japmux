@@ -17,6 +17,18 @@ import Breadcrumb, { Crumb } from '@/components/common/PageBreadCrumb';
 import PromptAssetTranslationsTable from '@/components/tables/PromptAssetTranslationsTable';
 import PromptAssetTranslationForm from '@/components/form/PromptAssetTranslationForm';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import axios from 'axios';
+
+// Helper para extraer mensajes de error de forma segura
+const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
+    if (axios.isAxiosError(error)) {
+        return error.response?.data?.message || error.message || defaultMessage;
+    }
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return defaultMessage;
+};
 
 type AssetTranslationUIData = CreateAssetTranslationDto;
 
@@ -63,7 +75,8 @@ const PromptAssetTranslationsPage: React.FC = () => {
             setVersion(versionData as PromptAssetVersionData);
         }).catch((err: unknown) => {
             console.error("Error fetching breadcrumb data (project/asset/version):", err);
-            const apiErrorMessage = (err as any)?.response?.data?.message || (err as Error)?.message || 'Failed to load project, asset, or version details.';
+            const defaultMsg = 'Failed to load project, asset, or version details.';
+            const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
             showErrorToast(apiErrorMessage);
             setProject(null);
             setAsset(null);
@@ -98,10 +111,10 @@ const PromptAssetTranslationsPage: React.FC = () => {
                 setError('Received invalid data format.');
             }
         } catch (err: unknown) {
-            const apiErrorMessage = (err as any)?.response?.data?.message || (err as Error)?.message || 'Failed to fetch asset translations.';
             console.error("Error fetching asset translations:", err);
+            const defaultMsg = 'Failed to fetch asset translations.';
+            const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
             setError(apiErrorMessage);
-            showErrorToast(apiErrorMessage);
             setItemsList([]);
         } finally {
             setLoading(false);
@@ -135,11 +148,11 @@ const PromptAssetTranslationsPage: React.FC = () => {
                 await promptAssetService.removeAssetTranslation(projectId, assetKey, versionTag, languageCode);
                 showSuccessToast("Translation deleted successfully!");
                 fetchData();
-            } catch (err) {
-                const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to delete translation.';
+            } catch (err: unknown) {
+                console.error("Error deleting translation:", err);
+                const defaultMsg = 'Failed to delete translation.';
+                const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
                 setError(apiErrorMessage);
-                console.error(err);
-                showErrorToast(apiErrorMessage);
             } finally {
                 setLoading(false);
             }
@@ -168,11 +181,11 @@ const PromptAssetTranslationsPage: React.FC = () => {
             setIsModalOpen(false);
             showSuccessToast(message);
             fetchData();
-        } catch (err) {
-            const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to save translation.';
+        } catch (err: unknown) {
+            console.error("Error saving translation:", err);
+            const defaultMsg = 'Failed to save translation.';
+            const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
             setError(apiErrorMessage);
-            console.error(err);
-            showErrorToast(apiErrorMessage);
         } finally {
             setLoading(false);
         }

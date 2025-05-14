@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { aiModelService } from '@/services/api';
-import * as generated from '../../../generated/japmux-api';
+import { AiModelResponseDto, CreateAiModelDto, UpdateAiModelDto } from '@/services/generated/api';
 import { showErrorToast } from '@/utils/toastUtils';
 
 // Tipo provisional para las opciones del proveedor, ajustar según la respuesta real del API
@@ -10,8 +10,8 @@ interface ProviderTypeOption {
 }
 
 interface AiModelFormProps {
-    initialData: generated.AiModelResponseDto | null;
-    onSave: (data: generated.CreateAiModelDto | generated.UpdateAiModelDto) => void;
+    initialData: AiModelResponseDto | null;
+    onSave: (data: CreateAiModelDto | UpdateAiModelDto) => void;
     onCancel: () => void;
     projectId: string;
 }
@@ -77,7 +77,7 @@ const AiModelForm: React.FC<AiModelFormProps> = ({ initialData, onSave, onCancel
             return;
         }
 
-        const payload: generated.CreateAiModelDto | generated.UpdateAiModelDto = {
+        const payload: CreateAiModelDto | UpdateAiModelDto = {
             name: name.trim(),
             provider: provider.trim(),
             description: description.trim() || undefined,

@@ -14,6 +14,18 @@ import Breadcrumb, { Crumb } from '@/components/common/PageBreadCrumb';
 import PromptAssetsTable, { PromptAssetData } from '@/components/tables/PromptAssetsTable';
 import PromptAssetForm from '@/components/form/PromptAssetForm';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import axios from 'axios';
+
+// Helper para extraer mensajes de error de forma segura
+const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
+    if (axios.isAxiosError(error)) {
+        return error.response?.data?.message || error.message || defaultMessage;
+    }
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return defaultMessage;
+};
 
 const PromptAssetsPage: React.FC = () => {
     const [itemsList, setItemsList] = useState<PromptAssetData[]>([]);
@@ -50,10 +62,11 @@ const PromptAssetsPage: React.FC = () => {
                 setError('Received invalid data format.');
                 setItemsList([]);
             }
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Error fetching assets:", err);
-            setError('Failed to fetch assets.');
-            showErrorToast('Failed to fetch prompt assets.');
+            const defaultMsg = 'Failed to fetch prompt assets.';
+            const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
+            setError(apiErrorMessage);
             setItemsList([]);
         } finally {
             setLoading(false);
@@ -95,11 +108,11 @@ const PromptAssetsPage: React.FC = () => {
                 await promptAssetService.remove(currentProjectId, assetKey);
                 showSuccessToast(`Asset ${assetKey} deleted successfully!`);
                 fetchData();
-            } catch (err) {
-                setError('Failed to delete item');
-                console.error(err);
-                const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to delete asset.';
-                showErrorToast(apiErrorMessage);
+            } catch (err: unknown) {
+                console.error("Error deleting asset:", err);
+                const defaultMsg = 'Failed to delete asset.';
+                const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
+                setError(apiErrorMessage);
             } finally {
                 setLoading(false);
             }
@@ -130,11 +143,11 @@ const PromptAssetsPage: React.FC = () => {
             setIsModalOpen(false);
             showSuccessToast(message);
             fetchData();
-        } catch (err) {
-            setError('Failed to save item');
-            console.error(err);
-            const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to save asset.';
-            showErrorToast(apiErrorMessage);
+        } catch (err: unknown) {
+            console.error("Error saving asset:", err);
+            const defaultMsg = 'Failed to save asset.';
+            const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
+            setError(apiErrorMessage);
         } finally {
             setLoading(false);
         }

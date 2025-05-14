@@ -17,6 +17,18 @@ import Breadcrumb, { Crumb } from '@/components/common/PageBreadCrumb';
 import PromptAssetVersionsTable from '@/components/tables/PromptAssetVersionsTable';
 import PromptAssetVersionForm from '@/components/form/PromptAssetVersionForm';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import axios from 'axios'; // Importar axios
+
+// Helper para extraer mensajes de error de forma segura (duplicado de translations/page.tsx, considerar mover a utils)
+const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
+    if (axios.isAxiosError(error)) {
+        return error.response?.data?.message || error.message || defaultMessage;
+    }
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return defaultMessage;
+};
 
 // Tipo local para representar una versión de Asset con campos adicionales necesarios para la UI
 // Exportar para que la tabla también pueda usarlo.
@@ -66,7 +78,9 @@ const PromptAssetVersionsPage: React.FC = () => {
             setAsset(assetData as CreatePromptAssetDto);
         }).catch(err => {
             console.error("Error fetching breadcrumb data (project/asset):", err);
-            showErrorToast("Failed to load project or asset details for breadcrumbs.");
+            const defaultMsg = "Failed to load project or asset details for breadcrumbs.";
+            const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
+            showErrorToast(apiErrorMessage); // Mantener toast aquí ya que no es un error de API directo de la página principal
             setProject(null);
             setAsset(null);
         }).finally(() => {
@@ -97,10 +111,12 @@ const PromptAssetVersionsPage: React.FC = () => {
                 setItemsList([]);
                 setLatestVersionTagForForm(null);
             }
-        } catch (err) {
+        } catch (err: unknown) { // Tipar err
             console.error("Error fetching asset versions:", err);
-            setError('Failed to fetch asset versions.');
-            showErrorToast('Failed to fetch asset versions.');
+            const defaultMsg = 'Failed to fetch asset versions.';
+            const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
+            setError(apiErrorMessage);
+            // Interceptor de Axios debería mostrar el toast.
             setItemsList([]);
             setLatestVersionTagForForm(null);
         } finally {
@@ -124,19 +140,20 @@ const PromptAssetVersionsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (versionTag: string) => { // La tabla pasa el tag directamente
+    const handleDelete = async (versionTagToDelete: string) => {
         if (!projectId || !assetKey) return;
-        if (window.confirm(`Are you sure you want to delete version "${versionTag}" for asset "${assetKey}"?`)) {
+        if (window.confirm(`Are you sure you want to delete version "${versionTagToDelete}" for asset "${assetKey}"?`)) {
             setLoading(true);
             try {
-                await promptAssetService.removeVersion(projectId, assetKey, versionTag);
-                showSuccessToast(`Version ${versionTag} deleted successfully!`);
-                fetchData(); // Recargar lista
-            } catch (err) {
-                setError('Failed to delete version');
-                console.error(err);
-                const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to delete version.';
-                showErrorToast(apiErrorMessage);
+                await promptAssetService.removeVersion(projectId, assetKey, versionTagToDelete);
+                showSuccessToast(`Version ${versionTagToDelete} deleted successfully!`);
+                fetchData();
+            } catch (err: unknown) { // Tipar err
+                console.error("Error deleting version:", err);
+                const defaultMsg = 'Failed to delete version.';
+                const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
+                setError(apiErrorMessage);
+                // Interceptor de Axios debería mostrar el toast.
             } finally {
                 setLoading(false);
             }
@@ -148,25 +165,23 @@ const PromptAssetVersionsPage: React.FC = () => {
         setLoading(true);
         try {
             let message = "";
-            if (editingItem && editingItem.versionTag) { // Asumiendo que la versión existente tiene versionTag
+            if (editingItem && editingItem.versionTag) {
                 await promptAssetService.updateVersion(projectId, assetKey, editingItem.versionTag, payload as UpdatePromptAssetVersionDto);
                 message = `Version ${editingItem.versionTag} updated successfully!`;
             } else {
                 const createPayload = payload as CreatePromptAssetVersionDto;
-                // El versionTag se asigna en el backend o se debe generar aquí?
-                // Por ahora, asumimos que el form no lo envía y el backend lo maneja
                 await promptAssetService.createVersion(projectId, assetKey, createPayload);
-                // No podemos mostrar el nuevo tag si no lo devuelve la API
                 message = "New version created successfully!";
             }
             setIsModalOpen(false);
             showSuccessToast(message);
-            fetchData(); // Recargar lista
-        } catch (err) {
-            setError('Failed to save version');
-            console.error(err);
-            const apiErrorMessage = (err as any)?.response?.data?.message || 'Failed to save version.';
-            showErrorToast(apiErrorMessage);
+            fetchData();
+        } catch (err: unknown) { // Tipar err
+            console.error("Error saving version:", err);
+            const defaultMsg = 'Failed to save version.';
+            const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
+            setError(apiErrorMessage);
+            // Interceptor de Axios debería mostrar el toast.
         } finally {
             setLoading(false);
         }
