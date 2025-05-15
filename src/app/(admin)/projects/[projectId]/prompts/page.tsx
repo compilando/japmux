@@ -153,7 +153,7 @@ const PromptsPage: React.FC = () => {
             <Breadcrumb crumbs={breadcrumbs} />
             <div className="my-6">
                 <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
-                    Prompts for {project?.name || projectId}
+                    Prompts for <span className="text-indigo-600 dark:text-indigo-400">{project?.name || projectId}</span>
                 </h2>
                 <p className="text-base font-medium text-gray-700 dark:text-gray-300">
                     Create, view, and manage all prompts associated with this project. Each prompt can have multiple versions and translations.

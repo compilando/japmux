@@ -7,7 +7,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **string** | Name of the project | [default to undefined]
 **description** | **string** | Optional description for the project | [optional] [default to undefined]
-**owner** | **string** | ID (CUID) of the User who owns this project | [default to undefined]
 
 ## Example
 
@@ -17,7 +16,6 @@ import { CreateProjectDto } from './api';
 const instance: CreateProjectDto = {
     name,
     description,
-    owner,
 };
 ```
 

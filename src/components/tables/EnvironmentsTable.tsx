@@ -47,14 +47,14 @@ const EnvironmentsTable: React.FC<EnvironmentsTableProps> = ({ environments, onE
                                         className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label="Edit Environment"
                                     >
-                                        <PencilIcon className="w-4 h-4" />
+                                        <PencilIcon />
                                     </button>
                                     <button
                                         onClick={() => onDelete(environment.id)}
                                         className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label="Delete Environment"
                                     >
-                                        <TrashBinIcon className="w-4 h-4" />
+                                        <TrashBinIcon />
                                     </button>
                                 </div>
                             </td>

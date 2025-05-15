@@ -89,14 +89,14 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                         className="text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-600 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label="Edit Version"
                                     >
-                                        <PencilIcon className="w-4 h-4" />
+                                        <PencilIcon />
                                     </button>
                                     <button
                                         onClick={() => onDelete(item)}
                                         className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-600 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label="Delete Version"
                                     >
-                                        <TrashBinIcon className="w-4 h-4" />
+                                        <TrashBinIcon />
                                     </button>
                                 </td>
                             </tr>

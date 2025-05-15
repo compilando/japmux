@@ -4,14 +4,14 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**userControllerCreate**](#usercontrollercreate) | **POST** /api/users | Create a new user|
+|[**userControllerCreate**](#usercontrollercreate) | **POST** /api/users | Create a new user (within the authenticated admin user\&#39;s tenant)|
 |[**userControllerFindAll**](#usercontrollerfindall) | **GET** /api/users | Get all users|
 |[**userControllerFindOne**](#usercontrollerfindone) | **GET** /api/users/{id} | Get a user by ID|
 |[**userControllerRemove**](#usercontrollerremove) | **DELETE** /api/users/{id} | Delete a user by ID|
 |[**userControllerUpdate**](#usercontrollerupdate) | **PATCH** /api/users/{id} | Update a user by ID|
 
 # **userControllerCreate**
-> CreateUserDto userControllerCreate(createUserDto)
+> userControllerCreate(createUserDto)
 
 
 ### Example
@@ -42,16 +42,16 @@ const { status, data } = await apiInstance.userControllerCreate(
 
 ### Return type
 
-**CreateUserDto**
+void (empty response body)
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Accept**: Not defined
 
 
 ### HTTP response details
@@ -59,6 +59,7 @@ No authorization required
 |-------------|-------------|------------------|
 |**201** | User created successfully. |  -  |
 |**400** | Invalid input data. |  -  |
+|**401** | Unauthorized. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

@@ -1,0 +1,4 @@
+provider = "prisma-client-js"
+// output   = "../node_modules/@prisma/client" // Comentado o eliminado el antiguo output
+output   = "../node_modules/.prisma/client" // Aplicada la sugerencia de Prisma
+previewFeatures = ["extendedWhereUnique"] 

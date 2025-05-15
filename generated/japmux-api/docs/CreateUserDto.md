@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **name** | **string** | User\&#39;s name | [optional] [default to undefined]
 **email** | **string** | Unique user email | [default to undefined]
 **password** | **string** | User\&#39;s password | [default to undefined]
+**role** | **string** | Role of the user | [optional] [default to RoleEnum_User]
 
 ## Example
 
@@ -18,6 +19,7 @@ const instance: CreateUserDto = {
     name,
     email,
     password,
+    role,
 };
 ```
 

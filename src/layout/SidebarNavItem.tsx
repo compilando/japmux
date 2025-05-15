@@ -46,33 +46,6 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = memo(({
     (isParentOfActivePath && !nav.subItems?.length) ||    // El NavItem es un enlace final y padre de la ruta actual
     (isSubmenuOpen && isParentOfActiveSubItem);           // El submenú de ESTE NavItem está abierto Y es padre de un subítem activo
 
-  // DEBUGGING LOG START
-  if (nav.name === "Prompt Execution") {
-    console.log(`[SidebarNavItem] Debug for: ${nav.name}`);
-    console.log(`  pathname: ${pathname}`);
-    console.log(`  nav.path: ${nav.path}`);
-    console.log(`  isDirectPathMatch: ${isDirectPathMatch}`);
-    console.log(`  isParentOfActivePath: ${isParentOfActivePath}`);
-    console.log(`  isSubmenuOpen: ${isSubmenuOpen}`);
-    console.log(`  isParentOfActiveSubItem: ${isParentOfActiveSubItem}`);
-    console.log(`  (isParentOfActivePath && !nav.subItems?.length): ${isParentOfActivePath && !nav.subItems?.length}`);
-    console.log(`  isActive: ${isActive}`);
-  }
-  // DEBUGGING LOG END
-
-  // DEBUGGING LOG FOR MANAGEMENT
-  if (nav.name === "Management") {
-    console.log(`[SidebarNavItem] Debug for: ${nav.name}`);
-    console.log(`  pathname: ${pathname}`);
-    console.log(`  nav.path: ${nav.path}`);
-    console.log(`  isDirectPathMatch: ${isDirectPathMatch}`);
-    console.log(`  isParentOfActivePath: ${isParentOfActivePath}`);
-    console.log(`  isSubmenuOpen: ${isSubmenuOpen}`);
-    console.log(`  isParentOfActiveSubItem: ${isParentOfActiveSubItem}`);
-    console.log(`  isActive: ${isActive}`);
-  }
-  // DEBUGGING LOG END
-
   const showTooltip = !isExpanded && !isHovered && !isMobileOpen;
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

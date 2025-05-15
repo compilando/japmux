@@ -3,7 +3,7 @@ import { PromptDto } from '@/services/generated/api';
 import Link from 'next/link';
 import { usePrompts } from '@/context/PromptContext';
 import CopyButton from '../common/CopyButton';
-import { TrashBinIcon, PencilIcon } from "@/icons";
+import { TrashBinIcon, PencilIcon, BoxCubeIcon } from "@/icons";
 import { BoltIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 
 interface PromptsTableProps {
@@ -52,28 +52,37 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                                     <BoltIcon className="w-5 h-5" />
                                 </Link>
                                 {projectId && (
-                                    <Link
-                                        href={`/projects/${projectId}/prompts/${item.id}/versions`}
-                                        onClick={() => selectPrompt(item.id)}
-                                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600 p-1 inline-block"
-                                        title="Manage Versions"
-                                    >
-                                        <DocumentDuplicateIcon className="w-5 h-5" />
-                                    </Link>
+                                    <>
+                                        <Link
+                                            href={`/projects/${projectId}/prompts/${item.id}/versions`}
+                                            onClick={() => selectPrompt(item.id)}
+                                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600 p-1 inline-block"
+                                            title="Manage Versions"
+                                        >
+                                            <DocumentDuplicateIcon className="w-5 h-5" />
+                                        </Link>
+                                        <Link
+                                            href={`/projects/${projectId}/prompts/${item.id}/assets`}
+                                            className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-600 p-1 inline-block"
+                                            title="Manage Assets"
+                                        >
+                                            <BoxCubeIcon style={{ paddingTop: '2px' }} />
+                                        </Link>
+                                    </>
                                 )}
                                 <button
                                     onClick={() => onEdit(item)}
                                     className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed inline-block"
                                     aria-label="Edit Prompt"
                                 >
-                                    <PencilIcon className="w-4 h-4" />
+                                    <PencilIcon />
                                 </button>
                                 <button
                                     onClick={() => onDelete(item.id)}
                                     className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed inline-block"
                                     aria-label="Delete Prompt"
                                 >
-                                    <TrashBinIcon className="w-4 h-4" />
+                                    <TrashBinIcon />
                                 </button>
                             </td>
                         </tr>

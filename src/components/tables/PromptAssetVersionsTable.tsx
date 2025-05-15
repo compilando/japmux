@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { AssetVersionUIData } from '@/app/(admin)/projects/[projectId]/prompt-assets/[assetKey]/versions/page';
+import { AssetVersionUIData } from '@/app/(admin)/projects/[projectId]/prompts/[promptId]/assets/[assetKey]/versions/page';
 import CopyButton from '../common/CopyButton';
 import { format } from 'date-fns';
 import { PencilIcon, TrashBinIcon } from "@/icons";
@@ -9,6 +9,7 @@ import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 interface PromptAssetVersionsTableProps {
     promptAssetVersions: AssetVersionUIData[];
     projectId: string;
+    promptId: string;
     assetKey: string;
     onEdit: (item: AssetVersionUIData) => void;
     onDelete: (versionTag: string) => void;
@@ -18,6 +19,7 @@ interface PromptAssetVersionsTableProps {
 const PromptAssetVersionsTable: React.FC<PromptAssetVersionsTableProps> = ({
     promptAssetVersions,
     projectId,
+    promptId,
     assetKey,
     onEdit,
     onDelete,
@@ -70,10 +72,10 @@ const PromptAssetVersionsTable: React.FC<PromptAssetVersionsTableProps> = ({
                                         className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 p-1 inline-block"
                                         title="Edit Version"
                                     >
-                                        <PencilIcon className="w-4 h-4" />
+                                        <PencilIcon />
                                     </button>
                                     <Link
-                                        href={`/projects/${projectId}/prompt-assets/${assetKey}/versions/${item.versionTag}/translations`}
+                                        href={`/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${item.versionTag}/translations`}
                                         className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600 p-1 inline-block"
                                         title="Manage Translations"
                                     >
@@ -84,7 +86,7 @@ const PromptAssetVersionsTable: React.FC<PromptAssetVersionsTableProps> = ({
                                         className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600 p-1 inline-block"
                                         title="Delete Version"
                                     >
-                                        <TrashBinIcon className="w-4 h-4" />
+                                        <TrashBinIcon />
                                     </button>
                                 </td>
                             </tr>

@@ -59,7 +59,7 @@ const CulturalDataTable: React.FC<CulturalDataTableProps> = ({ culturalDataList,
                                                 className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 aria-label="Edit Cultural Data"
                                             >
-                                                <PencilIcon className="w-4 h-4" />
+                                                <PencilIcon />
                                             </button>
                                             <button
                                                 type="button"
@@ -67,7 +67,7 @@ const CulturalDataTable: React.FC<CulturalDataTableProps> = ({ culturalDataList,
                                                 className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 aria-label="Delete Cultural Data"
                                             >
-                                                <TrashBinIcon className="w-4 h-4" />
+                                                <TrashBinIcon />
                                             </button>
                                         </div>
                                     </TableCell>

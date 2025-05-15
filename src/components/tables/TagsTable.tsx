@@ -47,14 +47,14 @@ const TagsTable: React.FC<TagsTableProps> = ({ tags, onEdit, onDelete }) => {
                                         className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label="Edit Tag"
                                     >
-                                        <PencilIcon className="w-4 h-4" />
+                                        <PencilIcon />
                                     </button>
                                     <button
                                         onClick={() => onDelete(tag.id)}
                                         className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label="Delete Tag"
                                     >
-                                        <TrashBinIcon className="w-4 h-4" />
+                                        <TrashBinIcon />
                                     </button>
                                 </div>
                             </td>

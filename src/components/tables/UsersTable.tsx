@@ -53,14 +53,14 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onEdit, onDelete }) => {
                                         className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label="Edit User"
                                     >
-                                        <PencilIcon className="w-4 h-4" />
+                                        <PencilIcon />
                                     </button>
                                     <button
                                         onClick={() => onDelete(user.id)}
                                         className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label="Delete User"
                                     >
-                                        <TrashBinIcon className="w-4 h-4" />
+                                        <TrashBinIcon />
                                     </button>
                                 </div>
                             </td>

@@ -6,7 +6,7 @@ All URIs are relative to *http://localhost*
 |------------- | ------------- | -------------|
 |[**promptTranslationControllerCreate**](#prompttranslationcontrollercreate) | **POST** /api/projects/{projectId}/prompts/{promptId}/versions/{versionTag}/translations | Create a translation for a specific prompt version within a project|
 |[**promptTranslationControllerFindAll**](#prompttranslationcontrollerfindall) | **GET** /api/projects/{projectId}/prompts/{promptId}/versions/{versionTag}/translations | Get all translations for a specific prompt version within a project|
-|[**promptTranslationControllerFindOneByLanguage**](#prompttranslationcontrollerfindonebylanguage) | **GET** /api/projects/{projectId}/prompts/{promptId}/versions/{versionTag}/translations/{languageCode} | Get a specific translation by language code for a prompt version|
+|[**promptTranslationControllerFindOneByLanguage**](#prompttranslationcontrollerfindonebylanguage) | **GET** /api/projects/{projectId}/prompts/{promptId}/versions/{versionTag}/translations/{languageCode} | Get a specific translation by language code for a prompt version. Allows resolving assets.|
 |[**promptTranslationControllerRemove**](#prompttranslationcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptId}/versions/{versionTag}/translations/{languageCode} | Delete a specific translation by language code for a prompt version|
 |[**promptTranslationControllerUpdate**](#prompttranslationcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptId}/versions/{versionTag}/translations/{languageCode} | Update a specific translation by language code for a prompt version|
 
@@ -153,12 +153,20 @@ let projectId: string; //Project ID (default to undefined)
 let promptId: string; //Prompt CUID (default to undefined)
 let versionTag: string; //Version Tag (default to undefined)
 let languageCode: string; //Language code (e.g., es-ES) (default to undefined)
+let resolveAssets: boolean; //Whether to resolve asset placeholders. Defaults to false. (optional) (default to undefined)
+let environmentId: string; //Environment ID for context. (optional) (default to undefined)
+let regionCode: string; //Region code for context (e.g., for asset translations - overrides languageCode for assets if provided). (optional) (default to undefined)
+let variables: string; //JSON stringified object of variables for substitution. (optional) (default to undefined)
 
 const { status, data } = await apiInstance.promptTranslationControllerFindOneByLanguage(
     projectId,
     promptId,
     versionTag,
-    languageCode
+    languageCode,
+    resolveAssets,
+    environmentId,
+    regionCode,
+    variables
 );
 ```
 
@@ -170,6 +178,10 @@ const { status, data } = await apiInstance.promptTranslationControllerFindOneByL
 | **promptId** | [**string**] | Prompt CUID | defaults to undefined|
 | **versionTag** | [**string**] | Version Tag | defaults to undefined|
 | **languageCode** | [**string**] | Language code (e.g., es-ES) | defaults to undefined|
+| **resolveAssets** | [**boolean**] | Whether to resolve asset placeholders. Defaults to false. | (optional) defaults to undefined|
+| **environmentId** | [**string**] | Environment ID for context. | (optional) defaults to undefined|
+| **regionCode** | [**string**] | Region code for context (e.g., for asset translations - overrides languageCode for assets if provided). | (optional) defaults to undefined|
+| **variables** | [**string**] | JSON stringified object of variables for substitution. | (optional) defaults to undefined|
 
 
 ### Return type

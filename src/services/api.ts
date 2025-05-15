@@ -98,7 +98,7 @@ const rawExecutionGeneratedApi = new generated.RawExecutionApi(generatedApiConfi
 const tagsGeneratedApi = new generated.TagsApi(generatedApiConfig, undefined, apiClient);
 const environmentsGeneratedApi = new generated.EnvironmentsApi(generatedApiConfig, undefined, apiClient);
 // Instanciar PromptAssetsApi aquí para que esté disponible para el servicio
-const promptAssetsGeneratedApi = new generated.PromptAssetsApi(generatedApiConfig, undefined, apiClient);
+const promptAssetsGeneratedApi = new generated.PromptAssetsForASpecificPromptApi(generatedApiConfig, undefined, apiClient);
 // Instanciar PromptAssetVersionsApi aquí para que esté disponible para el servicio
 const promptAssetVersionsGeneratedApi = new generated.PromptAssetVersionsWithinProjectAssetApi(generatedApiConfig, undefined, apiClient);
 // Instanciar PromptAssetTranslationsApi aquí para que esté disponible para el servicio
@@ -437,99 +437,88 @@ export const promptTranslationService = {
 
 // Servicio de Prompt Assets (Corregido para usar generated.PromptAssetsApi)
 export const promptAssetService = {
-    findAll: async (projectId: string): Promise<PromptAssetData[]> => {
-        try {
-            const response = await promptAssetsGeneratedApi.promptAssetControllerFindAll(projectId);
-            // Verificamos si la respuesta existe
-            const assets = response && response.data ? response.data : [];
-            return (assets as generated.CreatePromptAssetDto[]).map(item => ({
+    findAll: async (projectId: string, promptId: string): Promise<PromptAssetData[]> => {
+        console.log("DEBUG: promptAssetService.findAll - received projectId:", projectId);
+        console.log("DEBUG: promptAssetService.findAll - received promptId:", promptId);
+        const response = await promptAssetsGeneratedApi.promptAssetControllerFindAll(promptId, projectId);
+        const responseData = response.data;
+        if (Array.isArray(responseData)) {
+            const assets = responseData as generated.CreatePromptAssetDto[];
+            return assets.map(item => ({
                 ...item,
-                name: item.name || item.key,
-                category: item.category || 'default',
-                enabled: true
+                key: item.key || '',
+                projectId: projectId,
+                promptId: promptId,
             }));
-        } catch (error) {
-            console.error('Error fetching prompt assets:', error);
-            showErrorToast('Failed to fetch prompt assets.');
-            return [];
         }
+        console.warn("[promptAssetService.findAll] response.data no es un array o es void. Devolviendo array vacío.");
+        return [];
     },
-    findOne: async (projectId: string, assetKey: string): Promise<PromptAssetData> => {
-        try {
-            const response = await promptAssetsGeneratedApi.promptAssetControllerFindOne(assetKey, projectId);
-            // Verificamos si la respuesta existe
-            if (!response || !response.data) {
-                throw new Error(`Asset with key ${assetKey} not found`);
-            }
-            const asset = response.data as generated.CreatePromptAssetDto;
-            return {
-                ...asset,
-                name: asset.name || assetKey,
-                category: asset.category || 'default',
-                enabled: true
-            };
-        } catch (error) {
-            console.error(`Error fetching prompt asset ${assetKey}:`, error);
-            showErrorToast(`Failed to fetch prompt asset ${assetKey}.`);
-            throw error;
-        }
+    findOne: async (projectId: string, promptId: string, assetKey: string): Promise<PromptAssetData> => {
+        const response = await promptAssetsGeneratedApi.promptAssetControllerFindOne(promptId, projectId, assetKey);
+        const asset = response.data as any;
+        return {
+            ...asset,
+            key: asset.key || assetKey,
+            projectId: projectId,
+            promptId: promptId,
+        } as PromptAssetData;
     },
-    create: async (projectId: string, payload: generated.CreatePromptAssetDto): Promise<void> => {
-        await promptAssetsGeneratedApi.promptAssetControllerCreate(projectId, payload);
+    create: async (projectId: string, promptId: string, payload: generated.CreatePromptAssetDto): Promise<void> => {
+        await promptAssetsGeneratedApi.promptAssetControllerCreate(promptId, projectId, payload);
     },
-    update: async (projectId: string, assetKey: string, payload: generated.UpdatePromptAssetDto): Promise<void> => {
-        await promptAssetsGeneratedApi.promptAssetControllerUpdate(assetKey, projectId, payload);
+    update: async (projectId: string, promptId: string, assetKey: string, payload: generated.UpdatePromptAssetDto): Promise<void> => {
+        await promptAssetsGeneratedApi.promptAssetControllerUpdate(promptId, projectId, assetKey, payload);
     },
-    remove: async (projectId: string, assetKey: string): Promise<void> => {
-        await promptAssetsGeneratedApi.promptAssetControllerRemove(assetKey, projectId);
+    remove: async (projectId: string, promptId: string, assetKey: string): Promise<void> => {
+        await promptAssetsGeneratedApi.promptAssetControllerRemove(promptId, projectId, assetKey);
     },
-    findVersions: async (projectId: string, assetKey: string): Promise<generated.CreatePromptAssetVersionDto[]> => {
-        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerFindAll(projectId, assetKey);
+    findVersions: async (projectId: string, promptId: string, assetKey: string): Promise<generated.CreatePromptAssetVersionDto[]> => {
+        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerFindAll(projectId, promptId, assetKey);
         return response.data;
     },
-    findOneVersion: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerFindOneByTag(projectId, assetKey, versionTag);
+    findOneVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
+        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag);
         return response.data;
     },
-    createVersion: async (projectId: string, assetKey: string, payload: generated.CreatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerCreate(projectId, assetKey, payload);
+    createVersion: async (projectId: string, promptId: string, assetKey: string, payload: generated.CreatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => {
+        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerCreate(projectId, promptId, assetKey, payload);
         return response.data;
     },
-    updateVersion: async (projectId: string, assetKey: string, versionTag: string, payload: generated.UpdatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerUpdate(projectId, assetKey, versionTag, payload);
+    updateVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string, payload: generated.UpdatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => {
+        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerUpdate(projectId, promptId, assetKey, versionTag, payload);
         return response.data;
     },
-    removeVersion: async (projectId: string, assetKey: string, versionTag: string): Promise<void> => {
-        await promptAssetVersionsGeneratedApi.promptAssetVersionControllerRemove(projectId, assetKey, versionTag);
+    removeVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<void> => {
+        await promptAssetVersionsGeneratedApi.promptAssetVersionControllerRemove(projectId, promptId, assetKey, versionTag);
     },
-    // Nuevos métodos para Marketplace de Asset Version
-    requestPublishVersion: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
+    requestPublishVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
         const response = await apiClient.post<generated.CreatePromptAssetVersionDto>(
-            `/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/request-publish`
+            `/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/request-publish`
         );
-        return response.data; // Asume que la API devuelve la versión actualizada
+        return response.data;
     },
-    unpublishVersion: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
+    unpublishVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
         const response = await apiClient.post<generated.CreatePromptAssetVersionDto>(
-            `/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/unpublish`
+            `/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/unpublish`
         );
-        return response.data; // Asume que la API devuelve la versión actualizada
-    },
-    findAssetTranslations: async (projectId: string, assetKey: string, versionTag: string): Promise<generated.CreateAssetTranslationDto[]> => {
-        const response = await apiClient.get<generated.CreateAssetTranslationDto[]>(`/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/translations`);
         return response.data;
     },
-    createAssetTranslation: async (projectId: string, assetKey: string, versionTag: string, payload: generated.CreateAssetTranslationDto): Promise<generated.CreateAssetTranslationDto> => {
-        const response = await apiClient.post<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/translations`, payload);
+    findTranslations: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<generated.CreateAssetTranslationDto[]> => {
+        const response = await apiClient.get<generated.CreateAssetTranslationDto[]>(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations`);
         return response.data;
     },
-    updateAssetTranslation: async (projectId: string, assetKey: string, versionTag: string, languageCode: string, payload: generated.UpdateAssetTranslationDto): Promise<generated.CreateAssetTranslationDto> => {
-        const response = await apiClient.patch<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`, payload);
+    createTranslation: async (projectId: string, promptId: string, assetKey: string, versionTag: string, payload: generated.CreateAssetTranslationDto): Promise<generated.CreateAssetTranslationDto> => {
+        const response = await apiClient.post<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations`, payload);
         return response.data;
     },
-    removeAssetTranslation: async (projectId: string, assetKey: string, versionTag: string, languageCode: string): Promise<void> => {
-        await apiClient.delete(`/api/projects/${projectId}/prompt-assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`);
-    }
+    updateTranslation: async (projectId: string, promptId: string, assetKey: string, versionTag: string, languageCode: string, payload: generated.UpdateAssetTranslationDto): Promise<generated.CreateAssetTranslationDto> => {
+        const response = await apiClient.patch<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`, payload);
+        return response.data;
+    },
+    removeTranslation: async (projectId: string, promptId: string, assetKey: string, versionTag: string, languageCode: string): Promise<void> => {
+        await apiClient.delete(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`);
+    },
 };
 
 // Servicio de Health Check (Mantener manual o reemplazar con generated.HealthApi)
@@ -585,12 +574,8 @@ export const llmExecutionService = {
 export const systemPromptService = {
     findAll: async (): Promise<generated.CreateSystemPromptDto[]> => {
         try {
-            const response = await systemPromptsGeneratedApi.systemPromptControllerFindAll();
-            // Verificamos si la respuesta existe y tiene data
-            if (response && response.data) {
-                return response.data as generated.CreateSystemPromptDto[];
-            }
-            console.warn('systemPromptControllerFindAll did not return data as expected.');
+            await systemPromptsGeneratedApi.systemPromptControllerFindAll();
+            console.warn('[systemPromptService.findAll] systemPromptControllerFindAll está tipado como void. Devolviendo array vacío.');
             return [];
         } catch (error) {
             console.error("Error fetching system prompts:", error);
@@ -600,12 +585,8 @@ export const systemPromptService = {
     },
     findOne: async (name: string): Promise<generated.CreateSystemPromptDto | null> => {
         try {
-            const response = await systemPromptsGeneratedApi.systemPromptControllerFindOne(name);
-            // Verificamos si la respuesta existe y tiene data
-            if (response && response.data) {
-                return response.data as generated.CreateSystemPromptDto;
-            }
-            console.warn(`systemPromptControllerFindOne(${name}) did not return data.`);
+            await systemPromptsGeneratedApi.systemPromptControllerFindOne(name);
+            console.warn(`[systemPromptService.findOne] systemPromptControllerFindOne(${name}) está tipado como void. Devolviendo null.`);
             return null;
         } catch (error) {
             if (error && typeof error === 'object' && 'response' in error) {

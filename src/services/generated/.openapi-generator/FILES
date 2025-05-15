@@ -6,6 +6,8 @@ common.ts
 configuration.ts
 docs/AIModelsProjectSpecificApi.md
 docs/AiModelResponseDto.md
+docs/AppApi.md
+docs/AssetTranslationStructureDto.md
 docs/AssetTranslationsWithinProjectAssetVersionApi.md
 docs/AuthenticationApi.md
 docs/CreateAiModelDto.md
@@ -22,6 +24,8 @@ docs/CreateRagDocumentMetadataDto.md
 docs/CreateRegionDto.md
 docs/CreateSystemPromptDto.md
 docs/CreateTagDto.md
+docs/CreateTenantAdminUserDto.md
+docs/CreateTenantDto.md
 docs/CreateUserDto.md
 docs/CulturalDataApi.md
 docs/CulturalDataResponse.md
@@ -36,13 +40,19 @@ docs/HealthControllerCheck200ResponseInfoValue.md
 docs/HealthControllerCheck503Response.md
 docs/InitialTranslationDto.md
 docs/LLMExecutionApi.md
+docs/LoadPromptStructureDto.md
 docs/LoginDto.md
 docs/LoginResponse.md
+docs/MarketplaceApi.md
 docs/ProjectsApi.md
+docs/PromptAssetStructureDto.md
 docs/PromptAssetVersionsWithinProjectAssetApi.md
-docs/PromptAssetsApi.md
+docs/PromptAssetsForASpecificPromptApi.md
 docs/PromptDto.md
+docs/PromptMetaDto.md
 docs/PromptTranslationsWithinProjectPromptVersionApi.md
+docs/PromptVersionStructureDto.md
+docs/PromptVersionTranslationDto.md
 docs/PromptVersionsWithinProjectPromptApi.md
 docs/PromptsApi.md
 docs/RAGDocumentMetadataApi.md
@@ -54,6 +64,8 @@ docs/ServePromptApi.md
 docs/SystemPromptsApi.md
 docs/TagDto.md
 docs/TagsApi.md
+docs/TenantDto.md
+docs/TenantsApi.md
 docs/UpdateAiModelDto.md
 docs/UpdateAssetTranslationDto.md
 docs/UpdateCulturalDataDto.md
@@ -67,6 +79,7 @@ docs/UpdatePromptVersionDto.md
 docs/UpdateRegionDto.md
 docs/UpdateSystemPromptDto.md
 docs/UpdateTagDto.md
+docs/UpdateTenantDto.md
 docs/UserProfileResponse.md
 docs/UsersApi.md
 git_push.sh

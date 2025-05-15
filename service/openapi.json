@@ -1614,15 +1614,24 @@
         ]
       }
     },
-    "/api/projects/{projectId}/prompt-assets": {
+    "/api/projects/{projectId}/prompts/{promptId}/assets": {
       "post": {
         "operationId": "PromptAssetController_create",
         "parameters": [
           {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) del prompt padre",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "ID del proyecto",
+            "description": "ID del proyecto al que pertenece el prompt",
             "schema": {
               "type": "string"
             }
@@ -1643,13 +1652,13 @@
             "description": "Asset creado con su versión inicial."
           },
           "400": {
-            "description": "Datos inválidos (e.g., falta initialValue)."
+            "description": "Datos inválidos."
           },
           "404": {
-            "description": "Proyecto no encontrado."
+            "description": "Proyecto o Prompt no encontrado."
           },
           "409": {
-            "description": "Conflicto, ya existe un asset con esa key en el proyecto."
+            "description": "Conflicto, ya existe un asset con esa key en el prompt."
           }
         },
         "security": [
@@ -1657,19 +1666,28 @@
             "bearer": []
           }
         ],
-        "summary": "Crea un nuevo prompt asset (y su primera versión) dentro de un proyecto",
+        "summary": "Crea un nuevo prompt asset (y su primera versión) para un prompt específico",
         "tags": [
-          "Prompt Assets"
+          "Prompt Assets (for a specific Prompt)"
         ]
       },
       "get": {
         "operationId": "PromptAssetController_findAll",
         "parameters": [
           {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) del prompt padre",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "ID del proyecto",
+            "description": "ID del proyecto al que pertenece el prompt",
             "schema": {
               "type": "string"
             }
@@ -1680,7 +1698,7 @@
             "description": "Lista de assets."
           },
           "404": {
-            "description": "Proyecto no encontrado."
+            "description": "Proyecto o Prompt no encontrado."
           }
         },
         "security": [
@@ -1688,21 +1706,21 @@
             "bearer": []
           }
         ],
-        "summary": "Obtiene todos los prompt assets de un proyecto",
+        "summary": "Obtiene todos los prompt assets de un prompt específico",
         "tags": [
-          "Prompt Assets"
+          "Prompt Assets (for a specific Prompt)"
         ]
       }
     },
-    "/api/projects/{projectId}/prompt-assets/{assetKey}": {
+    "/api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}": {
       "get": {
         "operationId": "PromptAssetController_findOne",
         "parameters": [
           {
-            "name": "assetKey",
+            "name": "promptId",
             "required": true,
             "in": "path",
-            "description": "Key única del asset dentro del proyecto",
+            "description": "ID (slug) del prompt padre",
             "schema": {
               "type": "string"
             }
@@ -1712,6 +1730,15 @@
             "required": true,
             "in": "path",
             "description": "ID del proyecto",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assetKey",
+            "required": true,
+            "in": "path",
+            "description": "Key única del asset dentro del prompt",
             "schema": {
               "type": "string"
             }
@@ -1730,19 +1757,19 @@
             "bearer": []
           }
         ],
-        "summary": "Obtiene un prompt asset por su key dentro de un proyecto",
+        "summary": "Obtiene un prompt asset por su key dentro de un prompt específico",
         "tags": [
-          "Prompt Assets"
+          "Prompt Assets (for a specific Prompt)"
         ]
       },
       "patch": {
         "operationId": "PromptAssetController_update",
         "parameters": [
           {
-            "name": "assetKey",
+            "name": "promptId",
             "required": true,
             "in": "path",
-            "description": "Key única del asset a actualizar",
+            "description": "ID (slug) del prompt padre",
             "schema": {
               "type": "string"
             }
@@ -1752,6 +1779,15 @@
             "required": true,
             "in": "path",
             "description": "ID del proyecto",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assetKey",
+            "required": true,
+            "in": "path",
+            "description": "Key única del asset a actualizar",
             "schema": {
               "type": "string"
             }
@@ -1783,19 +1819,19 @@
             "bearer": []
           }
         ],
-        "summary": "Actualiza metadatos de un prompt asset (nombre, descripción, etc.) dentro de un proyecto",
+        "summary": "Actualiza metadatos de un prompt asset (nombre, descripción, etc.) dentro de un prompt",
         "tags": [
-          "Prompt Assets"
+          "Prompt Assets (for a specific Prompt)"
         ]
       },
       "delete": {
         "operationId": "PromptAssetController_remove",
         "parameters": [
           {
-            "name": "assetKey",
+            "name": "promptId",
             "required": true,
             "in": "path",
-            "description": "Key única del asset a eliminar",
+            "description": "ID (slug) del prompt padre",
             "schema": {
               "type": "string"
             }
@@ -1805,6 +1841,15 @@
             "required": true,
             "in": "path",
             "description": "ID del proyecto",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assetKey",
+            "required": true,
+            "in": "path",
+            "description": "Key única del asset a eliminar",
             "schema": {
               "type": "string"
             }
@@ -1826,9 +1871,9 @@
             "bearer": []
           }
         ],
-        "summary": "Elimina un prompt asset (y sus versiones/traducciones por Cascade) dentro de un proyecto",
+        "summary": "Elimina un prompt asset (y sus versiones/traducciones por Cascade) dentro de un prompt",
         "tags": [
-          "Prompt Assets"
+          "Prompt Assets (for a specific Prompt)"
         ]
       }
     },
@@ -2279,7 +2324,7 @@
           },
           {
             "name": "languageCode",
-            "required": false,
+            "required": true,
             "in": "path",
             "schema": {
               "type": "string"
@@ -3181,6 +3226,46 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "resolveAssets",
+            "required": false,
+            "in": "query",
+            "description": "Whether to resolve asset placeholders. Defaults to false.",
+            "schema": {
+              "example": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "environmentId",
+            "required": false,
+            "in": "query",
+            "description": "Environment ID for context.",
+            "schema": {
+              "example": "dev-env-123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "regionCode",
+            "required": false,
+            "in": "query",
+            "description": "Region code for context (e.g., for asset translations).",
+            "schema": {
+              "example": "us-east-1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "variables",
+            "required": false,
+            "in": "query",
+            "description": "JSON stringified object of variables for substitution.",
+            "schema": {
+              "example": "{\"varName\": \"value\"}",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3209,7 +3294,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get a specific prompt version by its tag within a project/prompt",
+        "summary": "Get a specific prompt version by its tag within a project/prompt. Allows resolving assets.",
         "tags": [
           "Prompt Versions (within Project/Prompt)"
         ]
@@ -3473,6 +3558,235 @@
         ]
       }
     },
+    "/api/tenants": {
+      "post": {
+        "operationId": "TenantController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTenantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tenant created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden resource."
+          },
+          "409": {
+            "description": "Tenant name already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new tenant",
+        "tags": [
+          "Tenants"
+        ]
+      },
+      "get": {
+        "operationId": "TenantController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Array of tenants.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TenantDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden resource."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all tenants",
+        "tags": [
+          "Tenants"
+        ]
+      }
+    },
+    "/api/tenants/{tenantId}": {
+      "get": {
+        "operationId": "TenantController_findOne",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "description": "The ID of the tenant",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tenant object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden resource."
+          },
+          "404": {
+            "description": "Tenant not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a specific tenant by ID",
+        "tags": [
+          "Tenants"
+        ]
+      },
+      "patch": {
+        "operationId": "TenantController_update",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "description": "The ID of the tenant",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tenant updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden resource."
+          },
+          "404": {
+            "description": "Tenant not found."
+          },
+          "409": {
+            "description": "Tenant name already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a tenant by ID",
+        "tags": [
+          "Tenants"
+        ]
+      },
+      "delete": {
+        "operationId": "TenantController_remove",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "description": "The ID of the tenant",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tenant deleted successfully."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden resource."
+          },
+          "404": {
+            "description": "Tenant not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a tenant by ID (Caution: Destructive operation)",
+        "tags": [
+          "Tenants"
+        ]
+      }
+    },
     "/api/projects/{projectId}/prompts/{promptId}/versions/{versionTag}/translations": {
       "post": {
         "operationId": "PromptTranslationController_create",
@@ -3657,6 +3971,46 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "resolveAssets",
+            "required": false,
+            "in": "query",
+            "description": "Whether to resolve asset placeholders. Defaults to false.",
+            "schema": {
+              "example": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "environmentId",
+            "required": false,
+            "in": "query",
+            "description": "Environment ID for context.",
+            "schema": {
+              "example": "dev-env-123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "regionCode",
+            "required": false,
+            "in": "query",
+            "description": "Region code for context (e.g., for asset translations - overrides languageCode for assets if provided).",
+            "schema": {
+              "example": "us-east-1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "variables",
+            "required": false,
+            "in": "query",
+            "description": "JSON stringified object of variables for substitution.",
+            "schema": {
+              "example": "{\"varName\": \"value\"}",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3685,7 +4039,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get a specific translation by language code for a prompt version",
+        "summary": "Get a specific translation by language code for a prompt version. Allows resolving assets.",
         "tags": [
           "Prompt Translations (within Project/Prompt/Version)"
         ]
@@ -3839,7 +4193,7 @@
         ]
       }
     },
-    "/api/projects/{projectId}/assets/{assetKey}/versions": {
+    "/api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions": {
       "post": {
         "operationId": "PromptAssetVersionController_create",
         "parameters": [
@@ -3847,7 +4201,16 @@
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Project ID",
+            "description": "ID of the Project the Prompt belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) of the Prompt",
             "schema": {
               "type": "string"
             }
@@ -3856,7 +4219,7 @@
             "name": "assetKey",
             "required": true,
             "in": "path",
-            "description": "Asset Key",
+            "description": "Key of the PromptAsset",
             "schema": {
               "type": "string"
             }
@@ -3901,9 +4264,9 @@
             "bearer": []
           }
         ],
-        "summary": "Create a new version for a specific asset within a project",
+        "summary": "Create a new version for a specific prompt asset",
         "tags": [
-          "Prompt Asset Versions (within Project/Asset)"
+          "Prompt Asset Versions (Project > Prompt > Asset > Version)"
         ]
       },
       "get": {
@@ -3913,7 +4276,16 @@
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Project ID",
+            "description": "ID of the Project the Prompt belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) of the Prompt",
             "schema": {
               "type": "string"
             }
@@ -3922,7 +4294,7 @@
             "name": "assetKey",
             "required": true,
             "in": "path",
-            "description": "Asset Key",
+            "description": "Key of the PromptAsset",
             "schema": {
               "type": "string"
             }
@@ -3957,13 +4329,13 @@
             "bearer": []
           }
         ],
-        "summary": "Get all versions for a specific asset within a project",
+        "summary": "Get all versions for a specific prompt asset",
         "tags": [
-          "Prompt Asset Versions (within Project/Asset)"
+          "Prompt Asset Versions (Project > Prompt > Asset > Version)"
         ]
       }
     },
-    "/api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}": {
+    "/api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}": {
       "get": {
         "operationId": "PromptAssetVersionController_findOneByTag",
         "parameters": [
@@ -3971,7 +4343,16 @@
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Project ID",
+            "description": "ID of the Project the Prompt belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) of the Prompt",
             "schema": {
               "type": "string"
             }
@@ -3980,7 +4361,7 @@
             "name": "assetKey",
             "required": true,
             "in": "path",
-            "description": "Asset Key",
+            "description": "Key of the PromptAsset",
             "schema": {
               "type": "string"
             }
@@ -4021,9 +4402,9 @@
             "bearer": []
           }
         ],
-        "summary": "Get a specific asset version by its tag within a project/asset",
+        "summary": "Get a specific prompt asset version by its tag",
         "tags": [
-          "Prompt Asset Versions (within Project/Asset)"
+          "Prompt Asset Versions (Project > Prompt > Asset > Version)"
         ]
       },
       "patch": {
@@ -4033,7 +4414,16 @@
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Project ID",
+            "description": "ID of the Project the Prompt belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) of the Prompt",
             "schema": {
               "type": "string"
             }
@@ -4042,7 +4432,7 @@
             "name": "assetKey",
             "required": true,
             "in": "path",
-            "description": "Asset Key",
+            "description": "Key of the PromptAsset",
             "schema": {
               "type": "string"
             }
@@ -4096,9 +4486,9 @@
             "bearer": []
           }
         ],
-        "summary": "Update a specific asset version by its tag within a project/asset",
+        "summary": "Update a specific prompt asset version by its tag",
         "tags": [
-          "Prompt Asset Versions (within Project/Asset)"
+          "Prompt Asset Versions (Project > Prompt > Asset > Version)"
         ]
       },
       "delete": {
@@ -4108,7 +4498,16 @@
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Project ID",
+            "description": "ID of the Project the Prompt belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) of the Prompt",
             "schema": {
               "type": "string"
             }
@@ -4117,7 +4516,7 @@
             "name": "assetKey",
             "required": true,
             "in": "path",
-            "description": "Asset Key",
+            "description": "Key of the PromptAsset",
             "schema": {
               "type": "string"
             }
@@ -4151,13 +4550,13 @@
             "bearer": []
           }
         ],
-        "summary": "Delete a specific asset version by its tag within a project/asset",
+        "summary": "Delete a specific prompt asset version by its tag",
         "tags": [
-          "Prompt Asset Versions (within Project/Asset)"
+          "Prompt Asset Versions (Project > Prompt > Asset > Version)"
         ]
       }
     },
-    "/api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/request-publish": {
+    "/api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/request-publish": {
       "post": {
         "operationId": "PromptAssetVersionController_requestPublish",
         "parameters": [
@@ -4165,7 +4564,16 @@
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Project ID",
+            "description": "ID of the Project the Prompt belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) of the Prompt",
             "schema": {
               "type": "string"
             }
@@ -4174,7 +4582,7 @@
             "name": "assetKey",
             "required": true,
             "in": "path",
-            "description": "Asset Key",
+            "description": "Key of the PromptAsset",
             "schema": {
               "type": "string"
             }
@@ -4217,11 +4625,11 @@
         ],
         "summary": "Request to publish an asset version to the marketplace",
         "tags": [
-          "Prompt Asset Versions (within Project/Asset)"
+          "Prompt Asset Versions (Project > Prompt > Asset > Version)"
         ]
       }
     },
-    "/api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/unpublish": {
+    "/api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/unpublish": {
       "post": {
         "operationId": "PromptAssetVersionController_unpublish",
         "parameters": [
@@ -4229,7 +4637,16 @@
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Project ID",
+            "description": "ID of the Project the Prompt belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) of the Prompt",
             "schema": {
               "type": "string"
             }
@@ -4238,7 +4655,7 @@
             "name": "assetKey",
             "required": true,
             "in": "path",
-            "description": "Asset Key",
+            "description": "Key of the PromptAsset",
             "schema": {
               "type": "string"
             }
@@ -4281,11 +4698,11 @@
         ],
         "summary": "Unpublish an asset version from the marketplace",
         "tags": [
-          "Prompt Asset Versions (within Project/Asset)"
+          "Prompt Asset Versions (Project > Prompt > Asset > Version)"
         ]
       }
     },
-    "/api/projects/{projectId}/prompt-assets/{assetKey}/versions/{versionTag}/translations": {
+    "/api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/translations": {
       "post": {
         "operationId": "AssetTranslationController_create",
         "parameters": [
@@ -4293,7 +4710,16 @@
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Project ID",
+            "description": "ID of the Project the Prompt belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) of the Prompt",
             "schema": {
               "type": "string"
             }
@@ -4302,7 +4728,7 @@
             "name": "assetKey",
             "required": true,
             "in": "path",
-            "description": "Asset Key",
+            "description": "Key of the PromptAsset",
             "schema": {
               "type": "string"
             }
@@ -4311,7 +4737,7 @@
             "name": "versionTag",
             "required": true,
             "in": "path",
-            "description": "Version Tag",
+            "description": "Tag of the PromptAssetVersion",
             "schema": {
               "type": "string"
             }
@@ -4359,9 +4785,9 @@
             "bearer": []
           }
         ],
-        "summary": "Create a translation for a specific asset version within a project",
+        "summary": "Create a translation for a specific asset version",
         "tags": [
-          "Asset Translations (within Project/Asset/Version)"
+          "Asset Translations (Project > Prompt > Asset > Version > Translation)"
         ]
       },
       "get": {
@@ -4371,7 +4797,16 @@
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Project ID",
+            "description": "ID of the Project the Prompt belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) of the Prompt",
             "schema": {
               "type": "string"
             }
@@ -4380,7 +4815,7 @@
             "name": "assetKey",
             "required": true,
             "in": "path",
-            "description": "Asset Key",
+            "description": "Key of the PromptAsset",
             "schema": {
               "type": "string"
             }
@@ -4389,7 +4824,7 @@
             "name": "versionTag",
             "required": true,
             "in": "path",
-            "description": "Version Tag",
+            "description": "Tag of the PromptAssetVersion",
             "schema": {
               "type": "string"
             }
@@ -4424,13 +4859,13 @@
             "bearer": []
           }
         ],
-        "summary": "Get all translations for a specific asset version within a project",
+        "summary": "Get all translations for a specific asset version",
         "tags": [
-          "Asset Translations (within Project/Asset/Version)"
+          "Asset Translations (Project > Prompt > Asset > Version > Translation)"
         ]
       }
     },
-    "/api/projects/{projectId}/prompt-assets/{assetKey}/versions/{versionTag}/translations/{languageCode}": {
+    "/api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/translations/{languageCode}": {
       "get": {
         "operationId": "AssetTranslationController_findOneByLanguage",
         "parameters": [
@@ -4438,7 +4873,16 @@
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Project ID",
+            "description": "ID of the Project the Prompt belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) of the Prompt",
             "schema": {
               "type": "string"
             }
@@ -4447,7 +4891,7 @@
             "name": "assetKey",
             "required": true,
             "in": "path",
-            "description": "Asset Key",
+            "description": "Key of the PromptAsset",
             "schema": {
               "type": "string"
             }
@@ -4456,7 +4900,7 @@
             "name": "versionTag",
             "required": true,
             "in": "path",
-            "description": "Version Tag",
+            "description": "Tag of the PromptAssetVersion",
             "schema": {
               "type": "string"
             }
@@ -4499,7 +4943,7 @@
         ],
         "summary": "Get a specific translation by language code for an asset version",
         "tags": [
-          "Asset Translations (within Project/Asset/Version)"
+          "Asset Translations (Project > Prompt > Asset > Version > Translation)"
         ]
       },
       "patch": {
@@ -4509,7 +4953,16 @@
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Project ID",
+            "description": "ID of the Project the Prompt belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) of the Prompt",
             "schema": {
               "type": "string"
             }
@@ -4518,7 +4971,7 @@
             "name": "assetKey",
             "required": true,
             "in": "path",
-            "description": "Asset Key",
+            "description": "Key of the PromptAsset",
             "schema": {
               "type": "string"
             }
@@ -4527,7 +4980,7 @@
             "name": "versionTag",
             "required": true,
             "in": "path",
-            "description": "Version Tag",
+            "description": "Tag of the PromptAssetVersion",
             "schema": {
               "type": "string"
             }
@@ -4583,7 +5036,7 @@
         ],
         "summary": "Update a specific translation by language code for an asset version",
         "tags": [
-          "Asset Translations (within Project/Asset/Version)"
+          "Asset Translations (Project > Prompt > Asset > Version > Translation)"
         ]
       },
       "delete": {
@@ -4593,7 +5046,16 @@
             "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Project ID",
+            "description": "ID of the Project the Prompt belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "ID (slug) of the Prompt",
             "schema": {
               "type": "string"
             }
@@ -4602,7 +5064,7 @@
             "name": "assetKey",
             "required": true,
             "in": "path",
-            "description": "Asset Key",
+            "description": "Key of the PromptAsset",
             "schema": {
               "type": "string"
             }
@@ -4611,7 +5073,7 @@
             "name": "versionTag",
             "required": true,
             "in": "path",
-            "description": "Version Tag",
+            "description": "Tag of the PromptAssetVersion",
             "schema": {
               "type": "string"
             }
@@ -4647,7 +5109,7 @@
         ],
         "summary": "Delete a specific translation by language code for an asset version",
         "tags": [
-          "Asset Translations (within Project/Asset/Version)"
+          "Asset Translations (Project > Prompt > Asset > Version > Translation)"
         ]
       }
     },
@@ -5203,9 +5665,19 @@
           },
           "password": {
             "type": "string",
-            "minLength": 6,
+            "minLength": 8,
             "example": "password123",
             "description": "User's password"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role of the user",
+            "enum": [
+              "USER",
+              "ADMIN",
+              "TENANT_ADMIN"
+            ],
+            "default": "USER"
           }
         },
         "required": [
@@ -5940,12 +6412,6 @@
             "type": "string",
             "description": "Mensaje de cambio para la primera versión"
           },
-          "projectId": {
-            "type": "string",
-            "minLength": 25,
-            "maxLength": 25,
-            "description": "ID opcional del proyecto al que pertenece el asset"
-          },
           "tenantId": {
             "type": "string",
             "description": "ID del tenant al que pertenece este asset",
@@ -6311,6 +6777,113 @@
             "items": {
               "$ref": "#/components/schemas/InitialTranslationDto"
             }
+          }
+        }
+      },
+      "CreateTenantAdminUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email for the initial tenant admin user.",
+            "example": "admin@acme.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Password for the initial tenant admin user.",
+            "example": "Str0ngP@sswOrd!"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name for the initial tenant admin user.",
+            "example": "Admin User"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "CreateTenantDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the tenant.",
+            "example": "Acme Corporation"
+          },
+          "marketplaceRequiresApproval": {
+            "type": "boolean",
+            "description": "Indicates if marketplace prompt versions require approval for this tenant. Defaults to true.",
+            "example": true
+          },
+          "initialAdminUser": {
+            "description": "Details for creating an initial admin user for this tenant.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CreateTenantAdminUserDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "initialAdminUser"
+        ]
+      },
+      "TenantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the tenant.",
+            "example": "clxrbspgy0000u0fwh8zgy17u"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the tenant.",
+            "example": "Acme Corporation"
+          },
+          "marketplaceRequiresApproval": {
+            "type": "boolean",
+            "description": "Indicates if marketplace prompt versions require approval for this tenant.",
+            "example": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date and time the tenant was created.",
+            "example": "2024-01-01T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date and time the tenant was last updated.",
+            "example": "2024-01-02T15:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "marketplaceRequiresApproval",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateTenantDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The new name of the tenant.",
+            "example": "Acme Corp Innovations"
+          },
+          "marketplaceRequiresApproval": {
+            "type": "boolean",
+            "description": "Set if marketplace prompt versions require approval for this tenant.",
+            "example": false
           }
         }
       },

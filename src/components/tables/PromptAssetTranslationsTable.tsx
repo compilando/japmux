@@ -56,7 +56,7 @@ const PromptAssetTranslationsTable: React.FC<PromptAssetTranslationsTableProps> 
                                         aria-label="Edit Translation"
                                         disabled={loading}
                                     >
-                                        <PencilIcon className="w-4 h-4" />
+                                        <PencilIcon />
                                     </button>
                                     <button
                                         onClick={() => onDelete(item.languageCode)}
@@ -64,7 +64,7 @@ const PromptAssetTranslationsTable: React.FC<PromptAssetTranslationsTableProps> 
                                         aria-label="Delete Translation"
                                         disabled={loading}
                                     >
-                                        <TrashBinIcon className="w-4 h-4" />
+                                        <TrashBinIcon />
                                     </button>
                                 </div>
                             </td>

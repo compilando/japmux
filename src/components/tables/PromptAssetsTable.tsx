@@ -9,18 +9,22 @@ import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 // pero que la API podría devolver y la tabla necesita (ej: enabled)
 export interface PromptAssetData extends CreatePromptAssetDto {
     enabled?: boolean; // Asumir que 'enabled' viene de la API aunque no esté en el DTO
+    projectId?: string; // Anteriormente projectId
+    promptId?: string;
+    promptName?: string;
     // key: string; // key ya está en CreatePromptAssetDto
 }
 
 interface PromptAssetsTableProps {
-    promptAssets: PromptAssetData[]; // Usar la nueva interfaz
-    projectId: string;
-    onEdit: (item: PromptAssetData) => void; // Usar la nueva interfaz
+    promptAssets: PromptAssetData[];
+    projectId: string;        // Cambiado de projectId a projectId
+    promptId: string;
+    onEdit: (item: PromptAssetData) => void;
     onDelete: (assetKey: string) => void;
     loading?: boolean;
 }
 
-const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, projectId, onEdit, onDelete, loading }) => {
+const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, projectId, promptId, onEdit, onDelete, loading }) => {
     if (loading) {
         return <p>Loading assets...</p>;
     }
@@ -55,11 +59,11 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
                                 <Link
-                                    href={`/projects/${projectId}/prompt-assets/${item.key}/versions`}
+                                    href={`/projects/${projectId}/prompts/${promptId}/assets/${item.key}/versions`}
                                     className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600 p-1 inline-block"
                                     title="Manage Versions"
                                 >
-                                    <DocumentDuplicateIcon className="w-5 h-5" />
+                                    <DocumentDuplicateIcon />
                                 </Link>
 
                                 <button
@@ -67,14 +71,14 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
                                     className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 p-1 inline-block"
                                     title="Edit Asset"
                                 >
-                                    <PencilIcon className="w-4 h-4" />
+                                    <PencilIcon />
                                 </button>
                                 <button
                                     onClick={() => onDelete(item.key)}
                                     className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600 p-1 inline-block"
                                     title="Delete Asset"
                                 >
-                                    <TrashBinIcon className="w-4 h-4" />
+                                    <TrashBinIcon />
                                 </button>
                             </td>
                         </tr>

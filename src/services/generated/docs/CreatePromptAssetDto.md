@@ -10,7 +10,6 @@ Name | Type | Description | Notes
 **category** | **string** | Categoría para organizar assets (e.g., Saludos, Despedidas) | [optional] [default to undefined]
 **initialValue** | **string** | Valor inicial del asset para la primera versión (v1.0.0) | [default to undefined]
 **initialChangeMessage** | **string** | Mensaje de cambio para la primera versión | [optional] [default to undefined]
-**projectId** | **string** | ID opcional del proyecto al que pertenece el asset | [optional] [default to undefined]
 **tenantId** | **string** | ID del tenant al que pertenece este asset | [default to undefined]
 
 ## Example
@@ -24,7 +23,6 @@ const instance: CreatePromptAssetDto = {
     category,
     initialValue,
     initialChangeMessage,
-    projectId,
     tenantId,
 };
 ```

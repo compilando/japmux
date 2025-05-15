@@ -57,7 +57,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({ projects, users, loading,
                                                 aria-label="Edit Project"
                                                 disabled={loading}
                                             >
-                                                <PencilIcon className="w-4 h-4" />
+                                                <PencilIcon />
                                             </button>
                                             <button
                                                 onClick={() => onDelete(project.id)}
@@ -65,7 +65,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({ projects, users, loading,
                                                 aria-label="Delete Project"
                                                 disabled={loading}
                                             >
-                                                <TrashBinIcon className="w-4 h-4" />
+                                                <TrashBinIcon />
                                             </button>
                                         </div>
                                     </TableCell>

@@ -46,14 +46,14 @@ const PromptTranslationsTable: React.FC<PromptTranslationsTableProps> = ({ promp
                                         className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label="Edit Translation"
                                     >
-                                        <PencilIcon className="w-4 h-4" />
+                                        <PencilIcon />
                                     </button>
                                     <button
                                         onClick={() => onDelete(item)}
                                         className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label="Delete Translation"
                                     >
-                                        <TrashBinIcon className="w-4 h-4" />
+                                        <TrashBinIcon />
                                     </button>
                                 </div>
                             </td>

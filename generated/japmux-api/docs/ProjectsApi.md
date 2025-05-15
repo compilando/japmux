@@ -5,7 +5,7 @@ All URIs are relative to *http://localhost*
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
 |[**projectControllerCreate**](#projectcontrollercreate) | **POST** /api/projects | Create a new project|
-|[**projectControllerFindAll**](#projectcontrollerfindall) | **GET** /api/projects | Get all projects|
+|[**projectControllerFindAll**](#projectcontrollerfindall) | **GET** /api/projects | Get all projects for the authenticated user\&#39;s tenant|
 |[**projectControllerFindMine**](#projectcontrollerfindmine) | **GET** /api/projects/mine | Get projects accessible by the current user|
 |[**projectControllerFindOne**](#projectcontrollerfindone) | **GET** /api/projects/{id} | Get a project by ID|
 |[**projectControllerRemove**](#projectcontrollerremove) | **DELETE** /api/projects/{id} | Delete a project by ID|
@@ -47,7 +47,7 @@ const { status, data } = await apiInstance.projectControllerCreate(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -60,11 +60,12 @@ No authorization required
 |-------------|-------------|------------------|
 |**201** | The project has been successfully created. |  -  |
 |**400** | Bad Request. |  -  |
+|**401** | Unauthorized. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **projectControllerFindAll**
-> Array<CreateProjectDto> projectControllerFindAll()
+> projectControllerFindAll()
 
 
 ### Example
@@ -87,7 +88,7 @@ This endpoint does not have any parameters.
 
 ### Return type
 
-**Array<CreateProjectDto>**
+void (empty response body)
 
 ### Authorization
 
@@ -96,13 +97,14 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: application/json
+ - **Accept**: Not defined
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | List of all projects. |  -  |
+|**200** | List of projects |  -  |
+|**401** | Unauthorized |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -185,7 +187,7 @@ const { status, data } = await apiInstance.projectControllerFindOne(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -236,7 +238,7 @@ const { status, data } = await apiInstance.projectControllerRemove(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -291,7 +293,7 @@ const { status, data } = await apiInstance.projectControllerUpdate(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 

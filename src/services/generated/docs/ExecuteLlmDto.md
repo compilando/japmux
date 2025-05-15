@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**modelId** | **string** | ID del AIModel a utilizar (de la tabla AIModel) | [default to undefined]
-**promptText** | **string** | El texto completo del prompt ya procesado y listo para enviar al LLM | [default to undefined]
-**variables** | **object** | Variables originales usadas para ensamblar el prompt (opcional, para logging/contexto) | [optional] [default to undefined]
+**modelId** | **string** | ID of the AIModel to use (from the AIModel table) | [default to undefined]
+**promptText** | **string** | The complete prompt text already processed and ready to send to the LLM | [default to undefined]
+**variables** | **object** | Original variables used to assemble the prompt (optional, for logging/context) | [optional] [default to undefined]
 
 ## Example
 
