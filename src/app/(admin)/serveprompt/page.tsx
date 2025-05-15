@@ -48,6 +48,10 @@ interface PromptVersionForSelect extends CreatePromptVersionDto {
     versionTag: string; // Should be present and non-optional for selection logic based on current code
 }
 
+// Constantes para los mensajes placeholder
+const CURL_PLACEHOLDER_MSG = '# Select a project, prompt, and version to see the commands.';
+const BASH_PLACEHOLDER_MSG = '# Select a project, prompt, and version to generate the example script.\n# Ensure jq is installed (e.g., sudo apt install jq) for token extraction.';
+
 const ServePromptPage: React.FC = () => {
     const { selectedProjectId } = useProjects();
     const [isClient, setIsClient] = useState(false); // Estado para saber si estamos en cliente
@@ -81,6 +85,9 @@ const ServePromptPage: React.FC = () => {
 
     // --- Nuevo Estado para el Comando cURL ---
     const [curlCommand, setCurlCommand] = useState<string>('');
+    const [displayedCurlBaseUrl, setDisplayedCurlBaseUrl] = useState<string>(''); // Estado para la URL base del cURL
+    const [bashScriptExample, setBashScriptExample] = useState<string>(''); // Estado para el script de Bash de ejemplo
+    const [activeCommandTab, setActiveCommandTab] = useState<'curl' | 'bash'>('curl'); // Estado para la pestaña activa
 
     // --- Efecto para detectar montaje en cliente ---
     useEffect(() => {
@@ -305,50 +312,129 @@ const ServePromptPage: React.FC = () => {
 
     }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage]);
 
-    // --- Efecto para generar el comando cURL ---
+    // --- Efecto para generar el comando cURL y el script Bash ---
     useEffect(() => {
-        if (!selectedProjectId || !selectedPrompt?.value || !selectedVersion?.value || !selectedAiModel?.value) {
-            setCurlCommand('# Select a project, prompt, version, and AI model to see the cURL command.');
+        const defaultApiUrl = 'http://localhost:3000';
+        const currentApiBaseUrl = (process.env.NEXT_PUBLIC_API_URL || defaultApiUrl).replace(/\/+$/, '');
+        setDisplayedCurlBaseUrl(currentApiBaseUrl);
+
+        if (!selectedProjectId || !selectedPrompt?.value || !selectedPrompt?.label || !selectedVersion?.value) {
+            setCurlCommand(CURL_PLACEHOLDER_MSG);
+            setBashScriptExample(BASH_PLACEHOLDER_MSG);
             return;
         }
 
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || '/api'; // Usar la misma base que apiClient
-        // Asegurarse de que no haya doble /api si apiBaseUrl ya lo contiene
-        const cleanApiBaseUrl = apiBaseUrl.endsWith('/api') ? apiBaseUrl.substring(0, apiBaseUrl.length - 4) : apiBaseUrl;
-        const endpoint = `${cleanApiBaseUrl}/api/projects/${selectedProjectId}/prompts/${selectedPrompt.value}/versions/${selectedVersion.value}/serve/${selectedAiModel.value}`;
+        const projectId = selectedProjectId;
+        const promptName = selectedPrompt.label;
+        const versionTag = selectedVersion.value;
 
-        let command = `curl -X POST "${window.location.origin}${endpoint}" \
-     -H "Authorization: Bearer YOUR_AUTH_TOKEN" \
+        let promptApiPath;
+        if (selectedLanguage?.value && selectedLanguage.value !== '__BASE__') {
+            const languageCode = selectedLanguage.value;
+            promptApiPath = `/api/serve-prompt/execute/${encodeURIComponent(projectId)}/${encodeURIComponent(promptName)}/${encodeURIComponent(versionTag)}/lang/${encodeURIComponent(languageCode)}`;
+        } else {
+            promptApiPath = `/api/serve-prompt/execute/${encodeURIComponent(projectId)}/${encodeURIComponent(promptName)}/${encodeURIComponent(versionTag)}/base`;
+        }
+        const fullPromptApiUrl = `${currentApiBaseUrl}${promptApiPath}`;
+
+        // 1. Generar el comando cURL simple
+        let одиночныйCurlCommand = `curl -X POST "${fullPromptApiUrl}" \\
+     -H "Authorization: Bearer YOUR_AUTH_TOKEN" \\
      -H "Content-Type: application/json"`;
 
-        const body: { languageCode?: string; variables?: StringMap } = {};
-        let hasBody = false;
-
-        if (selectedLanguage?.value && selectedLanguage.value !== '__BASE__') {
-            body.languageCode = selectedLanguage.value;
-            hasBody = true;
+        const bodyPayload: { variables?: StringMap, aiModelId?: string } = {};
+        if (Object.keys(variableInputs).filter(k => variableInputs[k].trim() !== '').length > 0) {
+            bodyPayload.variables = Object.entries(variableInputs)
+                .filter(([, val]) => val.trim() !== '')
+                .reduce((obj, [key, val]) => { obj[key] = val; return obj; }, {} as StringMap);
         }
 
-        const activeVariables = Object.entries(variableInputs)
-            .filter(([, val]) => val.trim() !== '') // Usando coma sin nombre para valor no utilizado
-            .reduce((obj, [key, val]) => {
-                obj[key] = val;
-                return obj;
-            }, {} as StringMap);
 
-        if (Object.keys(activeVariables).length > 0) {
-            body.variables = activeVariables;
-            hasBody = true;
+        if (Object.keys(bodyPayload).length > 0) {
+            одиночныйCurlCommand += ` \\
+     -d '${JSON.stringify(bodyPayload, null, 2)}'`;
         }
 
-        if (hasBody) {
-            command += ` \
-     -d '${JSON.stringify(body, null, 2)}'`; // pretty print JSON body
+        let curlNote = `\n\n# NOTE (for single cURL):`;
+        curlNote += `\n# Replace 'YOUR_AUTH_TOKEN' with your actual token.`;
+        // Eliminada la nota sobre aiModelId
+        if (bodyPayload.variables && Object.keys(bodyPayload.variables).length > 0) {
+            curlNote += `\n# Variables provided are included in the example body.`;
+        } else {
+            curlNote += `\n# No variables provided for this example; add them to the JSON body if needed.`;
+        }
+        одиночныйCurlCommand += curlNote;
+        setCurlCommand(одиночныйCurlCommand);
+
+        // 2. Generar el script Bash de ejemplo
+        const loginEndpointExample = `${currentApiBaseUrl}/api/auth/login`;
+        const jqTokenPathExample = ".access_token";
+
+        let servePromptCurlInScript = `curl -s -X POST "${fullPromptApiUrl}" \\
+  -H "Authorization: Bearer $TOKEN" \\
+  -H "Content-Type: application/json"`;
+
+        // Asegurar que scriptBodyPayload siempre tenga 'variables' como un objeto.
+        const scriptBodyPayload: { variables: StringMap } = { variables: {} };
+        if (bodyPayload.variables && Object.keys(bodyPayload.variables).length > 0) {
+            scriptBodyPayload.variables = bodyPayload.variables;
         }
 
-        setCurlCommand(command);
+        // Siempre añadir -d con al menos { "variables": {} }
+        servePromptCurlInScript += ` \\
+  -d '${JSON.stringify(scriptBodyPayload, null, 2)}'`;
 
-    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, selectedAiModel, variableInputs, currentPromptText]);
+        const fullBashScript = `#!/bin/bash
+
+# Example script to: 
+# 1. Authenticate to an API and get an access token.
+# 2. Use the token to call the prompt serving API.
+
+# --- Configuration (USER MUST MODIFY THESE) --- 
+LOGIN_ENDPOINT_URL="${loginEndpointExample}" # VERIFY: Your API's login endpoint
+USERNAME="YOUR_USERNAME_OR_EMAIL"          # VERIFY: Your username
+PASSWORD="***"                            # VERIFY: Your password (consider env vars or prompt for security)
+JQ_TOKEN_PATH="${jqTokenPathExample}"
+
+# Ensure jq is installed: (e.g., sudo apt install jq / brew install jq)
+if ! command -v jq &> /dev/null
+then
+    echo "jq could not be found, please install it." 
+    exit 1
+fi
+
+echo "Step 1: Authenticating to $LOGIN_ENDPOINT_URL..."
+# Construct JSON payload safely for login
+JSON_LOGIN_PAYLOAD=$(printf '{"email":"%s","password":"%s"}' "$USERNAME" "$PASSWORD")
+
+echo "Using login payload: $JSON_LOGIN_PAYLOAD" # Imprimir el payload para depuración
+
+AUTH_RESPONSE=$(curl -s -X POST "$LOGIN_ENDPOINT_URL" \
+  -H "Content-Type: application/json" \
+  -d "$JSON_LOGIN_PAYLOAD")
+
+TOKEN=$(echo "$AUTH_RESPONSE" | jq -r "$JQ_TOKEN_PATH")
+
+if [ -z "$TOKEN" ] || [ "$TOKEN" == "null" ]; then
+  echo "Error: Authentication failed or token not found."
+  echo "Login URL: $LOGIN_ENDPOINT_URL"
+  echo "Response: $AUTH_RESPONSE"
+  echo "Please check your credentials, LOGIN_ENDPOINT_URL, and JQ_TOKEN_PATH."
+  exit 1
+fi
+echo "Authentication successful. Token obtained."
+
+echo "\nStep 2: Calling the Prompt Serving API..."
+API_RESPONSE=$( ${servePromptCurlInScript} )
+
+echo "\nAPI Call Complete."
+echo "Response:"
+echo "$API_RESPONSE"
+
+`;
+        setBashScriptExample(fullBashScript);
+
+    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, variableInputs, displayedCurlBaseUrl]);
 
     // --- Handler para actualizar input de variable ---
     const handleVariableInputChange = (varName: string, value: string) => {
@@ -409,8 +495,8 @@ const ServePromptPage: React.FC = () => {
         };
 
         try {
-            const result: LlmExecutionResponse = await llmExecutionService.execute(executionDto);
-            setExecutionResult(result); // Guardar TODO el resultado
+            const result = await llmExecutionService.execute(executionDto);
+            setExecutionResult(result as LlmExecutionResponse); // Conversión de tipo segura
             showSuccessToast("Prompt executed successfully!");
         } catch (err: unknown) {
             console.error("Error executing prompt:", err);
@@ -438,21 +524,82 @@ const ServePromptPage: React.FC = () => {
                 </div>
             )}
 
-            {/* --- Caja de Comando cURL --- */}
+            {/* --- Caja de Comandos con Pestañas --- */}
             <div className="mb-6 p-4 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Direct API cURL Command:</label>
-                <div className="relative">
-                    <pre className="p-3 bg-gray-100 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 rounded-md overflow-x-auto whitespace-pre-wrap break-all">
-                        {curlCommand}
-                    </pre>
-                    {isClient && curlCommand && !curlCommand.startsWith('#') && (
-                        <CopyButton textToCopy={curlCommand} className="absolute top-2 right-2" />
-                    )}
+                {/* Contenedor de Pestañas */}
+                <div className="flex border-b border-gray-300 dark:border-gray-600 mb-4">
+                    <button
+                        onClick={() => setActiveCommandTab('curl')}
+                        className={`px-4 py-2 -mb-px font-medium text-sm rounded-t-lg
+                                    ${activeCommandTab === 'curl'
+                                ? 'border-gray-300 dark:border-gray-600 border-l border-t border-r text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}
+                                    focus:outline-none transition-colors duration-150 ease-in-out`}
+                    >
+                        Direct API cURL
+                    </button>
+                    <button
+                        onClick={() => setActiveCommandTab('bash')}
+                        className={`px-4 py-2 -mb-px font-medium text-sm rounded-t-lg
+                                    ${activeCommandTab === 'bash'
+                                ? 'border-gray-300 dark:border-gray-600 border-l border-t border-r text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}
+                                    focus:outline-none transition-colors duration-150 ease-in-out`}
+                    >
+                        Bash Script Example
+                    </button>
                 </div>
-                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                    Note: Replace <code>YOUR_AUTH_TOKEN</code> with your actual authentication token.
-                    The base URL (<code>{typeof window !== 'undefined' ? window.location.origin : ''}</code>) assumes the API is served from the same domain. Adjust if your API is elsewhere.
-                </p>
+
+                {/* Contenido de la Pestaña Activa */}
+                {activeCommandTab === 'curl' && (
+                    <div>
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Direct API cURL Command (Single Call)</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            This command calls the prompt serving API directly. You will need to replace <code>YOUR_AUTH_TOKEN</code> with a valid token.
+                        </p>
+                        {isClient && curlCommand && curlCommand !== CURL_PLACEHOLDER_MSG && (
+                            <div className="mb-2 flex items-center space-x-2">
+                                <CopyButton textToCopy={curlCommand} />
+                            </div>
+                        )}
+                        <div className="relative">
+                            <pre id="curl-command-display" className="p-3 bg-gray-100 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 rounded-md overflow-x-auto whitespace-pre-wrap break-all">
+                                {curlCommand}
+                            </pre>
+                        </div>
+                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            The API base URL for this command is <code>{displayedCurlBaseUrl}</code>.
+                            <br />You can typically find your auth token by inspecting API request headers in your browser's developer tools, or by using an authentication flow similar to the example script in the other tab.
+                            <br />Refer to comments within the cURL command above for more details on the request body (e.g., for 'variables').
+                        </p>
+                    </div>
+                )}
+
+                {activeCommandTab === 'bash' && (
+                    <div>
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Example Bash Script (Login &amp; API Call)</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            This script demonstrates a common pattern: first, authenticate to get a token, then use that token to make the API call to serve the prompt.
+                            You will need <code>jq</code> installed to parse the JSON response for the token (e.g., <code>sudo apt install jq</code> or <code>brew install jq</code>).
+                        </p>
+                        {isClient && bashScriptExample && bashScriptExample !== BASH_PLACEHOLDER_MSG && (
+                            <div className="mb-2 flex items-center space-x-2">
+                                <CopyButton textToCopy={bashScriptExample} />
+                            </div>
+                        )}
+                        <div className="relative">
+
+                            <pre className="p-3 bg-gray-100 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 rounded-md overflow-x-auto whitespace-pre-wrap break-all">
+                                {bashScriptExample}
+                            </pre>
+                        </div>
+                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            <strong>Important:</strong> This is an example. You MUST adjust the configuration variables at the top of the script (<code>LOGIN_ENDPOINT_URL</code>, <code>USERNAME</code>, <code>PASSWORD</code>, <code>JQ_TOKEN_PATH</code>) to match your specific API's authentication mechanism and user credentials.
+                            An error like <strong>401 Unauthorized</strong> during "Step 1: Authenticating" typically means the <code>USERNAME</code>, <code>PASSWORD</code>, or <code>LOGIN_ENDPOINT_URL</code> in the script are incorrect for your API. Please double-check these values in the script's configuration section.
+                            The script assumes the login endpoint is on the same base URL (<code>{displayedCurlBaseUrl}</code>) as the prompt serving API; adjust <code>LOGIN_ENDPOINT_URL</code> if it's different.
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* Selectors Grid */}
