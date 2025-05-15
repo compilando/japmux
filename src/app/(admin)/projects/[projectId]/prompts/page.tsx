@@ -13,6 +13,7 @@ import {
     projectService,
     CreateProjectDto,
 } from '@/services/api';
+import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptsTable from '@/components/tables/PromptsTable';
 import PromptForm from '@/components/form/PromptForm';
@@ -34,74 +35,89 @@ const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
 
 const PromptsPage: React.FC = () => {
     const [prompts, setPrompts] = useState<PromptDto[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
-    const [project, setProject] = useState<CreateProjectDto | null>(null);
-    const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
+    const [loadingPrompts, setLoadingPrompts] = useState<boolean>(true);
+    const [pageError, setPageError] = useState<string | null>(null);
 
     const params = useParams();
     const router = useRouter();
-    const projectId = params.projectId as string;
+    const urlProjectId = params.projectId as string;
 
-    useEffect(() => {
-        if (!projectId) return;
-        setBreadcrumbLoading(true);
-        projectService.findOne(projectId)
-            .then(data => setProject(data))
-            .catch(err => {
-                console.error("Error fetching project details:", err);
-                showErrorToast(getApiErrorMessage(err, "Failed to load project details."));
-                setProject(null);
-            })
-            .finally(() => setBreadcrumbLoading(false));
-    }, [projectId]);
+    const {
+        selectedProjectId: contextProjectId,
+        isLoading: projectContextIsLoading,
+        selectedProjectFull,
+        refreshProjects
+    } = useProjects();
+
+    console.log("[PromptsPage] Rendering. urlProjectId:", urlProjectId, "contextProjectId:", contextProjectId, "projectContextIsLoading:", projectContextIsLoading, "selectedProjectFull:", selectedProjectFull?.name);
 
     const fetchPrompts = useCallback(async () => {
-        if (!projectId) return;
-        setLoading(true);
-        setError(null);
+        if (!contextProjectId) {
+            console.log("[PromptsPage] fetchPrompts: No contextProjectId, skipping fetch.");
+            setPrompts([]);
+            setLoadingPrompts(false);
+            return;
+        }
+        console.log(`[PromptsPage] fetchPrompts: Fetching for contextProjectId: ${contextProjectId}`);
+        setLoadingPrompts(true);
+        setPageError(null);
         try {
-            const data = await promptService.findAll(projectId);
+            const data = await promptService.findAll(contextProjectId);
             setPrompts(data);
         } catch (err: unknown) {
-            console.error("Error fetching prompts:", err);
-            setError(getApiErrorMessage(err, "Failed to fetch prompts."));
+            console.error("[PromptsPage] Error fetching prompts:", err);
+            setPageError(getApiErrorMessage(err, "Failed to fetch prompts."));
             setPrompts([]);
         } finally {
-            setLoading(false);
+            setLoadingPrompts(false);
         }
-    }, [projectId]);
+    }, [contextProjectId]);
 
     useEffect(() => {
-        fetchPrompts();
-    }, [fetchPrompts]);
+        if (!projectContextIsLoading && contextProjectId) {
+            console.log("[PromptsPage] useEffect[fetchPrompts]: Context ready and contextProjectId available. Calling fetchPrompts.");
+            fetchPrompts();
+        } else {
+            console.log("[PromptsPage] useEffect[fetchPrompts]: Context loading or no contextProjectId. Prompts will not be fetched yet.");
+            setPrompts([]);
+            if (projectContextIsLoading) setLoadingPrompts(true);
+            else setLoadingPrompts(false);
+        }
+    }, [projectContextIsLoading, contextProjectId, fetchPrompts]);
 
     const handleAddPrompt = () => {
-        router.push(`/projects/${projectId}/prompts/new`);
+        if (contextProjectId) {
+            router.push(`/projects/${contextProjectId}/prompts/new`);
+        } else {
+            showErrorToast("No project selected in context to add a new prompt.");
+        }
     };
 
     const handleEditPrompt = (promptToEdit: PromptDto) => {
-        if (promptToEdit && promptToEdit.id) {
-            router.push(`/projects/${projectId}/prompts/${promptToEdit.id}/edit`);
+        if (contextProjectId && promptToEdit && promptToEdit.id) {
+            router.push(`/projects/${contextProjectId}/prompts/${promptToEdit.id}/edit`);
         } else {
-            showErrorToast("Prompt ID is missing, cannot navigate to edit page.");
-            console.error("Attempted to edit prompt without an ID:", promptToEdit);
+            showErrorToast("Project ID from context or Prompt ID is missing.");
         }
     };
 
     const handleDeletePrompt = async (promptIdToDelete: string, promptName?: string) => {
+        if (!contextProjectId) {
+            showErrorToast("No project selected in context.");
+            return;
+        }
         const confirmMessage = promptName ? `Are you sure you want to delete prompt "${promptName}"?` : "Are you sure you want to delete this prompt?";
         if (window.confirm(confirmMessage)) {
-            setLoading(true);
+            setLoadingPrompts(true);
             try {
-                await promptService.remove(projectId, promptIdToDelete);
+                await promptService.remove(contextProjectId, promptIdToDelete);
                 showSuccessToast(`Prompt ${promptName || promptIdToDelete} deleted.`);
                 fetchPrompts();
             } catch (err: unknown) {
-                console.error("Error deleting prompt:", err);
-                setError(getApiErrorMessage(err, "Failed to delete prompt."));
+                console.error("[PromptsPage] Error deleting prompt:", err);
+                setPageError(getApiErrorMessage(err, "Failed to delete prompt."));
             } finally {
-                setLoading(false);
+                setLoadingPrompts(false);
             }
         }
     };
@@ -109,18 +125,27 @@ const PromptsPage: React.FC = () => {
     const breadcrumbs = [
         { label: "Home", href: "/" },
         { label: "Projects", href: "/projects" },
-        { label: breadcrumbLoading ? projectId : (project?.name || projectId), href: `/projects/${projectId}/prompts` },
+        {
+            label: projectContextIsLoading ? urlProjectId : (selectedProjectFull?.name || contextProjectId || urlProjectId),
+            href: contextProjectId ? `/projects/${contextProjectId}/prompts` : `/projects/${urlProjectId}/prompts`
+        },
         { label: "Prompts" }
     ];
 
-    if (breadcrumbLoading) return <p>Loading project details...</p>;
+    if (projectContextIsLoading) return <p>Loading project information...</p>;
+    if (!contextProjectId && !projectContextIsLoading) {
+        return <p>No project is currently selected. Please select a project from the header.</p>;
+    }
+    if ((contextProjectId && !selectedProjectFull && !pageError) || loadingPrompts) {
+        return <p>Loading prompts for {selectedProjectFull?.name || contextProjectId}...</p>;
+    }
 
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
             <div className="my-6">
                 <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
-                    Prompts for <span className="text-indigo-600 dark:text-indigo-400">{project?.name || projectId}</span>
+                    Prompts for <span className="text-indigo-600 dark:text-indigo-400">{selectedProjectFull?.name || contextProjectId}</span>
                 </h2>
                 <p className="text-base font-medium text-gray-700 dark:text-gray-300">
                     Create, view, and manage all prompts associated with this project. Each prompt can have multiple versions and translations.
@@ -131,24 +156,23 @@ const PromptsPage: React.FC = () => {
                 <button
                     onClick={handleAddPrompt}
                     className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                    disabled={loading || breadcrumbLoading}
+                    disabled={loadingPrompts || projectContextIsLoading || !contextProjectId}
                 >
                     Add New Prompt
                 </button>
             </div>
 
-            {error && <p className="text-red-500 py-2">Error: {error}</p>}
-            {loading && !prompts.length ? (
-                <p>Loading prompts...</p>
-            ) : !loading && prompts.length === 0 && !error ? (
+            {pageError && <p className="text-red-500 py-2">Error: {pageError}</p>}
+
+            {!loadingPrompts && prompts.length === 0 && !pageError ? (
                 <p className="text-center py-4 text-gray-500 dark:text-gray-400">No prompts found for this project.</p>
             ) : (
                 <PromptsTable
                     prompts={prompts}
                     onEdit={handleEditPrompt}
                     onDelete={handleDeletePrompt}
-                    loading={loading}
-                    projectId={projectId}
+                    loading={loadingPrompts}
+                    projectId={contextProjectId || ''}
                 />
             )}
         </>

@@ -54,19 +54,30 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
             setName(initialData.name || '');
             setDescription(initialData.description || '');
 
-            if ('promptText' in initialData) {
+            if (!isEditing && 'promptText' in initialData && initialData.promptText) {
                 setPromptTextBody((initialData as CreatePromptDto).promptText || '');
             } else {
                 setPromptTextBody('');
             }
 
-            let initialTagIdsSet = new Set<string>();
-            if ('tags' in initialData && initialData.tags instanceof Set && initialData.tags.size > 0 && availableTags.length > 0) {
-                const initialTagNames = Array.from(initialData.tags as Set<string>);
-                initialTagIdsSet = new Set(initialTagNames.map(tagName => availableTags.find(t => t.name === tagName)?.id)
-                    .filter(id => id !== undefined) as string[]);
+            let initialTagIds: string[] = [];
+            if (isEditing) {
+                const currentPromptData = initialData as any;
+                if (currentPromptData.tags && Array.isArray(currentPromptData.tags)) {
+                    initialTagIds = (currentPromptData.tags as TagDto[]).map(tag => tag.id).filter(id => id !== undefined) as string[];
+                    console.log("[PromptForm Effect InitForm - EDITING] Extracted tag IDs from PromptDto:", initialTagIds);
+                } else {
+                    console.log("[PromptForm Effect InitForm - EDITING] 'tags' not found or not an array in initialData (PromptDto).", currentPromptData);
+                }
+            } else {
+                if ('tags' in initialData && initialData.tags instanceof Set && initialData.tags.size > 0 && availableTags.length > 0) {
+                    const initialTagNames = Array.from(initialData.tags as Set<string>);
+                    initialTagIds = initialTagNames.map(tagName => availableTags.find(t => t.name === tagName)?.id)
+                        .filter(id => id !== undefined) as string[];
+                    console.log("[PromptForm Effect InitForm - CREATION] Mapped tag names to IDs:", initialTagIds);
+                }
             }
-            setSelectedTagIds(Array.from(initialTagIdsSet));
+            setSelectedTagIds(initialTagIds);
 
         } else {
             console.log("[PromptForm Effect InitForm] No initialData. Resetting form fields for creation.");
@@ -103,7 +114,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
 
-        if (isEditing && initialData) {
+        if (isEditing && initialData && 'id' in initialData) {
             const updatePayload: UpdatePromptDto = {};
             let hasChanges = false;
 
@@ -112,18 +123,15 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                 hasChanges = true;
             }
 
-            let initialTagIdsFromInitialData = new Set<string>();
-            const initialCreateDtoForTags = initialData as CreatePromptDto;
-            if (initialCreateDtoForTags.tags && initialCreateDtoForTags.tags.size > 0 && availableTags.length > 0) {
-                const initialTagNames = Array.from(initialCreateDtoForTags.tags);
-                initialTagIdsFromInitialData = new Set(initialTagNames.map(tagName => availableTags.find(t => t.name === tagName)?.id)
-                    .filter(id => id !== undefined) as string[]);
-            }
+            const originalPromptData = initialData as any;
+            const originalTagIds = (originalPromptData.tags && Array.isArray(originalPromptData.tags))
+                ? new Set((originalPromptData.tags as TagDto[]).map(t => t.id))
+                : new Set<string>();
 
-            const selectedTagIdsSet = new Set(selectedTagIds);
+            const currentSelectedTagIdsSet = new Set(selectedTagIds);
 
-            if (initialTagIdsFromInitialData.size !== selectedTagIdsSet.size ||
-                !Array.from(initialTagIdsFromInitialData).every(id => selectedTagIdsSet.has(id))) {
+            if (originalTagIds.size !== currentSelectedTagIdsSet.size ||
+                !Array.from(originalTagIds).every(id => currentSelectedTagIdsSet.has(id))) {
                 updatePayload.tagIds = selectedTagIds;
                 hasChanges = true;
             }
@@ -133,7 +141,6 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                 onSave(updatePayload);
             } else {
                 showSuccessToast("No changes detected.");
-                onCancel();
             }
 
         } else {
@@ -146,18 +153,20 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                 return;
             }
 
-            const tagNamesForCreation = new Set<string>();
+            const tagNamesForCreationSet = new Set<string>();
             selectedTagIds.forEach(id => {
                 const foundTag = availableTags.find(t => t.id === id);
                 if (foundTag) {
-                    tagNamesForCreation.add(foundTag.name);
+                    tagNamesForCreationSet.add(foundTag.name);
                 }
             });
+
+            const tagsArrayForPayload = tagNamesForCreationSet.size > 0 ? Array.from(tagNamesForCreationSet) : undefined;
 
             const createPayload: CreatePromptDto = {
                 name: name.trim(),
                 description: description.trim() || undefined,
-                tags: tagNamesForCreation.size > 0 ? tagNamesForCreation : undefined,
+                tags: tagsArrayForPayload,
                 promptText: promptTextBody.trim(),
             } as CreatePromptDto;
 

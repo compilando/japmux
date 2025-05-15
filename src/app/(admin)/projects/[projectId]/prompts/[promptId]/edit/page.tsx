@@ -86,9 +86,14 @@ const EditPromptPage: React.FC = () => {
 
         setIsSaving(true);
         try {
-            // Se usa promptId (el ID interno de la URL) como el identificador para la API de update,
-            // aunque el parámetro generado en la API se llame promptIdSlug.
-            await promptService.update(projectId, promptId, updatePayload);
+            // Se usa promptData.name como el identificador para la API de update,
+            // ya que promptControllerUpdate espera promptName.
+            if (!promptData?.name) {
+                showErrorToast("Prompt name is missing, cannot update.");
+                setIsSaving(false);
+                return;
+            }
+            await promptService.update(projectId, promptData.name, updatePayload);
             showSuccessToast(`Prompt "${promptData.name}" updated successfully.`);
             router.push(`/projects/${projectId}/prompts`);
         } catch (err: unknown) {
@@ -123,17 +128,10 @@ const EditPromptPage: React.FC = () => {
         return <p>Error loading data for editing. The prompt may not exist or there was an issue fetching project details.</p>;
     }
 
-    // Preparamos initialData para PromptForm
-    // PromptForm espera CreatePromptDto | UpdatePromptDto
-    // Aquí es seguro usar los campos de PromptDto y castear a lo que espera PromptForm
-    const initialFormData: CreatePromptDtoType | UpdatePromptDto = {
-        name: promptData?.name || '', // El nombre se muestra pero no se edita si no está en UpdatePromptDto
-        description: promptData?.description || '',
-        promptText: (promptData as any)?.promptText || '',
-        // PromptDto no tiene tenantId, pero CreatePromptDtoType (parte de la unión) sí.
-        // Si PromptForm se basa en tenantId de initialData, lo tomamos del projectId.
-        tenantId: projectId,
-    };
+    // Ya no es necesario construir initialFormData aquí, pasaremos promptData directamente a PromptForm.
+    // promptData es de tipo PromptDto | null. Cuando no es null, es PromptDto.
+    // PromptForm espera initialData: PromptDto | CreatePromptDto | null.
+    // PromptDto tiene 'id', por lo que 'isEditing' será true en PromptForm.
 
     return (
         <>
@@ -146,14 +144,14 @@ const EditPromptPage: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 shadow-md rounded p-6">
                 {promptData ? (
                     <PromptForm
-                        initialData={initialFormData} // Los datos cargados del prompt
+                        initialData={promptData} // Pasamos promptData directamente
                         projectId={projectId}
                         onSave={handleSavePrompt}
                         onCancel={handleCancel}
-                    // isEditing={true} // Si PromptForm necesita saber que está en modo edición
                     />
                 ) : (
-                    <p>Prompt data could not be loaded.</p> // Mensaje si promptData sigue siendo null
+                    // Este caso se maneja arriba, pero por seguridad lo dejamos.
+                    <p>Prompt data could not be loaded or project details are missing.</p>
                 )}
             </div>
         </>

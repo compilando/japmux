@@ -38,6 +38,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     const [selectedProjectId, setSelectedProjectIdState] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true); // For initial projects list
     const [error, setError] = useState<string | null>(null);
+    const [isInitialIdLoaded, setIsInitialIdLoaded] = useState<boolean>(false); // Para la carga inicial del ID
 
     const [selectedProjectFull, setSelectedProjectFull] = useState<CreateProjectDto | null>(null);
     const [isLoadingSelectedProjectFull, setIsLoadingSelectedProjectFull] = useState<boolean>(false);
@@ -47,122 +48,152 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
 
     // Load selected ID from localStorage on startup
     useEffect(() => {
+        console.log("[ProjectContext] Attempting to load stored project ID from localStorage.");
         const storedProjectId = localStorage.getItem(SELECTED_PROJECT_ID_KEY);
         if (storedProjectId) {
-            setSelectedProjectIdState(storedProjectId);
+            console.log("[ProjectContext] Found stored project ID:", storedProjectId);
+            setSelectedProjectIdState(storedProjectId); // Establecer el estado con lo que hay en localStorage
+        } else {
+            console.log("[ProjectContext] No stored project ID found in localStorage.");
+            setSelectedProjectIdState(null); // Asegurarse de que es null si no hay nada
         }
+        setIsInitialIdLoaded(true);
     }, []);
 
     const fetchProjects = useCallback(async () => {
-        // Make sure the user is authenticated before calling
-        // if (!isAuthenticated) { // Uncomment if using authentication context
-        //     setProjects([]);
-        //     setSelectedProjectIdState(null);
-        //     setIsLoading(false);
-        //     return;
-        // }
+        // isInitialIdLoaded ya se verifica en el useEffect que llama a esto.
+        console.log("[ProjectContext] fetchProjects: Starting.");
+        setIsLoading(true);
+        setError(null);
 
-        // Check for token directly (alternative if no AuthContext)
         if (typeof window !== 'undefined') {
             let token = localStorage.getItem('authToken');
+            if (!token) token = sessionStorage.getItem('authToken');
             if (!token) {
-                token = sessionStorage.getItem('authToken');
-            }
-            if (!token) {
-                console.log("No auth token found, skipping project fetch.");
+                console.log("[ProjectContext] fetchProjects: No auth token, clearing.");
                 setProjects([]);
                 setSelectedProjectIdState(null);
-                setSelectedProjectFull(null); // Clear full project details
+                setSelectedProjectFull(null);
                 setIsLoading(false);
-                setIsLoadingSelectedProjectFull(false);
                 return;
             }
         }
 
-        setIsLoading(true);
-        setError(null);
         try {
             const userProjects = await projectService.findMine();
+            console.log("[ProjectContext] fetchProjects: Fetched user projects count:", userProjects.length);
             setProjects(userProjects);
 
-            const currentSelectedId = localStorage.getItem(SELECTED_PROJECT_ID_KEY);
-            const selectedProjectExists = currentSelectedId && userProjects.some(p => (p as ProjectWithId).id === currentSelectedId);
+            let idFromStorage = localStorage.getItem(SELECTED_PROJECT_ID_KEY);
+            console.log("[ProjectContext] fetchProjects: ID from localStorage for selection logic:", idFromStorage);
 
-            if (selectedProjectExists && currentSelectedId) {
-                setSelectedProjectIdState(currentSelectedId);
-                // setSelectedProjectFull will be set by the other useEffect
-            } else if (userProjects.length > 0) {
-                const defaultProjectId = (userProjects[0] as ProjectWithId).id;
-                setSelectedProjectIdState(defaultProjectId);
-                localStorage.setItem(SELECTED_PROJECT_ID_KEY, defaultProjectId);
-                // setSelectedProjectFull will be set by the other useEffect
+            let finalIdToSelect = null;
+
+            if (userProjects.length > 0) {
+                const projectExistsInList = idFromStorage && userProjects.some(p => (p as ProjectWithId).id === idFromStorage);
+
+                if (projectExistsInList) {
+                    console.log("[ProjectContext] fetchProjects: Project ID from storage exists in list:", idFromStorage);
+                    finalIdToSelect = idFromStorage;
+                } else {
+                    console.log("[ProjectContext] fetchProjects: Project ID from storage not in list or no ID in storage. Selecting first project.");
+                    finalIdToSelect = (userProjects[0] as ProjectWithId).id;
+                    localStorage.setItem(SELECTED_PROJECT_ID_KEY, finalIdToSelect);
+                }
             } else {
-                setSelectedProjectIdState(null);
-                setSelectedProjectFull(null); // No projects, so no full project
+                console.log("[ProjectContext] fetchProjects: No projects. Clearing stored ID.");
                 localStorage.removeItem(SELECTED_PROJECT_ID_KEY);
+                finalIdToSelect = null;
             }
+
+            if (selectedProjectId !== finalIdToSelect) {
+                console.log("[ProjectContext] fetchProjects: Updating selectedProjectIdState from", selectedProjectId, "to", finalIdToSelect);
+                setSelectedProjectIdState(finalIdToSelect);
+            } else {
+                console.log("[ProjectContext] fetchProjects: selectedProjectIdState already matches finalIdToSelect:", finalIdToSelect);
+            }
+
         } catch (err: unknown) {
-            console.error("Error fetching projects:", err);
+            console.error("[ProjectContext] fetchProjects: Error fetching projects:", err);
             setError("Failed to load projects.");
             setProjects([]);
             setSelectedProjectIdState(null);
             setSelectedProjectFull(null);
         } finally {
+            console.log("[ProjectContext] fetchProjects: Finished. Setting isLoading to false.");
             setIsLoading(false);
         }
-    }, []); // Dependency on authentication state if used
+    }, []); // QUITAR selectedProjectId de las dependencias.
 
-    // Load projects on component mount (and when auth state changes if used)
     useEffect(() => {
-        fetchProjects();
-    }, [fetchProjects]); // Add isAuthenticated if used
+        if (isInitialIdLoaded) {
+            console.log("[ProjectContext] useEffect[isInitialIdLoaded]: Initial ID load complete. Calling fetchProjects.");
+            fetchProjects();
+        } else {
+            console.log("[ProjectContext] useEffect[isInitialIdLoaded]: Waiting for initial ID load from localStorage.");
+        }
+    }, [isInitialIdLoaded, fetchProjects]);
 
-    // Effect to update selectedProjectFull when selectedProjectId or projects list changes
+    // Efecto para cargar el objeto completo del proyecto seleccionado
     useEffect(() => {
-        if (selectedProjectId && projects.length > 0) {
+        // Este isLoading es el de la lista de proyectos. Esperamos a que termine.
+        console.log("[ProjectContext] useEffect (selectedProjectFull): Triggered. selectedProjectId:", selectedProjectId, "isLoading (context):", isLoading);
+        if (selectedProjectId && projects.length > 0 && !isLoading) {
+            console.log("[ProjectContext] useEffect (selectedProjectFull): Finding full project details for:", selectedProjectId);
             setIsLoadingSelectedProjectFull(true);
             const project = projects.find(p => (p as ProjectWithId).id === selectedProjectId);
             if (project) {
                 setSelectedProjectFull(project);
+                console.log("[ProjectContext] useEffect (selectedProjectFull): Found and set.", project?.name);
             } else {
-                // This case implies selectedProjectId is stale or projects list is not up-to-date
-                // Or the project was deleted and localStorage wasn't updated.
-                // For now, just nullify. A more robust solution might re-fetch or clear selectedProjectId.
                 setSelectedProjectFull(null);
-                // Consider clearing selectedProjectId from localStorage if it's not found
-                // localStorage.removeItem(SELECTED_PROJECT_ID_KEY);
-                // setSelectedProjectIdState(null); // This could trigger a re-selection or prompt user
-                console.warn(`Project with ID ${selectedProjectId} not found in the loaded projects list.`);
+                console.warn(`[ProjectContext] useEffect (selectedProjectFull): Project with ID ${selectedProjectId} not found in projects list.`);
             }
             setIsLoadingSelectedProjectFull(false);
         } else if (!selectedProjectId) {
             setSelectedProjectFull(null);
-            setIsLoadingSelectedProjectFull(false);
+            if (!isLoading) { // Solo loguear si no es por estar cargando la lista de proyectos
+                console.log("[ProjectContext] useEffect (selectedProjectFull): No selectedProjectId, clearing selectedProjectFull.");
+            }
+        } else if (isLoading) {
+            console.log("[ProjectContext] useEffect (selectedProjectFull): Waiting for project list to load before setting full project details.");
         }
-        // Add dependency on projects list isLoading state to ensure it's loaded first
     }, [selectedProjectId, projects, isLoading]);
 
     const handleSetSelectedProjectId = (projectId: string | null) => {
-        setSelectedProjectIdState(projectId);
+        console.log("[ProjectContext] handleSetSelectedProjectId: Requested to set project ID to:", projectId);
         if (projectId) {
             localStorage.setItem(SELECTED_PROJECT_ID_KEY, projectId);
         } else {
             localStorage.removeItem(SELECTED_PROJECT_ID_KEY);
-            setSelectedProjectFull(null); // Clear full project when ID is cleared
         }
-        router.refresh(); // <-- Add route refresh
+        console.log("[ProjectContext] handleSetSelectedProjectId: Reloading window.");
+        window.location.reload();
     };
+
+    // isLoading global del contexto debe considerar la carga inicial del ID Y la carga de la lista de proyectos.
+    // Un componente consumidor está "cargando" si el ID inicial aún no se ha procesado O si la lista de proyectos se está cargando.
+    const combinedIsLoading = !isInitialIdLoaded || isLoading;
+
+    console.log(
+        "[ProjectContext] Rendering Provider. ",
+        "isInitialIdLoaded:", isInitialIdLoaded,
+        "isLoading (project list):", isLoading,
+        "--> combinedIsLoading:", combinedIsLoading,
+        "selectedProjectIdState:", selectedProjectId,
+        "selectedProjectFull:", selectedProjectFull?.name
+    );
 
     return (
         <ProjectContext.Provider value={{
             projects,
             selectedProjectId,
             setSelectedProjectId: handleSetSelectedProjectId,
-            isLoading,
+            isLoading: combinedIsLoading,
             error,
             refreshProjects: fetchProjects,
-            selectedProjectFull, // Provide the full project object
-            isLoadingSelectedProjectFull // Provide its loading state
+            selectedProjectFull,
+            isLoadingSelectedProjectFull
         }}>
             {children}
         </ProjectContext.Provider>
