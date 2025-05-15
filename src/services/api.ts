@@ -491,24 +491,63 @@ export const promptAssetService = {
         await promptAssetsGeneratedApi.promptAssetControllerRemove(promptId, projectId, assetKey);
     },
     findVersions: async (projectId: string, promptId: string, assetKey: string): Promise<generated.CreatePromptAssetVersionDto[]> => {
-        // Construcción manual de la URL para asegurar que promptId está incluido y se usa /prompt-assets/
-        const response = await apiClient.get<generated.CreatePromptAssetVersionDto[]>(`/api/projects/${projectId}/prompts/${promptId}/prompt-assets/${assetKey}/versions`);
+        // Construcción manual de la URL para asegurar que promptId está incluido y se usa /assets/
+        const response = await apiClient.get<generated.CreatePromptAssetVersionDto[]>(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions`);
         return response.data;
     },
-    findOneVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await getPromptAssetVersionsGeneratedApi().promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag);
-        return response.data;
+    findOneVersion: async (
+        projectId: string,
+        promptId: string, // Necesario para construir la URL correcta
+        assetKey: string,
+        versionTag: string
+    ): Promise<generated.CreatePromptAssetVersionDto> => {
+        console.log('[promptAssetService.findOneVersion] Usando apiClient.get directamente.');
+        console.log('[promptAssetService.findOneVersion] Project ID:', projectId);
+        console.log('[promptAssetService.findOneVersion] Prompt ID:', promptId);
+        console.log('[promptAssetService.findOneVersion] Asset Key:', assetKey);
+        console.log('[promptAssetService.findOneVersion] Version Tag:', versionTag);
+
+        // Construye la URL correcta manualmente para obtener UNA versión
+        const url = `/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}`;
+
+        try {
+            const response = await apiClient.get<generated.CreatePromptAssetVersionDto>(url);
+            return response.data;
+        } catch (error) {
+            console.error(`Error al obtener la versión del asset (${url}):`, error);
+            throw error;
+        }
     },
     createVersion: async (projectId: string, promptId: string, assetKey: string, payload: generated.CreatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await getPromptAssetVersionsGeneratedApi().promptAssetVersionControllerCreate(projectId, promptId, assetKey, payload);
+        const response = await getPromptAssetVersionsGeneratedApi().promptAssetVersionControllerCreate(projectId, assetKey, payload);
         return response.data;
     },
-    updateVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string, payload: generated.UpdatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await getPromptAssetVersionsGeneratedApi().promptAssetVersionControllerUpdate(projectId, promptId, assetKey, versionTag, payload);
-        return response.data;
+    updateVersion: async (
+        projectId: string,
+        promptId: string, // Necesario para construir la URL correcta
+        assetKey: string,
+        versionTag: string,
+        payload: generated.UpdatePromptAssetVersionDto // Este es el objeto { value, changeMessage }
+    ): Promise<generated.CreatePromptAssetVersionDto> => {
+        console.log('[promptAssetService.updateVersion] Usando apiClient.patch directamente.');
+        console.log('[promptAssetService.updateVersion] Project ID:', projectId);
+        console.log('[promptAssetService.updateVersion] Prompt ID:', promptId);
+        console.log('[promptAssetService.updateVersion] Asset Key:', assetKey);
+        console.log('[promptAssetService.updateVersion] Version Tag:', versionTag);
+        console.log('[promptAssetService.updateVersion] Payload enviado:', JSON.stringify(payload));
+
+        const url = `/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}`;
+
+        try {
+            const response = await apiClient.patch<generated.CreatePromptAssetVersionDto>(url, payload);
+            return response.data;
+        } catch (error) {
+            console.error(`Error al actualizar la versión del asset (${url}):`, error);
+            throw error;
+        }
     },
     removeVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<void> => {
-        await getPromptAssetVersionsGeneratedApi().promptAssetVersionControllerRemove(projectId, promptId, assetKey, versionTag);
+        await getPromptAssetVersionsGeneratedApi().promptAssetVersionControllerRemove(projectId, assetKey, versionTag);
     },
     requestPublishVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
         const response = await apiClient.post<generated.CreatePromptAssetVersionDto>(

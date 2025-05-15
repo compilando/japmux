@@ -207,7 +207,7 @@ const PromptAssetVersionsPage: React.FC = () => {
         });
         breadcrumbs.push({
             label: "Assets",
-            href: `/projects/${projectId}/prompt-assets`
+            href: `/projects/${projectId}/assets`
         });
     }
     if (assetKey) {

@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**promptAssetControllerCreate**](#promptassetcontrollercreate) | **POST** /api/projects/{projectId}/prompt-assets | Crea un nuevo prompt asset (y su primera versión) dentro de un proyecto|
-|[**promptAssetControllerFindAll**](#promptassetcontrollerfindall) | **GET** /api/projects/{projectId}/prompt-assets | Obtiene todos los prompt assets de un proyecto|
-|[**promptAssetControllerFindOne**](#promptassetcontrollerfindone) | **GET** /api/projects/{projectId}/prompt-assets/{assetKey} | Obtiene un prompt asset por su key dentro de un proyecto|
-|[**promptAssetControllerRemove**](#promptassetcontrollerremove) | **DELETE** /api/projects/{projectId}/prompt-assets/{assetKey} | Elimina un prompt asset (y sus versiones/traducciones por Cascade) dentro de un proyecto|
-|[**promptAssetControllerUpdate**](#promptassetcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompt-assets/{assetKey} | Actualiza metadatos de un prompt asset (nombre, descripción, etc.) dentro de un proyecto|
+|[**promptAssetControllerCreate**](#promptassetcontrollercreate) | **POST** /api/projects/{projectId}/assets | Crea un nuevo prompt asset (y su primera versión) dentro de un proyecto|
+|[**promptAssetControllerFindAll**](#promptassetcontrollerfindall) | **GET** /api/projects/{projectId}/assets | Obtiene todos los prompt assets de un proyecto|
+|[**promptAssetControllerFindOne**](#promptassetcontrollerfindone) | **GET** /api/projects/{projectId}/assets/{assetKey} | Obtiene un prompt asset por su key dentro de un proyecto|
+|[**promptAssetControllerRemove**](#promptassetcontrollerremove) | **DELETE** /api/projects/{projectId}/assets/{assetKey} | Elimina un prompt asset (y sus versiones/traducciones por Cascade) dentro de un proyecto|
+|[**promptAssetControllerUpdate**](#promptassetcontrollerupdate) | **PATCH** /api/projects/{projectId}/assets/{assetKey} | Actualiza metadatos de un prompt asset (nombre, descripción, etc.) dentro de un proyecto|
 
 # **promptAssetControllerCreate**
 > promptAssetControllerCreate(createPromptAssetDto)

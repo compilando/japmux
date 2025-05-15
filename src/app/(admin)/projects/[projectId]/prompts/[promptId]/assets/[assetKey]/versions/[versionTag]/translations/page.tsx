@@ -159,6 +159,18 @@ const PromptAssetTranslationsPage: React.FC = () => {
 
     const handleSave = async (payloadFromForm: CreateAssetTranslationDto | UpdateAssetTranslationDto) => {
         if (!projectId || !promptId || !assetKey || !versionTag) return;
+
+        // Para la creación, necesitamos el ID de la versión del asset.
+        // El objeto 'version' (tipo CreatePromptAssetVersionDto) debería tener este ID.
+        // Si 'version' o '(version as any).id' no existen, no podemos proceder con la creación.
+        // Usamos (version as any).id temporalmente para el chequeo y la asignación
+        // para evitar errores de TypeScript mientras el DTO CreatePromptAssetVersionDto no se actualiza.
+        if (!editingItem && (!version || !(version as any).id)) {
+            showErrorToast("Asset Version ID is missing from current version data. Cannot create translation. Please ensure the backend provides 'id' for asset versions.");
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
             let message = "";
@@ -170,24 +182,37 @@ const PromptAssetTranslationsPage: React.FC = () => {
             }
 
             if (editingItem && editingItem.languageCode) {
+                // Lógica de ACTUALIZACIÓN
                 const updatePayload: UpdateAssetTranslationDto = { value: (payloadFromForm as UpdateAssetTranslationDto).value };
+                // Asumimos que la API de actualización no necesita versionId en el payload si está en la URL.
                 await promptAssetService.updateTranslation(projectId, promptId, assetKey, versionTag, editingItem.languageCode, updatePayload);
                 message = `Translation for ${editingItem.languageCode} updated successfully!`;
             } else {
-                const createPayload = payloadFromForm as CreateAssetTranslationDto;
-                if (!createPayload.languageCode || !createPayload.value) {
+                // Lógica de CREACIÓN
+                let createPayloadFromForm = payloadFromForm as CreateAssetTranslationDto; // Renombrar para claridad
+                if (!createPayloadFromForm.languageCode || !createPayloadFromForm.value) {
                     showErrorToast("Language code and value are required for a new translation.");
                     setLoading(false);
                     return;
                 }
-                await promptAssetService.createTranslation(projectId, promptId, assetKey, versionTag, createPayload);
-                message = `Translation for ${createPayload.languageCode} created successfully!`;
+
+                // Incluir versionId en el payload de creación.
+                // El DTO CreateAssetTranslationDto (según openapi.json) ya espera un versionId.
+                const finalCreatePayload: CreateAssetTranslationDto = {
+                    ...createPayloadFromForm,
+                    versionId: (version as any).id, // Se usa (version as any).id debido a que CreatePromptAssetVersionDto no tiene 'id' todavía.
+                };
+
+                await promptAssetService.createTranslation(projectId, promptId, assetKey, versionTag, finalCreatePayload);
+                message = `Translation for ${finalCreatePayload.languageCode} created successfully!`;
             }
             setIsModalOpen(false);
             showSuccessToast(message);
-            fetchData();
+            fetchData(); // Recargar la lista de traducciones
         } catch (err: unknown) {
-            setError(getApiErrorMessage(err, 'Failed to save translation.'));
+            // Usar toast para errores de guardado, no sobreescribir el estado 'error' que es para fetchData.
+            showErrorToast(getApiErrorMessage(err, 'Failed to save translation.'));
+            console.error("Error saving translation:", err); // Loguear el error completo para depuración
         } finally {
             setLoading(false);
         }
@@ -280,4 +305,5 @@ const PromptAssetTranslationsPage: React.FC = () => {
     );
 };
 
-export default PromptAssetTranslationsPage; 
+export default PromptAssetTranslationsPage;
+

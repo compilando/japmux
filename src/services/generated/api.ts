@@ -2396,7 +2396,7 @@ export const AssetTranslationsWithinProjectAssetVersionApiAxiosParamCreator = fu
             assertParamExists('assetTranslationControllerCreate', 'versionTag', versionTag)
             // verify required parameter 'createAssetTranslationDto' is not null or undefined
             assertParamExists('assetTranslationControllerCreate', 'createAssetTranslationDto', createAssetTranslationDto)
-            const localVarPath = `/api/projects/{projectId}/prompt-assets/{assetKey}/versions/{versionTag}/translations`
+            const localVarPath = `/api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/translations`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
                 .replace(`{${"assetKey"}}`, encodeURIComponent(String(assetKey)))
                 .replace(`{${"versionTag"}}`, encodeURIComponent(String(versionTag)));
@@ -2445,7 +2445,7 @@ export const AssetTranslationsWithinProjectAssetVersionApiAxiosParamCreator = fu
             assertParamExists('assetTranslationControllerFindAll', 'assetKey', assetKey)
             // verify required parameter 'versionTag' is not null or undefined
             assertParamExists('assetTranslationControllerFindAll', 'versionTag', versionTag)
-            const localVarPath = `/api/projects/{projectId}/prompt-assets/{assetKey}/versions/{versionTag}/translations`
+            const localVarPath = `/api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/translations`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
                 .replace(`{${"assetKey"}}`, encodeURIComponent(String(assetKey)))
                 .replace(`{${"versionTag"}}`, encodeURIComponent(String(versionTag)));
@@ -2494,7 +2494,7 @@ export const AssetTranslationsWithinProjectAssetVersionApiAxiosParamCreator = fu
             assertParamExists('assetTranslationControllerFindOneByLanguage', 'versionTag', versionTag)
             // verify required parameter 'languageCode' is not null or undefined
             assertParamExists('assetTranslationControllerFindOneByLanguage', 'languageCode', languageCode)
-            const localVarPath = `/api/projects/{projectId}/prompt-assets/{assetKey}/versions/{versionTag}/translations/{languageCode}`
+            const localVarPath = `/api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/translations/{languageCode}`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
                 .replace(`{${"assetKey"}}`, encodeURIComponent(String(assetKey)))
                 .replace(`{${"versionTag"}}`, encodeURIComponent(String(versionTag)))
@@ -2544,7 +2544,7 @@ export const AssetTranslationsWithinProjectAssetVersionApiAxiosParamCreator = fu
             assertParamExists('assetTranslationControllerRemove', 'versionTag', versionTag)
             // verify required parameter 'languageCode' is not null or undefined
             assertParamExists('assetTranslationControllerRemove', 'languageCode', languageCode)
-            const localVarPath = `/api/projects/{projectId}/prompt-assets/{assetKey}/versions/{versionTag}/translations/{languageCode}`
+            const localVarPath = `/api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/translations/{languageCode}`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
                 .replace(`{${"assetKey"}}`, encodeURIComponent(String(assetKey)))
                 .replace(`{${"versionTag"}}`, encodeURIComponent(String(versionTag)))
@@ -2597,7 +2597,7 @@ export const AssetTranslationsWithinProjectAssetVersionApiAxiosParamCreator = fu
             assertParamExists('assetTranslationControllerUpdate', 'languageCode', languageCode)
             // verify required parameter 'updateAssetTranslationDto' is not null or undefined
             assertParamExists('assetTranslationControllerUpdate', 'updateAssetTranslationDto', updateAssetTranslationDto)
-            const localVarPath = `/api/projects/{projectId}/prompt-assets/{assetKey}/versions/{versionTag}/translations/{languageCode}`
+            const localVarPath = `/api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/translations/{languageCode}`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
                 .replace(`{${"assetKey"}}`, encodeURIComponent(String(assetKey)))
                 .replace(`{${"versionTag"}}`, encodeURIComponent(String(versionTag)))

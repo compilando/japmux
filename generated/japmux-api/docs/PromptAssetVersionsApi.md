@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**promptAssetVersionControllerCreate**](#promptassetversioncontrollercreate) | **POST** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions | Create a new version for a specific prompt asset|
+|[**promptAssetVersionControllerCreate**](#promptassetversioncontrollercreate) | **POST** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions | Create a new version for a specific prompt asset|
 
 # **promptAssetVersionControllerCreate**
 > CreatePromptAssetVersionDto promptAssetVersionControllerCreate(createPromptAssetVersionDto)

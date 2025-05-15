@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**assetTranslationControllerCreate**](#assettranslationcontrollercreate) | **POST** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/translations | Create a translation for a specific asset version|
-|[**assetTranslationControllerFindAll**](#assettranslationcontrollerfindall) | **GET** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/translations | Get all translations for a specific asset version|
-|[**assetTranslationControllerFindOneByLanguage**](#assettranslationcontrollerfindonebylanguage) | **GET** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/translations/{languageCode} | Get a specific translation by language code for an asset version|
-|[**assetTranslationControllerRemove**](#assettranslationcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/translations/{languageCode} | Delete a specific translation by language code for an asset version|
-|[**assetTranslationControllerUpdate**](#assettranslationcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/translations/{languageCode} | Update a specific translation by language code for an asset version|
+|[**assetTranslationControllerCreate**](#assettranslationcontrollercreate) | **POST** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag}/translations | Create a translation for a specific asset version|
+|[**assetTranslationControllerFindAll**](#assettranslationcontrollerfindall) | **GET** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag}/translations | Get all translations for a specific asset version|
+|[**assetTranslationControllerFindOneByLanguage**](#assettranslationcontrollerfindonebylanguage) | **GET** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag}/translations/{languageCode} | Get a specific translation by language code for an asset version|
+|[**assetTranslationControllerRemove**](#assettranslationcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag}/translations/{languageCode} | Delete a specific translation by language code for an asset version|
+|[**assetTranslationControllerUpdate**](#assettranslationcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag}/translations/{languageCode} | Update a specific translation by language code for an asset version|
 
 # **assetTranslationControllerCreate**
 > CreateAssetTranslationDto assetTranslationControllerCreate(createAssetTranslationDto)

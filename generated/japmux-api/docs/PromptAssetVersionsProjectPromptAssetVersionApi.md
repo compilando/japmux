@@ -4,12 +4,12 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**promptAssetVersionControllerFindAll**](#promptassetversioncontrollerfindall) | **GET** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions | Get all versions for a specific prompt asset|
-|[**promptAssetVersionControllerFindOneByTag**](#promptassetversioncontrollerfindonebytag) | **GET** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag} | Get a specific prompt asset version by its tag|
-|[**promptAssetVersionControllerRemove**](#promptassetversioncontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag} | Delete a specific prompt asset version by its tag|
-|[**promptAssetVersionControllerRequestPublish**](#promptassetversioncontrollerrequestpublish) | **POST** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/request-publish | Request to publish an asset version to the marketplace|
-|[**promptAssetVersionControllerUnpublish**](#promptassetversioncontrollerunpublish) | **POST** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/unpublish | Unpublish an asset version from the marketplace|
-|[**promptAssetVersionControllerUpdate**](#promptassetversioncontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag} | Update a specific prompt asset version by its tag|
+|[**promptAssetVersionControllerFindAll**](#promptassetversioncontrollerfindall) | **GET** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions | Get all versions for a specific prompt asset|
+|[**promptAssetVersionControllerFindOneByTag**](#promptassetversioncontrollerfindonebytag) | **GET** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag} | Get a specific prompt asset version by its tag|
+|[**promptAssetVersionControllerRemove**](#promptassetversioncontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag} | Delete a specific prompt asset version by its tag|
+|[**promptAssetVersionControllerRequestPublish**](#promptassetversioncontrollerrequestpublish) | **POST** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag}/request-publish | Request to publish an asset version to the marketplace|
+|[**promptAssetVersionControllerUnpublish**](#promptassetversioncontrollerunpublish) | **POST** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag}/unpublish | Unpublish an asset version from the marketplace|
+|[**promptAssetVersionControllerUpdate**](#promptassetversioncontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag} | Update a specific prompt asset version by its tag|
 
 # **promptAssetVersionControllerFindAll**
 > Array<CreatePromptAssetVersionDto> promptAssetVersionControllerFindAll()
