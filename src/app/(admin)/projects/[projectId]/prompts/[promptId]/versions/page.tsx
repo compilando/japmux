@@ -251,27 +251,6 @@ const PromptVersionsPage: React.FC = () => {
         }
     };
 
-    const handleToggleActive = async (itemToToggle: PromptVersionData) => {
-        // No es necesario verificar itemToToggle.versionTag si PromptVersionData lo garantiza
-        if (!projectId || !promptId || typeof itemToToggle.isActive === 'undefined' || !itemToToggle.versionTag) {
-            showErrorToast('Cannot toggle status: item data is incomplete (missing versionTag).');
-            return;
-        }
-        const updatePayload = { isActive: !itemToToggle.isActive };
-        setLoading(true);
-        try {
-            await promptVersionService.update(projectId, promptId, itemToToggle.versionTag!, updatePayload as UpdatePromptVersionDto);
-            showSuccessToast(`Version ${itemToToggle.versionTag} active status toggled.`);
-            fetchData();
-        } catch (err: unknown) {
-            console.error("Error toggling active state:", err);
-            const defaultMsg = 'Failed to toggle active status.';
-            setError(getApiErrorMessage(err, defaultMsg));
-        } finally {
-            setLoading(false);
-        }
-    };
-
     // Handlers para acciones de Marketplace (copiados y adaptados de translations/page.tsx y asset versions)
     const handleRequestPublish = async (versionTag: string) => {
         if (!projectId || !promptId || !versionTag) return;
@@ -331,42 +310,60 @@ const PromptVersionsPage: React.FC = () => {
         { label: "Home", href: "/" },
         { label: "Projects", href: "/projects" },
         { label: breadcrumbLoading ? projectId : (project?.name || projectId), href: `/projects/${projectId}/prompts` },
-        { label: breadcrumbLoading ? promptId : (prompt?.name || promptId), href: `/projects/${projectId}/prompts/${promptId}/versions` },
+        { label: breadcrumbLoading ? promptId : (prompt?.name || promptId) },
         { label: "Versions" }
     ];
 
-    if (breadcrumbLoading || loading) return <p>Loading version details...</p>;
+    if (breadcrumbLoading || loading) return <p>Loading page details...</p>;
     if (error) return <p className="text-red-500">{error}</p>;
 
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
-            <div className="flex justify-end mb-4">
-                <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600" disabled={breadcrumbLoading || loading}>
+
+            <div className="my-4">
+                <h1 className="text-2xl font-bold text-black dark:text-white mb-2">Manage Prompt Versions</h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Manage the different versions of your prompt. Each version can have its own prompt text, marketplace status (if applicable), and a dedicated set of translations. Create new versions to iterate on your prompt, test changes, or maintain stable releases for consumption.
+                </p>
+            </div>
+
+            {error && <p className="text-red-500 py-2 text-center">Error loading versions: {error}</p>}
+
+            <div className="flex justify-end items-center mb-6 mt-4">
+                <button
+                    onClick={handleAdd}
+                    className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50"
+                    disabled={loading}
+                >
                     Add Prompt Version
                 </button>
             </div>
-            <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                {itemsList.length === 0 && !loading ? (
+
+            {loading && <p className="text-center py-4">Loading versions...</p>}
+
+            {!loading && !error && (
+                itemsList.length === 0 ? (
                     <p className="text-center py-4 text-gray-500 dark:text-gray-400">No versions found for this prompt.</p>
                 ) : (
-                    <PromptVersionsTable
-                        promptVersions={itemsList}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        onToggleActive={handleToggleActive}
-                        onRequestPublish={handleRequestPublish}
-                        onUnpublish={handleUnpublish}
-                        marketplaceActionLoading={marketplaceActionLoading}
-                        projectId={projectId}
-                        promptIdForTable={promptId}
-                    />
+                    <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                        <PromptVersionsTable
+                            promptVersions={itemsList}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            onRequestPublish={handleRequestPublish}
+                            onUnpublish={handleUnpublish}
+                            marketplaceActionLoading={marketplaceActionLoading}
+                            projectId={projectId}
+                            promptIdForTable={promptId}
+                        />
+                    </div>
                 )
-                }
-            </div>
+            )}
+
             {isModalOpen && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
-                    <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-6xl">
                         <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                             {editingItem ? `Edit Version (${editingItem.versionTag})` : 'Add New Prompt Version'}
                         </h3>

@@ -187,7 +187,7 @@ const PromptAssetsPage: React.FC = () => {
                     Prompt Assets for {selectedProjectFull?.name || currentProjectId}
                 </h2>
                 <p className="text-base font-medium dark:text-white">
-                    Create, view, and manage all prompts and prompt assets associated with this project.
+                    Create, view, and manage all prompt assets associated with this prompt.
                 </p>
             </div>
 
@@ -217,7 +217,7 @@ const PromptAssetsPage: React.FC = () => {
             </div>
 
             {isModalOpen && currentProjectId && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
                     <div className="relative p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white dark:bg-gray-900">
                         <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                             {editingItem ? 'Edit Prompt Asset' : 'Add New Prompt Asset'}

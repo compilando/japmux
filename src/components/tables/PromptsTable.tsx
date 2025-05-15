@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePrompts } from '@/context/PromptContext';
 import CopyButton from '../common/CopyButton';
 import { TrashBinIcon, PencilIcon } from "@/icons";
+import { BoltIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 
 interface PromptsTableProps {
     prompts: PromptDto[];
@@ -42,32 +43,38 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{item.name}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 truncate max-w-xs" title={item.description}>{item.description || '-'}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
+                                <Link
+                                    href={`/serveprompt?promptId=${item.id}`}
+                                    className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 p-1 inline-block"
+                                    title="Test/Serve Prompt"
+                                >
+                                    <BoltIcon className="w-5 h-5" />
+                                </Link>
                                 {projectId && (
                                     <Link
                                         href={`/projects/${projectId}/prompts/${item.id}/versions`}
                                         onClick={() => selectPrompt(item.id)}
-                                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600"
+                                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600 p-1 inline-block"
+                                        title="Manage Versions"
                                     >
-                                        Versions
+                                        <DocumentDuplicateIcon className="w-5 h-5" />
                                     </Link>
                                 )}
-                                <div className="inline-flex items-center gap-3">
-                                    <button
-                                        onClick={() => onEdit(item)}
-                                        className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        aria-label="Edit Prompt"
-                                    >
-                                        <PencilIcon className="w-4 h-4" />
-                                    </button>
-                                    <button
-                                        onClick={() => onDelete(item.id)}
-                                        className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        aria-label="Delete Prompt"
-                                    >
-                                        <TrashBinIcon className="w-4 h-4" />
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={() => onEdit(item)}
+                                    className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed inline-block"
+                                    aria-label="Edit Prompt"
+                                >
+                                    <PencilIcon className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => onDelete(item.id)}
+                                    className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed inline-block"
+                                    aria-label="Delete Prompt"
+                                >
+                                    <TrashBinIcon className="w-4 h-4" />
+                                </button>
                             </td>
                         </tr>
                     ))}

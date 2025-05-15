@@ -50,7 +50,9 @@ export default function AdminLayout({
             className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin} w-full bg-white dark:bg-gray-900`}
           >
             <AppHeader />
-            <div className="p-6 mx-auto w-[95%] md:p-8 bg-white dark:bg-gray-900">{children}</div>
+            <div className="p-6 mx-auto w-[95%] md:p-8 bg-white dark:bg-gray-900">
+              {children}
+            </div>
           </div>
         </div>
       </PromptProvider>

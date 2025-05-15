@@ -15,7 +15,7 @@ const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ crumbs }) => {
   const pageTitle = crumbs[crumbs.length - 1]?.label || 'Page';
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-4">
       <h2
         className="text-xl font-semibold text-gray-800 dark:text-white/90"
         x-text="pageName"

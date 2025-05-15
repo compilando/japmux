@@ -137,7 +137,7 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Texto Original
+                    Original Text
                 </label>
                 <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
                     <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{versionText}</p>

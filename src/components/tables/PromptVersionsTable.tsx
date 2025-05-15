@@ -10,7 +10,6 @@ interface PromptVersionsTableProps {
     promptIdForTable: string;
     onEdit: (item: PromptVersionData) => void;
     onDelete: (item: PromptVersionData) => void;
-    onToggleActive?: (item: PromptVersionData) => void;
     onRequestPublish: (versionTag: string) => void;
     onUnpublish: (versionTag: string) => void;
     marketplaceActionLoading: Record<string, boolean>;
@@ -22,7 +21,6 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
     promptIdForTable,
     onEdit,
     onDelete,
-    onToggleActive,
     onRequestPublish,
     onUnpublish,
     marketplaceActionLoading
@@ -34,7 +32,6 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                     <tr>
                         <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tag</th>
                         <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Content (Excerpt)</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Active</th>
                         <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Marketplace Status</th>
                         <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -56,20 +53,6 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                     </div>
                                 </td>
                                 <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 truncate max-w-xs" title={item.promptText}>{item.promptText?.substring(0, 100)}{item.promptText && item.promptText.length > 100 ? '...' : ''}</td>
-                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                    {item.isActive ?
-                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">Active</span> :
-                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100">Inactive</span>
-                                    }
-                                    {onToggleActive && (
-                                        <button
-                                            onClick={() => onToggleActive(item)}
-                                            className="ml-2 px-2 py-0.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                        >
-                                            Toggle
-                                        </button>
-                                    )}
-                                </td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${status === 'PUBLISHED' ? 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100' : status === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-600 dark:text-yellow-100' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'}`}>
                                         {status || 'NOT_PUBLISHED'}

@@ -35,7 +35,44 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = memo(({
   subMenuHeight,
   subMenuRefs,
 }) => {
-  const isActive = openSubmenu === index || pathname === nav.path;
+  const isDirectPathMatch = nav.path ? pathname === nav.path : false;
+  const isParentOfActivePath = nav.path ? pathname.startsWith(nav.path) : false;
+  const isSubmenuOpen = openSubmenu === index;
+
+  const isParentOfActiveSubItem = nav.subItems?.some(subItem => subItem.path && pathname.startsWith(subItem.path)) || false;
+
+  const isActive =
+    isDirectPathMatch ||                                  // Coincidencia directa de la ruta del NavItem
+    (isParentOfActivePath && !nav.subItems?.length) ||    // El NavItem es un enlace final y padre de la ruta actual
+    (isSubmenuOpen && isParentOfActiveSubItem);           // El submenú de ESTE NavItem está abierto Y es padre de un subítem activo
+
+  // DEBUGGING LOG START
+  if (nav.name === "Prompt Execution") {
+    console.log(`[SidebarNavItem] Debug for: ${nav.name}`);
+    console.log(`  pathname: ${pathname}`);
+    console.log(`  nav.path: ${nav.path}`);
+    console.log(`  isDirectPathMatch: ${isDirectPathMatch}`);
+    console.log(`  isParentOfActivePath: ${isParentOfActivePath}`);
+    console.log(`  isSubmenuOpen: ${isSubmenuOpen}`);
+    console.log(`  isParentOfActiveSubItem: ${isParentOfActiveSubItem}`);
+    console.log(`  (isParentOfActivePath && !nav.subItems?.length): ${isParentOfActivePath && !nav.subItems?.length}`);
+    console.log(`  isActive: ${isActive}`);
+  }
+  // DEBUGGING LOG END
+
+  // DEBUGGING LOG FOR MANAGEMENT
+  if (nav.name === "Management") {
+    console.log(`[SidebarNavItem] Debug for: ${nav.name}`);
+    console.log(`  pathname: ${pathname}`);
+    console.log(`  nav.path: ${nav.path}`);
+    console.log(`  isDirectPathMatch: ${isDirectPathMatch}`);
+    console.log(`  isParentOfActivePath: ${isParentOfActivePath}`);
+    console.log(`  isSubmenuOpen: ${isSubmenuOpen}`);
+    console.log(`  isParentOfActiveSubItem: ${isParentOfActiveSubItem}`);
+    console.log(`  isActive: ${isActive}`);
+  }
+  // DEBUGGING LOG END
+
   const showTooltip = !isExpanded && !isHovered && !isMobileOpen;
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -62,7 +99,6 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = memo(({
           className={cn(
             "menu-item transition-all duration-200",
             isActive ? "menu-item-active" : "menu-item-inactive",
-            nav.pro && "menu-item-pro",
             nav.pro && !isActive && "menu-item-pro-inactive",
             "hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
           )}
@@ -74,7 +110,7 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = memo(({
           <div className={cn(
             "menu-item-icon transition-colors duration-200",
             isActive ? "menu-item-icon-active" : "menu-item-icon-inactive",
-            nav.pro && "menu-item-icon-pro"
+            nav.pro && !isActive && "menu-item-icon-pro-inactive"
           )}>
             {nav.icon}
           </div>
@@ -109,7 +145,7 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = memo(({
                   href={subItem.path}
                   className={cn(
                     "menu-dropdown-item transition-all duration-200",
-                    pathname === subItem.path ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive",
+                    (subItem.path && pathname.startsWith(subItem.path)) ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive",
                     "hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
                   )}
                   role="menuitem"
@@ -117,7 +153,7 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = memo(({
                 >
                   <div className={cn(
                     "menu-item-icon transition-colors duration-200",
-                    pathname === subItem.path ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                    (subItem.path && pathname.startsWith(subItem.path)) ? "menu-item-icon-active" : "menu-item-icon-inactive"
                   )}>
                     {subItem.icon}
                   </div>
@@ -127,7 +163,7 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = memo(({
                       <span
                         className={cn(
                           "menu-dropdown-badge transition-colors duration-200",
-                          pathname === subItem.path ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"
+                          (subItem.path && pathname.startsWith(subItem.path)) ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"
                         )}
                         role="status"
                         aria-label="New feature"
@@ -139,7 +175,7 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = memo(({
                       <span
                         className={cn(
                           "menu-dropdown-badge transition-colors duration-200",
-                          pathname === subItem.path ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"
+                          (subItem.path && pathname.startsWith(subItem.path)) ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"
                         )}
                         role="status"
                         aria-label="Pro feature"

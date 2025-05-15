@@ -97,17 +97,32 @@ const AppSidebar: React.FC = () => {
 
   // Calculate the correct submenu index based on the current path
   const activeSubmenuIndexBasedOnPath = React.useMemo(() => {
-    // 1. Check if the current pathname matches the path of a parent item that has subItems
-    let parentIndex = navItems.findIndex(nav => nav.path === pathname && nav.subItems && nav.subItems.length > 0);
-    if (parentIndex !== -1) {
-      return parentIndex;
-    }
+    let bestMatchIndex = -1;
+    let longestMatchPathLength = 0;
 
-    // 2. If not, check if the current pathname matches any subItem's path
-    parentIndex = navItems.findIndex(nav =>
-      nav.subItems && nav.subItems.some(subItem => subItem.path === pathname)
-    );
-    return parentIndex; // -1 if no match
+    navItems.forEach((navItem, index) => {
+      if (navItem.subItems && navItem.subItems.length > 0) {
+        navItem.subItems.forEach(subItem => {
+          if (subItem.path && pathname.startsWith(subItem.path)) {
+            if (subItem.path.length > longestMatchPathLength) {
+              longestMatchPathLength = subItem.path.length;
+              bestMatchIndex = index;
+            }
+          }
+        });
+        // Si la ruta del navItem padre (que tiene subítems) coincide directamente
+        // y es una coincidencia más larga/específica que cualquier subítem encontrado hasta ahora,
+        // ese navItem debería tener su submenú abierto.
+        // Esto es útil si el padre es un enlace en sí mismo y queremos que se expanda.
+        if (navItem.path && pathname === navItem.path) {
+          if (navItem.path.length >= longestMatchPathLength) {
+            longestMatchPathLength = navItem.path.length; // Actualizar por si este es el más largo
+            bestMatchIndex = index;
+          }
+        }
+      }
+    });
+    return bestMatchIndex;
   }, [pathname, navItems]);
 
   // Effect to synchronize the open submenu state with the calculated path index

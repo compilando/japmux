@@ -1,6 +1,62 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/api/admin-check": {
+      "get": {
+        "operationId": "AppController_adminCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/api/tenant-admin-check": {
+      "get": {
+        "operationId": "AppController_tenantAdminCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/api/user-check": {
+      "get": {
+        "operationId": "AppController_userCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/api/any-authenticated-check": {
+      "get": {
+        "operationId": "AppController_anyAuthenticatedCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
     "/api/users": {
       "post": {
         "operationId": "UserController_create",
@@ -852,6 +908,58 @@
           }
         ],
         "summary": "Get all prompts for a project",
+        "tags": [
+          "Prompts"
+        ]
+      }
+    },
+    "/api/projects/{projectId}/prompts/{promptId}": {
+      "get": {
+        "operationId": "PromptController_findOne",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "description": "The ID of the project.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "The ID (slug) of the prompt.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The prompt object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Project or Prompt not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a specific prompt by its ID (slug) for a project",
         "tags": [
           "Prompts"
         ]
@@ -2138,7 +2246,7 @@
         ]
       }
     },
-    "/serve-prompt/execute/{projectId}/{promptName}/{versionTag}/base": {
+    "/api/serve-prompt/execute/{projectId}/{promptName}/{versionTag}/base": {
       "post": {
         "operationId": "ServePromptController_executePromptWithoutLanguage",
         "parameters": [
@@ -2230,7 +2338,7 @@
         ]
       }
     },
-    "/serve-prompt/execute/{projectId}/{promptName}/{versionTag}/lang/{languageCode}": {
+    "/api/serve-prompt/execute/{projectId}/{promptName}/{versionTag}/lang/{languageCode}": {
       "post": {
         "operationId": "ServePromptController_executePromptWithLanguage",
         "parameters": [
@@ -4848,7 +4956,7 @@
         ]
       }
     },
-    "/llm-execution/execute": {
+    "/api/llm-execution/execute": {
       "post": {
         "operationId": "LlmExecutionController_executeLlm",
         "parameters": [],
@@ -6353,19 +6461,21 @@
         "properties": {
           "modelId": {
             "type": "string",
-            "description": "ID del AIModel a utilizar (de la tabla AIModel)",
+            "description": "ID of the AIModel to use (from the AIModel table)",
             "example": "clxyz..."
           },
           "promptText": {
             "type": "string",
-            "description": "El texto completo del prompt ya procesado y listo para enviar al LLM",
-            "example": "Traduce este texto a español: Hello world."
+            "description": "The complete prompt text already processed and ready to send to the LLM",
+            "example": "Translate this text to Spanish: Hello world."
           },
           "variables": {
             "type": "object",
-            "description": "Variables originales usadas para ensamblar el prompt (opcional, para logging/contexto)",
+            "description": "Original variables used to assemble the prompt (optional, for logging/context)",
             "example": {
-              "cliente": "ACME Corp"
+              "userLocale": "en-US",
+              "productName": "AwesomeProduct",
+              "maxItems": 5
             }
           }
         },

@@ -2,6 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import { CreatePromptAssetDto } from '@/services/api';
 import CopyButton from '../common/CopyButton';
+import { TrashBinIcon, PencilIcon } from "@/icons";
+import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 
 // Nueva interfaz local para incluir campos que podrían no estar en CreatePromptAssetDto
 // pero que la API podría devolver y la tabla necesita (ej: enabled)
@@ -51,12 +53,29 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
                                     {item.enabled ? 'Yes' : 'No'}
                                 </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
-                                <button onClick={() => onEdit(item)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600">Edit</button>
-                                <Link href={`/projects/${projectId}/prompt-assets/${item.key}/versions`} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600">
-                                    Versions
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
+                                <Link
+                                    href={`/projects/${projectId}/prompt-assets/${item.key}/versions`}
+                                    className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600 p-1 inline-block"
+                                    title="Manage Versions"
+                                >
+                                    <DocumentDuplicateIcon className="w-5 h-5" />
                                 </Link>
-                                <button onClick={() => onDelete(item.key)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">Delete</button>
+
+                                <button
+                                    onClick={() => onEdit(item)}
+                                    className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 p-1 inline-block"
+                                    title="Edit Asset"
+                                >
+                                    <PencilIcon className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => onDelete(item.key)}
+                                    className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600 p-1 inline-block"
+                                    title="Delete Asset"
+                                >
+                                    <TrashBinIcon className="w-4 h-4" />
+                                </button>
                             </td>
                         </tr>
                     ))}

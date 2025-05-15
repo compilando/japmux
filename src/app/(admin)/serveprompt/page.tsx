@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useProjects } from '@/context/ProjectContext';
+import { useSearchParams } from 'next/navigation';
 import {
     PromptDto,
     CreatePromptVersionDto,
@@ -55,6 +56,7 @@ const BASH_PLACEHOLDER_MSG = '# Select a project, prompt, and version to generat
 const ServePromptPage: React.FC = () => {
     const { selectedProjectId } = useProjects();
     const [isClient, setIsClient] = useState(false); // Estado para saber si estamos en cliente
+    const searchParams = useSearchParams();
 
     // --- Estados para Selecciones (usar PromptDto) ---
     const [selectedPrompt, setSelectedPrompt] = useState<SingleValue<SelectOption>>(null);
@@ -93,6 +95,51 @@ const ServePromptPage: React.FC = () => {
     useEffect(() => {
         setIsClient(true);
     }, []);
+
+    // --- Efecto para preseleccionar el prompt desde la URL ---
+    useEffect(() => {
+        console.log('[ServePromptPage] Preselection effect triggered. isClient:', isClient, 'selectedProjectId:', selectedProjectId, 'hasSearchParams:', !!searchParams);
+
+        if (!isClient || !searchParams || !selectedProjectId) {
+            console.log('[ServePromptPage] Preselection effect: Aborting, pre-conditions not met.');
+            return;
+        }
+
+        const promptIdFromQuery = searchParams.get('promptId');
+        console.log('[ServePromptPage] promptIdFromQuery:', promptIdFromQuery);
+        console.log('[ServePromptPage] current selectedPrompt state:', selectedPrompt);
+
+        if (promptIdFromQuery && !selectedPrompt) {
+            console.log(`[ServePromptPage] Conditions met: Attempting to fetch prompt with ID: ${promptIdFromQuery} for project: ${selectedProjectId}`);
+
+            // Cargar los datos del prompt específico para tener el 'label' (nombre)
+            // Asumimos que promptService.findOne(projectId, promptId) existe y devuelve { id, name, ... }
+            // Si findOne no existe o tiene otra firma, esto necesitará ajuste.
+            // Por ahora, vamos a simular la carga o asumir que necesitamos obtener el nombre de alguna forma.
+            // Lo ideal sería una llamada como:
+            promptService.findOne(selectedProjectId, promptIdFromQuery)
+                .then((promptData: PromptDto) => {
+                    console.log('[ServePromptPage] Fetched promptData:', promptData);
+                    if (promptData && promptData.id && promptData.name) {
+                        const newSelectedPrompt = { value: promptData.id, label: promptData.name };
+                        console.log('[ServePromptPage] Setting selectedPrompt to:', newSelectedPrompt);
+                        setSelectedPrompt(newSelectedPrompt);
+                        // No necesitas llamar a loadPromptOptions aquí directamente,
+                        // AsyncSelect se encargará de cargar más opciones si el usuario interactúa.
+                    } else {
+                        console.warn(`[ServePromptPage] Prompt with ID ${promptIdFromQuery} not found or data incomplete. promptData:`, promptData);
+                        // No hacer nada si el prompt no se encuentra, el usuario puede seleccionar manualmente.
+                    }
+                })
+                .catch(err => {
+                    console.error(`[ServePromptPage] Error fetching prompt by ID ${promptIdFromQuery}:`, err);
+                    // showErrorToast(`Failed to load prompt: ${promptIdFromQuery}`);
+                    // No hacer nada si falla, el usuario puede seleccionar manualmente.
+                });
+        } else {
+            console.log('[ServePromptPage] Conditions NOT met for fetching. promptIdFromQuery:', promptIdFromQuery, 'selectedPrompt:', selectedPrompt);
+        }
+    }, [isClient, searchParams, selectedProjectId, selectedPrompt, setSelectedPrompt]);
 
     // --- Efecto para cargar tamaño de fuente (SOLO en cliente) ---
     useEffect(() => {
@@ -159,6 +206,7 @@ const ServePromptPage: React.FC = () => {
         try {
             // promptService.findAll no toma un segundo argumento para búsqueda/filtrado.
             // AsyncSelect cargará todos y filtrará en el cliente.
+            // Si initialPromptData está seteado y coincide con alguna opción, AsyncSelect debería mostrarlo.
             const fetchedPrompts = await promptService.findAll(selectedProjectId);
             let options: PromptDto[] = [];
             if (Array.isArray(fetchedPrompts)) {
@@ -513,10 +561,18 @@ echo "$API_RESPONSE"
         }
     }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, selectedAiModel, variableInputs, currentPromptText]);
 
+    // --- Placeholder para API Token (debe ser gestionado de forma segura) ---
+    const API_TOKEN_PLACEHOLDER = 'YOUR_AUTH_TOKEN'; // Mover a .env o configuración
+
     // --- Render ---
     return (
         <div className={`${styles.servePromptContainer} bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen`}>
-            <h1 className="text-2xl font-bold text-black dark:text-white mb-6">Serve & Test Prompt</h1>
+            <div className="my-4">
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Serve & Test Prompts</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Test and execute your configured prompts with different variables and models.
+                </p>
+            </div>
 
             {error && (
                 <div className={`${styles.errorBanner} bg-yellow-100 border-yellow-400 text-yellow-700 dark:bg-yellow-700 dark:text-yellow-100 dark:border-yellow-600`}>
@@ -569,8 +625,6 @@ echo "$API_RESPONSE"
                         </div>
                         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                             The API base URL for this command is <code>{displayedCurlBaseUrl}</code>.
-                            <br />You can typically find your auth token by inspecting API request headers in your browser's developer tools, or by using an authentication flow similar to the example script in the other tab.
-                            <br />Refer to comments within the cURL command above for more details on the request body (e.g., for 'variables').
                         </p>
                     </div>
                 )}
@@ -594,9 +648,9 @@ echo "$API_RESPONSE"
                             </pre>
                         </div>
                         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            <strong>Important:</strong> This is an example. You MUST adjust the configuration variables at the top of the script (<code>LOGIN_ENDPOINT_URL</code>, <code>USERNAME</code>, <code>PASSWORD</code>, <code>JQ_TOKEN_PATH</code>) to match your specific API's authentication mechanism and user credentials.
-                            An error like <strong>401 Unauthorized</strong> during "Step 1: Authenticating" typically means the <code>USERNAME</code>, <code>PASSWORD</code>, or <code>LOGIN_ENDPOINT_URL</code> in the script are incorrect for your API. Please double-check these values in the script's configuration section.
-                            The script assumes the login endpoint is on the same base URL (<code>{displayedCurlBaseUrl}</code>) as the prompt serving API; adjust <code>LOGIN_ENDPOINT_URL</code> if it's different.
+                            <strong>Important:</strong> This is an example. You MUST adjust the configuration variables at the top of the script (<code>LOGIN_ENDPOINT_URL</code>, <code>USERNAME</code>, <code>PASSWORD</code>) to match your specific API's authentication mechanism and user credentials.
+                            <br />An error like <strong>401 Unauthorized</strong> during "Step 1: Authenticating" typically means the <code>USERNAME</code>, <code>PASSWORD</code>, or <code>LOGIN_ENDPOINT_URL</code> in the script are incorrect for your API.
+                            <br />The script assumes the login endpoint is on the same base URL (<code>{displayedCurlBaseUrl}</code>) as the prompt serving API; adjust <code>LOGIN_ENDPOINT_URL</code> if it's different.
                         </p>
                     </div>
                 )}
@@ -735,16 +789,30 @@ echo "$API_RESPONSE"
                     <div className={`${styles.resultsSection} bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow`}>
                         <h2 className="text-xl font-semibold mb-3 text-black dark:text-white">Execution Results</h2>
                         {executionResult && (
-                            <div className={`${styles.metadataContainer} text-gray-600 dark:text-gray-400`}>
-                                {executionResult.modelUsed && (
-                                    <p><span className={`${styles.infoLabel} text-gray-800 dark:text-gray-200`}>Model Used:</span> {executionResult.modelUsed}</p>
-                                )}
-                                {executionResult.providerUsed && (
-                                    <p><span className={`${styles.infoLabel} text-gray-800 dark:text-gray-200`}>Provider Used:</span> {executionResult.providerUsed}</p>
-                                )}
-                            </div>
+                            <>
+                                <div className={`${styles.metadataContainer} text-gray-600 dark:text-gray-400 mb-3`}>
+                                    {executionResult.modelUsed && (
+                                        <p><span className={`${styles.infoLabel} text-gray-800 dark:text-gray-200`}>Model Used:</span> {executionResult.modelUsed}</p>
+                                    )}
+                                    {executionResult.providerUsed && (
+                                        <p><span className={`${styles.infoLabel} text-gray-800 dark:text-gray-200`}>Provider Used:</span> {executionResult.providerUsed}</p>
+                                    )}
+                                </div>
+                                <textarea
+                                    id="execution-result-text"
+                                    readOnly
+                                    value={executionResult.result || "No result text received."}
+                                    className={`${styles.promptPreview} ${getFontSizeClass(selectedFontSize)} w-full p-3 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500`}
+                                    rows={10}
+                                />
+                            </>
                         )}
-                        {/* El resultTextarea ya está estilizado para dark mode desde el CSS Module */}
+                        {!executionResult && !isExecuting && (
+                            <p className="text-gray-500 dark:text-gray-400">Execute a prompt to see the results here.</p>
+                        )}
+                        {isExecuting && (
+                            <p className="text-gray-500 dark:text-gray-400">Executing...</p>
+                        )}
                     </div>
                 </div>
             )}

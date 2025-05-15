@@ -205,6 +205,12 @@ const PromptTranslationsPage: React.FC = () => {
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
+            <div className="my-4">
+                <h1 className="text-2xl font-bold text-black dark:text-white mb-2">Manage Translations</h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Manage translations for a specific version of your prompt. Each translation allows the prompt to be served in a different language, adapting its content while maintaining the core structure and variables of the base prompt version.
+                </p>
+            </div>
             {error && <p className="text-red-500 py-2">Error loading translations: {error}</p>}
 
             <div className="my-4 p-4 border rounded-md shadow bg-white dark:bg-gray-800">

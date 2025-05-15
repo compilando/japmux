@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**llmExecutionControllerExecuteLlm**](#llmexecutioncontrollerexecutellm) | **POST** /llm-execution/execute | Executes a pre-assembled prompt using a specified AI Model via LangChain|
+|[**llmExecutionControllerExecuteLlm**](#llmexecutioncontrollerexecutellm) | **POST** /api/llm-execution/execute | Executes a pre-assembled prompt using a specified AI Model via LangChain|
 
 # **llmExecutionControllerExecuteLlm**
 > any llmExecutionControllerExecuteLlm(executeLlmDto)

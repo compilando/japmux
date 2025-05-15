@@ -151,9 +151,21 @@ const PromptsPage: React.FC = () => {
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
-            <div className="flex justify-between items-center my-4">
-                <h1 className="text-2xl font-semibold text-gray-800 dark:text-white">Prompts Management</h1>
-                <button onClick={handleAddPrompt} className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+            <div className="my-6">
+                <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
+                    Prompts for {project?.name || projectId}
+                </h2>
+                <p className="text-base font-medium text-gray-700 dark:text-gray-300">
+                    Create, view, and manage all prompts associated with this project. Each prompt can have multiple versions and translations.
+                </p>
+            </div>
+
+            <div className="flex justify-end mb-4">
+                <button
+                    onClick={handleAddPrompt}
+                    className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                    disabled={loading || breadcrumbLoading}
+                >
                     Add New Prompt
                 </button>
             </div>
@@ -169,6 +181,7 @@ const PromptsPage: React.FC = () => {
                     onEdit={handleEditPrompt}
                     onDelete={handleDeletePrompt}
                     loading={loading}
+                    projectId={projectId}
                 />
             )}
 
