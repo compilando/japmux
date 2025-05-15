@@ -564,6 +564,29 @@ echo "$API_RESPONSE"
     // --- Placeholder para API Token (debe ser gestionado de forma segura) ---
     const API_TOKEN_PLACEHOLDER = 'YOUR_AUTH_TOKEN'; // Mover a .env o configuración
 
+    // --- Efecto para resetear selecciones cuando cambia el proyecto global ---
+    useEffect(() => {
+        if (!isClient) return; // Asegurar que esto solo se ejecute después del montaje inicial y cuando selectedProjectId realmente cambie
+        console.log('[ServePromptPage] selectedProjectId from context changed to:', selectedProjectId, '- Resetting dependent states.');
+
+        setSelectedPrompt(null);
+        setVersions([]);
+        setSelectedVersion(null);
+        setTranslations([]);
+        setSelectedLanguage(null);
+        setCurrentPromptText('');
+        setPromptVariables({});
+        setVariableInputs({});
+        setExecutionResult(null);
+        setCurlCommand(CURL_PLACEHOLDER_MSG);
+        setBashScriptExample(BASH_PLACEHOLDER_MSG);
+        setError(null);
+
+        // El AsyncSelect de prompts se actualizará debido al cambio de 'key' o porque su 'value' (selectedPrompt) es ahora null.
+        // Los demás useEffect que dependen de selectedPrompt, selectedVersion, etc., se ejecutarán 
+        // pero no harán fetches ya que sus dependencias clave serán null, evitando llamadas innecesarias.
+    }, [selectedProjectId, isClient]); // Depender de isClient también para evitar ejecución en SSR o antes de que el contexto esté listo
+
     // --- Render ---
     return (
         <div className={`${styles.servePromptContainer} bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen`}>
@@ -665,17 +688,17 @@ echo "$API_RESPONSE"
                 <div className={styles.selectWrapper}>
                     <label htmlFor="prompt-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">1. Select Prompt:</label>
                     <AsyncSelect
+                        key={selectedProjectId || 'no-project'} // Añadida key para forzar re-render/reset
                         id="prompt-select"
-                        cacheOptions // Opcional: cachea las opciones cargadas
-                        defaultOptions // Opcional: carga un conjunto inicial de opciones
+                        cacheOptions
+                        defaultOptions // Considerar si defaultOptions necesita ser limpiado o re-evaluado
                         loadOptions={loadPromptOptions}
                         value={selectedPrompt}
                         onChange={handlePromptChange}
-                        isDisabled={!selectedProjectId} // Se deshabilita si no hay proyecto
+                        isDisabled={!selectedProjectId}
                         placeholder={selectedProjectId ? "Type to search prompts..." : "Select a project first"}
                         classNamePrefix="react-select"
                         className="react-select-container dark:react-select-container-dark"
-                    // key={selectedProjectId} // Forzar recarga si cambia el proyecto y queremos limpiar caché/defaultOptions
                     />
                 </div>
 
