@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { CreatePromptAssetDto } from '@/services/api';
 import CopyButton from '../common/CopyButton';
 import { TrashBinIcon, PencilIcon } from "@/icons";
-import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { ClockIcon } from '@heroicons/react/24/outline';
 
 // Nueva interfaz local para incluir campos que podrían no estar en CreatePromptAssetDto
 // pero que la API podría devolver y la tabla necesita (ej: enabled)
@@ -63,7 +63,7 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
                                     className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600 p-1 inline-block"
                                     title="Manage Versions"
                                 >
-                                    <DocumentDuplicateIcon />
+                                    <ClockIcon className="w-5 h-5" />
                                 </Link>
 
                                 <button

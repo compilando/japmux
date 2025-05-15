@@ -10,7 +10,6 @@ Name | Type | Description | Notes
 **tags** | **Set&lt;string&gt;** | List of tag names to associate. | [optional] [default to undefined]
 **promptText** | **string** | Base prompt text for the first version (v1.0.0) | [default to undefined]
 **initialTranslations** | [**Array&lt;InitialTranslationDto&gt;**](InitialTranslationDto.md) | Optional initial translations for the first version | [optional] [default to undefined]
-**tenantId** | **string** | ID del tenant al que pertenece este prompt | [default to undefined]
 
 ## Example
 
@@ -23,7 +22,6 @@ const instance: CreatePromptDto = {
     tags,
     promptText,
     initialTranslations,
-    tenantId,
 };
 ```
 

@@ -58,7 +58,7 @@ const ServePromptForm: React.FC = () => {
                         id="promptId"
                         value={promptId}
                         onChange={(e) => setPromptId(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         placeholder="e.g., bienvenida-formal-es"
                     />
                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Ignores other filters if provided.</p>
@@ -70,7 +70,7 @@ const ServePromptForm: React.FC = () => {
                         id="languageCode"
                         value={languageCode}
                         onChange={(e) => setLanguageCode(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         placeholder="e.g., es-ES, en-US"
                     />
                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">For translation. Otherwise, uses base text.</p>
@@ -82,7 +82,7 @@ const ServePromptForm: React.FC = () => {
                         id="versionTag"
                         value={versionTag}
                         onChange={(e) => setVersionTag(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50"
+                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50"
                         placeholder="e.g., v1.2.1"
                         disabled={useLatestActive || !!promptId} // Disable if using latest active or promptId is set
                     />

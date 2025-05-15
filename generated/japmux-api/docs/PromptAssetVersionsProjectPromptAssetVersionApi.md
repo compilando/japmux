@@ -4,77 +4,12 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**promptAssetVersionControllerCreate**](#promptassetversioncontrollercreate) | **POST** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions | Create a new version for a specific prompt asset|
 |[**promptAssetVersionControllerFindAll**](#promptassetversioncontrollerfindall) | **GET** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions | Get all versions for a specific prompt asset|
 |[**promptAssetVersionControllerFindOneByTag**](#promptassetversioncontrollerfindonebytag) | **GET** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag} | Get a specific prompt asset version by its tag|
 |[**promptAssetVersionControllerRemove**](#promptassetversioncontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag} | Delete a specific prompt asset version by its tag|
 |[**promptAssetVersionControllerRequestPublish**](#promptassetversioncontrollerrequestpublish) | **POST** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/request-publish | Request to publish an asset version to the marketplace|
 |[**promptAssetVersionControllerUnpublish**](#promptassetversioncontrollerunpublish) | **POST** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag}/unpublish | Unpublish an asset version from the marketplace|
 |[**promptAssetVersionControllerUpdate**](#promptassetversioncontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptId}/prompt-assets/{assetKey}/versions/{versionTag} | Update a specific prompt asset version by its tag|
-
-# **promptAssetVersionControllerCreate**
-> CreatePromptAssetVersionDto promptAssetVersionControllerCreate(createPromptAssetVersionDto)
-
-
-### Example
-
-```typescript
-import {
-    PromptAssetVersionsProjectPromptAssetVersionApi,
-    Configuration,
-    CreatePromptAssetVersionDto
-} from './api';
-
-const configuration = new Configuration();
-const apiInstance = new PromptAssetVersionsProjectPromptAssetVersionApi(configuration);
-
-let projectId: string; //ID of the Project the Prompt belongs to (default to undefined)
-let promptId: string; //ID (slug) of the Prompt (default to undefined)
-let assetKey: string; //Key of the PromptAsset (default to undefined)
-let createPromptAssetVersionDto: CreatePromptAssetVersionDto; //
-
-const { status, data } = await apiInstance.promptAssetVersionControllerCreate(
-    projectId,
-    promptId,
-    assetKey,
-    createPromptAssetVersionDto
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **createPromptAssetVersionDto** | **CreatePromptAssetVersionDto**|  | |
-| **projectId** | [**string**] | ID of the Project the Prompt belongs to | defaults to undefined|
-| **promptId** | [**string**] | ID (slug) of the Prompt | defaults to undefined|
-| **assetKey** | [**string**] | Key of the PromptAsset | defaults to undefined|
-
-
-### Return type
-
-**CreatePromptAssetVersionDto**
-
-### Authorization
-
-[bearer](../README.md#bearer)
-
-### HTTP request headers
-
- - **Content-Type**: application/json
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**201** | Version created. |  -  |
-|**400** | Invalid data (e.g., duplicate versionTag). |  -  |
-|**401** | Unauthorized. |  -  |
-|**403** | Forbidden Access to Project. |  -  |
-|**404** | Project or Asset not found. |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **promptAssetVersionControllerFindAll**
 > Array<CreatePromptAssetVersionDto> promptAssetVersionControllerFindAll()

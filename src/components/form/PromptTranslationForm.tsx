@@ -107,23 +107,29 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
             const result = await rawExecutionService.executeRaw(executionDto);
             console.log('Resultado de la traducción:', result);
 
-            if (result?.response) {
+            if (result && typeof result === 'object' && 'response' in result) {
+                const resultWithResponse = result as { response: any };
                 try {
                     let parsedResponse;
-                    if (typeof result.response === 'string') {
-                        const cleanResponse = result.response
+                    if (typeof resultWithResponse.response === 'string') {
+                        const cleanResponse = resultWithResponse.response
                             .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
                             .replace(/\n\s+/g, '\n')
                             .trim();
 
-                        parsedResponse = JSON.parse(cleanResponse);
+                        if (cleanResponse) {
+                            parsedResponse = JSON.parse(cleanResponse);
+                        } else {
+                            throw new Error('Cleaned response is empty, cannot parse JSON.');
+                        }
+
                     } else {
-                        parsedResponse = result.response;
+                        parsedResponse = resultWithResponse.response;
                     }
 
                     console.log('Respuesta parseada:', parsedResponse);
 
-                    if (parsedResponse.translatedText) {
+                    if (parsedResponse && typeof parsedResponse === 'object' && 'translatedText' in parsedResponse && typeof parsedResponse.translatedText === 'string') {
                         const cleanText = parsedResponse.translatedText
                             .split('\n')
                             .map((line: string) => line.trim())
@@ -132,15 +138,15 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
 
                         setPromptText(cleanText);
                     } else {
-                        throw new Error('No se encontró el texto traducido en la respuesta');
+                        throw new Error('No se encontró el texto traducido en la respuesta o el formato es incorrecto.');
                     }
                 } catch (parseError) {
                     console.error('Error al parsear la respuesta:', parseError);
-                    console.error('Respuesta recibida:', result.response);
+                    console.error('Respuesta recibida (antes de parsear):', resultWithResponse.response);
                     throw new Error('Error al procesar la respuesta del servicio de traducción');
                 }
             } else {
-                throw new Error('No se recibió una respuesta válida del servicio de traducción');
+                throw new Error('No se recibió una respuesta válida o con el formato esperado del servicio de traducción');
             }
         } catch (error) {
             console.error('Error en la traducción:', error);
@@ -170,7 +176,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Original Text
@@ -190,7 +196,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
                         value={languageCode}
                         onChange={handleLanguageCodeChange}
                         disabled={!!initialData || loadingRegions}
-                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         required
                     >
                         <option value="">Selecciona una región</option>
@@ -234,13 +240,14 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                    disabled={isTranslating}
                 >
                     {isEditing ? 'Actualizar' : 'Guardar'}
                 </button>

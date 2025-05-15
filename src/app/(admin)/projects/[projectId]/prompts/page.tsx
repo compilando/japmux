@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import {
     // Prompt, // Does not exist or is not used directly
     CreatePromptDto,
@@ -36,12 +36,11 @@ const PromptsPage: React.FC = () => {
     const [prompts, setPrompts] = useState<PromptDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingPrompt, setEditingPrompt] = useState<CreatePromptDto | null>(null);
     const [project, setProject] = useState<CreateProjectDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     const params = useParams();
+    const router = useRouter();
     const projectId = params.projectId as string;
 
     useEffect(() => {
@@ -78,26 +77,16 @@ const PromptsPage: React.FC = () => {
     }, [fetchPrompts]);
 
     const handleAddPrompt = () => {
-        setEditingPrompt(null);
-        setIsModalOpen(true);
+        router.push(`/projects/${projectId}/prompts/new`);
     };
 
     const handleEditPrompt = (promptToEdit: PromptDto) => {
-        // Definir una interfaz extendida para el promptToEdit con campo opcional promptText
-        interface PromptWithOptionalPromptText extends PromptDto {
-            promptText?: string;
+        if (promptToEdit && promptToEdit.id) {
+            router.push(`/projects/${projectId}/prompts/${promptToEdit.id}/edit`);
+        } else {
+            showErrorToast("Prompt ID is missing, cannot navigate to edit page.");
+            console.error("Attempted to edit prompt without an ID:", promptToEdit);
         }
-
-        const typedPromptToEdit = promptToEdit as PromptWithOptionalPromptText;
-
-        const formInitialData: CreatePromptDto = {
-            name: typedPromptToEdit.name,
-            description: typedPromptToEdit.description,
-            promptText: typedPromptToEdit.promptText || '',
-            tenantId: projectId,
-        };
-        setEditingPrompt(formInitialData);
-        setIsModalOpen(true);
     };
 
     const handleDeletePrompt = async (promptIdToDelete: string, promptName?: string) => {
@@ -114,28 +103,6 @@ const PromptsPage: React.FC = () => {
             } finally {
                 setLoading(false);
             }
-        }
-    };
-
-    const handleSavePrompt = async (promptPayload: CreatePromptDto | UpdatePromptDto) => {
-        if (!projectId) return;
-        setLoading(true);
-        setError(null);
-        try {
-            if (editingPrompt && editingPrompt.name) {
-                await promptService.update(projectId, editingPrompt.name, promptPayload as UpdatePromptDto);
-                showSuccessToast(`Prompt ${editingPrompt.name} updated.`);
-            } else {
-                await promptService.create(projectId, promptPayload as CreatePromptDto);
-                showSuccessToast(`Prompt ${(promptPayload as CreatePromptDto).name} created successfully.`);
-            }
-            setIsModalOpen(false);
-            fetchPrompts();
-        } catch (err: unknown) {
-            console.error("Error saving prompt:", err);
-            setError(getApiErrorMessage(err, "Failed to save prompt."));
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -183,25 +150,6 @@ const PromptsPage: React.FC = () => {
                     loading={loading}
                     projectId={projectId}
                 />
-            )}
-
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-                    <div className="relative p-6 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-800">
-                        <h3 className="text-xl font-semibold leading-6 text-gray-900 dark:text-white mb-4">
-                            {editingPrompt ? `Edit Prompt: ${editingPrompt.name}` : 'Create New Prompt'}
-                        </h3>
-                        <PromptForm
-                            initialData={editingPrompt}
-                            projectId={projectId}
-                            onSave={handleSavePrompt}
-                            onCancel={() => {
-                                setIsModalOpen(false);
-                                setEditingPrompt(null);
-                            }}
-                        />
-                    </div>
-                </div>
             )}
         </>
     );

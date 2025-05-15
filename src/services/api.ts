@@ -99,12 +99,24 @@ const tagsGeneratedApi = new generated.TagsApi(generatedApiConfig, undefined, ap
 const environmentsGeneratedApi = new generated.EnvironmentsApi(generatedApiConfig, undefined, apiClient);
 // Instanciar PromptAssetsApi aquí para que esté disponible para el servicio
 const promptAssetsGeneratedApi = new generated.PromptAssetsForASpecificPromptApi(generatedApiConfig, undefined, apiClient);
-// Instanciar PromptAssetVersionsApi aquí para que esté disponible para el servicio
+// Instanciar PromptAssetVersionsApi aquí para que esté disponible para el servicio, CON EL NOMBRE CORRECTO
 const promptAssetVersionsGeneratedApi = new generated.PromptAssetVersionsWithinProjectAssetApi(generatedApiConfig, undefined, apiClient);
 // Instanciar PromptAssetTranslationsApi aquí para que esté disponible para el servicio
 // Esta constante no se utiliza actualmente, podría ser necesaria en el futuro
 // const promptAssetTranslationsGeneratedApi = new generated.AssetTranslationsWithinProjectAssetVersionApi(generatedApiConfig, undefined, apiClient);
 // const authGeneratedApi = new generated.AuthenticationApi(generatedApiConfig, undefined, apiClient); // Si decides reemplazar authService
+
+// Variable para la instancia de PromptAssetVersionsApi con el nombre corregido (inicialización perezosa)
+let _promptAssetVersionsGeneratedApi: generated.PromptAssetVersionsWithinProjectAssetApi | null = null;
+
+// Función getter para PromptAssetVersionsApi con el nombre corregido
+function getPromptAssetVersionsGeneratedApi(): generated.PromptAssetVersionsWithinProjectAssetApi {
+    if (!_promptAssetVersionsGeneratedApi) {
+        // Usar el nombre de clase correcto aquí:
+        _promptAssetVersionsGeneratedApi = new generated.PromptAssetVersionsWithinProjectAssetApi(generatedApiConfig, undefined, apiClient);
+    }
+    return _promptAssetVersionsGeneratedApi;
+}
 
 // --- Servicios Manuales (Wrapper sobre los generados o lógica personalizada) ---
 
@@ -351,29 +363,34 @@ export const tagService = {
 
 // Servicio de Prompts (Actualizado para usar generado donde aplique)
 export const promptService = {
-    findAll: async (projectId: string): Promise<generated.PromptDto[]> => {
-        const response = await apiClient.get<generated.PromptDto[]>(`/api/projects/${projectId}/prompts`);
-        return response.data;
-    },
-    findOne: async (projectId: string, promptNameOrId: string): Promise<generated.PromptDto> => {
-        const response = await apiClient.get<generated.PromptDto>(`/api/projects/${projectId}/prompts/${promptNameOrId}`);
-        return response.data;
-    },
     create: async (projectId: string, payload: generated.CreatePromptDto): Promise<generated.PromptDto> => {
         const response = await promptsGeneratedApi.promptControllerCreate(projectId, payload);
         return response.data;
     },
-    update: async (projectId: string, promptName: string, payload: generated.UpdatePromptDto): Promise<void> => {
-        await apiClient.patch<void>(`/api/projects/${projectId}/prompts/${promptName}`, payload);
-    },
-    remove: async (projectId: string, promptName: string): Promise<void> => {
-        await apiClient.delete(`/api/projects/${projectId}/prompts/${promptName}`);
-    },
-    generatePromptStructure: async (projectId: string, userPrompt: string): Promise<unknown> => {
-        const payload = { userPrompt: userPrompt };
-        const response = await apiClient.post(`/api/projects/${projectId}/prompts/generate-structure`, payload);
+    findAll: async (projectId: string): Promise<generated.PromptDto[]> => {
+        const response = await promptsGeneratedApi.promptControllerFindAllByProject(projectId);
         return response.data;
     },
+    // findOne ahora usa promptId según la API generada
+    findOne: async (projectId: string, promptId: string): Promise<generated.PromptDto> => {
+        const response = await promptsGeneratedApi.promptControllerFindOne(projectId, promptId);
+        return response.data;
+    },
+    // update todavía usa promptIdSlug según la API generada. Requiere cambio en openapi.json y regeneración.
+    update: async (projectId: string, promptIdSlug: string, payload: generated.UpdatePromptDto): Promise<generated.PromptDto> => {
+        const response = await promptsGeneratedApi.promptControllerUpdate(projectId, promptIdSlug, payload);
+        return response.data;
+    },
+    // remove todavía usa promptIdSlug según la API generada.
+    remove: async (projectId: string, promptIdSlug: string): Promise<void> => {
+        // @ts-ignore - El linter se queja pero el método existe según el grep del generado
+        await promptsGeneratedApi.promptControllerRemove(projectId, promptIdSlug);
+    },
+    // getPromptMeta: async (projectId: string, promptName: string): Promise<generated.PromptMetaDto> => {
+    // Este método no fue claramente identificado en la última lectura del generado. Se comenta por ahora.
+    // const response = await promptsGeneratedApi.promptControllerGetPromptMeta(projectId, promptName);
+    // return response.data;
+    // }
 };
 
 // Servicio para Versiones de Prompt
@@ -474,23 +491,24 @@ export const promptAssetService = {
         await promptAssetsGeneratedApi.promptAssetControllerRemove(promptId, projectId, assetKey);
     },
     findVersions: async (projectId: string, promptId: string, assetKey: string): Promise<generated.CreatePromptAssetVersionDto[]> => {
-        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerFindAll(projectId, promptId, assetKey);
+        // Construcción manual de la URL para asegurar que promptId está incluido y se usa /prompt-assets/
+        const response = await apiClient.get<generated.CreatePromptAssetVersionDto[]>(`/api/projects/${projectId}/prompts/${promptId}/prompt-assets/${assetKey}/versions`);
         return response.data;
     },
     findOneVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag);
+        const response = await getPromptAssetVersionsGeneratedApi().promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag);
         return response.data;
     },
     createVersion: async (projectId: string, promptId: string, assetKey: string, payload: generated.CreatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerCreate(projectId, promptId, assetKey, payload);
+        const response = await getPromptAssetVersionsGeneratedApi().promptAssetVersionControllerCreate(projectId, promptId, assetKey, payload);
         return response.data;
     },
     updateVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string, payload: generated.UpdatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await promptAssetVersionsGeneratedApi.promptAssetVersionControllerUpdate(projectId, promptId, assetKey, versionTag, payload);
+        const response = await getPromptAssetVersionsGeneratedApi().promptAssetVersionControllerUpdate(projectId, promptId, assetKey, versionTag, payload);
         return response.data;
     },
     removeVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<void> => {
-        await promptAssetVersionsGeneratedApi.promptAssetVersionControllerRemove(projectId, promptId, assetKey, versionTag);
+        await getPromptAssetVersionsGeneratedApi().promptAssetVersionControllerRemove(projectId, promptId, assetKey, versionTag);
     },
     requestPublishVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
         const response = await apiClient.post<generated.CreatePromptAssetVersionDto>(

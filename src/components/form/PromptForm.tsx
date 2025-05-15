@@ -29,7 +29,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
     const [isLoadingTags, setIsLoadingTags] = useState(false);
     const [promptTextBody, setPromptTextBody] = useState('');
 
-    const isEditing = useMemo(() => !!initialData, [initialData]);
+    const isEditing = useMemo(() => !!(initialData && 'id' in initialData && initialData.id), [initialData]);
 
     useEffect(() => {
         console.log("[PromptForm Effect FetchTags] Fetching tags for projectId:", projectId);
@@ -49,29 +49,33 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
     }, [projectId]);
 
     useEffect(() => {
-        console.log("[PromptForm Effect InitForm] Running. initialData:", initialData, "availableTags:", availableTags);
+        console.log("[PromptForm Effect InitForm] Running. initialData:", initialData, "isEditing:", isEditing);
         if (initialData) {
             setName(initialData.name || '');
             setDescription(initialData.description || '');
-            setPromptTextBody((initialData as CreatePromptDto).promptText || '');
+
+            if ('promptText' in initialData) {
+                setPromptTextBody((initialData as CreatePromptDto).promptText || '');
+            } else {
+                setPromptTextBody('');
+            }
 
             let initialTagIdsSet = new Set<string>();
-            const initialCreateDto = initialData as CreatePromptDto;
-            if (initialCreateDto.tags && initialCreateDto.tags.size > 0 && availableTags.length > 0) {
-                const initialTagNames = Array.from(initialCreateDto.tags);
+            if ('tags' in initialData && initialData.tags instanceof Set && initialData.tags.size > 0 && availableTags.length > 0) {
+                const initialTagNames = Array.from(initialData.tags as Set<string>);
                 initialTagIdsSet = new Set(initialTagNames.map(tagName => availableTags.find(t => t.name === tagName)?.id)
                     .filter(id => id !== undefined) as string[]);
             }
             setSelectedTagIds(Array.from(initialTagIdsSet));
 
         } else {
-            console.log("[PromptForm Effect InitForm] Creation mode (no initialData). Resetting form fields.");
+            console.log("[PromptForm Effect InitForm] No initialData. Resetting form fields for creation.");
             setName('');
             setDescription('');
             setSelectedTagIds([]);
             setPromptTextBody('');
         }
-    }, [initialData, availableTags]);
+    }, [initialData, availableTags, isEditing]);
 
     const handleTagSelectChange = (selectedOptions: MultiValue<TagOption>) => {
         const newIds = selectedOptions ? selectedOptions.map(option => option.value) : [];
@@ -115,7 +119,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                 initialTagIdsFromInitialData = new Set(initialTagNames.map(tagName => availableTags.find(t => t.name === tagName)?.id)
                     .filter(id => id !== undefined) as string[]);
             }
-            
+
             const selectedTagIdsSet = new Set(selectedTagIds);
 
             if (initialTagIdsFromInitialData.size !== selectedTagIdsSet.size ||
@@ -156,7 +160,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                 tags: tagNamesForCreation.size > 0 ? tagNamesForCreation : undefined,
                 promptText: promptTextBody.trim(),
             } as CreatePromptDto;
-            
+
             console.log("[PromptForm handleSubmit Create] Sending create payload:", createPayload);
             onSave(createPayload);
         }

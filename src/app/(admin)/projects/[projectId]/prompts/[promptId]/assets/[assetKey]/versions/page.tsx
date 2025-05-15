@@ -1,23 +1,23 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import {
     CreateProjectDto,
     CreatePromptAssetVersionDto,
     UpdatePromptAssetVersionDto,
+    PromptDto,
 } from '@/services/generated/api';
 import {
     promptAssetService,
     projectService,
+    promptService,
 } from '@/services/api';
 import Breadcrumb, { Crumb } from '@/components/common/PageBreadCrumb';
 import PromptAssetVersionsTable from '@/components/tables/PromptAssetVersionsTable';
 import PromptAssetVersionForm from '@/components/form/PromptAssetVersionForm';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import axios from 'axios';
-// La importación de PromptAssetData se hará desde la tabla de assets, si es necesaria, o se usará un tipo local.
-// Por ahora, para el asset en breadcrumbs, podemos usar un tipo más genérico o el DTO de la API.
 import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
 
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
@@ -55,38 +55,41 @@ const PromptAssetVersionsPage: React.FC = () => {
     const [latestVersionTagForForm, setLatestVersionTagForForm] = useState<string | null>(null);
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
+    const [currentPrompt, setCurrentPrompt] = useState<PromptDto | null>(null);
     const [asset, setAsset] = useState<PromptAssetData | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     const params = useParams();
-    // Usar projectId consistentemente
+    const router = useRouter();
     const projectId = params.projectId as string;
     const promptId = params.promptId as string;
     const assetKey = params.assetKey as string;
 
     useEffect(() => {
-        if (!projectId || !promptId || !assetKey) return; // Actualizado
+        if (!projectId || !promptId || !assetKey) return;
         setBreadcrumbLoading(true);
         Promise.all([
-            projectService.findOne(projectId), // Actualizado
-            promptAssetService.findOne(projectId, promptId, assetKey) // Actualizado
-        ]).then(([projectData, assetData]) => {
+            projectService.findOne(projectId),
+            promptService.findOne(projectId, promptId),
+            promptAssetService.findOne(projectId, promptId, assetKey)
+        ]).then(([projectData, promptData, assetData]) => {
             setProject(projectData as CreateProjectDto);
+            setCurrentPrompt(promptData as PromptDto);
             setAsset(assetData as PromptAssetData);
         }).catch(err => {
-            console.error("Error fetching breadcrumb data (project/asset):", err);
-            const defaultMsg = "Failed to load project or asset details for breadcrumbs.";
-            const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
-            showErrorToast(apiErrorMessage);
+            console.error("Error fetching breadcrumb data (project/prompt/asset):", err);
+            const defaultMsg = "Failed to load project, prompt, or asset details for breadcrumbs.";
+            showErrorToast(getApiErrorMessage(err, defaultMsg));
             setProject(null);
+            setCurrentPrompt(null);
             setAsset(null);
         }).finally(() => {
             setBreadcrumbLoading(false);
         });
-    }, [projectId, promptId, assetKey]); // Actualizado
+    }, [projectId, promptId, assetKey]);
 
     const fetchData = useCallback(async () => {
-        if (!projectId || !promptId || !assetKey) { // Actualizado
+        if (!projectId || !promptId || !assetKey) {
             setError("Project ID, Prompt ID, or Asset Key is missing.");
             setLoading(false);
             setItemsList([]);
@@ -95,7 +98,7 @@ const PromptAssetVersionsPage: React.FC = () => {
         setError(null);
         setLoading(true);
         try {
-            const data = await promptAssetService.findVersions(projectId, promptId, assetKey); // Actualizado
+            const data = await promptAssetService.findVersions(projectId, promptId, assetKey);
             if (Array.isArray(data)) {
                 const versionsData = data.map(v => ({
                     ...v,
@@ -107,21 +110,19 @@ const PromptAssetVersionsPage: React.FC = () => {
                 setLatestVersionTagForForm(latestTag);
             } else {
                 console.error("API response for asset versions is not an array:", data);
-                setError('Received invalid data format.');
+                setError('Received invalid data format for asset versions.');
                 setItemsList([]);
                 setLatestVersionTagForForm(null);
             }
         } catch (err: unknown) {
             console.error("Error fetching asset versions:", err);
-            const defaultMsg = 'Failed to fetch asset versions.';
-            const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
-            setError(apiErrorMessage);
+            setError(getApiErrorMessage(err, 'Failed to fetch asset versions.'));
             setItemsList([]);
             setLatestVersionTagForForm(null);
         } finally {
             setLoading(false);
         }
-    }, [projectId, promptId, assetKey]); // Actualizado
+    }, [projectId, promptId, assetKey]);
 
     useEffect(() => {
         fetchData();
@@ -138,18 +139,15 @@ const PromptAssetVersionsPage: React.FC = () => {
     };
 
     const handleDelete = async (versionTagToDelete: string) => {
-        if (!projectId || !promptId || !assetKey) return; // Actualizado
-        if (window.confirm(`Are you sure you want to delete version "${versionTagToDelete}" for asset "${assetKey}"?`)) {
+        if (!projectId || !promptId || !assetKey) return;
+        if (window.confirm(`Are you sure you want to delete version "${versionTagToDelete}" for asset "${asset?.name || assetKey}"?`)) {
             setLoading(true);
             try {
-                await promptAssetService.removeVersion(projectId, promptId, assetKey, versionTagToDelete); // Actualizado
+                await promptAssetService.removeVersion(projectId, promptId, assetKey, versionTagToDelete);
                 showSuccessToast(`Version ${versionTagToDelete} deleted successfully!`);
                 fetchData();
             } catch (err: unknown) {
-                console.error("Error deleting version:", err);
-                const defaultMsg = 'Failed to delete version.';
-                const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
-                setError(apiErrorMessage);
+                setError(getApiErrorMessage(err, 'Failed to delete version.'));
             } finally {
                 setLoading(false);
             }
@@ -157,85 +155,110 @@ const PromptAssetVersionsPage: React.FC = () => {
     };
 
     const handleSave = async (payload: CreatePromptAssetVersionDto | UpdatePromptAssetVersionDto) => {
-        if (!projectId || !promptId || !assetKey) return; // Actualizado
+        if (!projectId || !promptId || !assetKey) return;
         setLoading(true);
         try {
             let message = "";
-            if (editingItem && editingItem.versionTag) {
-                await promptAssetService.updateVersion(projectId, promptId, assetKey, editingItem.versionTag, payload as UpdatePromptAssetVersionDto); // Actualizado
+            if (editingItem && editingItem.versionTag && editingItem.versionTag !== 'N/A') {
+                await promptAssetService.updateVersion(projectId, promptId, assetKey, editingItem.versionTag, payload as UpdatePromptAssetVersionDto);
                 message = `Version ${editingItem.versionTag} updated successfully!`;
             } else {
                 const createPayload = payload as CreatePromptAssetVersionDto;
-                await promptAssetService.createVersion(projectId, promptId, assetKey, createPayload); // Actualizado
+                if (!createPayload.versionTag) {
+                    showErrorToast("Version Tag is required for new versions.");
+                    setLoading(false);
+                    return;
+                }
+                await promptAssetService.createVersion(projectId, promptId, assetKey, createPayload);
                 message = "New version created successfully!";
             }
             setIsModalOpen(false);
             showSuccessToast(message);
             fetchData();
         } catch (err: unknown) {
-            console.error("Error saving version:", err);
-            const defaultMsg = 'Failed to save version.';
-            const apiErrorMessage = getApiErrorMessage(err, defaultMsg);
-            setError(apiErrorMessage);
+            setError(getApiErrorMessage(err, 'Failed to save version.'));
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleViewTranslations = (versionTag: string) => {
+        router.push(`/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations`);
     };
 
     const breadcrumbs: Crumb[] = [
         { label: "Home", href: "/" },
         { label: "Projects", href: "/projects" },
     ];
-    if (projectId) { // Actualizado
+    if (projectId) {
         breadcrumbs.push({
-            label: breadcrumbLoading ? projectId : (project?.name || projectId), // Actualizado
+            label: breadcrumbLoading ? projectId : (project?.name || projectId),
             href: `/projects/${projectId}/prompts`
         });
     }
-    if (projectId && promptId) { // Actualizado para usar projectId
+    if (promptId) {
         breadcrumbs.push({
-            label: breadcrumbLoading ? promptId : (asset?.promptName || promptId),
+            label: breadcrumbLoading ? promptId : (currentPrompt?.name || promptId),
             href: `/projects/${projectId}/prompts/${promptId}/assets`
         });
     }
     if (assetKey) {
         breadcrumbs.push({
             label: breadcrumbLoading ? assetKey : (asset?.name || asset?.key || assetKey),
+            href: `/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/edit`
         });
         breadcrumbs.push({ label: "Versions" });
     }
 
-    if (breadcrumbLoading || loading) return <p>Loading asset version details...</p>;
-    if (error) return <p className="text-red-500">{error}</p>;
+    if (breadcrumbLoading) return <p>Loading page details...</p>;
+    if (!project || !currentPrompt || !asset) {
+        return <p>Error loading essential details (project, prompt, or asset). Please check the console and try again.</p>;
+    }
 
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
+            <div className="my-6">
+                <h2 className="text-2xl font-semibold mb-2 text-black dark:text-white">
+                    Versions for Asset: <span className="text-indigo-600 dark:text-indigo-400">{asset?.name || assetKey}</span>
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Prompt: <span className="font-medium">{currentPrompt?.name || promptId}</span> | Project: <span className="font-medium">{project?.name || projectId}</span>
+                </p>
+            </div>
+
             <div className="flex justify-end mb-4">
                 <button
                     onClick={handleAdd}
-                    className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-colors duration-150"
                     disabled={loading}
                     title="Add New Asset Version"
                 >
                     Add Version
                 </button>
             </div>
-            <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                {itemsList.length === 0 ? (
-                    <p className="text-center py-4 text-gray-500 dark:text-gray-400">No versions found for this asset.</p>
-                ) : (
+
+            {error && <p className="text-red-500 py-2">Error fetching versions: {error}</p>}
+            {loading && itemsList.length === 0 && <p>Loading versions...</p>}
+
+            {!loading && itemsList.length === 0 && !error && (
+                <p className="text-center py-4 text-gray-500 dark:text-gray-400">No versions found for this asset.</p>
+            )}
+
+            {itemsList.length > 0 && (
+                <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden">
                     <PromptAssetVersionsTable
                         promptAssetVersions={itemsList}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
-                        projectId={projectId} // Actualizado para pasar projectId
+                        projectId={projectId}
                         promptId={promptId}
                         assetKey={assetKey}
                         loading={loading}
                     />
-                )}
-            </div>
+                </div>
+            )}
+
             {isModalOpen && (
                 <PromptAssetVersionForm
                     onCancel={() => setIsModalOpen(false)}

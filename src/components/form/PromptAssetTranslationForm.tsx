@@ -19,11 +19,10 @@ interface PromptAssetTranslationFormProps {
     initialData: PromptAssetTranslation | null;
     onSave: (payload: CreateAssetTranslationDto | UpdateAssetTranslationDto) => void;
     onCancel: () => void;
-    versionId: string;
     versionText: string;
 }
 
-const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({ initialData, onSave, onCancel, versionId, versionText }) => {
+const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({ initialData, onSave, onCancel, versionText }) => {
     const [languageCode, setLanguageCode] = useState<string>(initialData?.languageCode || '');
     const [value, setValue] = useState<string>(initialData?.value || '');
     const [regionList, setRegionList] = useState<CreateRegionDto[]>([]);
@@ -75,7 +74,6 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
             } as UpdateAssetTranslationDto;
         } else {
             payload = {
-                versionId,
                 languageCode,
                 value,
             } as CreateAssetTranslationDto;
@@ -110,20 +108,27 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
             const result = await rawExecutionService.executeRaw(executionDto);
             console.log('Translation result:', result);
 
-            if (result?.response) {
+            if (result && typeof result === 'object' && 'response' in result) {
+                const resultWithResponse = result as { response: any };
                 try {
-                    const parsedResponse = JSON.parse(result.response);
-                    if (parsedResponse.translatedText) {
-                        setValue(parsedResponse.translatedText);
+                    if (typeof resultWithResponse.response === 'string') {
+                        const parsedResponse = JSON.parse(resultWithResponse.response);
+                        if (parsedResponse && typeof parsedResponse === 'object' && 'translatedText' in parsedResponse && typeof parsedResponse.translatedText === 'string') {
+                            setValue(parsedResponse.translatedText);
+                        } else {
+                            throw new Error('La respuesta no contiene el texto traducido o el formato es incorrecto.');
+                        }
                     } else {
-                        throw new Error('La respuesta no contiene el texto traducido');
+                        console.warn("Translation response was not a string, attempting to use as is or parse if needed.", resultWithResponse.response);
+                        throw new Error('El formato de la respuesta de traducción no es una cadena JSON como se esperaba.');
                     }
                 } catch (parseError) {
                     console.error('Error al parsear la respuesta:', parseError);
-                    throw new Error('Formato de respuesta inválido');
+                    console.error('Respuesta recibida (antes de parsear):', resultWithResponse.response);
+                    throw new Error('Error al procesar la respuesta del servicio de traducción. Formato inválido.');
                 }
             } else {
-                throw new Error('No se recibió una respuesta válida del servicio de traducción');
+                throw new Error('No se recibió una respuesta válida o con el formato esperado del servicio de traducción');
             }
         } catch (error) {
             console.error('Error al traducir:', error);
@@ -134,7 +139,7 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Original Text
@@ -154,7 +159,7 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
                         value={languageCode}
                         onChange={(e) => setLanguageCode(e.target.value)}
                         disabled={!!initialData || loadingRegions}
-                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         required
                     >
                         <option value="">Selecciona una región</option>
@@ -194,7 +199,7 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     rows={4}
-                    className="mt-1 block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     required
                 />
             </div>
@@ -203,13 +208,14 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                     Cancelar
                 </button>
                 <button
                     type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:hover:bg-indigo-500"
+                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                    disabled={isTranslating}
                 >
                     {initialData ? 'Actualizar' : 'Crear'}
                 </button>

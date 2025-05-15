@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-    User,
     userService,
     CreateUserDto,
-    UpdateUserDto
+    UserProfileResponse,
 } from '@/services/api';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import UsersTable from '@/components/tables/UsersTable';
@@ -13,11 +12,11 @@ import UserForm from '@/components/form/UserForm';
 import axios from 'axios';
 
 const UsersPage: React.FC = () => {
-    const [usersList, setUsersList] = useState<User[]>([]);
+    const [usersList, setUsersList] = useState<UserProfileResponse[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [editingUser, setEditingUser] = useState<UserProfileResponse | null>(null);
 
     const fetchData = async () => {
         setLoading(true);
@@ -52,7 +51,7 @@ const UsersPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (user: User) => {
+    const handleEdit = (user: UserProfileResponse) => {
         setEditingUser(user);
         setIsModalOpen(true);
     };
@@ -74,10 +73,10 @@ const UsersPage: React.FC = () => {
         }
     };
 
-    const handleSave = async (payload: CreateUserDto | UpdateUserDto) => {
+    const handleSave = async (payload: CreateUserDto | object) => {
         try {
             if (editingUser) {
-                await userService.update(editingUser.id, payload as UpdateUserDto);
+                await userService.update(editingUser.id, payload as object);
             } else {
                 await userService.create(payload as CreateUserDto);
             }
@@ -136,7 +135,13 @@ const UsersPage: React.FC = () => {
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
                     <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
                         <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-                            {editingUser ? 'Edit User' : 'Add New User'}
+                            {editingUser ? (
+                                <>
+                                    Edit User: <span className="text-indigo-600 dark:text-indigo-400">{editingUser.email}</span>
+                                </>
+                            ) : (
+                                'Add New User'
+                            )}
                         </h3>
                         <UserForm
                             initialData={editingUser}

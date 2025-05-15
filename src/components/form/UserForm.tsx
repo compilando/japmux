@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { User, UserCreatePayload, UserUpdatePayload } from '@/services/api'; // Make sure the path is correct
+import {
+    UserProfileResponse as User,
+    CreateUserDto,
+} from '@/services/api';
 
 interface UserFormProps {
     initialData: User | null;
-    onSave: (payload: UserCreatePayload | UserUpdatePayload) => void;
+    onSave: (payload: CreateUserDto | object) => void;
     onCancel: () => void;
 }
 
@@ -29,24 +32,24 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSave, onCancel }) =>
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        const payload: UserCreatePayload | UserUpdatePayload = {
+        const payload: CreateUserDto | object = {
             email,
-            name: name || undefined, // Send undefined if empty
-            // Include password only if entered (and perhaps only when creating)
+            name: name || undefined,
             ...(password && { password }),
-            // TODO: Add other fields to the payload
         };
 
-        // You might want to remove the password from the payload if editing and it wasn't changed
         if (isEditing && !password) {
-            delete (payload as UserUpdatePayload).password;
+            const updatePayload = { ...payload };
+            delete (updatePayload as { password?: string }).password;
+            onSave(updatePayload);
+            return;
         }
 
         onSave(payload);
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
             <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Email
@@ -93,13 +96,13 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSave, onCancel }) =>
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200 dark:border-gray-500"
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                 >
                     {initialData ? 'Save Changes' : 'Create User'}
                 </button>

@@ -46,6 +46,7 @@ docs/LoginResponse.md
 docs/MarketplaceApi.md
 docs/ProjectsApi.md
 docs/PromptAssetStructureDto.md
+docs/PromptAssetVersionsApi.md
 docs/PromptAssetVersionsProjectPromptAssetVersionApi.md
 docs/PromptAssetsForASpecificPromptApi.md
 docs/PromptDto.md

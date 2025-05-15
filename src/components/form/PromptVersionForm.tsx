@@ -14,6 +14,8 @@ interface PromptVersionFormProps {
     onSave: (payload: CreatePromptVersionDto | UpdatePromptVersionDto) => void;
     onCancel: () => void;
     latestVersionTag?: string;
+    projectId: string; // Añadir projectId como prop requerida
+    promptId: string; // Añadir promptId como prop requerida
 }
 
 // Helper para calcular la siguiente versión (simplificado)
@@ -48,7 +50,7 @@ const calculateNextVersionTag = (latestTag: string | null | undefined): string =
     return 'v1.0.0';
 };
 
-const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSave, onCancel, latestVersionTag }) => {
+const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSave, onCancel, latestVersionTag, projectId, promptId }) => {
     const [promptText, setPromptText] = useState('');
     const [versionTag, setVersionTag] = useState('v1.0.0');
     const [changeMessage, setChangeMessage] = useState('');
@@ -56,7 +58,6 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
     const [showAssetMenu, setShowAssetMenu] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
     const editorRef = useRef<HTMLTextAreaElement>(null);
-    const { selectedProjectId } = useProjects();
 
     const isEditing = !!initialData;
 
@@ -81,9 +82,9 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
 
     useEffect(() => {
         const fetchAssets = async () => {
-            if (!selectedProjectId) return;
+            if (!projectId || !promptId) return;
             try {
-                const assetsData = await promptAssetService.findAll(selectedProjectId);
+                const assetsData = await promptAssetService.findAll(projectId, promptId);
                 setAssets(assetsData);
             } catch (error) {
                 console.error('Error al cargar los assets:', error);
@@ -91,7 +92,7 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
         };
 
         fetchAssets();
-    }, [selectedProjectId]);
+    }, [projectId, promptId]);
 
     const handleContextMenu = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -153,7 +154,7 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
             <div>
                 <label htmlFor="versionTag" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Version Tag</label>
                 <input
@@ -175,7 +176,7 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                     value={promptText}
                     onChange={handleEditorChange}
                     onContextMenu={handleContextMenu}
-                    className="mt-1 block w-full min-h-[200px] p-3 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-white font-mono"
+                    className="mt-1 block w-full min-h-[200px] px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono"
                     style={{ resize: 'vertical' }}
                 />
                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -219,8 +220,19 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
             )}
 
             <div className="flex justify-end space-x-3">
-                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200 dark:border-gray-500">Cancel</button>
-                <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{isEditing ? 'Save Changes' : 'Create Version'}</button>
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                >
+                    {isEditing ? 'Save Changes' : 'Create Version'}
+                </button>
             </div>
         </form>
     );

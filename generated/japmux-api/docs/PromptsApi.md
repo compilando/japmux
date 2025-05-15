@@ -9,7 +9,8 @@ All URIs are relative to *http://localhost*
 |[**promptControllerFindOne**](#promptcontrollerfindone) | **GET** /api/projects/{projectId}/prompts/{promptId} | Get a specific prompt by its ID (slug) for a project|
 |[**promptControllerGenerateStructure**](#promptcontrollergeneratestructure) | **POST** /api/projects/{projectId}/prompts/generate-structure | Analyzes a user prompt using an LLM and suggests a structure based on project entities.|
 |[**promptControllerLoadStructure**](#promptcontrollerloadstructure) | **POST** /api/projects/{projectId}/prompts/load-structure | Load a generated prompt structure and create all related entities in the database.|
-|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptName} | Update an existing prompt by name|
+|[**promptControllerRemove**](#promptcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptIdSlug} | Delete a prompt by its slug within a project|
+|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptIdSlug} | Update an existing prompt by its ID (slug)|
 
 # **promptControllerCreate**
 > PromptDto promptControllerCreate(createPromptDto)
@@ -291,6 +292,62 @@ const { status, data } = await apiInstance.promptControllerLoadStructure(
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **promptControllerRemove**
+> promptControllerRemove()
+
+
+### Example
+
+```typescript
+import {
+    PromptsApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new PromptsApi(configuration);
+
+let projectId: string; // (default to undefined)
+let promptIdSlug: string; // (default to undefined)
+
+const { status, data } = await apiInstance.promptControllerRemove(
+    projectId,
+    promptIdSlug
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **projectId** | [**string**] |  | defaults to undefined|
+| **promptIdSlug** | [**string**] |  | defaults to undefined|
+
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[bearer](../README.md#bearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**204** | The prompt has been successfully deleted. |  -  |
+|**401** | Unauthorized. |  -  |
+|**403** | Forbidden. Project does not belong to tenant or prompt does not belong to project. |  -  |
+|**404** | Project or Prompt not found. |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **promptControllerUpdate**
 > PromptDto promptControllerUpdate(updatePromptDto)
 
@@ -307,13 +364,13 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let projectId: string; // (default to undefined)
-let promptName: string; // (default to undefined)
+let projectId: string; //The ID of the project. (default to undefined)
+let promptIdSlug: string; //The ID (slug) of the prompt to update. (default to undefined)
 let updatePromptDto: UpdatePromptDto; //
 
 const { status, data } = await apiInstance.promptControllerUpdate(
     projectId,
-    promptName,
+    promptIdSlug,
     updatePromptDto
 );
 ```
@@ -323,8 +380,8 @@ const { status, data } = await apiInstance.promptControllerUpdate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **updatePromptDto** | **UpdatePromptDto**|  | |
-| **projectId** | [**string**] |  | defaults to undefined|
-| **promptName** | [**string**] |  | defaults to undefined|
+| **projectId** | [**string**] | The ID of the project. | defaults to undefined|
+| **promptIdSlug** | [**string**] | The ID (slug) of the prompt to update. | defaults to undefined|
 
 
 ### Return type
