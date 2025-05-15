@@ -255,6 +255,42 @@ const PromptAssetTranslationsPage: React.FC = () => {
     }
     if (error && !loading) return <p className="text-red-500">Error fetching translations: {error}</p>;
 
+    // Si isModalOpen es true, mostrar el formulario de edición/creación
+    if (isModalOpen) {
+        return (
+            <>
+                <Breadcrumb crumbs={breadcrumbs} />
+                <div className="my-6">
+                    <h2 className="text-2xl font-semibold mb-4 text-black dark:text-white">
+                        {editingItem ? `Edit Translation for ${editingItem.languageCode}` : 'Add New Translation'}
+                        {' for Asset Version: '}
+                        <span className="text-indigo-600 dark:text-indigo-400">{version?.versionTag || versionTag}</span>
+                    </h2>
+                    {/* Podrías añadir más detalles del asset/prompt aquí si es útil */}
+                </div>
+                <PromptAssetTranslationForm
+                    onCancel={() => {
+                        setIsModalOpen(false);
+                        setEditingItem(null); // Limpiar item en edición al cancelar
+                    }}
+                    onSave={async (payload) => { // Hacer onSave async
+                        await handleSave(payload); // handleSave ya gestiona setIsModalOpen(false)
+                    }}
+                    initialData={editingItem}
+                    versionText={version?.value || ''} // El texto original de la versión del asset
+                // Pasar IDs necesarios si el formulario los requiere internamente
+                // projectId={projectId}
+                // promptId={promptId}
+                // assetKey={assetKey}
+                // versionTag={versionTag}
+                // Si el form necesita el versionId directamente:
+                // assetVersionId={(version as any)?.id}
+                />
+            </>
+        );
+    }
+
+    // Vista de tabla (cuando isModalOpen es false)
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
@@ -291,15 +327,6 @@ const PromptAssetTranslationsPage: React.FC = () => {
                         onDelete={handleDelete}
                     />
                 </div>
-            )}
-
-            {isModalOpen && (
-                <PromptAssetTranslationForm
-                    onCancel={() => setIsModalOpen(false)}
-                    onSave={handleSave}
-                    initialData={editingItem}
-                    versionText={version?.value || ''}
-                />
             )}
         </>
     );

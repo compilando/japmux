@@ -6,6 +6,9 @@ interface PromptAssetVersionFormProps {
     onSave: (payload: CreatePromptAssetVersionDto | UpdatePromptAssetVersionDto) => void;
     onCancel: () => void;
     latestVersionTag?: string;
+    projectId: string;
+    promptId: string;
+    assetKey: string;
 }
 
 // Helper para calcular la siguiente versión (simplificado)
@@ -32,7 +35,7 @@ const calculateNextAssetVersionTag = (latestTag: string | null | undefined): str
     return `v${parts.join('.')}${suffix}`;
 };
 
-const PromptAssetVersionForm: React.FC<PromptAssetVersionFormProps> = ({ initialData, onSave, onCancel, latestVersionTag }) => {
+const PromptAssetVersionForm: React.FC<PromptAssetVersionFormProps> = ({ initialData, onSave, onCancel, latestVersionTag, projectId, promptId, assetKey }) => {
     const [value, setValue] = useState('');
     // Usar latestVersionTag para inicializar el estado de versionTag en modo creación
     const [versionTag, setVersionTag] = useState(() => {
@@ -106,7 +109,7 @@ const PromptAssetVersionForm: React.FC<PromptAssetVersionFormProps> = ({ initial
                 <label htmlFor="value" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Value / Content</label>
                 <textarea
                     id="value"
-                    rows={5}
+                    rows={10}
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     required

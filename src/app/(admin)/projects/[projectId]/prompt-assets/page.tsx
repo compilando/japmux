@@ -49,7 +49,7 @@ const PromptAssetsPage: React.FC = () => {
     useEffect(() => {
         if (contextProjectId && urlProjectId && contextProjectId !== urlProjectId && !projectContextIsLoading) {
             console.log(`[PromptAssetsPage] URL projectId (${urlProjectId}) differs from context projectId (${contextProjectId}). Navigating...`);
-            router.replace(`/projects/${contextProjectId}/prompt-assets`);
+            router.replace(`/projects/${contextProjectId}/assets`);
         }
     }, [contextProjectId, urlProjectId, projectContextIsLoading, router]);
 

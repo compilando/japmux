@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePrompts } from '@/context/PromptContext';
 import CopyButton from '../common/CopyButton';
 import { TrashBinIcon, PencilIcon, BoxCubeIcon } from "@/icons";
-import { BoltIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { BoltIcon, ClockIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 
 interface PromptsTableProps {
     prompts: PromptDto[];
@@ -73,7 +73,7 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                                             className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600 p-1 inline-block"
                                             title="Manage Versions"
                                         >
-                                            <DocumentDuplicateIcon className="w-5 h-5" />
+                                            <ClockIcon className="w-5 h-5" />
                                         </Link>
                                         <Link
                                             href={`/projects/${projectId}/prompts/${item.id}/assets`}

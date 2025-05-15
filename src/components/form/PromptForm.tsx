@@ -63,9 +63,10 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
             let initialTagIds: string[] = [];
             if (isEditing) {
                 const currentPromptData = initialData as any;
+                console.log("[PromptForm Effect InitForm - EDITING] currentPromptData.tags:", currentPromptData.tags);
                 if (currentPromptData.tags && Array.isArray(currentPromptData.tags)) {
                     initialTagIds = (currentPromptData.tags as TagDto[]).map(tag => tag.id).filter(id => id !== undefined) as string[];
-                    console.log("[PromptForm Effect InitForm - EDITING] Extracted tag IDs from PromptDto:", initialTagIds);
+                    console.log("[PromptForm Effect InitForm - EDITING] Extracted initialTagIds from PromptDto:", initialTagIds);
                 } else {
                     console.log("[PromptForm Effect InitForm - EDITING] 'tags' not found or not an array in initialData (PromptDto).", currentPromptData);
                 }
@@ -124,18 +125,26 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
             }
 
             const originalPromptData = initialData as any;
+            console.log("[PromptForm handleSubmit Edit] initialData for originalTagIds:", originalPromptData);
             const originalTagIds = (originalPromptData.tags && Array.isArray(originalPromptData.tags))
                 ? new Set((originalPromptData.tags as TagDto[]).map(t => t.id))
                 : new Set<string>();
 
             const currentSelectedTagIdsSet = new Set(selectedTagIds);
 
+            console.log("[PromptForm handleSubmit Edit] originalTagIds Set:", originalTagIds);
+            console.log("[PromptForm handleSubmit Edit] currentSelectedTagIdsSet:", currentSelectedTagIdsSet);
+
             if (originalTagIds.size !== currentSelectedTagIdsSet.size ||
                 !Array.from(originalTagIds).every(id => currentSelectedTagIdsSet.has(id))) {
                 updatePayload.tagIds = selectedTagIds;
                 hasChanges = true;
+                console.log("[PromptForm handleSubmit Edit] Tag changes DETECTED.");
+            } else {
+                console.log("[PromptForm handleSubmit Edit] Tag changes NOT detected.");
             }
 
+            console.log("[PromptForm handleSubmit Edit] hasChanges before onSave:", hasChanges);
             if (hasChanges) {
                 console.log("[PromptForm handleSubmit Edit] Sending update payload:", updatePayload);
                 onSave(updatePayload);

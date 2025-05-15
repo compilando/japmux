@@ -138,12 +138,9 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
         } else {
             payload = {
                 promptText,
+                versionTag: versionTag,
                 changeMessage: changeMessage || undefined,
-            };
-
-            if (!payload.changeMessage) delete payload.changeMessage;
-
-            payload = payload as CreatePromptVersionDto;
+            } as any;
 
             if (!promptText) {
                 alert("Prompt Text is required!");

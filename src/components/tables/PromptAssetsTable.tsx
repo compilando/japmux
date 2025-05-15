@@ -60,7 +60,7 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
                                 <Link
                                     href={`/projects/${projectId}/prompts/${promptId}/assets/${item.key}/versions`}
-                                    className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600 p-1 inline-block"
+                                    className="text-green-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600 p-1 inline-block"
                                     title="Manage Versions"
                                 >
                                     <ClockIcon className="w-5 h-5" />

@@ -376,9 +376,10 @@ export const promptService = {
         const response = await promptsGeneratedApi.promptControllerFindOne(projectId, promptId);
         return response.data;
     },
-    // update usa promptName según la API generada (promptControllerUpdate espera promptName).
-    update: async (projectId: string, promptName: string, payload: generated.UpdatePromptDto): Promise<generated.PromptDto> => {
-        const response = await promptsGeneratedApi.promptControllerUpdate(projectId, promptName, payload);
+    // update espera el CUID del prompt (promptInternalId) como segundo argumento, 
+    // que se pasa como el parámetro 'promptName' a la API generada.
+    update: async (projectId: string, promptInternalId: string, payload: generated.UpdatePromptDto): Promise<generated.PromptDto> => {
+        const response = await promptsGeneratedApi.promptControllerUpdate(projectId, promptInternalId, payload);
         return response.data;
     },
     // remove todavía usa promptIdSlug según la API generada.
@@ -388,11 +389,13 @@ export const promptService = {
         // Asegúrate de que la ruta y los parámetros coinciden con tu API.
         await apiClient.delete(`/api/projects/${projectId}/prompts/${promptIdSlug}`);
     },
-    // getPromptMeta: async (projectId: string, promptName: string): Promise<generated.PromptMetaDto> => {
-    // Este método no fue claramente identificado en la última lectura del generado. Se comenta por ahora.
-    // const response = await promptsGeneratedApi.promptControllerGetPromptMeta(projectId, promptName);
-    // return response.data;
-    // }
+    generatePromptStructure: async (projectId: string, userPromptText: string): Promise<generated.LoadPromptStructureDto> => {
+        const payload: generated.GeneratePromptStructureDto = { userPrompt: userPromptText };
+        const response = await promptsGeneratedApi.promptControllerGenerateStructure(projectId, payload);
+        // Asumiendo que la respuesta de generateStructure es compatible con LoadPromptStructureDto o un tipo específico.
+        // El tipo de retorno real de la API debería verificarse. Por ahora, usamos LoadPromptStructureDto como suposición.
+        return response.data as generated.LoadPromptStructureDto;
+    }
 };
 
 // Servicio para Versiones de Prompt
@@ -493,8 +496,8 @@ export const promptAssetService = {
         await promptAssetsGeneratedApi.promptAssetControllerRemove(promptId, projectId, assetKey);
     },
     findVersions: async (projectId: string, promptId: string, assetKey: string): Promise<generated.CreatePromptAssetVersionDto[]> => {
-        // Construcción manual de la URL para asegurar que promptId está incluido y se usa /prompt-assets/
-        const response = await apiClient.get<generated.CreatePromptAssetVersionDto[]>(`/api/projects/${projectId}/prompts/${promptId}/prompt-assets/${assetKey}/versions`);
+        // Construcción manual de la URL para asegurar que promptId está incluido y se usa /assets/
+        const response = await apiClient.get<generated.CreatePromptAssetVersionDto[]>(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions`);
         return response.data;
     },
     findOneVersion: async (
@@ -509,7 +512,7 @@ export const promptAssetService = {
         console.log('[promptAssetService.findOneVersion] Asset Key:', assetKey);
         console.log('[promptAssetService.findOneVersion] Version Tag:', versionTag);
 
-        const url = `/api/projects/${projectId}/prompts/${promptId}/prompt-assets/${assetKey}/versions/${versionTag}`;
+        const url = `/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}`;
 
         try {
             const response = await apiClient.get<generated.CreatePromptAssetVersionDto>(url);
@@ -521,8 +524,20 @@ export const promptAssetService = {
         }
     },
     createVersion: async (projectId: string, promptId: string, assetKey: string, payload: generated.CreatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => {
-        const response = await getPromptAssetVersionsGeneratedApi().promptAssetVersionControllerCreate(projectId, assetKey, payload);
-        return response.data;
+        // El método generado promptAssetVersionControllerCreate probablemente omite promptId en la URL,
+        // construyendo algo como /api/projects/{projectId}/assets/{assetKey}/versions.
+        // Necesitamos POST a /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions.
+        const url = `/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions`;
+        console.log('[promptAssetService.createVersion] Usando apiClient.post. URL:', url, 'Payload:', payload);
+        try {
+            const response = await apiClient.post<generated.CreatePromptAssetVersionDto>(url, payload);
+            return response.data;
+        } catch (error) {
+            // Mostrar un error más específico o relanzar
+            showErrorToast(`Failed to create asset version: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            console.error(`Error creating asset version (${url}):`, error);
+            throw error; // Relanzar para que la página pueda manejar el estado de carga/error si es necesario
+        }
     },
     updateVersion: async (
         projectId: string,
@@ -538,7 +553,7 @@ export const promptAssetService = {
         console.log('[promptAssetService.updateVersion] Version Tag:', versionTag);
         console.log('[promptAssetService.updateVersion] Payload enviado:', JSON.stringify(payload));
 
-        const url = `/api/projects/${projectId}/prompts/${promptId}/prompt-assets/${assetKey}/versions/${versionTag}`;
+        const url = `/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}`;
 
         try {
             const response = await apiClient.patch<generated.CreatePromptAssetVersionDto>(url, payload);
@@ -549,7 +564,18 @@ export const promptAssetService = {
         }
     },
     removeVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<void> => {
-        await getPromptAssetVersionsGeneratedApi().promptAssetVersionControllerRemove(projectId, assetKey, versionTag);
+        // El método generado promptAssetVersionControllerRemove probablemente omite promptId en la URL.
+        // Construir manualmente la URL para asegurar que promptId está incluido.
+        const url = `/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}`;
+        console.log('[promptAssetService.removeVersion] Usando apiClient.delete directamente. URL:', url);
+        try {
+            await apiClient.delete(url);
+        } catch (error) {
+            // Mostrar un error más específico o relanzar
+            showErrorToast(`Failed to delete asset version ${versionTag}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            console.error(`Error deleting asset version ${versionTag} (${url}):`, error);
+            throw error; // Relanzar para que la página pueda manejar el estado de carga/error si es necesario
+        }
     },
     requestPublishVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
         const response = await apiClient.post<generated.CreatePromptAssetVersionDto>(

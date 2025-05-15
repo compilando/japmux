@@ -70,31 +70,18 @@ const EditPromptPage: React.FC = () => {
         }
     }, [projectId, promptId]);
 
-    const handleSavePrompt = async (payload: CreatePromptDtoType | UpdatePromptDto) => {
-        if (!projectId || !promptId || !promptData) {
-            showErrorToast("Missing project ID, prompt ID, or prompt data for update.");
+    const handleSavePrompt = async (payloadFromForm: UpdatePromptDto) => {
+        console.log("[EditPromptPage handleSavePrompt] Received payload from PromptForm:", payloadFromForm);
+
+        if (!projectId || !promptId) {
+            showErrorToast("Project ID or Prompt ID is missing for update.");
             return;
         }
 
-        // En edición, el nombre del prompt (usado como ID en la ruta de update) no se cambia.
-        // Los campos actualizables son los definidos en UpdatePromptDto.
-        // Se asume que ni 'name' ni 'promptText' son parte de UpdatePromptDto.
-        const updatePayload: UpdatePromptDto = {
-            description: payload.description,
-            // promptText: (payload as any).promptText, // Eliminado, no en UpdatePromptDto
-        };
-
         setIsSaving(true);
         try {
-            // Se usa promptData.name como el identificador para la API de update,
-            // ya que promptControllerUpdate espera promptName.
-            if (!promptData?.name) {
-                showErrorToast("Prompt name is missing, cannot update.");
-                setIsSaving(false);
-                return;
-            }
-            await promptService.update(projectId, promptData.name, updatePayload);
-            showSuccessToast(`Prompt "${promptData.name}" updated successfully.`);
+            await promptService.update(projectId, promptId, payloadFromForm);
+            showSuccessToast(`Prompt "${promptData?.name || promptId}" updated successfully.`);
             router.push(`/projects/${projectId}/prompts`);
         } catch (err: unknown) {
             console.error("Error updating prompt:", err);

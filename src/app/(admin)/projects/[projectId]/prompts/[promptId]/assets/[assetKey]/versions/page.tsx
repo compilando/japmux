@@ -215,6 +215,35 @@ const PromptAssetVersionsPage: React.FC = () => {
         return <p>Error loading essential details (project, prompt, or asset). Please check the console and try again.</p>;
     }
 
+    if (isModalOpen) {
+        return (
+            <>
+                <Breadcrumb crumbs={breadcrumbs} />
+                <div className="my-6">
+                    <h2 className="text-2xl font-semibold mb-4 text-black dark:text-white">
+                        {editingItem ? `Edit Version: ${editingItem.versionTag}` : 'Add New Asset Version'}
+                        {' for Asset: '}
+                        <span className="text-indigo-600 dark:text-indigo-400">{asset?.name || assetKey}</span>
+                    </h2>
+                </div>
+                <PromptAssetVersionForm
+                    onCancel={() => {
+                        setIsModalOpen(false);
+                        setEditingItem(null);
+                    }}
+                    onSave={async (payload) => {
+                        await handleSave(payload);
+                    }}
+                    initialData={editingItem}
+                    latestVersionTag={latestVersionTagForForm ?? undefined}
+                    projectId={projectId}
+                    promptId={promptId}
+                    assetKey={assetKey}
+                />
+            </>
+        );
+    }
+
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
@@ -257,15 +286,6 @@ const PromptAssetVersionsPage: React.FC = () => {
                         loading={loading}
                     />
                 </div>
-            )}
-
-            {isModalOpen && (
-                <PromptAssetVersionForm
-                    onCancel={() => setIsModalOpen(false)}
-                    onSave={handleSave}
-                    initialData={editingItem}
-                    latestVersionTag={latestVersionTagForForm ?? undefined}
-                />
             )}
         </>
     );
