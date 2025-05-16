@@ -10,21 +10,34 @@ import { useProjects } from '@/context/ProjectContext';
 import { CreateRegionDto } from '@/services/generated/api';
 
 // Definir el tipo localmente ya que no está exportado desde api
-interface PromptAssetTranslation {
-    languageCode: string;
-    value: string;
-}
+// No es necesario si CreateAssetTranslationDto y UpdateAssetTranslationDto son suficientes
+// interface PromptAssetTranslation {
+//     languageCode: string;
+//     value: string;
+// }
 
 interface PromptAssetTranslationFormProps {
-    initialData: PromptAssetTranslation | null;
+    initialData: (CreateAssetTranslationDto & { id?: string }) | (UpdateAssetTranslationDto & { languageCode: string; id?: string }) | null;
     onSave: (payload: CreateAssetTranslationDto | UpdateAssetTranslationDto) => void;
     onCancel: () => void;
     versionText: string;
+    availableLanguages?: { code: string; name: string }[];
+    isEditing?: boolean;
 }
 
-const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({ initialData, onSave, onCancel, versionText }) => {
-    const [languageCode, setLanguageCode] = useState<string>(initialData?.languageCode || '');
-    const [value, setValue] = useState<string>(initialData?.value || '');
+const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
+    initialData,
+    onSave,
+    onCancel,
+    versionText,
+    availableLanguages,
+    isEditing
+}) => {
+    const initialLanguageCode = initialData?.languageCode || '';
+    const initialValue = initialData?.value || '';
+
+    const [languageCode, setLanguageCode] = useState<string>(initialLanguageCode);
+    const [value, setValue] = useState<string>(initialValue);
     const [regionList, setRegionList] = useState<CreateRegionDto[]>([]);
     const [loadingRegions, setLoadingRegions] = useState<boolean>(true);
     const [isTranslating, setIsTranslating] = useState<boolean>(false);
@@ -32,37 +45,50 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
     const { selectedProjectId } = useProjects();
 
     useEffect(() => {
-        const fetchRegions = async () => {
-            if (!selectedProjectId) return;
+        if (initialData) {
+            setLanguageCode(initialData.languageCode || '');
+            setValue(initialData.value || '');
+        } else {
+            if (!isEditing && availableLanguages && availableLanguages.length > 0) {
+                setLanguageCode('');
+            } else {
+                setLanguageCode('');
+            }
+            setValue('');
+        }
+    }, [initialData, isEditing, availableLanguages]);
+
+    useEffect(() => {
+        const fetchRegionsAndModel = async () => {
+            if (!selectedProjectId) {
+                setLoadingRegions(false);
+                return;
+            }
             setLoadingRegions(true);
             try {
+                // Siempre cargar todas las regiones del proyecto para que handleTranslate funcione
                 const data = await regionService.findAll(selectedProjectId);
                 setRegionList(data);
-            } catch (error) {
-                console.error('Error fetching regions:', error);
-            } finally {
-                setLoadingRegions(false);
-            }
-        };
+                // Ya no necesitamos la condición `if (!availableLanguages)` aquí para cargar regionList
 
-        const fetchDefaultAiModel = async () => {
-            if (!selectedProjectId) return;
-            try {
                 const models = await aiModelService.findAll(selectedProjectId);
                 const gpt4Model = models.find(model => model.name.toLowerCase().includes('gpt-4'));
                 if (gpt4Model) {
                     setDefaultAiModelId(gpt4Model.id);
                 } else {
-                    console.error('No se encontró un modelo GPT-4 en el proyecto');
+                    console.warn('Default GPT-4 model not found in project.');
                 }
             } catch (error) {
-                console.error('Error al cargar el modelo de IA:', error);
+                console.error('Error fetching regions or AI model:', error);
+            } finally {
+                setLoadingRegions(false);
             }
         };
 
-        fetchRegions();
-        fetchDefaultAiModel();
-    }, [selectedProjectId]);
+        fetchRegionsAndModel();
+    }, [selectedProjectId]); // Se elimina availableLanguages de las dependencias de este useEffect,
+                             // ya que la carga de regionList y el modelo AI no depende de los idiomas *disponibles para nueva traducción*,
+                             // sino del proyecto seleccionado.
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -158,18 +184,31 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
                         id="languageCode"
                         value={languageCode}
                         onChange={(e) => setLanguageCode(e.target.value)}
-                        disabled={!!initialData || loadingRegions}
+                        disabled={isEditing || loadingRegions || (!isEditing && availableLanguages && availableLanguages.length === 0)}
                         className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        required
+                        required={!isEditing}
                     >
-                        <option value="">Selecciona una región</option>
-                        {regionList.map((region) => (
-                            <option key={region.languageCode} value={region.languageCode}>
-                                {region.name} ({region.languageCode})
-                            </option>
-                        ))}
+                        <option value="">
+                            {isEditing 
+                                ? (initialData?.languageCode || "Language")
+                                : (availableLanguages && availableLanguages.length === 0 ? "No languages available" : "Select a language")}
+                        </option>
+                        {!isEditing && availableLanguages && availableLanguages.length > 0 && (
+                            availableLanguages.map((lang) => (
+                                <option key={lang.code} value={lang.code}>
+                                    {lang.name} ({lang.code})
+                                </option>
+                            ))
+                        )}
+                        {!isEditing && !availableLanguages && regionList.length > 0 && (
+                            regionList.map((region) => (
+                                <option key={region.languageCode} value={region.languageCode}>
+                                    {region.name} ({region.languageCode})
+                                </option>
+                            ))
+                        )}
                     </select>
-                    {!initialData && languageCode && (
+                    {!isEditing && (
                         <button
                             type="button"
                             onClick={() => {
