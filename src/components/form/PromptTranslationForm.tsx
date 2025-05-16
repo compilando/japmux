@@ -9,9 +9,11 @@ interface PromptTranslationFormProps {
     onSave: (payload: CreatePromptTranslationDto | UpdatePromptTranslationDto) => void;
     onCancel: () => void;
     versionText: string;
+    availableLanguages: { code: string; name: string }[];
+    isEditing: boolean;
 }
 
-const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialData, versionId, onSave, onCancel, versionText }) => {
+const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialData, versionId, onSave, onCancel, versionText, availableLanguages, isEditing }) => {
     const [languageCode, setLanguageCode] = useState('');
     const [promptText, setPromptText] = useState('');
     const [regionList, setRegionList] = useState<CreateRegionDto[]>([]);
@@ -19,8 +21,6 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
     const [isTranslating, setIsTranslating] = useState(false);
     const [defaultAiModelId, setDefaultAiModelId] = useState<string | null>(null);
     const { selectedProjectId } = useProjects();
-
-    const isEditing = !!initialData;
 
     useEffect(() => {
         const fetchRegions = async () => {
@@ -30,7 +30,10 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
             try {
                 const data = await regionService.findAll(selectedProjectId);
                 if (Array.isArray(data)) {
-                    setRegionList(data);
+                    const filteredRegions = isEditing ? data : data.filter(region => 
+                        availableLanguages.some(lang => lang.code === region.languageCode)
+                    );
+                    setRegionList(filteredRegions);
                 }
             } catch (error) {
                 console.error("Error fetching regions:", error);
@@ -56,7 +59,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
 
         fetchRegions();
         fetchDefaultAiModel();
-    }, [selectedProjectId]);
+    }, [selectedProjectId, isEditing, availableLanguages]);
 
     useEffect(() => {
         if (initialData) {

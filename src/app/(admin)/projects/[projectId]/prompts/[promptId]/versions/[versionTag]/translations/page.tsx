@@ -11,6 +11,8 @@ import {
     promptVersionService,
     CreateProjectDto,
     PromptDto,
+    regionService,
+    CreateRegionDto,
 } from '@/services/api';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptTranslationsTable from '@/components/tables/PromptTranslationsTable';
@@ -40,6 +42,10 @@ const PromptTranslationsPage: React.FC = () => {
     const [prompt, setPrompt] = useState<PromptDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
+    const [projectRegions, setProjectRegions] = useState<CreateRegionDto[]>([]);
+    const [availableLanguagesForNewTranslation, setAvailableLanguagesForNewTranslation] = useState<{ code: string; name: string }[]>([]);
+    const [allLanguagesTranslated, setAllLanguagesTranslated] = useState<boolean>(false);
+
     const searchParams = useSearchParams();
     const params = useParams();
 
@@ -60,18 +66,21 @@ const PromptTranslationsPage: React.FC = () => {
         const fetchBreadcrumbData = async () => {
             setBreadcrumbLoading(true);
             try {
-                const [projectData, promptData] = await Promise.all([
+                const [projectData, promptData, regionsData] = await Promise.all([
                     projectService.findOne(projectId),
-                    promptService.findOne(projectId, promptId)
+                    promptService.findOne(projectId, promptId),
+                    regionService.findAll(projectId)
                 ]);
                 setProject(projectData);
                 setPrompt(promptData);
+                setProjectRegions(regionsData);
             } catch (err: unknown) {
                 console.error("Error fetching breadcrumb data:", err);
                 const defaultMsg = "Failed to load project or prompt details for breadcrumbs.";
                 showErrorToast(getApiErrorMessage(err, defaultMsg));
                 setProject(null);
                 setPrompt(null);
+                setProjectRegions([]);
             } finally {
                 setBreadcrumbLoading(false);
             }
@@ -101,6 +110,8 @@ const PromptTranslationsPage: React.FC = () => {
             setError("Missing Project, Prompt or Version Tag in URL.");
             setLoading(false);
             setItemsList([]);
+            setAvailableLanguagesForNewTranslation([]);
+            setAllLanguagesTranslated(false);
             return;
         }
 
@@ -110,20 +121,34 @@ const PromptTranslationsPage: React.FC = () => {
             const data = await promptTranslationService.findAll(projectId, promptId, versionTag);
             if (Array.isArray(data)) {
                 setItemsList(data);
+
+                const translatedLanguageCodes = new Set(data.map(t => t.languageCode));
+                const allPossibleLanguagesFromProject = projectRegions.map(region => ({
+                    code: region.languageCode,
+                    name: region.name
+                }));
+
+                const remainingLanguages = allPossibleLanguagesFromProject.filter(lang => !translatedLanguageCodes.has(lang.code));
+                setAvailableLanguagesForNewTranslation(remainingLanguages);
+                setAllLanguagesTranslated(remainingLanguages.length === 0 && allPossibleLanguagesFromProject.length > 0);
             } else {
                 console.error("API response is not an array:", data);
                 setError('Received invalid data format.');
                 setItemsList([]);
+                setAvailableLanguagesForNewTranslation([]);
+                setAllLanguagesTranslated(false);
             }
         } catch (err: unknown) {
             console.error("Error fetching items:", err);
             const defaultMsg = 'Failed to fetch translations.';
             setError(getApiErrorMessage(err, defaultMsg));
             setItemsList([]);
+            setAvailableLanguagesForNewTranslation([]);
+            setAllLanguagesTranslated(false);
         } finally {
             setLoading(false);
         }
-    }, [projectId, promptId, versionTag]);
+    }, [projectId, promptId, versionTag, projectRegions]);
 
     useEffect(() => {
         fetchData();
@@ -220,15 +245,29 @@ const PromptTranslationsPage: React.FC = () => {
                 </pre>
             </div>
 
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-black dark:text-white">Translations for Version: {versionTag}</h2>
-                <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600" disabled={loading || breadcrumbLoading}>
-                    Add Prompt Translation
-                </button>
-            </div>
+            {!loading && !error && (
+                allLanguagesTranslated ? (
+                    <div className="mb-4 p-3 text-center bg-green-100 dark:bg-green-700 border border-green-300 dark:border-green-600 rounded-md">
+                        <p className="text-green-700 dark:text-green-200 font-medium">
+                            All available languages translated! ✅
+                        </p>
+                    </div>
+                ) : (
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-semibold text-black dark:text-white">Translations for Version: {versionTag}</h2>
+                        <button 
+                            onClick={handleAdd} 
+                            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600" 
+                            disabled={loading || breadcrumbLoading || availableLanguagesForNewTranslation.length === 0}
+                        >
+                            Add Prompt Translation
+                        </button>
+                    </div>
+                )
+            )}
 
             {loading && <p>Loading translations...</p>}
-            {!loading && itemsList.length === 0 && (
+            {!loading && itemsList.length === 0 && !allLanguagesTranslated && (
                 <p className="text-center py-4 text-gray-500 dark:text-gray-400">No translations found for this version.</p>
             )}
             {!loading && itemsList.length > 0 && (
@@ -251,6 +290,8 @@ const PromptTranslationsPage: React.FC = () => {
                                 onSave={handleSave}
                                 onCancel={() => setIsModalOpen(false)}
                                 versionText={versionText}
+                                availableLanguages={availableLanguagesForNewTranslation}
+                                isEditing={!!editingItem}
                             />
                         </div>
                     </div>

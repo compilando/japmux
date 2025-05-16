@@ -825,8 +825,8 @@ echo "$API_RESPONSE"
                                     id="execution-result-text"
                                     readOnly
                                     value={executionResult.result || "No result text received."}
-                                    className={`font-mono ${getFontSizeClass(selectedFontSize)} w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500`}
-                                    rows={10}
+                                    className={`font-mono ${getFontSizeClass(selectedFontSize)} w-full p-3 border border-gray-700 dark:border-gray-600 rounded-md bg-gray-800 dark:bg-gray-800 text-gray-100 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 resize-none`}
+                                    rows={16}
                                 />
                             </>
                         )}
