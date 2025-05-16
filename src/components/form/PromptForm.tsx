@@ -6,6 +6,9 @@ import {
     TagDto,
     PromptDto,
     tagService,
+    rawExecutionService,
+    ExecuteRawDto,
+    aiModelService,
 } from '@/services/api';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 
@@ -28,6 +31,8 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
     const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
     const [isLoadingTags, setIsLoadingTags] = useState(false);
     const [promptTextBody, setPromptTextBody] = useState('');
+    const [isImproving, setIsImproving] = useState(false);
+    const [defaultAiModelId, setDefaultAiModelId] = useState<string>('');
 
     const isEditing = useMemo(() => !!(initialData && 'id' in initialData && initialData.id), [initialData]);
 
@@ -46,6 +51,25 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                 })
                 .finally(() => setIsLoadingTags(false));
         }
+    }, [projectId]);
+
+    useEffect(() => {
+        const fetchDefaultAiModel = async () => {
+            if (!projectId) return;
+            try {
+                const models = await aiModelService.findAll(projectId);
+                const gpt4Model = models.find(model => model.name.toLowerCase().includes('gpt-4'));
+                if (gpt4Model) {
+                    setDefaultAiModelId(gpt4Model.id);
+                } else {
+                    console.error('No se encontró un modelo GPT-4 en el proyecto');
+                }
+            } catch (error) {
+                console.error('Error al cargar el modelo de IA:', error);
+            }
+        };
+
+        fetchDefaultAiModel();
     }, [projectId]);
 
     useEffect(() => {
@@ -184,6 +208,45 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         }
     };
 
+    const handleImprovePrompt = async () => {
+        if (!promptTextBody.trim()) {
+            showErrorToast("Please write a prompt to improve.");
+            return;
+        }
+
+        if (!defaultAiModelId) {
+            showErrorToast("No GPT-4 model found in the project configuration.");
+            return;
+        }
+
+        setIsImproving(true);
+        try {
+            const payload: ExecuteRawDto & { variables?: Record<string, string> } = {
+                userText: promptTextBody,
+                systemPromptName: "prompt-improver",
+                aiModelId: defaultAiModelId,
+                variables: {
+                    text: promptTextBody
+                }
+            };
+
+            const response = await rawExecutionService.executeRaw(payload);
+
+            if (response && typeof response === 'object' && 'response' in response && response.response) {
+                setPromptTextBody(response.response as string);
+                showSuccessToast("Prompt improved successfully.");
+            } else {
+                console.error("Invalid response format:", response);
+                showErrorToast("Failed to improve prompt. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error improving prompt:", error);
+            showErrorToast("Error improving prompt. Please try again.");
+        } finally {
+            setIsImproving(false);
+        }
+    };
+
     return (
         <>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -220,13 +283,38 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
 
                 {!isEditing && (
                     <div>
-                        <label htmlFor="promptTextBody" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Prompt Text
-                        </label>
+                        <div className="flex justify-between items-center mb-2">
+                            <label htmlFor="promptTextBody" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Prompt Text
+                            </label>
+                            <button
+                                type="button"
+                                onClick={handleImprovePrompt}
+                                disabled={isImproving || !promptTextBody.trim()}
+                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/20 rounded-md hover:bg-brand-100 dark:hover:bg-brand-500/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isImproving ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-brand-600 dark:text-brand-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Improving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                        Help me write
+                                    </>
+                                )}
+                            </button>
+                        </div>
                         <textarea
                             name="promptTextBody"
                             id="promptTextBody"
-                            rows={4}
+                            rows={10}
                             value={promptTextBody}
                             onChange={(e) => setPromptTextBody(e.target.value)}
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"

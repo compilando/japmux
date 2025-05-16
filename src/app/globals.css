@@ -156,24 +156,106 @@
 
   button:not(:disabled),
   [role="button"]:not(:disabled) {
-    cursor: pointer;
+    @apply cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
   }
 
   body {
     @apply relative font-normal font-outfit z-1 bg-gray-50;
   }
+
+  table {
+    @apply w-full border-collapse;
+  }
+
+  th {
+    @apply bg-gray-50 dark:bg-gray-800/50 text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700;
+  }
+
+  td {
+    @apply py-3 px-4 border-b border-gray-100 dark:border-gray-800 text-gray-600 dark:text-gray-400;
+  }
+
+  tr:hover td {
+    @apply bg-gray-50/50 dark:bg-gray-800/30;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  textarea,
+  select {
+    @apply w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 
+           bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+           focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500
+           transition-all duration-200;
+  }
+
+  input[type="text"]:hover,
+  input[type="email"]:hover,
+  input[type="password"]:hover,
+  input[type="number"]:hover,
+  input[type="search"]:hover,
+  textarea:hover,
+  select:hover {
+    @apply border-gray-300 dark:border-gray-600;
+  }
+
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700
+           shadow-sm hover:shadow-md transition-all duration-200
+           p-6;
+  }
+
+  .card-header {
+    @apply mb-4 pb-4 border-b border-gray-100 dark:border-gray-700;
+  }
+
+  .card-title {
+    @apply text-xl font-semibold text-gray-900 dark:text-white;
+  }
+
+  .card-subtitle {
+    @apply text-sm text-gray-500 dark:text-gray-400 mt-1;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+           transition-all duration-200;
+  }
+
+  .badge-primary {
+    @apply bg-brand-50 text-brand-600 dark:bg-brand-500/20 dark:text-brand-400;
+  }
+
+  .badge-success {
+    @apply bg-success-50 text-success-600 dark:bg-success-500/20 dark:text-success-400;
+  }
+
+  .badge-warning {
+    @apply bg-warning-50 text-warning-600 dark:bg-warning-500/20 dark:text-warning-400;
+  }
+
+  .badge-error {
+    @apply bg-error-50 text-error-600 dark:bg-error-500/20 dark:text-error-400;
+  }
+
+  .badge-gray {
+    @apply bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300;
+  }
 }
 
 @utility menu-item {
-  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm transition-all duration-200;
+  @apply relative flex items-center w-full gap-3 px-3 py-2.5 font-medium rounded-lg text-base transition-all duration-200;
 }
 
 @utility menu-item-active {
-  @apply bg-brand-50 text-brand-600 dark:bg-brand-500/[0.15] dark:text-brand-400 shadow-sm;
+  @apply bg-brand-50 text-brand-600 dark:bg-brand-500/[0.15] dark:text-brand-400 shadow-sm hover:shadow-md;
 }
 
 @utility menu-item-inactive {
-  @apply text-gray-700 hover:bg-gray-100 group-hover:text-gray-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
+  @apply text-gray-700 hover:bg-gray-100 group-hover:text-gray-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300 hover:shadow-sm;
 }
 
 @utility menu-item-pro {
@@ -185,7 +267,7 @@
 }
 
 @utility menu-item-icon {
-  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 transition-colors duration-200;
+  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 transition-colors duration-200 w-6 h-6;
 }
 
 @utility menu-item-icon-active {
@@ -201,7 +283,7 @@
 }
 
 @utility menu-item-arrow {
-  @apply relative transition-transform duration-200;
+  @apply relative transition-transform duration-200 w-5 h-5;
 }
 
 @utility menu-item-arrow-open {
@@ -213,15 +295,15 @@
 }
 
 @utility menu-dropdown-item {
-  @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-theme-sm font-medium transition-all duration-200;
+  @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-base font-medium transition-all duration-200;
 }
 
 @utility menu-dropdown-item-active {
-  @apply bg-brand-50 text-brand-600 dark:bg-brand-500/[0.15] dark:text-brand-400 shadow-sm;
+  @apply bg-brand-50 text-brand-600 dark:bg-brand-500/[0.15] dark:text-brand-400 shadow-sm hover:shadow-md;
 }
 
 @utility menu-dropdown-item-inactive {
-  @apply text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5;
+  @apply text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5 hover:shadow-sm;
 }
 
 @utility menu-dropdown-badge {
