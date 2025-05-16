@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PromptDto } from '@/services/generated/api';
 import Link from 'next/link';
 import { usePrompts } from '@/context/PromptContext';
 import CopyButton from '../common/CopyButton';
 import { TrashBinIcon, PencilIcon, BoxCubeIcon } from "@/icons";
 import { BoltIcon, ClockIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { promptVersionService } from '@/services/api';
 
 interface PromptsTableProps {
     prompts: PromptDto[];
@@ -16,6 +17,27 @@ interface PromptsTableProps {
 
 const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, projectId, loading }) => {
     const { selectPrompt } = usePrompts();
+    const [versionsCount, setVersionsCount] = useState<Record<string, number>>({});
+
+    useEffect(() => {
+        const fetchVersionsCount = async () => {
+            if (!projectId) return;
+            
+            const counts: Record<string, number> = {};
+            for (const prompt of prompts) {
+                try {
+                    const versions = await promptVersionService.findAll(projectId, prompt.id);
+                    counts[prompt.id] = versions.length;
+                } catch (error) {
+                    console.error(`Error fetching versions for prompt ${prompt.id}:`, error);
+                    counts[prompt.id] = 0;
+                }
+            }
+            setVersionsCount(counts);
+        };
+
+        fetchVersionsCount();
+    }, [prompts, projectId]);
 
     if (loading && prompts.length === 0) {
         return <p className="text-center py-4 text-gray-500 dark:text-gray-400">Loading prompts...</p>;
@@ -70,10 +92,15 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                                         <Link
                                             href={`/projects/${projectId}/prompts/${item.id}/versions`}
                                             onClick={() => selectPrompt(item.id)}
-                                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600 p-1 inline-block"
+                                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600 p-1 inline-block relative"
                                             title="Manage Versions"
                                         >
                                             <ClockIcon className="w-5 h-5" />
+                                            {versionsCount[item.id] !== undefined && (
+                                                <span className="absolute -top-2 -right-2 bg-green-100 text-green-800 text-xs font-bold px-1.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-200">
+                                                    {versionsCount[item.id]}
+                                                </span>
+                                            )}
                                         </Link>
                                         <Link
                                             href={`/projects/${projectId}/prompts/${item.id}/assets`}

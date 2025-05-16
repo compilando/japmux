@@ -232,6 +232,9 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
                             required
                         />
+                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            This text will be used to create the first version of this prompt.
+                        </p>
                     </div>
                 )}
 
@@ -250,6 +253,22 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                         classNamePrefix="react-select"
                     />
                 </div>
+
+                {!isEditing && (
+                    <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-md border border-blue-200 dark:border-blue-800">
+                        <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">About Prompt Creation</h3>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                            When you create a prompt, two things will happen:
+                        </p>
+                        <ul className="mt-2 text-sm text-blue-700 dark:text-blue-300 list-disc list-inside space-y-1">
+                            <li>A new prompt will be created as a parent container</li>
+                            <li>A first version will be automatically created with the <strong>Prompt text</strong> you provided</li>
+                        </ul>
+                        <p className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                            You can later add more versions and translations to this prompt.
+                        </p>
+                    </div>
+                )}
 
                 <div className="flex justify-end space-x-3 pt-4">
                     <button

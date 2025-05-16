@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { CreatePromptAssetDto } from '@/services/api';
+import { CreatePromptAssetDto, promptAssetService } from '@/services/api';
 import CopyButton from '../common/CopyButton';
 import { TrashBinIcon, PencilIcon } from "@/icons";
 import { ClockIcon } from '@heroicons/react/24/outline';
@@ -25,6 +25,26 @@ interface PromptAssetsTableProps {
 }
 
 const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, projectId, promptId, onEdit, onDelete, loading }) => {
+    const [versionsCount, setVersionsCount] = useState<Record<string, number>>({});
+
+    useEffect(() => {
+        const fetchVersionsCount = async () => {
+            const counts: Record<string, number> = {};
+            for (const asset of promptAssets) {
+                try {
+                    const versions = await promptAssetService.findVersions(projectId, promptId, asset.key);
+                    counts[asset.key] = versions.length;
+                } catch (error) {
+                    console.error(`Error fetching versions for asset ${asset.key}:`, error);
+                    counts[asset.key] = 0;
+                }
+            }
+            setVersionsCount(counts);
+        };
+
+        fetchVersionsCount();
+    }, [promptAssets, projectId, promptId]);
+
     if (loading) {
         return <p>Loading assets...</p>;
     }
@@ -58,10 +78,15 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
                                 <Link
                                     href={`/projects/${projectId}/prompts/${promptId}/assets/${item.key}/versions`}
-                                    className="text-green-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600 p-1 inline-block"
+                                    className="text-green-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600 p-1 inline-block relative"
                                     title="Manage Versions"
                                 >
                                     <ClockIcon className="w-5 h-5" />
+                                    {versionsCount[item.key] !== undefined && (
+                                        <span className="absolute -top-2 -right-2 bg-green-100 text-green-800 text-xs font-bold px-1.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-200">
+                                            {versionsCount[item.key]}
+                                        </span>
+                                    )}
                                 </Link>
 
                                 <button
