@@ -472,12 +472,17 @@ if [ -z "$TOKEN" ] || [ "$TOKEN" == "null" ]; then
 fi
 echo "Authentication successful. Token obtained."
 
-echo "\nStep 2: Calling the Prompt Serving API..."
+echo "Step 2: Calling the Prompt Serving API..."
 API_RESPONSE=$( ${servePromptCurlInScript} )
 
-echo "\nAPI Call Complete."
+echo "API Call Complete."
 echo "Response:"
-echo "$API_RESPONSE"
+if echo "$API_RESPONSE" | jq . &> /dev/null; then
+    echo "$API_RESPONSE" | jq .
+else
+    echo "Warning: API response is not valid JSON or jq failed. Displaying raw response:"
+    echo "$API_RESPONSE"
+fi
 
 `;
         setBashScriptExample(fullBashScript);

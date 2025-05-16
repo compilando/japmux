@@ -40,6 +40,15 @@ const PromptAssetTranslationsTable: React.FC<PromptAssetTranslationsTableProps> 
                             </td> */}
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                 <div className="flex items-center space-x-2">
+                                    <img 
+                                        src={`https://flagcdn.com/24x18/${item.languageCode.split('-')[1].toLowerCase()}.png`}
+                                        alt={`${item.languageCode} flag`}
+                                        className="w-6 h-4 object-cover rounded-sm"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = 'https://flagcdn.com/24x18/xx.png';
+                                        }}
+                                    />
                                     <span title={item.languageCode}>{item.languageCode}</span>
                                     <CopyButton textToCopy={item.languageCode} />
                                 </div>

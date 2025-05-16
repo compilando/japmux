@@ -276,6 +276,7 @@ const PromptTranslationsPage: React.FC = () => {
                         promptTranslations={itemsList}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
+                        projectId={projectId}
                     />
                 </div>
             )}

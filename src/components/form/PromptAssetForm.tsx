@@ -95,7 +95,7 @@ const PromptAssetForm: React.FC<PromptAssetFormProps> = ({ initialData, onSave, 
             Object.keys(createPayload).forEach(k => createPayload[k as keyof CreatePromptAssetDto] === undefined && delete createPayload[k as keyof CreatePromptAssetDto]);
 
             if (!createPayload.key || !createPayload.name || !createPayload.initialValue) {
-                alert("Se requieren la clave, el nombre y el valor inicial para crear un nuevo asset.");
+                alert("The key, name, and initial value are required to create a new asset.");
                 return;
             }
             onSave(createPayload);
@@ -105,7 +105,7 @@ const PromptAssetForm: React.FC<PromptAssetFormProps> = ({ initialData, onSave, 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-                <label htmlFor="key" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Región</label>
+                <label htmlFor="key" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Region</label>
                 <select
                     id="key"
                     value={key}

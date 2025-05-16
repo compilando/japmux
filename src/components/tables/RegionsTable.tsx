@@ -28,6 +28,15 @@ const RegionsTable: React.FC<RegionsTableProps> = ({ regions, onEdit, onDelete }
                                 <TableRow key={region.languageCode}>
                                     <TableCell className="px-4 py-4 text-start text-gray-800 dark:text-white/90 text-theme-sm">
                                         <div className="flex items-center space-x-2">
+                                            <img 
+                                                src={`https://flagcdn.com/24x18/${region.languageCode.split('-')[1].toLowerCase()}.png`}
+                                                alt={`${region.languageCode} flag`}
+                                                className="w-6 h-4 object-cover rounded-sm"
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    target.src = 'https://flagcdn.com/24x18/xx.png';
+                                                }}
+                                            />
                                             <span title={region.languageCode}>{region.languageCode}</span>
                                             <CopyButton textToCopy={region.languageCode} />
                                         </div>

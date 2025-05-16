@@ -191,7 +191,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
 
             <div>
                 <label htmlFor="languageCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Región
+                    Region
                 </label>
                 <div className="flex gap-2">
                     <select
@@ -224,7 +224,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialDa
 
             <div>
                 <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Transalted Text
+                    Translation
                 </label>
                 <textarea
                     id="promptText"

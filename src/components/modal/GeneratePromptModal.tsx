@@ -14,7 +14,7 @@ interface GeneratePromptModalProps {
     onClose: () => void;
     onGenerateComplete: (generatedText: string) => void;
     projectId: string;
-    initialUserText?: string; // Opcional para pre-rellenar
+    initialUserText?: string; 
 }
 
 interface SystemPromptOption {
@@ -23,9 +23,9 @@ interface SystemPromptOption {
 }
 
 interface AiModelOption {
-    value: string; // Para el valor del Select (usaremos el 'name' del modelo)
-    label: string; // Para el texto visible en el Select
-    id: string;    // <--- El CUID real del AIModel
+    value: string; 
+    label: string; 
+    id: string;    
 }
 
 const GeneratePromptModal: React.FC<GeneratePromptModalProps> = ({

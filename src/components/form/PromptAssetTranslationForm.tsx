@@ -138,9 +138,23 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
                 const resultWithResponse = result as { response: any };
                 try {
                     if (typeof resultWithResponse.response === 'string') {
-                        const parsedResponse = JSON.parse(resultWithResponse.response);
-                        if (parsedResponse && typeof parsedResponse === 'object' && 'translatedText' in parsedResponse && typeof parsedResponse.translatedText === 'string') {
-                            setValue(parsedResponse.translatedText);
+                        // Limpiar la respuesta usando una expresión regular
+                        const cleanResponse = resultWithResponse.response
+                            .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Eliminar caracteres de control
+                            .replace(/\n/g, ' ') // Reemplazar saltos de línea con espacios
+                            .replace(/\s+/g, ' ') // Normalizar espacios
+                            .trim();
+
+                        console.log('Respuesta limpia:', cleanResponse);
+                        const parsedResponse = JSON.parse(cleanResponse);
+                        
+                        if (parsedResponse && typeof parsedResponse === 'object' && 'translatedText' in parsedResponse) {
+                            // Restaurar los saltos de línea en el texto traducido
+                            const translatedText = parsedResponse.translatedText
+                                .split(' ')
+                                .filter(Boolean)
+                                .join('\n');
+                            setValue(translatedText);
                         } else {
                             throw new Error('La respuesta no contiene el texto traducido o el formato es incorrecto.');
                         }
@@ -177,7 +191,7 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
 
             <div>
                 <label htmlFor="languageCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Región
+                    Region
                 </label>
                 <div className="flex gap-2">
                     <select
@@ -231,13 +245,13 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
 
             <div>
                 <label htmlFor="value" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Valor
+                    Value
                 </label>
                 <textarea
                     id="value"
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
-                    rows={4}
+                    rows={10}
                     className="mt-1 block w-full px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     required
                 />

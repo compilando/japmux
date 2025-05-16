@@ -67,20 +67,20 @@ const PromptAssetVersionsTable: React.FC<PromptAssetVersionsTableProps> = ({
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{item.changeMessage || '-'}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatDate(item.createdAt)}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
+                                <Link
+                                        href={`/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${item.versionTag}/translations`}
+                                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600 p-1 inline-block"
+                                        title="Manage Translations"
+                                    >
+                                        Translations
+                                    </Link>
                                     <button
                                         onClick={() => onEdit(item)}
                                         className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 p-1 inline-block"
                                         title="Edit Version"
                                     >
                                         <PencilIcon />
-                                    </button>
-                                    <Link
-                                        href={`/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${item.versionTag}/translations`}
-                                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600 p-1 inline-block"
-                                        title="Manage Translations"
-                                    >
-                                        <DocumentDuplicateIcon className="w-5 h-5" />
-                                    </Link>
+                                    </button>                                    
                                     <button
                                         onClick={() => onDelete(item.versionTag)}
                                         className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600 p-1 inline-block"
