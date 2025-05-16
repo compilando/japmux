@@ -37,13 +37,13 @@ const PromptTranslationsTable: React.FC<PromptTranslationsTableProps> = ({ promp
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
             <div className="max-w-full overflow-x-auto">
-                <div className="min-w-[600px]">
+                <div className="min-w-[800px]">
                     <Table>
                         <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                             <TableRow>
                                 <TableCell isHeader className="w-2/12 px-4 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Language Code</TableCell>
-                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Name</TableCell>
-                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Actions</TableCell>
+                                <TableCell isHeader className="w-5/12 px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Preview</TableCell>
+                                <TableCell isHeader className="w-2/12 px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Actions</TableCell>
                             </TableRow>
                         </TableHeader>
                         <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
@@ -71,9 +71,19 @@ const PromptTranslationsTable: React.FC<PromptTranslationsTableProps> = ({ promp
                                             </div>
                                         </TableCell>
                                         <TableCell className="px-5 py-4 text-start text-gray-800 dark:text-white/90 text-theme-sm">
-                                            {item.languageCode === 'es-ES' ? 'España' : 
-                                             item.languageCode === 'en-US' ? 'United States' : 
-                                             item.languageCode}
+                                            <div className="group relative">
+                                                <div className="truncate max-w-xl" title={item.promptText}>
+                                                    {item.promptText?.substring(0, 150)}
+                                                    {item.promptText && item.promptText.length > 150 ? '...' : ''}
+                                                </div>
+                                                {item.promptText && item.promptText.length > 150 && (
+                                                    <div className="absolute left-0 top-full mt-2 w-96 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                                                        <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                                                            {item.promptText}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </TableCell>
                                         <TableCell className="px-5 py-4 text-center">
                                             <div className="flex items-center justify-center gap-3">

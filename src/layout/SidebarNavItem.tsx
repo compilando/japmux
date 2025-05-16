@@ -88,6 +88,32 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = memo(({
             {nav.icon}
           </div>
           <span className="flex-1">{nav.name}</span>
+          <span className="flex items-center gap-1 ml-auto">
+            {nav.new && (
+              <span
+                className={cn(
+                  "menu-dropdown-badge transition-colors duration-200",
+                  (nav.path && pathname.startsWith(nav.path)) ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"
+                )}
+                role="status"
+                aria-label="New feature"
+              >
+                new
+              </span>
+            )}
+            {nav.pro && (
+              <span
+                className={cn(
+                  "menu-dropdown-badge transition-colors duration-200",
+                  (nav.path && pathname.startsWith(nav.path)) ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"
+                )}
+                role="status"
+                aria-label="Pro feature"
+              >
+                pro
+              </span>
+            )}
+          </span>
           {nav.subItems && nav.subItems.length > 0 && (
             <div className={cn(
               "menu-item-arrow transition-transform duration-200",

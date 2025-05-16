@@ -220,88 +220,127 @@ const PromptWizardPage: React.FC = () => {
         <>
             <Breadcrumb crumbs={breadcrumbs} />
 
-            <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Prompt Wizard</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                    A step-by-step guide to create, configure, and optimize your prompts.
+            <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl px-8 pt-6 pb-8 mb-4 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-3 mb-6">
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-500 to-purple-600 bg-clip-text text-transparent">Prompt Wizard</h1>
+                    <span className="px-3 py-1 text-sm font-medium text-brand-600 bg-brand-50 dark:bg-brand-500/20 dark:text-brand-400 rounded-full">Beta</span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-8">
+                    A step-by-step guide to create, configure, and optimize your prompts with AI assistance.
                 </p>
 
-                <div className="mb-8 p-6 border border-gray-300 dark:border-gray-600 rounded-lg">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">1. Write your prompt for the AI to suggest a structure:</h2>
+                <div className="mb-8 p-6 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/50">
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-white font-semibold">1</div>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Write your prompt</h2>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Describe what you want to achieve, and our AI will suggest the best structure for your prompt.
+                    </p>
                     <div className="mb-4">
                         <textarea
                             id="prompt-editor"
                             rows={5}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline dark:bg-gray-700 dark:border-gray-600"
+                            className="w-full px-4 py-3 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all duration-200"
                             value={promptContent}
                             onChange={(e) => setPromptContent(e.target.value)}
                             placeholder="E.g.: Create a welcome message for new users in English and Spanish..."
                             disabled={isLoadingGenerate}
                         />
                     </div>
-                    <div className="flex items-center justify-end">
-                        <button
-                            onClick={handleGenerateStructure}
-                            className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoadingGenerate || !selectedProjectId ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            type="button"
-                            disabled={isLoadingGenerate || !selectedProjectId}
-                            title={!selectedProjectId ? "Select a project to generate structure" : "Generate structure based on the prompt"}
-                        >
-                            {isLoadingGenerate ? 'Generating...' : 'Suggest Structure by AI'}
-                        </button>
-                    </div>
-                    {errorGenerate && (
-                        <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                            <strong className="font-bold">Error generating: </strong>
-                            <span className="block sm:inline">{errorGenerate}</span>
-                        </div>
-                    )}
+                    <button
+                        onClick={handleGenerateStructure}
+                        disabled={isLoadingGenerate || !promptContent.trim()}
+                        className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isLoadingGenerate ? (
+                            <span className="flex items-center gap-2">
+                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Generating...
+                            </span>
+                        ) : (
+                            'Generate Structure'
+                        )}
+                    </button>
                 </div>
 
-                {/* Visualización y Edición de JSON + Acciones de Carga */}
-                {(generatedJson || jsonToLoadInput) && (
-                    <div className="mt-8">
-                        <div className="flex flex-col md:flex-row gap-6">
-                            {/* Columna Izquierda: Visualización Estructurada (solo si hay generatedJson) */}
-                            {generatedJson && (
-                                <div className="md:w-1/2 w-full">
-                                    <GeneratedStructureDisplay data={generatedJson} />
-                                </div>
-                            )}
+                {errorGenerate && (
+                    <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <p className="text-sm text-red-600 dark:text-red-400">{errorGenerate}</p>
+                    </div>
+                )}
 
-                            {/* Columna Derecha: Textarea Unificado para Edición y Carga */}
-                            <div className={generatedJson ? "md:w-1/2 w-full" : "w-full"}>
-                                <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg shadow-inner h-full flex flex-col">
-                                    <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">JSON Editor</h2>
-                                    <textarea
-                                        id="json-unified-editor"
-                                        className="w-full flex-grow p-3 border border-gray-700 dark:border-gray-600 rounded-md bg-gray-800 dark:bg-gray-900 text-gray-100 dark:text-gray-200 text-sm font-mono whitespace-pre focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                        rows={generatedJson ? 20 : 25}
-                                        value={jsonToLoadInput}
-                                        onChange={(e) => setJsonToLoadInput(e.target.value)}
-                                        placeholder='Paste the structure JSON here, or generate one with the AI.'
-                                        disabled={isLoadingLoad || isLoadingGenerate}
-                                    />
-                                    <div className="mt-4 flex items-center justify-end">
-                                        <button
-                                            onClick={handleLoadStructure}
-                                            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoadingLoad || !selectedProjectId || !jsonToLoadInput.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            type="button"
-                                            disabled={isLoadingLoad || !selectedProjectId || !jsonToLoadInput.trim()}
-                                            title={!selectedProjectId ? "Select a project to load structure" : !jsonToLoadInput.trim() ? "JSON cannot be empty" : "Load this JSON structure into the project"}
-                                        >
-                                            {isLoadingLoad ? 'Loading...' : 'Load Prompt in Project'}
-                                        </button>
-                                    </div>
-                                    {loadStatusMessage && (
-                                        <div className={`mt-4 px-4 py-3 rounded relative border ${loadStatusMessage.type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'}`} role="alert">
-                                            <strong className="font-bold">{loadStatusMessage.type === 'success' ? 'Success:' : 'Error:'} </strong>
-                                            <span className="block sm:inline whitespace-pre-wrap">{loadStatusMessage.message}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                {generatedJson && (
+                    <div className="mb-8 p-6 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/50">
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold">2</div>
+                            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Review Generated Structure</h2>
                         </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            Review and modify the generated structure before saving it.
+                        </p>
+                        <pre className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-x-auto">
+                            <code className="text-sm text-gray-800 dark:text-gray-200">
+                                {JSON.stringify(generatedJson, null, 2)}
+                            </code>
+                        </pre>
+                    </div>
+                )}
+
+                <div className="mb-8 p-6 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/50">
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-semibold">3</div>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Load Existing Structure</h2>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Or load an existing structure to modify it.
+                    </p>
+                    <div className="mb-4">
+                        <textarea
+                            id="json-to-load"
+                            rows={5}
+                            className="w-full px-4 py-3 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all duration-200"
+                            value={jsonToLoadInput}
+                            onChange={(e) => setJsonToLoadInput(e.target.value)}
+                            placeholder="Paste your JSON structure here..."
+                            disabled={isLoadingLoad}
+                        />
+                    </div>
+                    <button
+                        onClick={handleLoadStructure}
+                        disabled={isLoadingLoad || !jsonToLoadInput.trim()}
+                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isLoadingLoad ? (
+                            <span className="flex items-center gap-2">
+                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Loading...
+                            </span>
+                        ) : (
+                            'Load Structure'
+                        )}
+                    </button>
+                </div>
+
+                {loadStatusMessage && (
+                    <div className={`mb-8 p-4 rounded-lg ${
+                        loadStatusMessage.type === 'success' 
+                            ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
+                            : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                    }`}>
+                        <p className={`text-sm ${
+                            loadStatusMessage.type === 'success' 
+                                ? 'text-green-600 dark:text-green-400' 
+                                : 'text-red-600 dark:text-red-400'
+                        }`}>
+                            {loadStatusMessage.message}
+                        </p>
                     </div>
                 )}
             </div>

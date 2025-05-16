@@ -36,6 +36,7 @@ export interface NavItem {
   path?: string;
   subItems?: SubItem[];
   pro?: boolean;
+  new?: boolean;
 }
 
 const AppSidebar: React.FC = () => {
@@ -47,7 +48,7 @@ const AppSidebar: React.FC = () => {
   const navItems: NavItem[] = [
     {
       icon: <UserCircleIcon />,
-      name: "Management",
+      name: "Control Center",
       path: "/management",
       subItems: [
         { name: "Users", path: "/users", icon: <UserCircleIcon /> },
@@ -71,19 +72,20 @@ const AppSidebar: React.FC = () => {
       name: "Prompt Management",
       path: selectedProjectId ? `/projects/${selectedProjectId}/prompts` : undefined,
       subItems: selectedProjectId ? [
-        { name: "Prompts", path: `/projects/${selectedProjectId}/prompts`, icon: <TaskIcon /> },
+        { name: "My Prompts", path: `/projects/${selectedProjectId}/prompts`, icon: <TaskIcon /> },
       ] : [],
     },
     {
       icon: <PaperPlaneIcon />,
-      name: "Prompt Execution",
+      name: "Execute Prompt",
       path: "/serveprompt",
-      pro: true
+      new: true
     },
     {
       icon: <ShootingStarIcon />,
-      name: "Prompt Wizard",
+      name: "Magic Assistant",
       path: "/prompt-wizard",
+      pro: true
     }
   ].filter(item => !(item.subItems && item.subItems.length === 0 && (item.name === "Current Project" || item.name === "Prompt Management")));
 
@@ -195,18 +197,22 @@ const AppSidebar: React.FC = () => {
       <div
         className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}
       >
-        <Link href="/">
+        <Link href="/" className="group">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <h1 style={{ fontSize: "24px", fontWeight: "bold" }} className="dark:text-white">japm.app</h1>
+              <h1 className="dark:text-white text-2xl font-bold bg-gradient-to-r from-brand-500 to-purple-600 bg-clip-text text-transparent group-hover:from-brand-600 group-hover:to-purple-700 transition-all duration-300">japm.app</h1>
             </>
           ) : (
-            <Image
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
+            <div className="relative">
+              <Image
+                src="/images/logo/logo-icon.svg"
+                alt="Logo"
+                width={32}
+                height={32}
+                className="transform group-hover:scale-110 transition-transform duration-300"
+              />
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-brand-500 rounded-full animate-pulse"></div>
+            </div>
           )}
         </Link>
       </div>

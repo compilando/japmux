@@ -247,7 +247,7 @@
 }
 
 @utility menu-item {
-  @apply relative flex items-center w-full gap-3 px-3 py-2.5 font-medium rounded-lg text-base transition-all duration-200;
+  @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-base font-medium transition-all duration-200;
 }
 
 @utility menu-item-active {
@@ -255,7 +255,7 @@
 }
 
 @utility menu-item-inactive {
-  @apply text-gray-700 hover:bg-gray-100 group-hover:text-gray-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300 hover:shadow-sm;
+  @apply text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5 hover:shadow-sm;
 }
 
 @utility menu-item-pro {
@@ -263,7 +263,7 @@
 }
 
 @utility menu-item-pro-inactive {
-  @apply hover:from-brand-500/20 hover:to-brand-600/20 dark:hover:from-brand-500/30 dark:hover:to-brand-600/30;
+  @apply text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-500/[0.15];
 }
 
 @utility menu-item-icon {
@@ -527,4 +527,144 @@
 
 .flatpickr-calendar.static {
   @apply right-0;
+}
+
+/* Enhanced menu animations and effects */
+.menu-item {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.menu-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.menu-item:hover::before {
+  transform: translateX(100%);
+}
+
+/* Glowing effect for icons */
+.menu-item-icon {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.menu-item:hover .menu-item-icon {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 8px rgba(70, 95, 255, 0.3));
+}
+
+/* Pulse animation for new items */
+@keyframes pulse-new {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.menu-dropdown-badge[aria-label="New feature"] {
+  animation: pulse-new 2s infinite;
+  background: linear-gradient(45deg, var(--color-brand-500), var(--color-theme-purple-500));
+  color: white;
+}
+
+/* Enhanced pro badge effect */
+.menu-item-pro-inactive {
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-item-pro-inactive::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  bottom: -2px;
+  left: -2px;
+  background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+  border-radius: 8px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.menu-item-pro-inactive:hover::after {
+  opacity: 1;
+}
+
+/* Smooth submenu transitions */
+.menu-dropdown-item {
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: fadeInUp 0.3s forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover effect for menu items */
+.menu-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Active state enhancement */
+.menu-item-active {
+  background: linear-gradient(45deg, var(--color-brand-50), var(--color-brand-100));
+  box-shadow: 0 4px 12px rgba(70, 95, 255, 0.15);
+}
+
+/* Dark mode enhancements */
+.dark .menu-item-active {
+  background: linear-gradient(45deg, rgba(70, 95, 255, 0.15), rgba(70, 95, 255, 0.25));
+  box-shadow: 0 4px 12px rgba(70, 95, 255, 0.1);
+}
+
+/* Logo animation */
+.logo-container {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.logo-container:hover {
+  transform: scale(1.05);
+}
+
+.logo-container::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  background: var(--color-brand-500);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
