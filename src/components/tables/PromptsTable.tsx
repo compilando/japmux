@@ -5,7 +5,7 @@ import { usePrompts } from '@/context/PromptContext';
 import CopyButton from '../common/CopyButton';
 import { TrashBinIcon, PencilIcon, BoxCubeIcon } from "@/icons";
 import { BoltIcon, ClockIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
-import { promptVersionService } from '@/services/api';
+import { promptVersionService, promptAssetService } from '@/services/api';
 
 interface PromptsTableProps {
     prompts: PromptDto[];
@@ -18,25 +18,46 @@ interface PromptsTableProps {
 const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, projectId, loading }) => {
     const { selectPrompt } = usePrompts();
     const [versionsCount, setVersionsCount] = useState<Record<string, number>>({});
+    const [assetsCount, setAssetsCount] = useState<Record<string, number>>({});
 
     useEffect(() => {
-        const fetchVersionsCount = async () => {
-            if (!projectId) return;
+        const fetchCounts = async () => {
+            if (!projectId || prompts.length === 0) {
+                setVersionsCount({});
+                setAssetsCount({});
+                return;
+            }
 
-            const counts: Record<string, number> = {};
+            const newVersionCounts: Record<string, number> = {};
+            const newAssetCounts: Record<string, number> = {};
+
             for (const prompt of prompts) {
                 try {
                     const versions = await promptVersionService.findAll(projectId, prompt.id);
-                    counts[prompt.id] = versions.length;
+                    newVersionCounts[prompt.id] = versions.length;
                 } catch (error) {
                     console.error(`Error fetching versions for prompt ${prompt.id}:`, error);
-                    counts[prompt.id] = 0;
+                    newVersionCounts[prompt.id] = 0;
+                }
+
+                try {
+                    const assets = await promptAssetService.findAll(projectId, prompt.id);
+                    newAssetCounts[prompt.id] = assets.length;
+                } catch (error) {
+                    console.error(`Error fetching assets for prompt ${prompt.id}:`, error);
+                    newAssetCounts[prompt.id] = 0;
                 }
             }
-            setVersionsCount(counts);
+            setVersionsCount(newVersionCounts);
+            setAssetsCount(newAssetCounts);
         };
 
-        fetchVersionsCount();
+        if (projectId && prompts.length > 0) {
+            fetchCounts();
+        } else {
+            setVersionsCount({});
+            setAssetsCount({});
+        }
     }, [prompts, projectId]);
 
     if (loading && prompts.length === 0) {
@@ -49,22 +70,21 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {prompts.map((item) => (
+            {prompts.map((item: PromptDto) => (
                 <div
                     key={item.id}
-                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden"
+                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700"
                 >
                     <div className="p-6">
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex-1 min-w-0">
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate" title={item.name}>
-                                    {item.name}
+                                    {item.id} <CopyButton textToCopy={item.id} />
                                 </h3>
                                 <div className="flex items-center mt-1">
-                                    <span className="text-sm text-gray-500 dark:text-gray-400 font-mono" title={item.id}>
-                                        {item.id.substring(0, 8)}...
+                                    <span className="text-sm text-gray-500 dark:text-gray-400 font-mono" title={item.name}>
+                                        {item.name.substring(0, 50)}...
                                     </span>
-                                    <CopyButton textToCopy={item.id} className="ml-2" />
                                 </div>
                             </div>
                             <div className="flex items-center space-x-2">
@@ -132,8 +152,13 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                                     className="flex items-center text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors duration-200"
                                     title="Manage Assets"
                                 >
-                                    <BoxCubeIcon className="w-4 h-4 mr-1.5" />
+                                    <BoxCubeIcon className="mr-1.5" />
                                     <span>Assets</span>
+                                    {assetsCount[item.id] !== undefined && (
+                                        <span className="ml-1.5 px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded-full dark:bg-purple-900 dark:text-purple-200">
+                                            {assetsCount[item.id]}
+                                        </span>
+                                    )}
                                 </Link>
                             </div>
                         )}

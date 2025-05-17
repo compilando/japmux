@@ -405,6 +405,7 @@ interface PromptVersionDetail extends generated.CreatePromptVersionDto {
     id: string;
     versionTag: string;
     isActive: boolean;
+    languageCode?: string;
     // Añadir otros campos que se esperan de findOne y que están en PromptVersionData
 }
 

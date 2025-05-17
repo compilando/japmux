@@ -42,6 +42,7 @@ export interface PromptVersionData extends CreatePromptVersionDto {
     versionTag: string; // Asumimos que versionTag SIEMPRE debe existir para una versión existente
     isActive: boolean;
     promptId: string;
+    languageCode?: string;
 }
 
 // Nueva interfaz para detalles del marketplace, extendiendo PromptVersionData
@@ -164,7 +165,7 @@ const PromptVersionsPage: React.FC = () => {
             const data = await promptVersionService.findAll(projectId, promptId);
             if (Array.isArray(data)) {
                 const versionsData = data.map(v_any => {
-                    const v = v_any as CreatePromptVersionDto & Partial<{ id: string, versionTag: string, isActive: boolean, marketplaceStatus: string, promptId: string, createdAt: string }>;
+                    const v = v_any as CreatePromptVersionDto & Partial<{ id: string, versionTag: string, isActive: boolean, marketplaceStatus: string, promptId: string, createdAt: string, languageCode: string }>;
                     return {
                         ...v,
                         id: v.id || v.versionTag || String(Date.now() + Math.random()),
@@ -172,7 +173,8 @@ const PromptVersionsPage: React.FC = () => {
                         isActive: v.isActive || false,
                         promptId: v.promptId || promptId,
                         marketplaceStatus: v.marketplaceStatus,
-                        createdAt: v.createdAt
+                        createdAt: v.createdAt,
+                        languageCode: v.languageCode
                     };
                 }) as PromptVersionMarketplaceDetails[];
                 setItemsList(versionsData);

@@ -93,6 +93,31 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                             <span className="text-xs text-gray-500 dark:text-gray-400">
                                                 {formatDistanceToNow(createdAt, { addSuffix: true })}
                                             </span>
+
+                                            {/* Mostrar bandera y languageCode si existe */}
+                                            {item.languageCode && (() => {
+                                                const langParts = item.languageCode.split('-');
+                                                const countryOrLangCode = langParts.length > 1 ? langParts[1].toLowerCase() : langParts[0].toLowerCase();
+                                                const flagUrl = countryOrLangCode.length === 2 ? `https://flagcdn.com/16x12/${countryOrLangCode}.png` : `https://flagcdn.com/16x12/xx.png`;
+                                                // Para languageCode que son solo idioma (ej. 'en'), usamos 'xx' o podríamos mapear a un país común (ej. 'en' -> 'us')
+                                                // Por ahora, si no es un código de país de 2 letras, usa 'xx'
+
+                                                return (
+                                                    <div className="flex items-center space-x-1 ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700" title={`Language: ${item.languageCode}`}>
+                                                        <img
+                                                            src={flagUrl}
+                                                            alt={`${item.languageCode} flag`}
+                                                            className="w-4 h-3 object-cover rounded-sm border border-gray-300 dark:border-gray-500"
+                                                            onError={(e) => {
+                                                                const target = e.target as HTMLImageElement;
+                                                                target.src = 'https://flagcdn.com/16x12/xx.png'; // Fallback
+                                                                target.onerror = null;
+                                                            }}
+                                                        />
+                                                        <span className="text-xs text-gray-600 dark:text-gray-300">{item.languageCode.toUpperCase()}</span>
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
 
                                         {/* Mensaje de cambio con efecto hover */}

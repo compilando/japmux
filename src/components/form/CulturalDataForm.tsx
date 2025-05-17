@@ -171,7 +171,7 @@ const CulturalDataForm: React.FC<CulturalDataFormProps> = ({ initialData, onSave
                 {isEditing && <p className="text-xs text-gray-500 mt-1">Region ID cannot be changed after creation.</p>}
             </div>
 
-            <div>
+            <div className="max-w-[95%]">
                 <label htmlFor="formalityLevel" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Formality Level (Optional)
                 </label>

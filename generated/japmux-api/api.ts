@@ -401,6 +401,12 @@ export interface CreatePromptVersionDto {
      */
     'promptText': string;
     /**
+     * Tag de versión para esta nueva versión (e.g., v1.0.0, v1.0.0-beta.1). Debe ser único por prompt.
+     * @type {string}
+     * @memberof CreatePromptVersionDto
+     */
+    'versionTag': string;
+    /**
      * Mensaje describiendo los cambios en esta versión.
      * @type {string}
      * @memberof CreatePromptVersionDto
@@ -1428,6 +1434,12 @@ export interface UpdatePromptVersionDto {
      */
     'promptText'?: string;
     /**
+     * Tag de versión para esta nueva versión (e.g., v1.0.0, v1.0.0-beta.1). Debe ser único por prompt.
+     * @type {string}
+     * @memberof UpdatePromptVersionDto
+     */
+    'versionTag'?: string;
+    /**
      * Mensaje describiendo los cambios en esta versión.
      * @type {string}
      * @memberof UpdatePromptVersionDto
@@ -1606,7 +1618,7 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -1615,12 +1627,12 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createAiModelDto, localVarRequestOptions, configuration)
 
             return {
@@ -1647,7 +1659,7 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -1656,10 +1668,10 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1689,7 +1701,7 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -1698,10 +1710,10 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1727,7 +1739,7 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -1736,10 +1748,10 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1769,7 +1781,7 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -1778,10 +1790,10 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1814,7 +1826,7 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -1823,12 +1835,12 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateAiModelDto, localVarRequestOptions, configuration)
 
             return {
@@ -1843,7 +1855,7 @@ export const AIModelsProjectSpecificApiAxiosParamCreator = function (configurati
  * AIModelsProjectSpecificApi - functional programming interface
  * @export
  */
-export const AIModelsProjectSpecificApiFp = function (configuration?: Configuration) {
+export const AIModelsProjectSpecificApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AIModelsProjectSpecificApiAxiosParamCreator(configuration)
     return {
         /**
@@ -2114,15 +2126,15 @@ export const AppApiAxiosParamCreator = function (configuration?: Configuration) 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2143,15 +2155,15 @@ export const AppApiAxiosParamCreator = function (configuration?: Configuration) 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2172,15 +2184,15 @@ export const AppApiAxiosParamCreator = function (configuration?: Configuration) 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2201,15 +2213,15 @@ export const AppApiAxiosParamCreator = function (configuration?: Configuration) 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2223,7 +2235,7 @@ export const AppApiAxiosParamCreator = function (configuration?: Configuration) 
  * AppApi - functional programming interface
  * @export
  */
-export const AppApiFp = function (configuration?: Configuration) {
+export const AppApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AppApiAxiosParamCreator(configuration)
     return {
         /**
@@ -2405,7 +2417,7 @@ export const AssetTranslationsProjectPromptAssetVersionTranslationApiAxiosParamC
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -2414,12 +2426,12 @@ export const AssetTranslationsProjectPromptAssetVersionTranslationApiAxiosParamC
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createAssetTranslationDto, localVarRequestOptions, configuration)
 
             return {
@@ -2458,7 +2470,7 @@ export const AssetTranslationsProjectPromptAssetVersionTranslationApiAxiosParamC
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -2467,10 +2479,10 @@ export const AssetTranslationsProjectPromptAssetVersionTranslationApiAxiosParamC
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2512,7 +2524,7 @@ export const AssetTranslationsProjectPromptAssetVersionTranslationApiAxiosParamC
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -2521,10 +2533,10 @@ export const AssetTranslationsProjectPromptAssetVersionTranslationApiAxiosParamC
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2566,7 +2578,7 @@ export const AssetTranslationsProjectPromptAssetVersionTranslationApiAxiosParamC
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -2575,10 +2587,10 @@ export const AssetTranslationsProjectPromptAssetVersionTranslationApiAxiosParamC
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2623,7 +2635,7 @@ export const AssetTranslationsProjectPromptAssetVersionTranslationApiAxiosParamC
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -2632,12 +2644,12 @@ export const AssetTranslationsProjectPromptAssetVersionTranslationApiAxiosParamC
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateAssetTranslationDto, localVarRequestOptions, configuration)
 
             return {
@@ -2652,7 +2664,7 @@ export const AssetTranslationsProjectPromptAssetVersionTranslationApiAxiosParamC
  * AssetTranslationsProjectPromptAssetVersionTranslationApi - functional programming interface
  * @export
  */
-export const AssetTranslationsProjectPromptAssetVersionTranslationApiFp = function (configuration?: Configuration) {
+export const AssetTranslationsProjectPromptAssetVersionTranslationApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AssetTranslationsProjectPromptAssetVersionTranslationApiAxiosParamCreator(configuration)
     return {
         /**
@@ -2934,7 +2946,7 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -2943,10 +2955,10 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2971,17 +2983,17 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(loginDto, localVarRequestOptions, configuration)
 
             return {
@@ -3007,17 +3019,17 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(registerDto, localVarRequestOptions, configuration)
 
             return {
@@ -3032,7 +3044,7 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
  * AuthenticationApi - functional programming interface
  * @export
  */
-export const AuthenticationApiFp = function (configuration?: Configuration) {
+export const AuthenticationApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AuthenticationApiAxiosParamCreator(configuration)
     return {
         /**
@@ -3188,7 +3200,7 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -3197,12 +3209,12 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createCulturalDataDto, localVarRequestOptions, configuration)
 
             return {
@@ -3229,7 +3241,7 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -3238,10 +3250,10 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3271,7 +3283,7 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -3280,10 +3292,10 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3313,7 +3325,7 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -3322,10 +3334,10 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3358,7 +3370,7 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -3367,12 +3379,12 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateCulturalDataDto, localVarRequestOptions, configuration)
 
             return {
@@ -3387,7 +3399,7 @@ export const CulturalDataApiAxiosParamCreator = function (configuration?: Config
  * CulturalDataApi - functional programming interface
  * @export
  */
-export const CulturalDataApiFp = function (configuration?: Configuration) {
+export const CulturalDataApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = CulturalDataApiAxiosParamCreator(configuration)
     return {
         /**
@@ -3631,7 +3643,7 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -3640,12 +3652,12 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createEnvironmentDto, localVarRequestOptions, configuration)
 
             return {
@@ -3672,7 +3684,7 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -3681,10 +3693,10 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3714,7 +3726,7 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -3723,10 +3735,10 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3756,7 +3768,7 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -3765,10 +3777,10 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3798,7 +3810,7 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -3807,10 +3819,10 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3843,7 +3855,7 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -3852,12 +3864,12 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateEnvironmentDto, localVarRequestOptions, configuration)
 
             return {
@@ -3872,7 +3884,7 @@ export const EnvironmentsApiAxiosParamCreator = function (configuration?: Config
  * EnvironmentsApi - functional programming interface
  * @export
  */
-export const EnvironmentsApiFp = function (configuration?: Configuration) {
+export const EnvironmentsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = EnvironmentsApiAxiosParamCreator(configuration)
     return {
         /**
@@ -4146,15 +4158,15 @@ export const HealthApiAxiosParamCreator = function (configuration?: Configuratio
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4168,7 +4180,7 @@ export const HealthApiAxiosParamCreator = function (configuration?: Configuratio
  * HealthApi - functional programming interface
  * @export
  */
-export const HealthApiFp = function (configuration?: Configuration) {
+export const HealthApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = HealthApiAxiosParamCreator(configuration)
     return {
         /**
@@ -4247,7 +4259,7 @@ export const LLMExecutionApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -4256,12 +4268,12 @@ export const LLMExecutionApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(executeLlmDto, localVarRequestOptions, configuration)
 
             return {
@@ -4276,7 +4288,7 @@ export const LLMExecutionApiAxiosParamCreator = function (configuration?: Config
  * LLMExecutionApi - functional programming interface
  * @export
  */
-export const LLMExecutionApiFp = function (configuration?: Configuration) {
+export const LLMExecutionApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = LLMExecutionApiAxiosParamCreator(configuration)
     return {
         /**
@@ -4363,7 +4375,7 @@ export const MarketplaceApiAxiosParamCreator = function (configuration?: Configu
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -4392,10 +4404,10 @@ export const MarketplaceApiAxiosParamCreator = function (configuration?: Configu
             }
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4422,7 +4434,7 @@ export const MarketplaceApiAxiosParamCreator = function (configuration?: Configu
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -4451,10 +4463,10 @@ export const MarketplaceApiAxiosParamCreator = function (configuration?: Configu
             }
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4468,7 +4480,7 @@ export const MarketplaceApiAxiosParamCreator = function (configuration?: Configu
  * MarketplaceApi - functional programming interface
  * @export
  */
-export const MarketplaceApiFp = function (configuration?: Configuration) {
+export const MarketplaceApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = MarketplaceApiAxiosParamCreator(configuration)
     return {
         /**
@@ -4644,7 +4656,7 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -4653,12 +4665,12 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createProjectDto, localVarRequestOptions, configuration)
 
             return {
@@ -4681,15 +4693,15 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4711,7 +4723,7 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -4720,10 +4732,10 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4749,7 +4761,7 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -4758,10 +4770,10 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4787,7 +4799,7 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -4796,10 +4808,10 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4828,7 +4840,7 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -4837,12 +4849,12 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateProjectDto, localVarRequestOptions, configuration)
 
             return {
@@ -4857,7 +4869,7 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
  * ProjectsApi - functional programming interface
  * @export
  */
-export const ProjectsApiFp = function (configuration?: Configuration) {
+export const ProjectsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ProjectsApiAxiosParamCreator(configuration)
     return {
         /**
@@ -5126,7 +5138,7 @@ export const PromptAssetVersionsApiAxiosParamCreator = function (configuration?:
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5135,12 +5147,12 @@ export const PromptAssetVersionsApiAxiosParamCreator = function (configuration?:
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createPromptAssetVersionDto, localVarRequestOptions, configuration)
 
             return {
@@ -5148,89 +5160,6 @@ export const PromptAssetVersionsApiAxiosParamCreator = function (configuration?:
                 options: localVarRequestOptions,
             };
         },
-    }
-};
-
-/**
- * PromptAssetVersionsApi - functional programming interface
- * @export
- */
-export const PromptAssetVersionsApiFp = function (configuration?: Configuration) {
-    const localVarAxiosParamCreator = PromptAssetVersionsApiAxiosParamCreator(configuration)
-    return {
-        /**
-         * 
-         * @summary Create a new version for a specific prompt asset
-         * @param {string} projectId ID of the Project the Prompt belongs to
-         * @param {string} promptId ID (slug) of the Prompt
-         * @param {string} assetKey Key of the PromptAsset
-         * @param {CreatePromptAssetVersionDto} createPromptAssetVersionDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async promptAssetVersionControllerCreate(projectId: string, promptId: string, assetKey: string, createPromptAssetVersionDto: CreatePromptAssetVersionDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptAssetVersionDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetVersionControllerCreate(projectId, promptId, assetKey, createPromptAssetVersionDto, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsApi.promptAssetVersionControllerCreate']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-    }
-};
-
-/**
- * PromptAssetVersionsApi - factory interface
- * @export
- */
-export const PromptAssetVersionsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = PromptAssetVersionsApiFp(configuration)
-    return {
-        /**
-         * 
-         * @summary Create a new version for a specific prompt asset
-         * @param {string} projectId ID of the Project the Prompt belongs to
-         * @param {string} promptId ID (slug) of the Prompt
-         * @param {string} assetKey Key of the PromptAsset
-         * @param {CreatePromptAssetVersionDto} createPromptAssetVersionDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        promptAssetVersionControllerCreate(projectId: string, promptId: string, assetKey: string, createPromptAssetVersionDto: CreatePromptAssetVersionDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetVersionDto> {
-            return localVarFp.promptAssetVersionControllerCreate(projectId, promptId, assetKey, createPromptAssetVersionDto, options).then((request) => request(axios, basePath));
-        },
-    };
-};
-
-/**
- * PromptAssetVersionsApi - object-oriented interface
- * @export
- * @class PromptAssetVersionsApi
- * @extends {BaseAPI}
- */
-export class PromptAssetVersionsApi extends BaseAPI {
-    /**
-     * 
-     * @summary Create a new version for a specific prompt asset
-     * @param {string} projectId ID of the Project the Prompt belongs to
-     * @param {string} promptId ID (slug) of the Prompt
-     * @param {string} assetKey Key of the PromptAsset
-     * @param {CreatePromptAssetVersionDto} createPromptAssetVersionDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PromptAssetVersionsApi
-     */
-    public promptAssetVersionControllerCreate(projectId: string, promptId: string, assetKey: string, createPromptAssetVersionDto: CreatePromptAssetVersionDto, options?: RawAxiosRequestConfig) {
-        return PromptAssetVersionsApiFp(this.configuration).promptAssetVersionControllerCreate(projectId, promptId, assetKey, createPromptAssetVersionDto, options).then((request) => request(this.axios, this.basePath));
-    }
-}
-
-
-
-/**
- * PromptAssetVersionsProjectPromptAssetVersionApi - axios parameter creator
- * @export
- */
-export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = function (configuration?: Configuration) {
-    return {
         /**
          * 
          * @summary Get all versions for a specific prompt asset
@@ -5258,7 +5187,7 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5267,10 +5196,10 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5308,7 +5237,7 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5317,10 +5246,10 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5358,7 +5287,7 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5367,10 +5296,10 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5408,7 +5337,7 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5417,10 +5346,10 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5458,7 +5387,7 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5467,10 +5396,10 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5511,7 +5440,7 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5520,12 +5449,12 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updatePromptAssetVersionDto, localVarRequestOptions, configuration)
 
             return {
@@ -5537,12 +5466,28 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator = 
 };
 
 /**
- * PromptAssetVersionsProjectPromptAssetVersionApi - functional programming interface
+ * PromptAssetVersionsApi - functional programming interface
  * @export
  */
-export const PromptAssetVersionsProjectPromptAssetVersionApiFp = function (configuration?: Configuration) {
-    const localVarAxiosParamCreator = PromptAssetVersionsProjectPromptAssetVersionApiAxiosParamCreator(configuration)
+export const PromptAssetVersionsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = PromptAssetVersionsApiAxiosParamCreator(configuration)
     return {
+        /**
+         * 
+         * @summary Create a new version for a specific prompt asset
+         * @param {string} projectId ID of the Project the Prompt belongs to
+         * @param {string} promptId ID (slug) of the Prompt
+         * @param {string} assetKey Key of the PromptAsset
+         * @param {CreatePromptAssetVersionDto} createPromptAssetVersionDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async promptAssetVersionControllerCreate(projectId: string, promptId: string, assetKey: string, createPromptAssetVersionDto: CreatePromptAssetVersionDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptAssetVersionDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetVersionControllerCreate(projectId, promptId, assetKey, createPromptAssetVersionDto, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsApi.promptAssetVersionControllerCreate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
         /**
          * 
          * @summary Get all versions for a specific prompt asset
@@ -5555,7 +5500,7 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiFp = function (confi
         async promptAssetVersionControllerFindAll(projectId: string, promptId: string, assetKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CreatePromptAssetVersionDto>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetVersionControllerFindAll(projectId, promptId, assetKey, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsProjectPromptAssetVersionApi.promptAssetVersionControllerFindAll']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsApi.promptAssetVersionControllerFindAll']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -5571,7 +5516,7 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiFp = function (confi
         async promptAssetVersionControllerFindOneByTag(projectId: string, promptId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptAssetVersionDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsProjectPromptAssetVersionApi.promptAssetVersionControllerFindOneByTag']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsApi.promptAssetVersionControllerFindOneByTag']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -5587,7 +5532,7 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiFp = function (confi
         async promptAssetVersionControllerRemove(projectId: string, promptId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetVersionControllerRemove(projectId, promptId, assetKey, versionTag, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsProjectPromptAssetVersionApi.promptAssetVersionControllerRemove']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsApi.promptAssetVersionControllerRemove']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -5603,7 +5548,7 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiFp = function (confi
         async promptAssetVersionControllerRequestPublish(projectId: string, promptId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptAssetVersionDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetVersionControllerRequestPublish(projectId, promptId, assetKey, versionTag, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsProjectPromptAssetVersionApi.promptAssetVersionControllerRequestPublish']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsApi.promptAssetVersionControllerRequestPublish']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -5619,7 +5564,7 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiFp = function (confi
         async promptAssetVersionControllerUnpublish(projectId: string, promptId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptAssetVersionDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetVersionControllerUnpublish(projectId, promptId, assetKey, versionTag, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsProjectPromptAssetVersionApi.promptAssetVersionControllerUnpublish']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsApi.promptAssetVersionControllerUnpublish']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -5636,19 +5581,32 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiFp = function (confi
         async promptAssetVersionControllerUpdate(projectId: string, promptId: string, assetKey: string, versionTag: string, updatePromptAssetVersionDto: UpdatePromptAssetVersionDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptAssetVersionDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetVersionControllerUpdate(projectId, promptId, assetKey, versionTag, updatePromptAssetVersionDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsProjectPromptAssetVersionApi.promptAssetVersionControllerUpdate']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsApi.promptAssetVersionControllerUpdate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
 };
 
 /**
- * PromptAssetVersionsProjectPromptAssetVersionApi - factory interface
+ * PromptAssetVersionsApi - factory interface
  * @export
  */
-export const PromptAssetVersionsProjectPromptAssetVersionApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = PromptAssetVersionsProjectPromptAssetVersionApiFp(configuration)
+export const PromptAssetVersionsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = PromptAssetVersionsApiFp(configuration)
     return {
+        /**
+         * 
+         * @summary Create a new version for a specific prompt asset
+         * @param {string} projectId ID of the Project the Prompt belongs to
+         * @param {string} promptId ID (slug) of the Prompt
+         * @param {string} assetKey Key of the PromptAsset
+         * @param {CreatePromptAssetVersionDto} createPromptAssetVersionDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        promptAssetVersionControllerCreate(projectId: string, promptId: string, assetKey: string, createPromptAssetVersionDto: CreatePromptAssetVersionDto, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetVersionDto> {
+            return localVarFp.promptAssetVersionControllerCreate(projectId, promptId, assetKey, createPromptAssetVersionDto, options).then((request) => request(axios, basePath));
+        },
         /**
          * 
          * @summary Get all versions for a specific prompt asset
@@ -5731,12 +5689,27 @@ export const PromptAssetVersionsProjectPromptAssetVersionApiFactory = function (
 };
 
 /**
- * PromptAssetVersionsProjectPromptAssetVersionApi - object-oriented interface
+ * PromptAssetVersionsApi - object-oriented interface
  * @export
- * @class PromptAssetVersionsProjectPromptAssetVersionApi
+ * @class PromptAssetVersionsApi
  * @extends {BaseAPI}
  */
-export class PromptAssetVersionsProjectPromptAssetVersionApi extends BaseAPI {
+export class PromptAssetVersionsApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create a new version for a specific prompt asset
+     * @param {string} projectId ID of the Project the Prompt belongs to
+     * @param {string} promptId ID (slug) of the Prompt
+     * @param {string} assetKey Key of the PromptAsset
+     * @param {CreatePromptAssetVersionDto} createPromptAssetVersionDto 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PromptAssetVersionsApi
+     */
+    public promptAssetVersionControllerCreate(projectId: string, promptId: string, assetKey: string, createPromptAssetVersionDto: CreatePromptAssetVersionDto, options?: RawAxiosRequestConfig) {
+        return PromptAssetVersionsApiFp(this.configuration).promptAssetVersionControllerCreate(projectId, promptId, assetKey, createPromptAssetVersionDto, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * 
      * @summary Get all versions for a specific prompt asset
@@ -5745,10 +5718,10 @@ export class PromptAssetVersionsProjectPromptAssetVersionApi extends BaseAPI {
      * @param {string} assetKey Key of the PromptAsset
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PromptAssetVersionsProjectPromptAssetVersionApi
+     * @memberof PromptAssetVersionsApi
      */
     public promptAssetVersionControllerFindAll(projectId: string, promptId: string, assetKey: string, options?: RawAxiosRequestConfig) {
-        return PromptAssetVersionsProjectPromptAssetVersionApiFp(this.configuration).promptAssetVersionControllerFindAll(projectId, promptId, assetKey, options).then((request) => request(this.axios, this.basePath));
+        return PromptAssetVersionsApiFp(this.configuration).promptAssetVersionControllerFindAll(projectId, promptId, assetKey, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -5760,10 +5733,10 @@ export class PromptAssetVersionsProjectPromptAssetVersionApi extends BaseAPI {
      * @param {string} versionTag Version tag (e.g., v1.0.0)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PromptAssetVersionsProjectPromptAssetVersionApi
+     * @memberof PromptAssetVersionsApi
      */
     public promptAssetVersionControllerFindOneByTag(projectId: string, promptId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig) {
-        return PromptAssetVersionsProjectPromptAssetVersionApiFp(this.configuration).promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag, options).then((request) => request(this.axios, this.basePath));
+        return PromptAssetVersionsApiFp(this.configuration).promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -5775,10 +5748,10 @@ export class PromptAssetVersionsProjectPromptAssetVersionApi extends BaseAPI {
      * @param {string} versionTag Version tag to delete
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PromptAssetVersionsProjectPromptAssetVersionApi
+     * @memberof PromptAssetVersionsApi
      */
     public promptAssetVersionControllerRemove(projectId: string, promptId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig) {
-        return PromptAssetVersionsProjectPromptAssetVersionApiFp(this.configuration).promptAssetVersionControllerRemove(projectId, promptId, assetKey, versionTag, options).then((request) => request(this.axios, this.basePath));
+        return PromptAssetVersionsApiFp(this.configuration).promptAssetVersionControllerRemove(projectId, promptId, assetKey, versionTag, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -5790,10 +5763,10 @@ export class PromptAssetVersionsProjectPromptAssetVersionApi extends BaseAPI {
      * @param {string} versionTag Version tag
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PromptAssetVersionsProjectPromptAssetVersionApi
+     * @memberof PromptAssetVersionsApi
      */
     public promptAssetVersionControllerRequestPublish(projectId: string, promptId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig) {
-        return PromptAssetVersionsProjectPromptAssetVersionApiFp(this.configuration).promptAssetVersionControllerRequestPublish(projectId, promptId, assetKey, versionTag, options).then((request) => request(this.axios, this.basePath));
+        return PromptAssetVersionsApiFp(this.configuration).promptAssetVersionControllerRequestPublish(projectId, promptId, assetKey, versionTag, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -5805,10 +5778,10 @@ export class PromptAssetVersionsProjectPromptAssetVersionApi extends BaseAPI {
      * @param {string} versionTag Version tag
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PromptAssetVersionsProjectPromptAssetVersionApi
+     * @memberof PromptAssetVersionsApi
      */
     public promptAssetVersionControllerUnpublish(projectId: string, promptId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig) {
-        return PromptAssetVersionsProjectPromptAssetVersionApiFp(this.configuration).promptAssetVersionControllerUnpublish(projectId, promptId, assetKey, versionTag, options).then((request) => request(this.axios, this.basePath));
+        return PromptAssetVersionsApiFp(this.configuration).promptAssetVersionControllerUnpublish(projectId, promptId, assetKey, versionTag, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -5821,10 +5794,10 @@ export class PromptAssetVersionsProjectPromptAssetVersionApi extends BaseAPI {
      * @param {UpdatePromptAssetVersionDto} updatePromptAssetVersionDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PromptAssetVersionsProjectPromptAssetVersionApi
+     * @memberof PromptAssetVersionsApi
      */
     public promptAssetVersionControllerUpdate(projectId: string, promptId: string, assetKey: string, versionTag: string, updatePromptAssetVersionDto: UpdatePromptAssetVersionDto, options?: RawAxiosRequestConfig) {
-        return PromptAssetVersionsProjectPromptAssetVersionApiFp(this.configuration).promptAssetVersionControllerUpdate(projectId, promptId, assetKey, versionTag, updatePromptAssetVersionDto, options).then((request) => request(this.axios, this.basePath));
+        return PromptAssetVersionsApiFp(this.configuration).promptAssetVersionControllerUpdate(projectId, promptId, assetKey, versionTag, updatePromptAssetVersionDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -5862,7 +5835,7 @@ export const PromptAssetsForASpecificPromptApiAxiosParamCreator = function (conf
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5871,12 +5844,12 @@ export const PromptAssetsForASpecificPromptApiAxiosParamCreator = function (conf
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createPromptAssetDto, localVarRequestOptions, configuration)
 
             return {
@@ -5907,7 +5880,7 @@ export const PromptAssetsForASpecificPromptApiAxiosParamCreator = function (conf
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5916,10 +5889,10 @@ export const PromptAssetsForASpecificPromptApiAxiosParamCreator = function (conf
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5953,7 +5926,7 @@ export const PromptAssetsForASpecificPromptApiAxiosParamCreator = function (conf
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5962,10 +5935,10 @@ export const PromptAssetsForASpecificPromptApiAxiosParamCreator = function (conf
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5999,7 +5972,7 @@ export const PromptAssetsForASpecificPromptApiAxiosParamCreator = function (conf
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -6008,10 +5981,10 @@ export const PromptAssetsForASpecificPromptApiAxiosParamCreator = function (conf
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -6048,7 +6021,7 @@ export const PromptAssetsForASpecificPromptApiAxiosParamCreator = function (conf
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -6057,12 +6030,12 @@ export const PromptAssetsForASpecificPromptApiAxiosParamCreator = function (conf
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updatePromptAssetDto, localVarRequestOptions, configuration)
 
             return {
@@ -6077,7 +6050,7 @@ export const PromptAssetsForASpecificPromptApiAxiosParamCreator = function (conf
  * PromptAssetsForASpecificPromptApi - functional programming interface
  * @export
  */
-export const PromptAssetsForASpecificPromptApiFp = function (configuration?: Configuration) {
+export const PromptAssetsForASpecificPromptApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PromptAssetsForASpecificPromptApiAxiosParamCreator(configuration)
     return {
         /**
@@ -6319,7 +6292,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
          * @summary Create a translation for a specific prompt version within a project
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {CreatePromptTranslationDto} createPromptTranslationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6344,7 +6317,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -6353,12 +6326,12 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createPromptTranslationDto, localVarRequestOptions, configuration)
 
             return {
@@ -6371,7 +6344,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
          * @summary Get all translations for a specific prompt version within a project
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6393,7 +6366,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -6402,10 +6375,10 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -6417,7 +6390,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
          * @summary Get a specific translation by language code for a prompt version. Allows resolving assets.
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code (e.g., es-ES)
          * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
          * @param {string} [environmentId] Environment ID for context.
@@ -6447,7 +6420,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -6472,10 +6445,10 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
             }
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -6487,7 +6460,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
          * @summary Delete a specific translation by language code for a prompt version
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code of the translation to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6513,7 +6486,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -6522,10 +6495,10 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -6537,7 +6510,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
          * @summary Update a specific translation by language code for a prompt version
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code of the translation to update
          * @param {UpdatePromptTranslationDto} updatePromptTranslationDto 
          * @param {*} [options] Override http request option.
@@ -6566,7 +6539,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -6575,12 +6548,12 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updatePromptTranslationDto, localVarRequestOptions, configuration)
 
             return {
@@ -6595,7 +6568,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
  * PromptTranslationsWithinProjectPromptVersionApi - functional programming interface
  * @export
  */
-export const PromptTranslationsWithinProjectPromptVersionApiFp = function (configuration?: Configuration) {
+export const PromptTranslationsWithinProjectPromptVersionApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator(configuration)
     return {
         /**
@@ -6603,7 +6576,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFp = function (confi
          * @summary Create a translation for a specific prompt version within a project
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {CreatePromptTranslationDto} createPromptTranslationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6619,7 +6592,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFp = function (confi
          * @summary Get all translations for a specific prompt version within a project
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6634,7 +6607,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFp = function (confi
          * @summary Get a specific translation by language code for a prompt version. Allows resolving assets.
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code (e.g., es-ES)
          * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
          * @param {string} [environmentId] Environment ID for context.
@@ -6654,7 +6627,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFp = function (confi
          * @summary Delete a specific translation by language code for a prompt version
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code of the translation to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6670,7 +6643,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFp = function (confi
          * @summary Update a specific translation by language code for a prompt version
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code of the translation to update
          * @param {UpdatePromptTranslationDto} updatePromptTranslationDto 
          * @param {*} [options] Override http request option.
@@ -6697,7 +6670,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFactory = function (
          * @summary Create a translation for a specific prompt version within a project
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {CreatePromptTranslationDto} createPromptTranslationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6710,7 +6683,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFactory = function (
          * @summary Get all translations for a specific prompt version within a project
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6722,7 +6695,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFactory = function (
          * @summary Get a specific translation by language code for a prompt version. Allows resolving assets.
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code (e.g., es-ES)
          * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
          * @param {string} [environmentId] Environment ID for context.
@@ -6739,7 +6712,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFactory = function (
          * @summary Delete a specific translation by language code for a prompt version
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code of the translation to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6752,7 +6725,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFactory = function (
          * @summary Update a specific translation by language code for a prompt version
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag
+         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code of the translation to update
          * @param {UpdatePromptTranslationDto} updatePromptTranslationDto 
          * @param {*} [options] Override http request option.
@@ -6776,7 +6749,7 @@ export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI {
      * @summary Create a translation for a specific prompt version within a project
      * @param {string} projectId Project ID
      * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag
+     * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
      * @param {CreatePromptTranslationDto} createPromptTranslationDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6791,7 +6764,7 @@ export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI {
      * @summary Get all translations for a specific prompt version within a project
      * @param {string} projectId Project ID
      * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag
+     * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptTranslationsWithinProjectPromptVersionApi
@@ -6805,7 +6778,7 @@ export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI {
      * @summary Get a specific translation by language code for a prompt version. Allows resolving assets.
      * @param {string} projectId Project ID
      * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag
+     * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
      * @param {string} languageCode Language code (e.g., es-ES)
      * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
      * @param {string} [environmentId] Environment ID for context.
@@ -6824,7 +6797,7 @@ export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI {
      * @summary Delete a specific translation by language code for a prompt version
      * @param {string} projectId Project ID
      * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag
+     * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
      * @param {string} languageCode Language code of the translation to delete
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6839,7 +6812,7 @@ export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI {
      * @summary Update a specific translation by language code for a prompt version
      * @param {string} projectId Project ID
      * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag
+     * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
      * @param {string} languageCode Language code of the translation to update
      * @param {UpdatePromptTranslationDto} updatePromptTranslationDto 
      * @param {*} [options] Override http request option.
@@ -6885,7 +6858,7 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -6894,12 +6867,12 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createPromptVersionDto, localVarRequestOptions, configuration)
 
             return {
@@ -6930,7 +6903,7 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -6939,10 +6912,10 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -6954,7 +6927,7 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
          * @summary Get a specific prompt version by its tag within a project/prompt. Allows resolving assets.
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version tag (e.g., v1.0.0)
+         * @param {string} versionTag Version tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
          * @param {string} [environmentId] Environment ID for context.
          * @param {string} [regionCode] Region code for context (e.g., for asset translations).
@@ -6980,7 +6953,7 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7005,10 +6978,10 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
             }
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7042,7 +7015,7 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7051,10 +7024,10 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7088,7 +7061,7 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7097,10 +7070,10 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7134,7 +7107,7 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7143,10 +7116,10 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7183,7 +7156,7 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7192,12 +7165,12 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updatePromptVersionDto, localVarRequestOptions, configuration)
 
             return {
@@ -7212,7 +7185,7 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
  * PromptVersionsWithinProjectPromptApi - functional programming interface
  * @export
  */
-export const PromptVersionsWithinProjectPromptApiFp = function (configuration?: Configuration) {
+export const PromptVersionsWithinProjectPromptApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PromptVersionsWithinProjectPromptApiAxiosParamCreator(configuration)
     return {
         /**
@@ -7249,7 +7222,7 @@ export const PromptVersionsWithinProjectPromptApiFp = function (configuration?: 
          * @summary Get a specific prompt version by its tag within a project/prompt. Allows resolving assets.
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version tag (e.g., v1.0.0)
+         * @param {string} versionTag Version tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
          * @param {string} [environmentId] Environment ID for context.
          * @param {string} [regionCode] Region code for context (e.g., for asset translations).
@@ -7362,7 +7335,7 @@ export const PromptVersionsWithinProjectPromptApiFactory = function (configurati
          * @summary Get a specific prompt version by its tag within a project/prompt. Allows resolving assets.
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version tag (e.g., v1.0.0)
+         * @param {string} versionTag Version tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
          * @param {string} [environmentId] Environment ID for context.
          * @param {string} [regionCode] Region code for context (e.g., for asset translations).
@@ -7464,7 +7437,7 @@ export class PromptVersionsWithinProjectPromptApi extends BaseAPI {
      * @summary Get a specific prompt version by its tag within a project/prompt. Allows resolving assets.
      * @param {string} projectId Project ID
      * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version tag (e.g., v1.0.0)
+     * @param {string} versionTag Version tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
      * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
      * @param {string} [environmentId] Environment ID for context.
      * @param {string} [regionCode] Region code for context (e.g., for asset translations).
@@ -7565,7 +7538,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7574,12 +7547,12 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createPromptDto, localVarRequestOptions, configuration)
 
             return {
@@ -7606,7 +7579,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7615,10 +7588,10 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7648,7 +7621,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7657,10 +7630,10 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7689,7 +7662,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7698,12 +7671,12 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(generatePromptStructureDto, localVarRequestOptions, configuration)
 
             return {
@@ -7733,7 +7706,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7742,12 +7715,12 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(loadPromptStructureDto, localVarRequestOptions, configuration)
 
             return {
@@ -7778,7 +7751,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7787,10 +7760,10 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7823,7 +7796,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7832,12 +7805,12 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updatePromptDto, localVarRequestOptions, configuration)
 
             return {
@@ -7852,7 +7825,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
  * PromptsApi - functional programming interface
  * @export
  */
-export const PromptsApiFp = function (configuration?: Configuration) {
+export const PromptsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PromptsApiAxiosParamCreator(configuration)
     return {
         /**
@@ -8172,7 +8145,7 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -8181,12 +8154,12 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createRagDocumentMetadataDto, localVarRequestOptions, configuration)
 
             return {
@@ -8213,7 +8186,7 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -8222,10 +8195,10 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -8255,7 +8228,7 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -8264,10 +8237,10 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -8297,7 +8270,7 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -8306,10 +8279,10 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -8342,7 +8315,7 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -8351,12 +8324,12 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
 
             return {
@@ -8371,7 +8344,7 @@ export const RAGDocumentMetadataApiAxiosParamCreator = function (configuration?:
  * RAGDocumentMetadataApi - functional programming interface
  * @export
  */
-export const RAGDocumentMetadataApiFp = function (configuration?: Configuration) {
+export const RAGDocumentMetadataApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = RAGDocumentMetadataApiAxiosParamCreator(configuration)
     return {
         /**
@@ -8611,7 +8584,7 @@ export const RawExecutionApiAxiosParamCreator = function (configuration?: Config
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -8620,12 +8593,12 @@ export const RawExecutionApiAxiosParamCreator = function (configuration?: Config
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(executeRawDto, localVarRequestOptions, configuration)
 
             return {
@@ -8640,7 +8613,7 @@ export const RawExecutionApiAxiosParamCreator = function (configuration?: Config
  * RawExecutionApi - functional programming interface
  * @export
  */
-export const RawExecutionApiFp = function (configuration?: Configuration) {
+export const RawExecutionApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = RawExecutionApiAxiosParamCreator(configuration)
     return {
         /**
@@ -8729,7 +8702,7 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -8738,12 +8711,12 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createRegionDto, localVarRequestOptions, configuration)
 
             return {
@@ -8770,7 +8743,7 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -8779,10 +8752,10 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -8812,7 +8785,7 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -8821,10 +8794,10 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -8854,7 +8827,7 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -8863,10 +8836,10 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -8899,7 +8872,7 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -8908,12 +8881,12 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateRegionDto, localVarRequestOptions, configuration)
 
             return {
@@ -8928,7 +8901,7 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
  * RegionsApi - functional programming interface
  * @export
  */
-export const RegionsApiFp = function (configuration?: Configuration) {
+export const RegionsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = RegionsApiAxiosParamCreator(configuration)
     return {
         /**
@@ -9155,7 +9128,7 @@ export const ServePromptApiAxiosParamCreator = function (configuration?: Configu
          * @summary Assembles and prepares a specific prompt version (specific language) for execution with provided variables
          * @param {string} projectId Project ID
          * @param {string} promptName The unique name of the prompt within the project
-         * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;)
+         * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;) or \&quot;latest\&quot; to use the most recent version
          * @param {string} languageCode Language code for translation (e.g., \&quot;es\&quot;)
          * @param {ExecutePromptBodyDto} executePromptBodyDto Input variables for the prompt
          * @param {*} [options] Override http request option.
@@ -9184,7 +9157,7 @@ export const ServePromptApiAxiosParamCreator = function (configuration?: Configu
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -9193,12 +9166,12 @@ export const ServePromptApiAxiosParamCreator = function (configuration?: Configu
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(executePromptBodyDto, localVarRequestOptions, configuration)
 
             return {
@@ -9211,28 +9184,24 @@ export const ServePromptApiAxiosParamCreator = function (configuration?: Configu
          * @summary Assembles and prepares a specific prompt version (base language) for execution with provided variables
          * @param {string} projectId Project ID
          * @param {string} promptName The unique name of the prompt within the project
-         * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;)
-         * @param {string} languageCode 
+         * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;) or \&quot;latest\&quot; to use the most recent version
          * @param {ExecutePromptBodyDto} executePromptBodyDto Input variables for the prompt
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        servePromptControllerExecutePromptWithoutLanguage: async (projectId: string, promptName: string, versionTag: string, languageCode: string, executePromptBodyDto: ExecutePromptBodyDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        servePromptControllerExecutePromptWithoutLanguage: async (projectId: string, promptName: string, versionTag: string, executePromptBodyDto: ExecutePromptBodyDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('servePromptControllerExecutePromptWithoutLanguage', 'projectId', projectId)
             // verify required parameter 'promptName' is not null or undefined
             assertParamExists('servePromptControllerExecutePromptWithoutLanguage', 'promptName', promptName)
             // verify required parameter 'versionTag' is not null or undefined
             assertParamExists('servePromptControllerExecutePromptWithoutLanguage', 'versionTag', versionTag)
-            // verify required parameter 'languageCode' is not null or undefined
-            assertParamExists('servePromptControllerExecutePromptWithoutLanguage', 'languageCode', languageCode)
             // verify required parameter 'executePromptBodyDto' is not null or undefined
             assertParamExists('servePromptControllerExecutePromptWithoutLanguage', 'executePromptBodyDto', executePromptBodyDto)
             const localVarPath = `/api/serve-prompt/execute/{projectId}/{promptName}/{versionTag}/base`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
                 .replace(`{${"promptName"}}`, encodeURIComponent(String(promptName)))
-                .replace(`{${"versionTag"}}`, encodeURIComponent(String(versionTag)))
-                .replace(`{${"languageCode"}}`, encodeURIComponent(String(languageCode)));
+                .replace(`{${"versionTag"}}`, encodeURIComponent(String(versionTag)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -9240,7 +9209,7 @@ export const ServePromptApiAxiosParamCreator = function (configuration?: Configu
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -9249,12 +9218,12 @@ export const ServePromptApiAxiosParamCreator = function (configuration?: Configu
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(executePromptBodyDto, localVarRequestOptions, configuration)
 
             return {
@@ -9269,7 +9238,7 @@ export const ServePromptApiAxiosParamCreator = function (configuration?: Configu
  * ServePromptApi - functional programming interface
  * @export
  */
-export const ServePromptApiFp = function (configuration?: Configuration) {
+export const ServePromptApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ServePromptApiAxiosParamCreator(configuration)
     return {
         /**
@@ -9277,7 +9246,7 @@ export const ServePromptApiFp = function (configuration?: Configuration) {
          * @summary Assembles and prepares a specific prompt version (specific language) for execution with provided variables
          * @param {string} projectId Project ID
          * @param {string} promptName The unique name of the prompt within the project
-         * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;)
+         * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;) or \&quot;latest\&quot; to use the most recent version
          * @param {string} languageCode Language code for translation (e.g., \&quot;es\&quot;)
          * @param {ExecutePromptBodyDto} executePromptBodyDto Input variables for the prompt
          * @param {*} [options] Override http request option.
@@ -9294,14 +9263,13 @@ export const ServePromptApiFp = function (configuration?: Configuration) {
          * @summary Assembles and prepares a specific prompt version (base language) for execution with provided variables
          * @param {string} projectId Project ID
          * @param {string} promptName The unique name of the prompt within the project
-         * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;)
-         * @param {string} languageCode 
+         * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;) or \&quot;latest\&quot; to use the most recent version
          * @param {ExecutePromptBodyDto} executePromptBodyDto Input variables for the prompt
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async servePromptControllerExecutePromptWithoutLanguage(projectId: string, promptName: string, versionTag: string, languageCode: string, executePromptBodyDto: ExecutePromptBodyDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.servePromptControllerExecutePromptWithoutLanguage(projectId, promptName, versionTag, languageCode, executePromptBodyDto, options);
+        async servePromptControllerExecutePromptWithoutLanguage(projectId: string, promptName: string, versionTag: string, executePromptBodyDto: ExecutePromptBodyDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.servePromptControllerExecutePromptWithoutLanguage(projectId, promptName, versionTag, executePromptBodyDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ServePromptApi.servePromptControllerExecutePromptWithoutLanguage']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -9321,7 +9289,7 @@ export const ServePromptApiFactory = function (configuration?: Configuration, ba
          * @summary Assembles and prepares a specific prompt version (specific language) for execution with provided variables
          * @param {string} projectId Project ID
          * @param {string} promptName The unique name of the prompt within the project
-         * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;)
+         * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;) or \&quot;latest\&quot; to use the most recent version
          * @param {string} languageCode Language code for translation (e.g., \&quot;es\&quot;)
          * @param {ExecutePromptBodyDto} executePromptBodyDto Input variables for the prompt
          * @param {*} [options] Override http request option.
@@ -9335,14 +9303,13 @@ export const ServePromptApiFactory = function (configuration?: Configuration, ba
          * @summary Assembles and prepares a specific prompt version (base language) for execution with provided variables
          * @param {string} projectId Project ID
          * @param {string} promptName The unique name of the prompt within the project
-         * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;)
-         * @param {string} languageCode 
+         * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;) or \&quot;latest\&quot; to use the most recent version
          * @param {ExecutePromptBodyDto} executePromptBodyDto Input variables for the prompt
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        servePromptControllerExecutePromptWithoutLanguage(projectId: string, promptName: string, versionTag: string, languageCode: string, executePromptBodyDto: ExecutePromptBodyDto, options?: RawAxiosRequestConfig): AxiosPromise<any> {
-            return localVarFp.servePromptControllerExecutePromptWithoutLanguage(projectId, promptName, versionTag, languageCode, executePromptBodyDto, options).then((request) => request(axios, basePath));
+        servePromptControllerExecutePromptWithoutLanguage(projectId: string, promptName: string, versionTag: string, executePromptBodyDto: ExecutePromptBodyDto, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.servePromptControllerExecutePromptWithoutLanguage(projectId, promptName, versionTag, executePromptBodyDto, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -9359,7 +9326,7 @@ export class ServePromptApi extends BaseAPI {
      * @summary Assembles and prepares a specific prompt version (specific language) for execution with provided variables
      * @param {string} projectId Project ID
      * @param {string} promptName The unique name of the prompt within the project
-     * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;)
+     * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;) or \&quot;latest\&quot; to use the most recent version
      * @param {string} languageCode Language code for translation (e.g., \&quot;es\&quot;)
      * @param {ExecutePromptBodyDto} executePromptBodyDto Input variables for the prompt
      * @param {*} [options] Override http request option.
@@ -9375,15 +9342,14 @@ export class ServePromptApi extends BaseAPI {
      * @summary Assembles and prepares a specific prompt version (base language) for execution with provided variables
      * @param {string} projectId Project ID
      * @param {string} promptName The unique name of the prompt within the project
-     * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;)
-     * @param {string} languageCode 
+     * @param {string} versionTag Specific version tag (e.g., \&quot;v1.2.0\&quot;) or \&quot;latest\&quot; to use the most recent version
      * @param {ExecutePromptBodyDto} executePromptBodyDto Input variables for the prompt
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ServePromptApi
      */
-    public servePromptControllerExecutePromptWithoutLanguage(projectId: string, promptName: string, versionTag: string, languageCode: string, executePromptBodyDto: ExecutePromptBodyDto, options?: RawAxiosRequestConfig) {
-        return ServePromptApiFp(this.configuration).servePromptControllerExecutePromptWithoutLanguage(projectId, promptName, versionTag, languageCode, executePromptBodyDto, options).then((request) => request(this.axios, this.basePath));
+    public servePromptControllerExecutePromptWithoutLanguage(projectId: string, promptName: string, versionTag: string, executePromptBodyDto: ExecutePromptBodyDto, options?: RawAxiosRequestConfig) {
+        return ServePromptApiFp(this.configuration).servePromptControllerExecutePromptWithoutLanguage(projectId, promptName, versionTag, executePromptBodyDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -9413,7 +9379,7 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -9422,12 +9388,12 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createSystemPromptDto, localVarRequestOptions, configuration)
 
             return {
@@ -9450,7 +9416,7 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -9459,10 +9425,10 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9488,7 +9454,7 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -9497,10 +9463,10 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9526,7 +9492,7 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -9535,10 +9501,10 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9567,7 +9533,7 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -9576,12 +9542,12 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateSystemPromptDto, localVarRequestOptions, configuration)
 
             return {
@@ -9596,7 +9562,7 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
  * SystemPromptsApi - functional programming interface
  * @export
  */
-export const SystemPromptsApiFp = function (configuration?: Configuration) {
+export const SystemPromptsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SystemPromptsApiAxiosParamCreator(configuration)
     return {
         /**
@@ -9825,7 +9791,7 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -9834,12 +9800,12 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createTagDto, localVarRequestOptions, configuration)
 
             return {
@@ -9866,7 +9832,7 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -9875,10 +9841,10 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9908,7 +9874,7 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -9917,10 +9883,10 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9950,7 +9916,7 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -9959,10 +9925,10 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -9992,7 +9958,7 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -10001,10 +9967,10 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -10037,7 +10003,7 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -10046,12 +10012,12 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateTagDto, localVarRequestOptions, configuration)
 
             return {
@@ -10066,7 +10032,7 @@ export const TagsApiAxiosParamCreator = function (configuration?: Configuration)
  * TagsApi - functional programming interface
  * @export
  */
-export const TagsApiFp = function (configuration?: Configuration) {
+export const TagsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = TagsApiAxiosParamCreator(configuration)
     return {
         /**
@@ -10344,7 +10310,7 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -10353,12 +10319,12 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createTenantDto, localVarRequestOptions, configuration)
 
             return {
@@ -10381,7 +10347,7 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -10390,10 +10356,10 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -10419,7 +10385,7 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -10428,10 +10394,10 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -10457,7 +10423,7 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -10466,10 +10432,10 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -10498,7 +10464,7 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -10507,12 +10473,12 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(updateTenantDto, localVarRequestOptions, configuration)
 
             return {
@@ -10527,7 +10493,7 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
  * TenantsApi - functional programming interface
  * @export
  */
-export const TenantsApiFp = function (configuration?: Configuration) {
+export const TenantsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = TenantsApiAxiosParamCreator(configuration)
     return {
         /**
@@ -10752,7 +10718,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -10761,12 +10727,12 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createUserDto, localVarRequestOptions, configuration)
 
             return {
@@ -10789,15 +10755,15 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -10823,15 +10789,15 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -10857,15 +10823,15 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -10894,17 +10860,17 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
-
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
 
             return {
@@ -10919,7 +10885,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
  * UsersApi - functional programming interface
  * @export
  */
-export const UsersApiFp = function (configuration?: Configuration) {
+export const UsersApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = UsersApiAxiosParamCreator(configuration)
     return {
         /**

@@ -146,7 +146,7 @@ const apiInstance = new PromptVersionsWithinProjectPromptApi(configuration);
 
 let projectId: string; //Project ID (default to undefined)
 let promptId: string; //Prompt CUID (default to undefined)
-let versionTag: string; //Version tag (e.g., v1.0.0) (default to undefined)
+let versionTag: string; //Version tag (e.g., v1.0.0) or \"latest\" to get the most recent version (default to undefined)
 let resolveAssets: boolean; //Whether to resolve asset placeholders. Defaults to false. (optional) (default to undefined)
 let environmentId: string; //Environment ID for context. (optional) (default to undefined)
 let regionCode: string; //Region code for context (e.g., for asset translations). (optional) (default to undefined)
@@ -169,7 +169,7 @@ const { status, data } = await apiInstance.promptVersionControllerFindOneByTag(
 |------------- | ------------- | ------------- | -------------|
 | **projectId** | [**string**] | Project ID | defaults to undefined|
 | **promptId** | [**string**] | Prompt CUID | defaults to undefined|
-| **versionTag** | [**string**] | Version tag (e.g., v1.0.0) | defaults to undefined|
+| **versionTag** | [**string**] | Version tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version | defaults to undefined|
 | **resolveAssets** | [**boolean**] | Whether to resolve asset placeholders. Defaults to false. | (optional) defaults to undefined|
 | **environmentId** | [**string**] | Environment ID for context. | (optional) defaults to undefined|
 | **regionCode** | [**string**] | Region code for context (e.g., for asset translations). | (optional) defaults to undefined|

@@ -46,6 +46,7 @@ const PromptTranslationsPage: React.FC = () => {
     const [projectRegions, setProjectRegions] = useState<CreateRegionDto[]>([]);
     const [availableLanguagesForNewTranslation, setAvailableLanguagesForNewTranslation] = useState<{ code: string; name: string }[]>([]);
     const [allLanguagesTranslated, setAllLanguagesTranslated] = useState<boolean>(false);
+    const [originalVersionLanguageCode, setOriginalVersionLanguageCode] = useState<string | null>(null);
 
     const searchParams = useSearchParams();
     const params = useParams();
@@ -98,8 +99,14 @@ const PromptTranslationsPage: React.FC = () => {
                 if (version?.promptText) {
                     setVersionText(version.promptText);
                 }
+                if (version?.languageCode) {
+                    setOriginalVersionLanguageCode(version.languageCode);
+                } else {
+                    setOriginalVersionLanguageCode(null);
+                }
             } catch (err: unknown) {
                 console.error('Error fetching version text:', err);
+                setOriginalVersionLanguageCode(null);
             }
         };
 
@@ -129,7 +136,10 @@ const PromptTranslationsPage: React.FC = () => {
                     name: region.name
                 }));
 
-                const remainingLanguages = allPossibleLanguagesFromProject.filter(lang => !translatedLanguageCodes.has(lang.code));
+                const remainingLanguages = allPossibleLanguagesFromProject.filter(lang =>
+                    !translatedLanguageCodes.has(lang.code) &&
+                    (originalVersionLanguageCode ? lang.code !== originalVersionLanguageCode : true)
+                );
                 setAvailableLanguagesForNewTranslation(remainingLanguages);
                 setAllLanguagesTranslated(remainingLanguages.length === 0 && allPossibleLanguagesFromProject.length > 0);
             } else {
@@ -149,7 +159,7 @@ const PromptTranslationsPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [projectId, promptId, versionTag, projectRegions]);
+    }, [projectId, promptId, versionTag, projectRegions, originalVersionLanguageCode]);
 
     useEffect(() => {
         if (projectId && promptId && versionTag && !breadcrumbLoading && projectRegions.length > 0) {
@@ -253,6 +263,8 @@ const PromptTranslationsPage: React.FC = () => {
                         versionText={versionText}
                         availableLanguages={availableLanguagesForNewTranslation}
                         isEditing={!!editingItem}
+                        versionTag={versionTag}
+                        originalVersionLanguageCode={originalVersionLanguageCode}
                     />
                 </div>
             ) : (
@@ -288,9 +300,28 @@ const PromptTranslationsPage: React.FC = () => {
                         {/* Columna del texto original */}
                         <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden h-fit">
                             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                    <DocumentDuplicateIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                                    Original Prompt Text (Version: {versionTag})
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center flex-wrap gap-x-2 gap-y-1">
+                                    <DocumentDuplicateIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                                    <span className="flex-shrink-0">Original Prompt Text (Version: {versionTag})</span>
+                                    {originalVersionLanguageCode && (
+                                        <div className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700" title={`Original Language: ${originalVersionLanguageCode}`}>
+                                            <img
+                                                src={(() => {
+                                                    const langParts = originalVersionLanguageCode.split('-');
+                                                    const countryOrLangCode = langParts.length > 1 ? langParts[1].toLowerCase() : langParts[0].toLowerCase();
+                                                    return countryOrLangCode.length === 2 ? `https://flagcdn.com/16x12/${countryOrLangCode}.png` : `https://flagcdn.com/16x12/xx.png`;
+                                                })()}
+                                                alt={`${originalVersionLanguageCode} flag`}
+                                                className="w-4 h-3 object-cover rounded-sm border border-gray-300 dark:border-gray-500"
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    target.src = 'https://flagcdn.com/16x12/xx.png'; // Fallback
+                                                    target.onerror = null;
+                                                }}
+                                            />
+                                            <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{originalVersionLanguageCode.toUpperCase()}</span>
+                                        </div>
+                                    )}
                                 </h3>
                             </div>
                             <div className="p-6">
