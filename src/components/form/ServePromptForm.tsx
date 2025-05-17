@@ -80,14 +80,15 @@ const ServePromptForm: React.FC = () => {
                     <input
                         type="text"
                         id="versionTag"
-                        value={versionTag}
+                        value={useLatestActive ? 'latest' : versionTag}
                         onChange={(e) => setVersionTag(e.target.value)}
                         className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50"
                         placeholder="e.g., v1.2.1"
                         disabled={useLatestActive || !!promptId} // Disable if using latest active or promptId is set
                     />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Ignored if &apos;Use Latest Active&apos; is checked.</p>
-
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        {useLatestActive ? 'Using latest active version' : 'Ignored if \'Use Latest Active\' is checked.'}
+                    </p>
                 </div>
                 <div className="flex items-center col-span-1 md:col-span-2">
                     <input

@@ -175,12 +175,13 @@ const ServePromptPage: React.FC = () => {
     };
 
     // --- Opciones para Selects (Memoizadas) ---
-    const versionOptions: SelectOption[] = useMemo(() =>
-        versions.map(v => ({
+    const versionOptions: SelectOption[] = useMemo(() => [
+        { value: 'latest', label: 'Latest Version' },
+        ...versions.map(v => ({
             value: v.versionTag || v.id || String(Date.now() + Math.random()), // Prioritize versionTag, then id, then fallback
             label: v.versionTag || v.id || 'Unknown Version'
-        })),
-        [versions]);
+        }))
+    ], [versions]);
     const languageOptions: SelectOption[] = useMemo(() => [
         { value: '__BASE__', label: 'Base Text' }, // Opción para usar el texto base
         ...translations.map(t => ({ value: t.languageCode, label: t.languageCode }))
@@ -328,9 +329,13 @@ const ServePromptPage: React.FC = () => {
         let fetchPromise: Promise<CreatePromptVersionDto | CreatePromptTranslationDto | null | undefined>;
 
         if (selectedLanguage.value === '__BASE__') {
-            fetchPromise = promptVersionService.findOne(selectedProjectId, selectedPrompt.value, selectedVersion.value);
+            // Si la versión seleccionada es "latest", usar la versión más reciente
+            const versionToUse = selectedVersion.value === 'latest' ? 'latest' : selectedVersion.value;
+            fetchPromise = promptVersionService.findOne(selectedProjectId, selectedPrompt.value, versionToUse);
         } else {
-            fetchPromise = promptTranslationService.findByLanguage(selectedProjectId, selectedPrompt.value, selectedVersion.value, selectedLanguage.value);
+            // Si la versión seleccionada es "latest", usar la versión más reciente
+            const versionToUse = selectedVersion.value === 'latest' ? 'latest' : selectedVersion.value;
+            fetchPromise = promptTranslationService.findByLanguage(selectedProjectId, selectedPrompt.value, versionToUse, selectedLanguage.value);
         }
 
         fetchPromise
@@ -374,7 +379,7 @@ const ServePromptPage: React.FC = () => {
 
         const projectId = selectedProjectId;
         const promptName = selectedPrompt.label;
-        const versionTag = selectedVersion.value;
+        const versionTag = selectedVersion.value === 'latest' ? 'latest' : selectedVersion.value;
 
         let promptApiPath;
         if (selectedLanguage?.value && selectedLanguage.value !== '__BASE__') {
