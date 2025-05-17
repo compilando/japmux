@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CreatePromptTranslationDto, UpdatePromptTranslationDto, regionService, rawExecutionService, aiModelService } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import { CreateRegionDto } from '@/services/generated/api';
+import { LanguageIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 
 interface PromptTranslationFormProps {
     initialData: CreatePromptTranslationDto | null;
@@ -13,249 +14,143 @@ interface PromptTranslationFormProps {
     isEditing: boolean;
 }
 
-const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({ initialData, versionId, onSave, onCancel, versionText, availableLanguages, isEditing }) => {
-    const [languageCode, setLanguageCode] = useState('');
-    const [promptText, setPromptText] = useState('');
-    const [regionList, setRegionList] = useState<CreateRegionDto[]>([]);
-    const [loadingRegions, setLoadingRegions] = useState(false);
-    const [isTranslating, setIsTranslating] = useState(false);
-    const [defaultAiModelId, setDefaultAiModelId] = useState<string | null>(null);
+const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
+    initialData,
+    versionId,
+    onSave,
+    onCancel,
+    versionText,
+    availableLanguages,
+    isEditing
+}) => {
+    const [formData, setFormData] = useState<CreatePromptTranslationDto>({
+        versionId: versionId || '',
+        languageCode: initialData?.languageCode || '',
+        promptText: initialData?.promptText || ''
+    });
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const { selectedProjectId } = useProjects();
 
-    useEffect(() => {
-        const fetchRegions = async () => {
-            if (!selectedProjectId) return;
-
-            setLoadingRegions(true);
-            try {
-                const data = await regionService.findAll(selectedProjectId);
-                if (Array.isArray(data)) {
-                    const filteredRegions = isEditing ? data : data.filter(region => 
-                        availableLanguages.some(lang => lang.code === region.languageCode)
-                    );
-                    setRegionList(filteredRegions);
-                }
-            } catch (error) {
-                console.error("Error fetching regions:", error);
-            } finally {
-                setLoadingRegions(false);
-            }
-        };
-
-        const fetchDefaultAiModel = async () => {
-            if (!selectedProjectId) return;
-            try {
-                const models = await aiModelService.findAll(selectedProjectId);
-                const gpt4Model = models.find(model => model.name.toLowerCase().includes('gpt-4'));
-                if (gpt4Model) {
-                    setDefaultAiModelId(gpt4Model.id);
-                } else {
-                    console.error('No se encontró un modelo GPT-4 en el proyecto');
-                }
-            } catch (error) {
-                console.error('Error al cargar el modelo de IA:', error);
-            }
-        };
-
-        fetchRegions();
-        fetchDefaultAiModel();
-    }, [selectedProjectId, isEditing, availableLanguages]);
-
-    useEffect(() => {
-        if (initialData) {
-            setLanguageCode(initialData.languageCode || '');
-            setPromptText(initialData.promptText || '');
-        } else {
-            setLanguageCode('');
-            setPromptText('');
-        }
-    }, [initialData]);
-
-    const handleLanguageCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setLanguageCode(e.target.value);
-    };
-
-    const handleTranslate = async () => {
-        if (!languageCode || !versionText || !defaultAiModelId) {
-            console.error('Faltan datos necesarios para la traducción:', {
-                languageCode,
-                versionText,
-                defaultAiModelId
-            });
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formData.languageCode || !formData.promptText) {
+            setError('Please fill in all required fields.');
             return;
         }
 
-        const selectedRegion = regionList.find(region => region.languageCode === languageCode);
-        if (!selectedRegion) return;
+        setIsLoading(true);
+        setError(null);
 
         try {
-            setIsTranslating(true);
-            console.log('Ejecutando traducción con:', {
-                languageCode,
-                versionText,
-                defaultAiModelId
-            });
-
-            const executionDto = {
-                userText: versionText,
-                systemPromptName: 'prompt-translator',
-                aiModelId: defaultAiModelId,
-                variables: {
-                    text: versionText,
-                    targetLanguage: languageCode,
-                    regionName: selectedRegion.name
-                }
-            };
-
-            const result = await rawExecutionService.executeRaw(executionDto);
-            console.log('Resultado de la traducción:', result);
-
-            if (result && typeof result === 'object' && 'response' in result) {
-                const resultWithResponse = result as { response: any };
-                try {
-                    let parsedResponse;
-                    if (typeof resultWithResponse.response === 'string') {
-                        const cleanResponse = resultWithResponse.response
-                            .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-                            .replace(/\n\s+/g, '\n')
-                            .trim();
-
-                        if (cleanResponse) {
-                            parsedResponse = JSON.parse(cleanResponse);
-                        } else {
-                            throw new Error('Cleaned response is empty, cannot parse JSON.');
-                        }
-
-                    } else {
-                        parsedResponse = resultWithResponse.response;
-                    }
-
-                    console.log('Respuesta parseada:', parsedResponse);
-
-                    if (parsedResponse && typeof parsedResponse === 'object' && 'translatedText' in parsedResponse && typeof parsedResponse.translatedText === 'string') {
-                        const cleanText = parsedResponse.translatedText
-                            .split('\n')
-                            .map((line: string) => line.trim())
-                            .filter((line: string) => line.length > 0)
-                            .join('\n');
-
-                        setPromptText(cleanText);
-                    } else {
-                        throw new Error('No se encontró el texto traducido en la respuesta o el formato es incorrecto.');
-                    }
-                } catch (parseError) {
-                    console.error('Error al parsear la respuesta:', parseError);
-                    console.error('Respuesta recibida (antes de parsear):', resultWithResponse.response);
-                    throw new Error('Error al procesar la respuesta del servicio de traducción');
-                }
-            } else {
-                throw new Error('No se recibió una respuesta válida o con el formato esperado del servicio de traducción');
-            }
-        } catch (error) {
-            console.error('Error en la traducción:', error);
-            alert('Error al realizar la traducción automática: ' + (error instanceof Error ? error.message : String(error)));
+            await onSave(formData);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred while saving the translation.');
         } finally {
-            setIsTranslating(false);
+            setIsLoading(false);
         }
     };
 
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-        let payload: CreatePromptTranslationDto | UpdatePromptTranslationDto;
+    const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setFormData(prev => ({ ...prev, languageCode: e.target.value }));
+    };
 
-        if (isEditing) {
-            payload = {
-                promptText: promptText
-            } as UpdatePromptTranslationDto;
-        } else {
-            payload = {
-                versionId,
-                languageCode,
-                promptText
-            } as CreatePromptTranslationDto;
-        }
-
-        onSave(payload);
+    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setFormData(prev => ({ ...prev, promptText: e.target.value }));
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Original Text
-                </label>
-                <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
-                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{versionText}</p>
-                </div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <LanguageIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                    {isEditing ? 'Edit Translation' : 'Add New Translation'}
+                </h3>
             </div>
 
-            <div>
-                <label htmlFor="languageCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Region
-                </label>
-                <div className="flex gap-2">
-                    <select
-                        id="languageCode"
-                        value={languageCode}
-                        onChange={handleLanguageCodeChange}
-                        disabled={!!initialData || loadingRegions}
-                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        required
-                    >
-                        <option value="">Selecciona una región</option>
-                        {regionList.map((region) => (
-                            <option key={region.languageCode} value={region.languageCode}>
-                                {region.name} ({region.languageCode})
-                            </option>
-                        ))}
-                    </select>
-                    {!initialData && languageCode && (
-                        <button
-                            type="button"
-                            onClick={handleTranslate}
-                            disabled={isTranslating || !defaultAiModelId}
-                            className="mt-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                {error && (
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                    </div>
+                )}
+
+                <div className="space-y-4">
+                    <div>
+                        <label htmlFor="language" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Language
+                        </label>
+                        <select
+                            id="language"
+                            value={formData.languageCode}
+                            onChange={handleLanguageChange}
+                            disabled={isEditing}
+                            className="w-full px-4 py-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            required
                         >
-                            {isTranslating ? 'Traduciendo...' : 'Traducir'}
-                        </button>
-                    )}
+                            <option value="">Select a language</option>
+                            {availableLanguages.map(lang => (
+                                <option key={lang.code} value={lang.code}>
+                                    {lang.name} ({lang.code})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label htmlFor="translation" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Translation
+                        </label>
+                        <textarea
+                            id="translation"
+                            value={formData.promptText}
+                            onChange={handleTextChange}
+                            rows={6}
+                            className="w-full px-4 py-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                            required
+                        />
+                    </div>
+
+                    <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-2 mb-2">
+                            <DocumentDuplicateIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Original Text</h4>
+                        </div>
+                        <pre className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap font-mono bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700">
+                            {versionText}
+                        </pre>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Translation
-                </label>
-                <textarea
-                    id="promptText"
-                    rows={8}
-                    value={promptText}
-                    onChange={(e) => setPromptText(e.target.value)}
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                />
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    Escribe o pega aquí el texto traducido. Puedes usar el botón &apos;Traducir&apos; para obtener una traducción automática.
-                </p>
-            </div>
-
-            <div className="flex justify-end space-x-3">
-                <button
-                    type="button"
-                    onClick={onCancel}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                    Cancel
-                </button>
-                <button
-                    type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                    disabled={isTranslating}
-                >
-                    {isEditing ? 'Actualizar' : 'Guardar'}
-                </button>
-            </div>
-        </form>
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                        {isLoading ? (
+                            <>
+                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Saving...
+                            </>
+                        ) : (
+                            'Save Translation'
+                        )}
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 };
 

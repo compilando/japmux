@@ -35,21 +35,32 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = memo(({
   subMenuHeight,
   subMenuRefs,
 }) => {
-  const isDirectPathMatch = nav.path ? pathname === nav.path : false;
-  const isParentOfActivePath = nav.path ? pathname.startsWith(nav.path) : false;
+  const isActive = React.useMemo(() => {
+    if (!nav.path) return false;
+
+    if (!nav.subItems?.length) {
+      return pathname === nav.path;
+    }
+
+    return nav.subItems.some(subItem =>
+      subItem.path && pathname === subItem.path
+    );
+  }, [nav.path, nav.subItems, pathname]);
+
   const isSubmenuOpen = openSubmenu === index;
-
-  const isParentOfActiveSubItem = nav.subItems?.some(subItem => subItem.path && pathname.startsWith(subItem.path)) || false;
-
-  const isActive =
-    isDirectPathMatch ||                                  // Coincidencia directa de la ruta del NavItem
-    (isParentOfActivePath && !nav.subItems?.length) ||    // El NavItem es un enlace final y padre de la ruta actual
-    (isSubmenuOpen && isParentOfActiveSubItem);           // El submenú de ESTE NavItem está abierto Y es padre de un subítem activo
-
   const showTooltip = !isExpanded && !isHovered && !isMobileOpen;
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (nav.subItems && nav.subItems.length > 0) {
+        handleSubmenuToggle(index);
+      }
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (nav.subItems && nav.subItems.length > 0) {
       e.preventDefault();
       handleSubmenuToggle(index);
     }
@@ -67,10 +78,10 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = memo(({
       >
         <Link
           href={nav.path || "#"}
-          onClick={() => handleSubmenuToggle(index)}
+          onClick={handleClick}
           onKeyPress={handleKeyPress}
           className={cn(
-            "menu-item transition-all duration-200",
+            "menu-item relative transition-all duration-200",
             isActive ? "menu-item-active" : "menu-item-inactive",
             nav.pro && !isActive && "menu-item-pro-inactive",
             "hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"

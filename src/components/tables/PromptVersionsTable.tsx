@@ -3,6 +3,7 @@ import { PromptVersionData, PromptVersionMarketplaceDetails } from '@/app/(admin
 import CopyButton from '../common/CopyButton';
 import Link from 'next/link';
 import { TrashBinIcon, PencilIcon, ChevronDownIcon, ChevronUpIcon, GitBranchIcon } from "@/icons";
+import { DocumentDuplicateIcon, LanguageIcon } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 
 interface PromptVersionsTableProps {
@@ -89,8 +90,8 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                         {/* Estado del marketplace con efecto hover */}
                                         <div className="mb-2">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full transition-colors duration-200 ${status === 'PUBLISHED' ? 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100 group-hover:bg-green-200 dark:group-hover:bg-green-600' :
-                                                    status === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-600 dark:text-yellow-100 group-hover:bg-yellow-200 dark:group-hover:bg-yellow-500' :
-                                                        'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 group-hover:bg-gray-200 dark:group-hover:bg-gray-600'
+                                                status === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-600 dark:text-yellow-100 group-hover:bg-yellow-200 dark:group-hover:bg-yellow-500' :
+                                                    'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 group-hover:bg-gray-200 dark:group-hover:bg-gray-600'
                                                 }`}>
                                                 {status || 'NOT_PUBLISHED'}
                                             </span>
@@ -118,16 +119,17 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                     <div className="flex items-center space-x-2 ml-4">
                                         <Link
                                             href={`/projects/${projectId}/prompts/${currentPromptId}/versions/${item.versionTag}/translations?versionId=${item.id}`}
-                                            className="text-purple-500 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-600 p-1 transition-colors duration-200"
+                                            className="inline-flex items-center text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors duration-200"
                                             title="Manage Translations"
                                         >
-                                            Translations
+                                            <LanguageIcon className="w-4 h-4 mr-1.5" />
+                                            <span>Translations</span>
                                         </Link>
                                         {canRequestPublish && (
                                             <button
                                                 onClick={() => onRequestPublish(item.versionTag)}
                                                 disabled={isLoadingAction}
-                                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600 disabled:opacity-50 p-1 transition-colors duration-200"
+                                                className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 transition-colors duration-200"
                                                 title="Request Publish to Marketplace">
                                                 {isLoadingAction ? '...' : 'Publish'}
                                             </button>
@@ -136,7 +138,7 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                             <button
                                                 onClick={() => onUnpublish(item.versionTag)}
                                                 disabled={isLoadingAction}
-                                                className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-600 disabled:opacity-50 p-1 transition-colors duration-200"
+                                                className="inline-flex items-center text-sm text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 disabled:opacity-50 transition-colors duration-200"
                                                 title="Unpublish from Marketplace">
                                                 {isLoadingAction ? '...' : 'Unpublish'}
                                             </button>

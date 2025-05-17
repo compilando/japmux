@@ -20,6 +20,7 @@ import PromptVersionsTable from '@/components/tables/PromptVersionsTable';
 import PromptVersionForm from '@/components/form/PromptVersionForm';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import { PlusCircleIcon, PencilIcon as EditIconHero } from '@heroicons/react/24/outline';
 
 // Helper para extraer mensajes de error de forma segura
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
@@ -82,12 +83,10 @@ const getLatestVersionTag = (versions: PromptVersionData[]): string | null => {
 // Simplify: we'll use a simple object for the payload.
 
 const PromptVersionsPage: React.FC = () => {
-    // Use local extended type
     const [itemsList, setItemsList] = useState<PromptVersionMarketplaceDetails[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    // Use local extended type if editing
+    const [formMode, setFormMode] = useState<'add' | 'edit' | null>(null);
     const [editingItem, setEditingItem] = useState<PromptVersionData | null>(null);
     const [latestVersionTagForForm, setLatestVersionTagForForm] = useState<string | null>(null);
     const [marketplaceActionLoading, setMarketplaceActionLoading] = useState<Record<string, boolean>>({});
@@ -157,21 +156,19 @@ const PromptVersionsPage: React.FC = () => {
         try {
             const data = await promptVersionService.findAll(projectId, promptId);
             if (Array.isArray(data)) {
-                // Cast to local interface that includes isActive and potentially marketplaceStatus from API
-                const versionsData = data.map(v_any => { // Renombrar v a v_any para casteo explícito
-                    // Tipo más específico para v en lugar de 'any'
-                    const v = v_any as CreatePromptVersionDto & Partial<{ id: string, versionTag: string, isActive: boolean, marketplaceStatus: string, promptId: string }>;
+                const versionsData = data.map(v_any => {
+                    const v = v_any as CreatePromptVersionDto & Partial<{ id: string, versionTag: string, isActive: boolean, marketplaceStatus: string, promptId: string, createdAt: string }>;
                     return {
-                        ...v, // Spread original data from API. Esto es seguro si los campos de Partial coinciden o son adicionales
+                        ...v,
                         id: v.id || v.versionTag || String(Date.now() + Math.random()),
-                        versionTag: v.versionTag || 'N/A', // Asegurar que versionTag exista, default a N/A si no
+                        versionTag: v.versionTag || 'N/A',
                         isActive: v.isActive || false,
-                        promptId: v.promptId || promptId, // Usar promptId de v si existe, sino el de la página
-                        marketplaceStatus: v.marketplaceStatus, // Será undefined si no está en v
+                        promptId: v.promptId || promptId,
+                        marketplaceStatus: v.marketplaceStatus,
+                        createdAt: v.createdAt
                     };
                 }) as PromptVersionMarketplaceDetails[];
                 setItemsList(versionsData);
-                // Calcular el último tag después de obtener los datos
                 const latestTag = getLatestVersionTag(versionsData);
                 setLatestVersionTagForForm(latestTag);
             } else {
@@ -197,17 +194,21 @@ const PromptVersionsPage: React.FC = () => {
 
     const handleAdd = () => {
         setEditingItem(null);
-        setIsModalOpen(true);
+        setFormMode('add');
     };
 
     const handleEdit = (item: PromptVersionData) => {
         setEditingItem(item);
-        setIsModalOpen(true);
+        setFormMode('edit');
+    };
+
+    const handleCancelForm = () => {
+        setFormMode(null);
+        setEditingItem(null);
     };
 
     const handleDelete = async (itemToDelete: PromptVersionData) => {
-        // No es necesario verificar itemToDelete.versionTag aquí si PromptVersionData lo garantiza
-        if (!projectId || !promptId || !itemToDelete.versionTag) { // Pero la guarda no hace daño
+        if (!projectId || !promptId || !itemToDelete.versionTag) {
             showErrorToast("Cannot delete: version data is incomplete (missing versionTag).");
             return;
         }
@@ -227,32 +228,46 @@ const PromptVersionsPage: React.FC = () => {
         }
     };
 
-    const handleSave = async (payload: CreatePromptVersionDto | UpdatePromptVersionDto) => {
-        if (!projectId || !promptId) return;
-        setLoading(true);
+    const handleSave = async (payload: CreatePromptVersionDto | UpdatePromptVersionDto, versionTagFromForm?: string) => {
         try {
-            let message = "";
-            // No es necesario verificar editingItem.versionTag si PromptVersionData lo garantiza
-            if (editingItem && editingItem.versionTag) {
-                await promptVersionService.update(projectId, promptId, editingItem.versionTag, payload as UpdatePromptVersionDto);
-                message = `Version ${editingItem.versionTag} updated successfully!`;
-            } else {
-                await promptVersionService.create(projectId, promptId, payload as CreatePromptVersionDto);
-                message = "New version created successfully!";
+            if (!versionTagFromForm && !editingItem) {
+                showErrorToast('Version tag is required for new versions.');
+                return;
             }
-            setIsModalOpen(false);
-            showSuccessToast(message);
+
+            if (editingItem) {
+                await promptVersionService.update(projectId, promptId, editingItem.versionTag, payload as UpdatePromptVersionDto);
+                showSuccessToast('Versión actualizada correctamente');
+            } else {
+                const rawPayload = {
+                    promptText: (payload as CreatePromptVersionDto).promptText,
+                    changeMessage: payload.changeMessage,
+                    initialTranslations: (payload as CreatePromptVersionDto).initialTranslations,
+                    versionTag: versionTagFromForm
+                };
+
+                if (!rawPayload.promptText) {
+                    showErrorToast('Prompt text is required for new versions.');
+                    return;
+                }
+                if (!rawPayload.versionTag) {
+                    showErrorToast('Version tag is somehow missing before API call.');
+                    return;
+                }
+                // Castear a 'any' temporalmente para diagnóstico, 
+                // para permitir que versionTag se envíe en el payload a pesar de la definición de CreatePromptVersionDto.
+                await promptVersionService.create(projectId, promptId, rawPayload as any);
+                showSuccessToast('Nueva versión creada correctamente');
+            }
+            setFormMode(null);
             fetchData();
-        } catch (err: unknown) {
-            console.error("Error saving version:", err);
-            const defaultMsg = 'Failed to save version.';
-            setError(getApiErrorMessage(err, defaultMsg));
-        } finally {
-            setLoading(false);
+        } catch (error: any) {
+            console.error('Error saving version:', error);
+            const apiErrorMessage = error.response?.data?.message || error.message || 'Error al guardar la versión';
+            showErrorToast(apiErrorMessage);
         }
     };
 
-    // Handlers para acciones de Marketplace (copiados y adaptados de translations/page.tsx y asset versions)
     const handleRequestPublish = async (versionTag: string) => {
         if (!projectId || !promptId || !versionTag) return;
         setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: true }));
@@ -315,8 +330,7 @@ const PromptVersionsPage: React.FC = () => {
         { label: "Versions" }
     ];
 
-    if (breadcrumbLoading || loading) return <p>Loading page details...</p>;
-    if (error) return <p className="text-red-500">{error}</p>;
+    if (breadcrumbLoading || loading && !formMode) return <p>Loading page details...</p>;
 
     return (
         <>
@@ -329,24 +343,43 @@ const PromptVersionsPage: React.FC = () => {
                 </p>
             </div>
 
-            {error && <p className="text-red-500 py-2 text-center">Error loading versions: {error}</p>}
+            {!formMode && (
+                <div className="flex justify-end items-center mb-6 mt-4">
+                    <button
+                        onClick={handleAdd}
+                        className="flex items-center gap-2 px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50"
+                        disabled={loading}
+                    >
+                        <PlusCircleIcon className="h-5 w-5" />
+                        Add Prompt Version
+                    </button>
+                </div>
+            )}
 
-            <div className="flex justify-end items-center mb-6 mt-4">
-                <button
-                    onClick={handleAdd}
-                    className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50"
-                    disabled={loading}
-                >
-                    Add Prompt Version
-                </button>
-            </div>
+            {formMode && (
+                <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 my-8 border border-gray-200 dark:border-gray-700">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+                        {formMode === 'edit' && editingItem ? `Edit Version (${editingItem.versionTag})` : 'Add New Prompt Version'}
+                    </h3>
+                    <PromptVersionForm
+                        initialData={formMode === 'edit' ? editingItem : null}
+                        onSave={handleSave}
+                        onCancel={handleCancelForm}
+                        latestVersionTag={latestVersionTagForForm ?? undefined}
+                        projectId={projectId}
+                        promptId={promptId}
+                    />
+                </div>
+            )}
 
-            {loading && <p className="text-center py-4">Loading versions...</p>}
+            {error && !formMode && <p className="text-red-500 py-2 text-center">Error loading versions: {error}</p>}
+
+            {loading && !formMode && <p className="text-center py-4">Loading versions...</p>}
 
             {!loading && !error && (
-                itemsList.length === 0 ? (
+                itemsList.length === 0 && !formMode ? (
                     <p className="text-center py-4 text-gray-500 dark:text-gray-400">No versions found for this prompt.</p>
-                ) : (
+                ) : !formMode && (
                     <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                         <PromptVersionsTable
                             promptVersions={itemsList}
@@ -360,22 +393,6 @@ const PromptVersionsPage: React.FC = () => {
                         />
                     </div>
                 )
-            )}
-
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
-                    <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-6xl">
-                        <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-                            {editingItem ? `Edit Version (${editingItem.versionTag})` : 'Add New Prompt Version'}
-                        </h3>
-                        <PromptVersionForm
-                            initialData={editingItem}
-                            onSave={handleSave}
-                            onCancel={() => setIsModalOpen(false)}
-                            latestVersionTag={latestVersionTagForForm ?? undefined}
-                        />
-                    </div>
-                </div>
             )}
         </>
     );

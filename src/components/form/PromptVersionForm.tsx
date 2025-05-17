@@ -1,21 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CreatePromptVersionDto, UpdatePromptVersionDto, promptAssetService } from '@/services/api';
+import { CreatePromptVersionDto, UpdatePromptVersionDto, promptAssetService, promptVersionService } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
+import { DocumentDuplicateIcon, LanguageIcon } from '@heroicons/react/24/outline';
+import CopyButton from '../common/CopyButton';
 
 // Interface local para los datos del formulario, incluyendo versionTag
 export interface PromptVersionFormData extends CreatePromptVersionDto {
-    versionTag?: string; // Hacerlo opcional para que coincida con la creación, pero presente en edición
-    // promptText y changeMessage ya están en CreatePromptVersionDto
+    versionTag?: string;
 }
 
 interface PromptVersionFormProps {
-    initialData: PromptVersionFormData | null; // Usar la interfaz local
-    onSave: (payload: CreatePromptVersionDto | UpdatePromptVersionDto) => void;
+    initialData: PromptVersionFormData | null;
+    onSave: (payload: CreatePromptVersionDto | UpdatePromptVersionDto, versionTag: string) => void;
     onCancel: () => void;
     latestVersionTag?: string;
-    projectId: string; // Añadir projectId como prop requerida
-    promptId: string; // Añadir promptId como prop requerida
+    projectId: string;
+    promptId: string;
 }
 
 // Helper para calcular la siguiente versión (simplificado)
@@ -57,6 +58,7 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
     const [assets, setAssets] = useState<PromptAssetData[]>([]);
     const [showAssetMenu, setShowAssetMenu] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+    const [previousVersion, setPreviousVersion] = useState<{ versionTag: string; promptText: string } | null>(null);
     const editorRef = useRef<HTMLTextAreaElement>(null);
 
     const isEditing = !!initialData;
@@ -94,6 +96,27 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
         fetchAssets();
     }, [projectId, promptId]);
 
+    useEffect(() => {
+        const fetchPreviousVersion = async () => {
+            if (!projectId || !promptId || !latestVersionTag) return;
+            try {
+                const version = await promptVersionService.findOne(projectId, promptId, latestVersionTag);
+                if (version) {
+                    setPreviousVersion({
+                        versionTag: version.versionTag,
+                        promptText: version.promptText || ''
+                    });
+                }
+            } catch (error) {
+                console.error('Error al cargar la versión anterior:', error);
+            }
+        };
+
+        if (!isEditing) {
+            fetchPreviousVersion();
+        }
+    }, [projectId, promptId, latestVersionTag, isEditing]);
+
     const handleContextMenu = (e: React.MouseEvent) => {
         e.preventDefault();
         setMenuPosition({ x: e.clientX, y: e.clientY });
@@ -111,7 +134,6 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
             const newText = text.substring(0, start) + variable + text.substring(end);
             setPromptText(newText);
 
-            // Restaurar el cursor después de la variable insertada
             setTimeout(() => {
                 textarea.focus();
                 textarea.setSelectionRange(start + variable.length, start + variable.length);
@@ -134,62 +156,107 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                 changeMessage: changeMessage ? changeMessage : undefined,
             } as UpdatePromptVersionDto;
             payload = Object.fromEntries(Object.entries(payload).filter(([, v]) => v !== undefined)) as UpdatePromptVersionDto;
-
         } else {
             payload = {
                 promptText,
-                versionTag: versionTag,
                 changeMessage: changeMessage || undefined,
-            } as any;
+            } as CreatePromptVersionDto;
 
             if (!promptText) {
                 alert("Prompt Text is required!");
                 return;
             }
         }
-        onSave(payload);
+
+        onSave(payload, versionTag);
     };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-                <label htmlFor="versionTag" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Version Tag</label>
-                <input
-                    type="text"
-                    id="versionTag"
-                    value={versionTag}
-                    onChange={(e) => setVersionTag(e.target.value)}
-                    required
-                    disabled={isEditing} // Not editable
-                    pattern="^v\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*)?(\\+[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*)?$"
-                    title="Semantic Versioning format (e.g., v1.0.0, v1.2.3-beta)"
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500"
-                />
-            </div>
-            <div>
-                <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Prompt Text</label>
-                <textarea
-                    ref={editorRef}
-                    value={promptText}
-                    onChange={handleEditorChange}
-                    onContextMenu={handleContextMenu}
-                    className="mt-1 block w-full min-h-[200px] px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono"
-                    style={{ resize: 'vertical' }}
-                />
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    Haz clic derecho en el editor para abrir el menú de assets (variables).
-                    Selecciona una variable para insertarla en el texto.
-                </p>
-            </div>
-            <div>
-                <label htmlFor="changeMessage" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Change Message (Optional)</label>
-                <input
-                    type="text"
-                    id="changeMessage"
-                    value={changeMessage}
-                    onChange={(e) => setChangeMessage(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Columna izquierda: Versión anterior */}
+                <div className="space-y-4">
+                    {!isEditing && previousVersion && (
+                        <>
+                            <div className="flex items-center justify-between">
+                                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Previous Version ({previousVersion.versionTag})
+                                </h4>
+                                <CopyButton textToCopy={previousVersion.promptText} />
+                            </div>
+                            <div className="bg-[#343541] border border-gray-700 rounded-lg p-4 h-full min-h-[200px]">
+                                <pre className="text-sm text-gray-100 whitespace-pre-wrap font-mono h-full overflow-y-auto">
+                                    {previousVersion.promptText}
+                                </pre>
+                            </div>
+                        </>
+                    )}
+                    {!isEditing && !previousVersion && (
+                        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full min-h-[200px] flex items-center justify-center">
+                            <p className="text-sm text-gray-400 font-mono">No previous version data to display.</p>
+                        </div>
+                    )}
+                    {isEditing && initialData && (
+                        <>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Current Prompt (Editing Version {initialData.versionTag})
+                            </h4>
+                            <div className="bg-[#343541] border border-gray-700 rounded-lg p-4 h-full min-h-[200px]">
+                                <pre className="text-sm text-gray-100 whitespace-pre-wrap font-mono h-full overflow-y-auto">
+                                    {initialData.promptText}
+                                </pre>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* Columna derecha: Formulario */}
+                <div className="space-y-4">
+                    <div>
+                        <label htmlFor="versionTagInput" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Version Tag</label>
+                        <input
+                            type="text"
+                            id="versionTagInput"
+                            value={versionTag}
+                            onChange={(e) => setVersionTag(e.target.value)}
+                            required
+                            disabled={isEditing}
+                            pattern="^v\d+\.\d+\.\d+(-[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?(\+[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?$"
+                            title="Semantic Versioning format (e.g., v1.0.0, v1.2.3-beta)"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500 font-mono"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {isEditing ? 'Prompt Text (Editing)' : 'New Prompt Text'}
+                        </label>
+                        <textarea
+                            ref={editorRef}
+                            value={promptText}
+                            onChange={handleEditorChange}
+                            onContextMenu={handleContextMenu}
+                            className="mt-1 block w-full min-h-[240px] px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono"
+                            style={{ resize: 'vertical' }}
+                            placeholder={isEditing ? "Edit the prompt text..." : "Enter the new prompt text here..."}
+                        />
+                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            Right-click in the editor to open the asset (variables) menu. Select a variable to insert it into the text.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label htmlFor="changeMessage" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Change Message (Optional)</label>
+                        <input
+                            type="text"
+                            id="changeMessage"
+                            value={changeMessage}
+                            onChange={(e) => setChangeMessage(e.target.value)}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white font-mono"
+                            placeholder="Describe the changes in this version..."
+                        />
+                    </div>
+                </div>
             </div>
 
             {showAssetMenu && (
@@ -216,7 +283,7 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                 </div>
             )}
 
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end space-x-3 pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
                 <button
                     type="button"
                     onClick={onCancel}

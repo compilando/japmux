@@ -95,53 +95,36 @@ const AppSidebar: React.FC = () => {
 
   // Calculate the correct submenu index based on the current path
   const activeSubmenuIndexBasedOnPath = React.useMemo(() => {
-    let bestMatchIndex = -1;
-    let longestMatchPathLength = 0;
-
-    navItems.forEach((navItem, index) => {
-      if (navItem.subItems && navItem.subItems.length > 0) {
-        navItem.subItems.forEach(subItem => {
-          if (subItem.path && pathname.startsWith(subItem.path)) {
-            if (subItem.path.length > longestMatchPathLength) {
-              longestMatchPathLength = subItem.path.length;
-              bestMatchIndex = index;
-            }
-          }
-        });
-        // Si la ruta del navItem padre (que tiene subítems) coincide directamente
-        // y es una coincidencia más larga/específica que cualquier subítem encontrado hasta ahora,
-        // ese navItem debería tener su submenú abierto.
-        // Esto es útil si el padre es un enlace en sí mismo y queremos que se expanda.
-        if (navItem.path && pathname === navItem.path) {
-          if (navItem.path.length >= longestMatchPathLength) {
-            longestMatchPathLength = navItem.path.length; // Actualizar por si este es el más largo
-            bestMatchIndex = index;
-          }
-        }
+    // Solo abrir el submenú si la ruta actual coincide exactamente con algún subítem
+    for (let i = 0; i < navItems.length; i++) {
+      const item = navItems[i];
+      if (item.subItems?.some(subItem => subItem.path && pathname === subItem.path)) {
+        return i;
       }
-    });
-    return bestMatchIndex;
+    }
+    return -1;
   }, [pathname, navItems]);
 
   // Effect to synchronize the open submenu state with the calculated path index
   useEffect(() => {
-    // Set the open submenu state to match the index derived from the path
-    // If no match was found (index is -1), set it to null (no submenu open)
-    setOpenSubmenu(activeSubmenuIndexBasedOnPath !== -1 ? activeSubmenuIndexBasedOnPath : null);
-  }, [activeSubmenuIndexBasedOnPath]); // Depend only on the calculated index
+    setOpenSubmenu(activeSubmenuIndexBasedOnPath);
+  }, [activeSubmenuIndexBasedOnPath]);
 
   // Manual toggle handler
   const handleSubmenuToggle = (index: number) => {
-    setOpenSubmenu(openSubmenu === index ? null : index);
+    // Solo permitir toggle si el elemento tiene subítems
+    if (navItems[index].subItems && navItems[index].subItems.length > 0) {
+      setOpenSubmenu(prev => prev === index ? null : index);
+    }
   };
 
-  // useEffect para calcular altura del submenú (se mantiene)
+  // useEffect para calcular altura del submenú
   useEffect(() => {
     if (openSubmenu !== null && subMenuRefs.current[openSubmenu]) {
       const currentSubMenu = subMenuRefs.current[openSubmenu];
       if (currentSubMenu) {
         setTimeout(() => {
-          setSubMenuHeight((prev) => ({
+          setSubMenuHeight(prev => ({
             ...prev,
             [openSubmenu]: currentSubMenu.scrollHeight,
           }));

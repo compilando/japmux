@@ -5,6 +5,8 @@ import * as generated from './generated';
 // Eliminar esta importación, apiClient se define abajo
 // import { apiClient } from '../axiosClient';
 import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
+// Eliminar la importación anterior si existe:
+// import { PromptVersionData } from '@/app/(admin)/projects/[projectId]/prompts/[promptId]/versions/page.tsx';
 
 // --- Configuración Global de Axios ---
 
@@ -398,15 +400,23 @@ export const promptService = {
     }
 };
 
+// Interfaz local para el servicio, debería coincidir o ser compatible con PromptVersionData de la página
+interface PromptVersionDetail extends generated.CreatePromptVersionDto {
+    id: string;
+    versionTag: string;
+    isActive: boolean;
+    // Añadir otros campos que se esperan de findOne y que están en PromptVersionData
+}
+
 // Servicio para Versiones de Prompt
 export const promptVersionService = {
     findAll: async (projectId: string, promptId: string): Promise<generated.CreatePromptVersionDto[]> => {
         const response = await promptVersionsGeneratedApi.promptVersionControllerFindAll(projectId, promptId);
         return response.data as generated.CreatePromptVersionDto[];
     },
-    findOne: async (projectId: string, promptId: string, versionTag: string): Promise<generated.CreatePromptVersionDto> => {
+    findOne: async (projectId: string, promptId: string, versionTag: string): Promise<PromptVersionDetail> => {
         const response = await promptVersionsGeneratedApi.promptVersionControllerFindOneByTag(projectId, promptId, versionTag);
-        return response.data as generated.CreatePromptVersionDto;
+        return response.data as PromptVersionDetail;
     },
     create: async (projectId: string, promptId: string, payload: generated.CreatePromptVersionDto): Promise<generated.CreatePromptVersionDto> => {
         const response = await promptVersionsGeneratedApi.promptVersionControllerCreate(projectId, promptId, payload);

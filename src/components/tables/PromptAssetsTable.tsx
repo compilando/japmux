@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { CreatePromptAssetDto, promptAssetService } from '@/services/api';
 import CopyButton from '../common/CopyButton';
 import { TrashBinIcon, PencilIcon } from "@/icons";
-import { ClockIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 
 // Nueva interfaz local para incluir campos que podrían no estar en CreatePromptAssetDto
 // pero que la API podría devolver y la tabla necesita (ej: enabled)
@@ -26,6 +26,7 @@ interface PromptAssetsTableProps {
 
 const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, projectId, promptId, onEdit, onDelete, loading }) => {
     const [versionsCount, setVersionsCount] = useState<Record<string, number>>({});
+    const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchVersionsCount = async () => {
@@ -46,70 +47,98 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
     }, [promptAssets, projectId, promptId]);
 
     if (loading) {
-        return <p>Loading assets...</p>;
+        return (
+            <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
+            </div>
+        );
     }
 
     return (
-        <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
-                    <tr>
-                        <th scope="col" className="w-4/12 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Key</th>
-                        <th scope="col" className="w-2/12 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
-                        <th scope="col" className="w-1/12 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Enabled</th>
-                        <th scope="col" className="w-2/12 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                    {Array.isArray(promptAssets) && promptAssets.map((item) => (
-                        <tr key={item.key}>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                <div className="flex items-center space-x-2">
-                                    <span className="truncate" title={item.key}>{item.key ?? 'N/A'}</span>
-                                    {item.key && <CopyButton textToCopy={item.key} />}
-                                </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{item.category || '-'}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.enabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                    {item.enabled ? 'Yes' : 'No'}
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
-                                <Link
-                                    href={`/projects/${projectId}/prompts/${promptId}/assets/${item.key}/versions`}
-                                    className="text-green-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600 p-1 inline-block relative"
-                                    title="Manage Versions"
-                                >
-                                    <ClockIcon className="w-5 h-5" />
-                                    {versionsCount[item.key] !== undefined && (
-                                        <span className="absolute -top-2 -right-2 bg-green-100 text-green-800 text-xs font-bold px-1.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-200">
-                                            {versionsCount[item.key]}
-                                        </span>
-                                    )}
-                                </Link>
-
-                                <button
-                                    onClick={() => onEdit(item)}
-                                    className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 p-1 inline-block"
-                                    title="Edit Asset"
-                                >
-                                    <PencilIcon />
-                                </button>
-                                <button
-                                    onClick={() => onDelete(item.key)}
-                                    className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600 p-1 inline-block"
-                                    title="Delete Asset"
-                                >
-                                    <TrashBinIcon />
-                                </button>
-                            </td>
+        <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+            <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead>
+                        <tr className="bg-gray-50 dark:bg-gray-800/50">
+                            <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Key</th>
+                            <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                            <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                            <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                        {Array.isArray(promptAssets) && promptAssets.map((item) => (
+                            <tr
+                                key={item.key}
+                                className={`transition-colors duration-200 ${hoveredRow === item.key
+                                        ? 'bg-gray-50 dark:bg-gray-700/50'
+                                        : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                                    }`}
+                                onMouseEnter={() => setHoveredRow(item.key)}
+                                onMouseLeave={() => setHoveredRow(null)}
+                            >
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="flex items-center space-x-3">
+                                        <span className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[200px]" title={item.key}>
+                                            {item.key ?? 'N/A'}
+                                        </span>
+                                        {item.key && <CopyButton textToCopy={item.key} />}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                                        {item.category || '-'}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${item.enabled
+                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                        }`}>
+                                        {item.enabled ? 'Active' : 'Inactive'}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                    <div className="flex items-center justify-end space-x-3">
+                                        <Link
+                                            href={`/projects/${projectId}/prompts/${promptId}/assets/${item.key}/versions`}
+                                            className="inline-flex items-center text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors duration-200"
+                                            title="Manage Versions"
+                                        >
+                                            <ClockIcon className="w-4 h-4 mr-1.5" />
+                                            <span>Versions</span>
+                                            {versionsCount[item.key] !== undefined && (
+                                                <span className="ml-1.5 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full dark:bg-green-900 dark:text-green-200">
+                                                    {versionsCount[item.key]}
+                                                </span>
+                                            )}
+                                        </Link>
+                                        <button
+                                            onClick={() => onEdit(item)}
+                                            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
+                                            title="Edit Asset"
+                                        >
+                                            <PencilIcon className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => onDelete(item.key)}
+                                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200"
+                                            title="Delete Asset"
+                                        >
+                                            <TrashBinIcon className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
             {(!Array.isArray(promptAssets) || promptAssets.length === 0) && (
-                <p className="text-center py-4 text-gray-500 dark:text-gray-400">No prompt assets found.</p>
+                <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50">
+                    <DocumentDuplicateIcon className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400">No prompt assets found</p>
+                </div>
             )}
         </div>
     );

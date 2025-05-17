@@ -19,6 +19,7 @@ import PromptTranslationsTable from '@/components/tables/PromptTranslationsTable
 import PromptTranslationForm from '@/components/form/PromptTranslationForm';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import { LanguageIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
     if (axios.isAxiosError(error)) {
@@ -230,60 +231,115 @@ const PromptTranslationsPage: React.FC = () => {
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
-            <div className="my-4">
-                <h1 className="text-2xl font-bold text-black dark:text-white mb-2">Manage Translations</h1>
+
+            {/* Header con información del proyecto y prompt */}
+            <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl px-8 pt-6 pb-8 mb-6 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-3 mb-4">
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-500 to-purple-600 bg-clip-text text-transparent">Manage Translations</h1>
+                    <span className="px-3 py-1 text-sm font-medium text-brand-600 bg-brand-50 dark:bg-brand-500/20 dark:text-brand-400 rounded-full">Version {versionTag}</span>
+                </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Manage translations for a specific version of your prompt. Each translation allows the prompt to be served in a different language, adapting its content while maintaining the core structure and variables of the base prompt version.
+                    Manage translations for this version of your prompt. Each translation allows the prompt to be served in a different language, adapting its content while maintaining the core structure and variables.
                 </p>
             </div>
-            {error && <p className="text-red-500 py-2">Error loading translations: {error}</p>}
 
-            <div className="my-4 p-4 border rounded-md shadow bg-white dark:bg-gray-800">
-                <h3 className="text-lg font-semibold mb-1 text-black dark:text-white">Original Prompt Text (Version: {versionTag})</h3>
-                <pre className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 rounded text-sm text-black dark:text-gray-200 whitespace-pre-wrap">
-                    {versionText || 'Loading original text...'}
-                </pre>
-            </div>
-
-            {!loading && !error && (
-                allLanguagesTranslated ? (
-                    <div className="mb-4 p-3 text-center bg-green-100 dark:bg-green-700 border border-green-300 dark:border-green-600 rounded-md">
-                        <p className="text-green-700 dark:text-green-200 font-medium">
-                            All available languages translated! ✅
-                        </p>
-                    </div>
-                ) : (
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold text-black dark:text-white">Translations for Version: {versionTag}</h2>
-                        <button 
-                            onClick={handleAdd} 
-                            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600" 
-                            disabled={loading || breadcrumbLoading || availableLanguagesForNewTranslation.length === 0}
-                        >
-                            Add Prompt Translation
-                        </button>
-                    </div>
-                )
-            )}
-
-            {loading && <p>Loading translations...</p>}
-            {!loading && itemsList.length === 0 && !allLanguagesTranslated && (
-                <p className="text-center py-4 text-gray-500 dark:text-gray-400">No translations found for this version.</p>
-            )}
-            {!loading && itemsList.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                    <PromptTranslationsTable
-                        promptTranslations={itemsList}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        projectId={projectId}
-                    />
+            {error && (
+                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
                 </div>
             )}
 
+            {/* Sección del texto original y traducciones en layout horizontal */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Columna del texto original */}
+                <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden h-fit">
+                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                            <DocumentDuplicateIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                            Original Prompt Text
+                        </h3>
+                    </div>
+                    <div className="p-6">
+                        <pre className="text-sm text-gray-100 whitespace-pre-wrap font-mono bg-[#343541] p-4 rounded-lg border border-gray-700 max-h-[calc(100vh-300px)] overflow-y-auto">
+                            {versionText || 'Loading original text...'}
+                        </pre>
+                    </div>
+                </div>
+
+                {/* Columna de traducciones */}
+                <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                            <LanguageIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                            Translations
+                        </h3>
+                        {!loading && !error && !allLanguagesTranslated && (
+                            <button
+                                onClick={handleAdd}
+                                className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                disabled={loading || breadcrumbLoading || availableLanguagesForNewTranslation.length === 0}
+                            >
+                                <LanguageIcon className="w-4 h-4" />
+                                Add Translation
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="p-6">
+                        {loading && (
+                            <div className="flex justify-center items-center py-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
+                            </div>
+                        )}
+
+                        {!loading && allLanguagesTranslated && (
+                            <div className="text-center py-8">
+                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
+                                    <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">All Languages Translated!</h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">You have successfully translated this version into all available languages.</p>
+                            </div>
+                        )}
+
+                        {!loading && itemsList.length === 0 && !allLanguagesTranslated && (
+                            <div className="text-center py-8">
+                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-900/30 mb-4">
+                                    <LanguageIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                                </div>
+                                <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Translations Yet</h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Start by adding a translation for one of the available languages.</p>
+                                <button
+                                    onClick={handleAdd}
+                                    className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
+                                    disabled={loading || breadcrumbLoading || availableLanguagesForNewTranslation.length === 0}
+                                >
+                                    <LanguageIcon className="w-4 h-4" />
+                                    Add Translation
+                                </button>
+                            </div>
+                        )}
+
+                        {!loading && itemsList.length > 0 && (
+                            <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+                                <PromptTranslationsTable
+                                    promptTranslations={itemsList}
+                                    onEdit={handleEdit}
+                                    onDelete={handleDelete}
+                                    projectId={projectId}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Modal de traducción */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-                    <div className="relative top-20 mx-auto p-5 border w-[800px] shadow-lg rounded-md bg-white dark:bg-gray-800">
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                    <div className="relative top-20 mx-auto p-5 border w-[800px] shadow-lg rounded-xl bg-white dark:bg-gray-800">
                         <div className="mt-3">
                             <PromptTranslationForm
                                 initialData={editingItem}

@@ -1,9 +1,6 @@
-import { useEffect, useState } from 'react';
+import React from 'react';
 import { CreatePromptTranslationDto } from '@/services/api';
-import CopyButton from '../common/CopyButton';
-import { TrashBinIcon, PencilIcon } from "@/icons";
-import { regionService } from '@/services/api';
-import { Table, TableHeader, TableBody, TableRow, TableCell } from '@/components/ui/table';
+import { PencilIcon, TrashIcon, LanguageIcon } from '@heroicons/react/24/outline';
 
 interface PromptTranslationsTableProps {
     promptTranslations: CreatePromptTranslationDto[];
@@ -12,104 +9,70 @@ interface PromptTranslationsTableProps {
     projectId: string;
 }
 
-const PromptTranslationsTable: React.FC<PromptTranslationsTableProps> = ({ promptTranslations, onEdit, onDelete, projectId }) => {
-    console.log('[PromptTranslationsTable] Rendering with translations:', promptTranslations);
-
-    useEffect(() => {
-        console.log('[PromptTranslationsTable] Component mounted with translations:', promptTranslations);
-    }, [promptTranslations]);
-
-    const getCountryCode = (languageCode: string) => {
-        const code = languageCode.split('-')[1].toLowerCase();
-        console.log('[PromptTranslationsTable] Language code:', languageCode, 'Country code:', code);
-        return code;
-    };
-
-    if (!promptTranslations || promptTranslations.length === 0) {
-        console.log('[PromptTranslationsTable] No translations to display');
-        return (
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                <p className="text-center py-4 text-gray-500 dark:text-gray-400">No translations found.</p>
-            </div>
-        );
-    }
-
+const PromptTranslationsTable: React.FC<PromptTranslationsTableProps> = ({
+    promptTranslations,
+    onEdit,
+    onDelete,
+    projectId
+}) => {
     return (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-            <div className="max-w-full overflow-x-auto">
-                <div className="min-w-[800px]">
-                    <Table>
-                        <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                            <TableRow>
-                                <TableCell isHeader className="w-2/12 px-4 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Language Code</TableCell>
-                                <TableCell isHeader className="w-5/12 px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Preview</TableCell>
-                                <TableCell isHeader className="w-2/12 px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Actions</TableCell>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                            {promptTranslations.map((item) => {
-                                const countryCode = getCountryCode(item.languageCode);
-                                const flagUrl = `https://flagcdn.com/24x18/${countryCode}.png`;
-                                console.log('[PromptTranslationsTable] Rendering row for:', item.languageCode, 'Flag URL:', flagUrl);
-                                
-                                return (
-                                    <TableRow key={item.languageCode}>
-                                        <TableCell className="px-4 py-4 text-start text-gray-800 dark:text-white/90 text-theme-sm">
-                                            <div className="flex items-center space-x-2">
-                                                <img 
-                                                    src={flagUrl}
-                                                    alt={`${item.languageCode} flag`}
-                                                    className="w-6 h-4 object-cover rounded-sm"
-                                                    onError={(e) => {
-                                                        console.error('[PromptTranslationsTable] Error loading flag for:', item.languageCode);
-                                                        const target = e.target as HTMLImageElement;
-                                                        target.src = 'https://flagcdn.com/24x18/xx.png';
-                                                    }}
-                                                />
-                                                <span title={item.languageCode}>{item.languageCode}</span>
-                                                <CopyButton textToCopy={item.languageCode} />
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="px-5 py-4 text-start text-gray-800 dark:text-white/90 text-theme-sm">
-                                            <div className="group relative">
-                                                <div className="truncate max-w-xl" title={item.promptText}>
-                                                    {item.promptText?.substring(0, 150)}
-                                                    {item.promptText && item.promptText.length > 150 ? '...' : ''}
-                                                </div>
-                                                {item.promptText && item.promptText.length > 150 && (
-                                                    <div className="absolute left-0 top-full mt-2 w-96 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-                                                        <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                                                            {item.promptText}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="px-5 py-4 text-center">
-                                            <div className="flex items-center justify-center gap-3">
-                                                <button
-                                                    onClick={() => onEdit(item)}
-                                                    className="text-blue-500 hover:text-blue-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    aria-label="Edit Translation"
-                                                >
-                                                    <PencilIcon />
-                                                </button>
-                                                <button
-                                                    onClick={() => onDelete(item)}
-                                                    className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    aria-label="Delete Translation"
-                                                >
-                                                    <TrashBinIcon />
-                                                </button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </div>
-            </div>
+        <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-900/50">
+                    <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Language
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Translation
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {promptTranslations.map((item) => (
+                        <tr key={item.languageCode} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0 h-8 w-8 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center">
+                                        <LanguageIcon className="h-4 w-4 text-brand-600 dark:text-brand-400" />
+                                    </div>
+                                    <div className="ml-4">
+                                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                            {item.languageCode}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td className="px-6 py-4">
+                                <div className="text-sm text-gray-900 dark:text-gray-100 max-w-xl line-clamp-2">
+                                    {item.promptText}
+                                </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div className="flex items-center justify-end space-x-2">
+                                    <button
+                                        onClick={() => onEdit(item)}
+                                        className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-1 rounded-full hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors duration-200"
+                                        title="Edit Translation"
+                                    >
+                                        <PencilIcon className="h-5 w-5" />
+                                    </button>
+                                    <button
+                                        onClick={() => onDelete(item)}
+                                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors duration-200"
+                                        title="Delete Translation"
+                                    >
+                                        <TrashIcon className="h-5 w-5" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 };
