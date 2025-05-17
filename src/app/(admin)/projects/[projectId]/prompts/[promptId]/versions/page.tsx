@@ -44,6 +44,7 @@ export interface PromptVersionData extends CreatePromptVersionDto {
 // Nueva interfaz para detalles del marketplace, extendiendo PromptVersionData
 export interface PromptVersionMarketplaceDetails extends PromptVersionData {
     marketplaceStatus?: 'NOT_PUBLISHED' | 'PENDING_APPROVAL' | 'PUBLISHED' | 'REJECTED' | string;
+    createdAt?: string;
 }
 
 // --- Helper para versionado (simplificado) ---

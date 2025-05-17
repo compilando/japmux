@@ -69,11 +69,8 @@ const AppSidebar: React.FC = () => {
     },
     {
       icon: <TaskIcon />,
-      name: "Prompt Management",
+      name: "My Prompts",
       path: selectedProjectId ? `/projects/${selectedProjectId}/prompts` : undefined,
-      subItems: selectedProjectId ? [
-        { name: "My Prompts", path: `/projects/${selectedProjectId}/prompts`, icon: <TaskIcon /> },
-      ] : [],
     },
     {
       icon: <PaperPlaneIcon />,
@@ -87,7 +84,7 @@ const AppSidebar: React.FC = () => {
       path: "/prompt-wizard",
       pro: true
     }
-  ].filter(item => !(item.subItems && item.subItems.length === 0 && (item.name === "Current Project" || item.name === "Prompt Management")));
+  ].filter(item => !(item.subItems && item.subItems.length === 0 && item.name === "Current Project"));
 
   // Índice removido por no ser utilizado
 

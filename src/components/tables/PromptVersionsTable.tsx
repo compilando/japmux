@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PromptVersionData, PromptVersionMarketplaceDetails } from '@/app/(admin)/projects/[projectId]/prompts/[promptId]/versions/page';
 import CopyButton from '../common/CopyButton';
 import Link from 'next/link';
-import { TrashBinIcon, PencilIcon } from "@/icons";
+import { TrashBinIcon, PencilIcon, ChevronDownIcon, ChevronUpIcon, GitBranchIcon } from "@/icons";
+import { formatDistanceToNow } from 'date-fns';
 
 interface PromptVersionsTableProps {
     promptVersions: PromptVersionMarketplaceDetails[];
@@ -25,85 +26,143 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
     onUnpublish,
     marketplaceActionLoading
 }) => {
-    return (
-        <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
-                    <tr>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tag</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Content (Excerpt)</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Marketplace Status</th>
-                        <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                    {promptVersions.map((item) => {
-                        const status = item.marketplaceStatus;
-                        const isLoadingAction = marketplaceActionLoading[item.versionTag] || false;
-                        const canRequestPublish = !status || status === 'NOT_PUBLISHED' || status === 'REJECTED';
-                        const canUnpublish = status === 'PENDING_APPROVAL' || status === 'PUBLISHED';
-                        const currentPromptId = item.promptId || promptIdForTable;
+    const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+    const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
-                        return (
-                            <tr key={item.id}>
-                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                    <div className="flex items-center space-x-2">
-                                        <span className="truncate" title={item.versionTag}>{item.versionTag}</span>
-                                        <CopyButton textToCopy={item.versionTag} />
+    const toggleExpand = (itemId: string) => {
+        setExpandedItems(prev => ({
+            ...prev,
+            [itemId]: !prev[itemId]
+        }));
+    };
+
+    return (
+        <div className="relative">
+            {/* Línea vertical central con gradiente */}
+            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-brand-500 via-brand-400 to-brand-300 dark:from-brand-600 dark:via-brand-500 dark:to-brand-400"></div>
+
+            <div className="space-y-6">
+                {promptVersions.map((item, index) => {
+                    const status = item.marketplaceStatus;
+                    const isLoadingAction = marketplaceActionLoading[item.versionTag] || false;
+                    const canRequestPublish = !status || status === 'NOT_PUBLISHED' || status === 'REJECTED';
+                    const canUnpublish = status === 'PENDING_APPROVAL' || status === 'PUBLISHED';
+                    const currentPromptId = item.promptId || promptIdForTable;
+                    const createdAt = item.createdAt ? new Date(item.createdAt) : new Date();
+                    const isExpanded = expandedItems[item.id] || false;
+                    const isHovered = hoveredItem === item.id;
+
+                    return (
+                        <div
+                            key={item.id}
+                            className="relative flex items-start group"
+                            onMouseEnter={() => setHoveredItem(item.id)}
+                            onMouseLeave={() => setHoveredItem(null)}
+                        >
+                            {/* Círculo en la línea temporal con efecto hover */}
+                            <div className={`absolute left-6 w-4 h-4 rounded-full bg-brand-500 dark:bg-brand-400 border-2 border-white dark:border-gray-800 -translate-x-1/2 transition-all duration-300 ${isHovered ? 'scale-125 ring-4 ring-brand-100 dark:ring-brand-900' : ''}`}></div>
+
+                            {/* Contenido principal con efecto hover */}
+                            <div className={`ml-12 flex-grow bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 transition-all duration-300 ${isHovered ? 'shadow-md border-brand-200 dark:border-brand-700' : ''}`}>
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <div className="flex items-center space-x-2 mb-2">
+                                            <div className="flex items-center space-x-1">
+                                                <GitBranchIcon className="w-4 h-4 text-brand-500 dark:text-brand-400" />
+                                                <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{item.versionTag}</span>
+                                            </div>
+                                            <CopyButton textToCopy={item.versionTag} />
+                                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                {formatDistanceToNow(createdAt, { addSuffix: true })}
+                                            </span>
+                                        </div>
+
+                                        {/* Mensaje de cambio con efecto hover */}
+                                        {item.changeMessage && (
+                                            <div className="mb-2">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 transition-colors duration-200 group-hover:bg-blue-200 dark:group-hover:bg-blue-800">
+                                                    {item.changeMessage}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        {/* Estado del marketplace con efecto hover */}
+                                        <div className="mb-2">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full transition-colors duration-200 ${status === 'PUBLISHED' ? 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100 group-hover:bg-green-200 dark:group-hover:bg-green-600' :
+                                                    status === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-600 dark:text-yellow-100 group-hover:bg-yellow-200 dark:group-hover:bg-yellow-500' :
+                                                        'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 group-hover:bg-gray-200 dark:group-hover:bg-gray-600'
+                                                }`}>
+                                                {status || 'NOT_PUBLISHED'}
+                                            </span>
+                                        </div>
+
+                                        {/* Vista previa del contenido con animación mejorada */}
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => toggleExpand(item.id)}
+                                                className="w-full text-left group/prompt"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <p className={`text-sm text-gray-600 dark:text-gray-300 ${!isExpanded ? 'line-clamp-3' : ''} transition-all duration-300 group-hover/prompt:text-gray-900 dark:group-hover/prompt:text-gray-100`}>
+                                                        {item.promptText}
+                                                    </p>
+                                                    <span className="ml-2 text-gray-400 group-hover/prompt:text-brand-500 dark:group-hover/prompt:text-brand-400 transition-colors duration-200">
+                                                        {isExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        </div>
                                     </div>
-                                </td>
-                                <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 truncate max-w-xs" title={item.promptText}>{item.promptText?.substring(0, 100)}{item.promptText && item.promptText.length > 100 ? '...' : ''}</td>
-                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${status === 'PUBLISHED' ? 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100' : status === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-600 dark:text-yellow-100' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'}`}>
-                                        {status || 'NOT_PUBLISHED'}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
-                                    <Link
-                                        href={`/projects/${projectId}/prompts/${currentPromptId}/versions/${item.versionTag}/translations?versionId=${item.id}`}
-                                        className="text-purple-500 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-600 p-1"
-                                        title="Manage Translations"
-                                    >
-                                        Translations
-                                    </Link>
-                                    {canRequestPublish && (
+
+                                    {/* Acciones con efectos hover mejorados */}
+                                    <div className="flex items-center space-x-2 ml-4">
+                                        <Link
+                                            href={`/projects/${projectId}/prompts/${currentPromptId}/versions/${item.versionTag}/translations?versionId=${item.id}`}
+                                            className="text-purple-500 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-600 p-1 transition-colors duration-200"
+                                            title="Manage Translations"
+                                        >
+                                            Translations
+                                        </Link>
+                                        {canRequestPublish && (
+                                            <button
+                                                onClick={() => onRequestPublish(item.versionTag)}
+                                                disabled={isLoadingAction}
+                                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600 disabled:opacity-50 p-1 transition-colors duration-200"
+                                                title="Request Publish to Marketplace">
+                                                {isLoadingAction ? '...' : 'Publish'}
+                                            </button>
+                                        )}
+                                        {canUnpublish && (
+                                            <button
+                                                onClick={() => onUnpublish(item.versionTag)}
+                                                disabled={isLoadingAction}
+                                                className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-600 disabled:opacity-50 p-1 transition-colors duration-200"
+                                                title="Unpublish from Marketplace">
+                                                {isLoadingAction ? '...' : 'Unpublish'}
+                                            </button>
+                                        )}
                                         <button
-                                            onClick={() => onRequestPublish(item.versionTag)}
-                                            disabled={isLoadingAction}
-                                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600 disabled:opacity-50 p-1"
-                                            title="Request Publish to Marketplace">
-                                            {isLoadingAction ? '...' : 'Publish'}
+                                            onClick={() => onEdit(item)}
+                                            className="text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-600 p-1 transition-colors duration-200"
+                                            aria-label="Edit Version"
+                                        >
+                                            <PencilIcon />
                                         </button>
-                                    )}
-                                    {canUnpublish && (
                                         <button
-                                            onClick={() => onUnpublish(item.versionTag)}
-                                            disabled={isLoadingAction}
-                                            className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-600 disabled:opacity-50 p-1"
-                                            title="Unpublish from Marketplace">
-                                            {isLoadingAction ? '...' : 'Unpublish'}
+                                            onClick={() => onDelete(item)}
+                                            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-600 p-1 transition-colors duration-200"
+                                            aria-label="Delete Version"
+                                        >
+                                            <TrashBinIcon />
                                         </button>
-                                    )}
-                                    <button
-                                        onClick={() => onEdit(item)}
-                                        className="text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-600 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        aria-label="Edit Version"
-                                    >
-                                        <PencilIcon />
-                                    </button>
-                                    <button
-                                        onClick={() => onDelete(item)}
-                                        className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-600 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        aria-label="Delete Version"
-                                    >
-                                        <TrashBinIcon />
-                                    </button>
-                                </td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
             {promptVersions.length === 0 && (
                 <p className="text-center py-4 text-gray-500 dark:text-gray-400">No prompt versions found for this prompt.</p>
             )}
