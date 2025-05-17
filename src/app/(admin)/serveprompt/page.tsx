@@ -599,10 +599,7 @@ fi
         setBashScriptExample(BASH_PLACEHOLDER_MSG);
         setError(null);
 
-        // El AsyncSelect de prompts se actualizará debido al cambio de 'key' o porque su 'value' (selectedPrompt) es ahora null.
-        // Los demás useEffect que dependen de selectedPrompt, selectedVersion, etc., se ejecutarán 
-        // pero no harán fetches ya que sus dependencias clave serán null, evitando llamadas innecesarias.
-    }, [selectedProjectId, isClient]); // Depender de isClient también para evitar ejecución en SSR o antes de que el contexto esté listo
+    }, [selectedProjectId, isClient]);
 
     // --- Render ---
     return (

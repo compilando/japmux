@@ -21,6 +21,8 @@ import PromptVersionForm from '@/components/form/PromptVersionForm';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import { PlusCircleIcon, PencilIcon as EditIconHero } from '@heroicons/react/24/outline';
+import { diffLines, type Change } from 'diff'; // Importar solo diffLines y Change
+import DiffViewerModal from '@/components/common/DiffViewerModal'; // Importar el nuevo modal
 
 // Helper para extraer mensajes de error de forma segura
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
@@ -94,6 +96,11 @@ const PromptVersionsPage: React.FC = () => {
     const [project, setProject] = useState<CreateProjectDto | null>(null);
     const [prompt, setPrompt] = useState<PromptDto | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
+
+    // Estados para la funcionalidad de Diff
+    const [selectedVersionsForDiff, setSelectedVersionsForDiff] = useState<string[]>([]);
+    const [diffResult, setDiffResult] = useState<Change[] | null>(null);
+    const [showDiffModal, setShowDiffModal] = useState<boolean>(false);
 
     const params = useParams();
     const { selectedProjectId } = useProjects();
@@ -192,6 +199,42 @@ const PromptVersionsPage: React.FC = () => {
         fetchData();
     }, [fetchData]);
 
+    const handleSelectVersionForDiff = (versionTag: string) => {
+        setSelectedVersionsForDiff(prevSelected => {
+            if (prevSelected.includes(versionTag)) {
+                return prevSelected.filter(tag => tag !== versionTag);
+            } else {
+                if (prevSelected.length < 2) {
+                    return [...prevSelected, versionTag];
+                }
+                // showErrorToast("Puedes seleccionar hasta 2 versiones para comparar.");
+                return prevSelected;
+            }
+        });
+    };
+
+    const handleCompareVersions = () => {
+        if (selectedVersionsForDiff.length !== 2) {
+            showErrorToast("Por favor, selecciona exactamente dos versiones para comparar.");
+            return;
+        }
+
+        const version1Data = itemsList.find(item => item.versionTag === selectedVersionsForDiff[0]);
+        const version2Data = itemsList.find(item => item.versionTag === selectedVersionsForDiff[1]);
+
+        if (!version1Data || !version2Data) {
+            showErrorToast("No se pudieron encontrar los datos de las versiones seleccionadas.");
+            return;
+        }
+
+        const text1 = version1Data.promptText ?? '';
+        const text2 = version2Data.promptText ?? '';
+
+        const differences = diffLines(text1, text2, { newlineIsToken: true });
+        setDiffResult(differences);
+        setShowDiffModal(true);
+    };
+
     const handleAdd = () => {
         setEditingItem(null);
         setFormMode('add');
@@ -225,6 +268,56 @@ const PromptVersionsPage: React.FC = () => {
             } finally {
                 setLoading(false);
             }
+        }
+    };
+
+    // Funciones para marketplace (asumiendo que podrían estar aquí o necesitan ser definidas
+    // según las props de PromptVersionsTable)
+    const handleRequestPublish = async (versionTag: string) => {
+        if (!projectId || !promptId || !versionTag) return;
+        setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: true }));
+        try {
+            // Asumimos que el servicio devuelve la versión actualizada con el nuevo estado
+            const updatedVersion = await promptVersionService.requestPublish(projectId, promptId, versionTag);
+            // Actualizar el estado en itemsList es crucial aquí
+            setItemsList(prevList =>
+                prevList.map(item =>
+                    item.versionTag === versionTag
+                        ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as PromptVersionMarketplaceDetails).marketplaceStatus || 'PENDING_APPROVAL' }
+                        : item
+                )
+            );
+            showSuccessToast(`Solicitud de publicación para la versión ${versionTag} enviada.`);
+            fetchData(); // Opcional: re-fetch para asegurar consistencia, o confiar en la actualización local.
+        } catch (err) {
+            console.error(`Error requesting publish for version ${versionTag}:`, err);
+            showErrorToast(getApiErrorMessage(err, `Error al solicitar publicación para ${versionTag}.`));
+        } finally {
+            setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: false }));
+        }
+    };
+
+    const handleUnpublish = async (versionTag: string) => {
+        if (!projectId || !promptId || !versionTag) return;
+        setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: true }));
+        try {
+            // Asumimos que el servicio devuelve la versión actualizada
+            const updatedVersion = await promptVersionService.unpublish(projectId, promptId, versionTag);
+            // Actualizar el estado en itemsList
+            setItemsList(prevList =>
+                prevList.map(item =>
+                    item.versionTag === versionTag
+                        ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as PromptVersionMarketplaceDetails).marketplaceStatus || 'NOT_PUBLISHED' }
+                        : item
+                )
+            );
+            showSuccessToast(`Versión ${versionTag} retirada del marketplace.`);
+            fetchData(); // Opcional: re-fetch
+        } catch (err) {
+            console.error(`Error unpublishing version ${versionTag}:`, err);
+            showErrorToast(getApiErrorMessage(err, `Error al retirar ${versionTag} del marketplace.`));
+        } finally {
+            setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: false }));
         }
     };
 
@@ -265,48 +358,6 @@ const PromptVersionsPage: React.FC = () => {
             console.error('Error saving version:', error);
             const apiErrorMessage = error.response?.data?.message || error.message || 'Error al guardar la versión';
             showErrorToast(apiErrorMessage);
-        }
-    };
-
-    const handleRequestPublish = async (versionTag: string) => {
-        if (!projectId || !promptId || !versionTag) return;
-        setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: true }));
-        try {
-            const updatedVersion = await promptVersionService.requestPublish(projectId, promptId, versionTag);
-            setItemsList(prevList =>
-                prevList.map(item =>
-                    item.versionTag === versionTag
-                        ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as PromptVersionMarketplaceDetails).marketplaceStatus || 'PENDING_APPROVAL' }
-                        : item
-                )
-            );
-            showSuccessToast(`Solicitud de publicación para la versión ${versionTag} enviada.`);
-        } catch (err) {
-            console.error(`Error requesting publish for version ${versionTag}:`, err);
-            showErrorToast(getApiErrorMessage(err, `Error al solicitar publicación para ${versionTag}.`));
-        } finally {
-            setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: false }));
-        }
-    };
-
-    const handleUnpublish = async (versionTag: string) => {
-        if (!projectId || !promptId || !versionTag) return;
-        setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: true }));
-        try {
-            const updatedVersion = await promptVersionService.unpublish(projectId, promptId, versionTag);
-            setItemsList(prevList =>
-                prevList.map(item =>
-                    item.versionTag === versionTag
-                        ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as PromptVersionMarketplaceDetails).marketplaceStatus || 'NOT_PUBLISHED' }
-                        : item
-                )
-            );
-            showSuccessToast(`Versión ${versionTag} retirada del marketplace.`);
-        } catch (err) {
-            console.error(`Error unpublishing version ${versionTag}:`, err);
-            showErrorToast(getApiErrorMessage(err, `Error al retirar ${versionTag} del marketplace.`));
-        } finally {
-            setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: false }));
         }
     };
 
@@ -357,12 +408,16 @@ const PromptVersionsPage: React.FC = () => {
             )}
 
             {formMode && (
-                <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 my-8 border border-gray-200 dark:border-gray-700">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-                        {formMode === 'edit' && editingItem ? `Edit Version (${editingItem.versionTag})` : 'Add New Prompt Version'}
+                <div className="mb-6 p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 shadow-md">
+                    <h3 className="text-xl font-semibold leading-7 text-gray-900 dark:text-white mb-6">
+                        {formMode === 'edit' ? `Editando Versión: ${editingItem?.versionTag}` : 'Crear Nueva Versión del Prompt'}
                     </h3>
                     <PromptVersionForm
-                        initialData={formMode === 'edit' ? editingItem : null}
+                        initialData={editingItem ? {
+                            promptText: editingItem.promptText || '',
+                            changeMessage: editingItem.changeMessage || '',
+                            versionTag: editingItem.versionTag
+                        } : null}
                         onSave={handleSave}
                         onCancel={handleCancelForm}
                         latestVersionTag={latestVersionTagForForm ?? undefined}
@@ -372,28 +427,90 @@ const PromptVersionsPage: React.FC = () => {
                 </div>
             )}
 
-            {error && !formMode && <p className="text-red-500 py-2 text-center">Error loading versions: {error}</p>}
-
-            {loading && !formMode && <p className="text-center py-4">Loading versions...</p>}
-
-            {!loading && !error && (
-                itemsList.length === 0 && !formMode ? (
-                    <p className="text-center py-4 text-gray-500 dark:text-gray-400">No versions found for this prompt.</p>
-                ) : !formMode && (
-                    <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                        <PromptVersionsTable
-                            promptVersions={itemsList}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                            onRequestPublish={handleRequestPublish}
-                            onUnpublish={handleUnpublish}
-                            marketplaceActionLoading={marketplaceActionLoading}
-                            projectId={projectId}
-                            promptIdForTable={promptId}
-                        />
-                    </div>
-                )
+            {/* Botón para comparar versiones seleccionadas */}
+            {itemsList.length > 1 && !loading && ( // Mostrar solo si hay más de una versión y no está cargando
+                <div className="my-4 flex justify-start gap-x-4 items-center">
+                    <button
+                        onClick={handleCompareVersions}
+                        disabled={selectedVersionsForDiff.length !== 2}
+                        title={selectedVersionsForDiff.length !== 2 ? "Selecciona 2 versiones de la tabla para comparar" : "Comparar versiones seleccionadas"}
+                        className="px-4 py-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h4.5M12 3v1.5M12 9v1.5m0 3v1.5m0 3v1.5M12 21v-1.5m6-10.5h-1.5m0 0V5.25m0 3V9m0 3v1.5m0 3V18M3 10.5h1.5m0 0V9m0 3v1.5m0 3V18" />
+                        </svg>
+                        <span>Comparar ({selectedVersionsForDiff.length}/2)</span>
+                    </button>
+                    {selectedVersionsForDiff.length > 0 && (
+                        <button
+                            onClick={() => setSelectedVersionsForDiff([])}
+                            title="Limpiar selección"
+                            className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                        >
+                            Limpiar Selección
+                        </button>
+                    )}
+                </div>
             )}
+
+            {/* Tabla de versiones */}
+            {loading && <p className="text-center py-10 text-gray-500 dark:text-gray-400">Cargando versiones...</p>}
+            {error && (
+                <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-700/30 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg my-4 shadow" role="alert">
+                    <strong className="font-bold">Error:</strong>
+                    <span className="block sm:inline ml-2">{error}</span>
+                </div>
+            )}
+            {!loading && !error && itemsList.length === 0 && (
+                <div className="text-center py-10 mt-4">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    </svg>
+                    <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No hay versiones</h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Empieza creando una nueva versión para este prompt.</p>
+                </div>
+            )}
+            {!loading && !error && itemsList.length > 0 && (
+                <PromptVersionsTable
+                    promptVersions={itemsList}
+                    projectId={projectId}
+                    promptIdForTable={promptId}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onRequestPublish={handleRequestPublish}
+                    onUnpublish={handleUnpublish}
+                    marketplaceActionLoading={marketplaceActionLoading}
+                    selectedVersionsForDiff={selectedVersionsForDiff}
+                    onSelectVersionForDiff={handleSelectVersionForDiff}
+                />
+            )}
+
+            {showDiffModal && diffResult && selectedVersionsForDiff.length === 2 && (() => {
+                const v1Details = itemsList.find(item => item.versionTag === selectedVersionsForDiff[0]);
+                const v2Details = itemsList.find(item => item.versionTag === selectedVersionsForDiff[1]);
+
+                if (!v1Details || !v2Details) return null; // No debería pasar si selectedVersionsForDiff tiene 2 elementos válidos
+
+                return (
+                    <DiffViewerModal
+                        isOpen={showDiffModal}
+                        onClose={() => {
+                            setShowDiffModal(false);
+                            setDiffResult(null);
+                            // setSelectedVersionsForDiff([]); // Opcional: limpiar selección
+                        }}
+                        diffResult={diffResult}
+                        versionInfo1={{
+                            tag: v1Details.versionTag,
+                            text: v1Details.promptText
+                        }}
+                        versionInfo2={{
+                            tag: v2Details.versionTag,
+                            text: v2Details.promptText
+                        }}
+                    />
+                );
+            })()}
         </>
     );
 };

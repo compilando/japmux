@@ -220,6 +220,7 @@ const PromptWizardPage: React.FC = () => {
         <>
             <Breadcrumb crumbs={breadcrumbs} />
             <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Prompt Wizard</h1>
 
                 <div className="mb-8 p-6 border border-gray-300 dark:border-gray-600 rounded-lg">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">1. Generar/Editar Estructura</h2>

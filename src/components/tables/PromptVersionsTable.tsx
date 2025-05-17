@@ -15,6 +15,8 @@ interface PromptVersionsTableProps {
     onRequestPublish: (versionTag: string) => void;
     onUnpublish: (versionTag: string) => void;
     marketplaceActionLoading: Record<string, boolean>;
+    selectedVersionsForDiff: string[];
+    onSelectVersionForDiff: (versionTag: string) => void;
 }
 
 const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
@@ -25,7 +27,9 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
     onDelete,
     onRequestPublish,
     onUnpublish,
-    marketplaceActionLoading
+    marketplaceActionLoading,
+    selectedVersionsForDiff,
+    onSelectVersionForDiff
 }) => {
     const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -60,6 +64,19 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                             onMouseEnter={() => setHoveredItem(item.id)}
                             onMouseLeave={() => setHoveredItem(null)}
                         >
+                            {/* Checkbox para seleccionar para Diff */}
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full pr-2 flex items-center">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-indigo-600 dark:ring-offset-gray-800"
+                                    checked={selectedVersionsForDiff.includes(item.versionTag)}
+                                    onChange={() => onSelectVersionForDiff(item.versionTag)}
+                                    disabled={selectedVersionsForDiff.length >= 2 && !selectedVersionsForDiff.includes(item.versionTag)}
+                                    title={selectedVersionsForDiff.length >= 2 && !selectedVersionsForDiff.includes(item.versionTag) ? "Deselecciona una versión para elegir otra" : "Seleccionar para comparar"}
+                                    aria-label={`Seleccionar versión ${item.versionTag} para comparar`}
+                                />
+                            </div>
+
                             {/* Círculo en la línea temporal con efecto hover */}
                             <div className={`absolute left-6 w-4 h-4 rounded-full bg-brand-500 dark:bg-brand-400 border-2 border-white dark:border-gray-800 -translate-x-1/2 transition-all duration-300 ${isHovered ? 'scale-125 ring-4 ring-brand-100 dark:ring-brand-900' : ''}`}></div>
 
