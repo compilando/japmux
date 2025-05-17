@@ -9,7 +9,7 @@ import {
 import { aiModelService } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
-import AiModelsTable from '@/components/tables/AiModelsTable';
+import AiModelsDisplay from '@/components/ai-models/AiModelsDisplay';
 import AiModelForm from '@/components/form/AiModelForm';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
@@ -18,8 +18,8 @@ const AiModelsPage: React.FC = () => {
     const [aiModelsList, setAiModelsList] = useState<AiModelResponseDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [editingModel, setEditingModel] = useState<AiModelResponseDto | null>(null);
+    const [showForm, setShowForm] = useState<boolean>(false);
 
     const {
         selectedProjectId,
@@ -69,12 +69,12 @@ const AiModelsPage: React.FC = () => {
 
     const handleAdd = () => {
         setEditingModel(null);
-        setIsModalOpen(true);
+        setShowForm(true);
     };
 
     const handleEdit = (model: AiModelResponseDto) => {
         setEditingModel(model);
-        setIsModalOpen(true);
+        setShowForm(true);
     };
 
     const handleDelete = async (id: string) => {
@@ -83,18 +83,19 @@ const AiModelsPage: React.FC = () => {
             return;
         }
         if (window.confirm('Are you sure you want to delete this AI model?')) {
-            setLoading(true);
             try {
                 await aiModelService.remove(selectedProjectId, id);
                 showSuccessToast('AI Model deleted successfully!');
                 if (selectedProjectId) {
                     fetchData(selectedProjectId);
                 }
+                if (editingModel && editingModel.id === id) {
+                    setShowForm(false);
+                    setEditingModel(null);
+                }
             } catch (err) {
                 console.error("Error deleting AI Model:", err);
-            } finally {
-                setIsModalOpen(false);
-                setLoading(false);
+                showErrorToast(err instanceof Error ? err.message : 'Error deleting AI model');
             }
         }
     };
@@ -102,10 +103,9 @@ const AiModelsPage: React.FC = () => {
     const handleSave = async (payload: CreateAiModelDto | UpdateAiModelDto) => {
         if (!selectedProjectId) {
             showErrorToast("Cannot save model without a selected project.");
-            setIsModalOpen(false);
+            setShowForm(false);
             return;
         }
-        setLoading(true);
         try {
             let message = "";
             if (editingModel && editingModel.id) {
@@ -115,17 +115,22 @@ const AiModelsPage: React.FC = () => {
                 await aiModelService.create(selectedProjectId, payload as CreateAiModelDto);
                 message = 'AI Model created successfully!';
             }
-            setIsModalOpen(false);
+            setShowForm(false);
+            setEditingModel(null);
             showSuccessToast(message);
             if (selectedProjectId) {
                 fetchData(selectedProjectId);
             }
         } catch (err) {
             console.error("Error saving AI Model:", err);
-        } finally {
-            setLoading(false);
+            showErrorToast(err instanceof Error ? err.message : 'Error saving AI model');
         }
     };
+
+    const handleCancelForm = () => {
+        setShowForm(false);
+        setEditingModel(null);
+    }
 
     const breadcrumbs: { label: string; href?: string }[] = [
         { label: "Home", href: "/" },
@@ -159,7 +164,11 @@ const AiModelsPage: React.FC = () => {
             {selectedProjectId && (
                 <>
                     <div className="flex justify-end mb-4">
-                        <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
+                        <button
+                            onClick={handleAdd}
+                            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+                            disabled={showForm}
+                        >
                             Add AI Model
                         </button>
                     </div>
@@ -167,29 +176,27 @@ const AiModelsPage: React.FC = () => {
                     {error && <p className="text-red-500">{error}</p>}
                     {!loading && !error && (!selectedProjectId || !isLoadingSelectedProjectFull) && (
                         <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                            <AiModelsTable
-                                aiModels={aiModelsList}
+                            {showForm && (
+                                <div className="mb-6 p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900">
+                                    <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+                                        {editingModel ? 'Edit AI Model' : 'Add New AI Model'}
+                                    </h3>
+                                    <AiModelForm
+                                        initialData={editingModel}
+                                        onSave={handleSave}
+                                        onCancel={handleCancelForm}
+                                        projectId={selectedProjectId || ''}
+                                    />
+                                </div>
+                            )}
+                            <AiModelsDisplay
+                                aiModelsList={aiModelsList}
                                 onEdit={handleEdit}
                                 onDelete={handleDelete}
                             />
                         </div>
                     )}
                 </>
-            )}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
-                    <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
-                        <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-                            {editingModel ? 'Edit AI Model' : 'Add New AI Model'}
-                        </h3>
-                        <AiModelForm
-                            initialData={editingModel}
-                            onSave={handleSave}
-                            onCancel={() => setIsModalOpen(false)}
-                            projectId={selectedProjectId || ''}
-                        />
-                    </div>
-                </div>
             )}
         </>
     );

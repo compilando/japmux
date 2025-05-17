@@ -23,6 +23,7 @@ import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import axios from 'axios';
 import styles from './ServePromptPage.module.css'; // Importar CSS Modules
 import CopyButton from '@/components/common/CopyButton'; // Importar CopyButton
+import Breadcrumb from '@/components/common/PageBreadCrumb'; // Asegurar que la importación esté presente
 
 interface StringMap { [key: string]: string; }
 
@@ -90,6 +91,12 @@ const ServePromptPage: React.FC = () => {
     const [displayedCurlBaseUrl, setDisplayedCurlBaseUrl] = useState<string>(''); // Estado para la URL base del cURL
     const [bashScriptExample, setBashScriptExample] = useState<string>(''); // Estado para el script de Bash de ejemplo
     const [activeCommandTab, setActiveCommandTab] = useState<'curl' | 'bash'>('curl'); // Estado para la pestaña activa
+
+    // Definición de breadcrumbs
+    const breadcrumbs = [
+        { label: "Home", href: "/" },
+        { label: "Serve Prompt" }
+    ];
 
     // --- Efecto para detectar montaje en cliente ---
     useEffect(() => {
@@ -599,257 +606,246 @@ fi
 
     // --- Render ---
     return (
-        <div className={`${styles.servePromptContainer} bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen`}>
-            <div className="my-4">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Serve & Test Prompts</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Test and execute your configured prompts with different variables and models.
-                </p>
-            </div>
-
-            {error && (
-                <div className={`${styles.errorBanner} bg-yellow-100 border-yellow-400 text-yellow-700 dark:bg-yellow-700 dark:text-yellow-100 dark:border-yellow-600`}>
-                    Error: {error}
-                </div>
-            )}
-
-            {/* --- Caja de Comandos con Pestañas --- */}
-            <div className="mb-6 p-4 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800">
-                {/* Contenedor de Pestañas */}
-                <div className="flex border-b border-gray-300 dark:border-gray-600 mb-4">
-                    <button
-                        onClick={() => setActiveCommandTab('curl')}
-                        className={`px-4 py-2 -mb-px font-medium text-sm rounded-t-lg
-                                    ${activeCommandTab === 'curl'
-                                ? 'border-gray-300 dark:border-gray-600 border-l border-t border-r text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}
-                                    focus:outline-none transition-colors duration-150 ease-in-out`}
-                    >
-                        Direct API cURL
-                    </button>
-                    <button
-                        onClick={() => setActiveCommandTab('bash')}
-                        className={`px-4 py-2 -mb-px font-medium text-sm rounded-t-lg
-                                    ${activeCommandTab === 'bash'
-                                ? 'border-gray-300 dark:border-gray-600 border-l border-t border-r text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}
-                                    focus:outline-none transition-colors duration-150 ease-in-out`}
-                    >
-                        Bash Script Example
-                    </button>
+        <>
+            <Breadcrumb crumbs={breadcrumbs} />
+            <div className={`${styles.servePromptContainer} bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen`}>
+                <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Test and execute your configured prompts with different variables and models.
+                    </p>
                 </div>
 
-                {/* Contenido de la Pestaña Activa */}
-                {activeCommandTab === 'curl' && (
-                    <div>
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Direct API cURL Command (Single Call)</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                            This command calls the prompt serving API directly. You will need to replace <code>YOUR_AUTH_TOKEN</code> with a valid token.
-                        </p>
-                        {isClient && curlCommand && curlCommand !== CURL_PLACEHOLDER_MSG && (
-                            <div className="mb-2 flex items-center space-x-2">
-                                <CopyButton textToCopy={curlCommand} />
-                            </div>
-                        )}
-                        <div className="relative">
-                            <pre id="curl-command-display" className="p-3 bg-gray-100 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 rounded-md overflow-x-auto whitespace-pre-wrap break-all">
-                                {curlCommand}
-                            </pre>
-                        </div>
-                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            The API base URL for this command is <code>{displayedCurlBaseUrl}</code>.
-                        </p>
+                {error && (
+                    <div className={`${styles.errorBanner} bg-yellow-100 border-yellow-400 text-yellow-700 dark:bg-yellow-700 dark:text-yellow-100 dark:border-yellow-600`}>
+                        Error: {error}
                     </div>
                 )}
 
-                {activeCommandTab === 'bash' && (
-                    <div>
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Example Bash Script (Login &amp; API Call)</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                            This script demonstrates a common pattern: first, authenticate to get a token, then use that token to make the API call to serve the prompt.
-                            You will need <code>jq</code> installed to parse the JSON response for the token (e.g., <code>sudo apt install jq</code> or <code>brew install jq</code>).
-                        </p>
-                        {isClient && bashScriptExample && bashScriptExample !== BASH_PLACEHOLDER_MSG && (
-                            <div className="mb-2 flex items-center space-x-2">
-                                <CopyButton textToCopy={bashScriptExample} />
-                            </div>
-                        )}
-                        <div className="relative">
-
-                            <pre className="p-3 bg-gray-100 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 rounded-md overflow-x-auto whitespace-pre-wrap break-all">
-                                {bashScriptExample}
-                            </pre>
-                        </div>
-                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            <strong>Important:</strong> This is an example. You MUST adjust the configuration variables at the top of the script (<code>LOGIN_ENDPOINT_URL</code>, <code>USERNAME</code>, <code>PASSWORD</code>) to match your specific API's authentication mechanism and user credentials.
-                            <br />An error like <strong>401 Unauthorized</strong> during "Step 1: Authenticating" typically means the <code>USERNAME</code>, <code>PASSWORD</code>, or <code>LOGIN_ENDPOINT_URL</code> in the script are incorrect for your API.
-                            <br />The script assumes the login endpoint is on the same base URL (<code>{displayedCurlBaseUrl}</code>) as the prompt serving API; adjust <code>LOGIN_ENDPOINT_URL</code> if it's different.
-                        </p>
-                    </div>
-                )}
-            </div>
-
-            {/* Selectors Grid */}
-            <div className={styles.selectorsGrid}>
-                {/* Project Selector (si se decide añadirlo o si selectedProjectId no fuera global) */}
-                <input id="project-select" type="hidden" value={selectedProjectId || 'No Project Selected'} readOnly disabled className={`${styles.inputDisplay} bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300`} />
-
-                {/* Prompt Selector (Async) */}
-                <div className={styles.selectWrapper}>
-                    <label htmlFor="prompt-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">1. Select Prompt:</label>
-                    <AsyncSelect
-                        key={selectedProjectId || 'no-project'} // Añadida key para forzar re-render/reset
-                        id="prompt-select"
-                        cacheOptions
-                        defaultOptions // Considerar si defaultOptions necesita ser limpiado o re-evaluado
-                        loadOptions={loadPromptOptions}
-                        value={selectedPrompt}
-                        onChange={handlePromptChange}
-                        isDisabled={!selectedProjectId}
-                        placeholder={selectedProjectId ? "Type to search prompts..." : "Select a project first"}
-                        classNamePrefix="react-select"
-                        className="react-select-container dark:react-select-container-dark"
-                    />
-                </div>
-
-                {/* Version Selector */}
-                <div className={styles.selectWrapper}>
-                    <label htmlFor="version-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">2. Select Version:</label>
-                    <Select
-                        id="version-select"
-                        options={versionOptions}
-                        value={selectedVersion}
-                        onChange={handleVersionChange}
-                        isLoading={loadingVersions}
-                        isDisabled={!selectedPrompt || loadingVersions}
-                        placeholder={selectedPrompt ? "Select version..." : "Select prompt first"}
-                        classNamePrefix="react-select"
-                        className="react-select-container dark:react-select-container-dark"
-                    />
-                </div>
-
-                {/* Language Selector */}
-                <div className={styles.selectWrapper}>
-                    <label htmlFor="language-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">3. Select Language:</label>
-                    <Select
-                        id="language-select"
-                        options={languageOptions}
-                        value={selectedLanguage}
-                        onChange={handleLanguageChange}
-                        isLoading={loadingTranslations}
-                        isDisabled={!selectedVersion || loadingTranslations}
-                        placeholder={selectedVersion ? "Select language (or base)..." : "Select version first"}
-                        classNamePrefix="react-select"
-                        className="react-select-container dark:react-select-container-dark"
-                    />
-                </div>
-
-                {/* AI Model Selector */}
-                <div className={styles.selectWrapper}>
-                    <label htmlFor="aimodel-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">4. Select AI Model:</label>
-                    <Select
-                        id="aimodel-select"
-                        options={aiModelOptions}
-                        value={selectedAiModel}
-                        onChange={handleAiModelChange}
-                        isLoading={loadingAiModels}
-                        isDisabled={loadingAiModels || !selectedProjectId} // Habilitar si hay proyecto
-                        placeholder={selectedProjectId ? "Select AI Model..." : "Select a project first"}
-                        classNamePrefix="react-select"
-                        className="react-select-container dark:react-select-container-dark"
-                    />
-                </div>
-            </div>
-
-            {isClient && selectedPrompt && selectedVersion && (
-                <div className={`${styles.detailsResultsContainer} md:grid md:grid-cols-2 md:gap-6`}>
-                    <div className={`${styles.promptDetailsSection} bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow`}>
-                        <h2 className="text-xl font-semibold mb-3 text-black dark:text-white">Prompt Details & Variables</h2>
-
-                        <div className="mb-4">
-                            <label htmlFor="font-size-selector" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Text Size:</label>
-                            <div className={styles.fontSizeSelectorContainer}>
-                                <span className={`${styles.fontSizeSelectorLabel} text-gray-700 dark:text-gray-300`}>Font Size:</span>
-                                <div className={styles.fontSizeSelector}>
-                                    {fontSizes.map(size => (
-                                        <button
-                                            key={size}
-                                            onClick={() => handleFontSizeChange(size)}
-                                            className={`${styles.fontSizeButton} ${selectedFontSize === size ? styles.active : 'dark:bg-gray-600 dark:text-gray-200'}`}
-                                        >
-                                            {size.toUpperCase()}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <textarea
-                            id="prompt-preview"
-                            readOnly
-                            value={currentPromptText || "Loading prompt text..."}
-                            className={`${styles.promptPreview} ${getFontSizeClass(selectedFontSize)} w-full p-3 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500`}
-                            rows={10}
-                        />
-
-                        {Object.keys(promptVariables).length > 0 && (
-                            <div className={`${styles.variablesSection} mt-4 pt-4 border-t border-gray-300 dark:border-gray-600`}>
-                                <h3 className="text-lg font-medium mb-2 text-black dark:text-white">Variables:</h3>
-                                {Object.entries(promptVariables).map(([varName, defaultValue]) => (
-                                    <div key={varName} className={`${styles.variableInput} mb-3`}>
-                                        <label htmlFor={`var-${varName}`} className={`${styles.variableLabel} font-mono font-semibold text-sm text-gray-700 dark:text-gray-300`}>{`{{${varName}}}:`}</label>
-                                        <input
-                                            type="text"
-                                            id={`var-${varName}`}
-                                            value={variableInputs[varName] || ''}
-                                            onChange={(e) => handleVariableInputChange(varName, e.target.value)}
-                                            placeholder={`Enter value for ${varName}${defaultValue ? ` (default: ${defaultValue})` : ''}`}
-                                            className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                {/* --- Caja de Comandos con Pestañas --- */}
+                <div className="mb-6 p-4 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800">
+                    {/* Contenedor de Pestañas */}
+                    <div className="flex border-b border-gray-300 dark:border-gray-600 mb-4">
                         <button
-                            onClick={handleExecute}
-                            disabled={isExecuting || !selectedAiModel || !currentPromptText}
-                            className={`${styles.executeButton} mt-6 w-full py-2 px-4 rounded-md text-white font-semibold transition-colors duration-150 ease-in-out bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-gray-500`}
+                            onClick={() => setActiveCommandTab('curl')}
+                            className={`px-4 py-2 -mb-px font-medium text-sm rounded-t-lg
+                                        ${activeCommandTab === 'curl'
+                                    ? 'border-gray-300 dark:border-gray-600 border-l border-t border-r text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}
+                                        focus:outline-none transition-colors duration-150 ease-in-out`}
                         >
-                            {isExecuting ? 'Executing...' : 'Execute Prompt'}
+                            Direct API cURL
+                        </button>
+                        <button
+                            onClick={() => setActiveCommandTab('bash')}
+                            className={`px-4 py-2 -mb-px font-medium text-sm rounded-t-lg
+                                        ${activeCommandTab === 'bash'
+                                    ? 'border-gray-300 dark:border-gray-600 border-l border-t border-r text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}
+                                        focus:outline-none transition-colors duration-150 ease-in-out`}
+                        >
+                            Bash Script Example
                         </button>
                     </div>
 
-                    <div className={`${styles.resultsSection} bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow`}>
-                        <h2 className="text-xl font-semibold mb-3 text-black dark:text-white">Execution Results</h2>
-                        {executionResult && (
-                            <>
-                                <div className={`${styles.metadataContainer} text-gray-600 dark:text-gray-400 mb-3`}>
-                                    {executionResult.modelUsed && (
-                                        <p><span className={`${styles.infoLabel} text-gray-800 dark:text-gray-200`}>Model Used:</span> {executionResult.modelUsed}</p>
-                                    )}
-                                    {executionResult.providerUsed && (
-                                        <p><span className={`${styles.infoLabel} text-gray-800 dark:text-gray-200`}>Provider Used:</span> {executionResult.providerUsed}</p>
-                                    )}
+                    {/* Contenido de la Pestaña Activa */}
+                    {activeCommandTab === 'curl' && (
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Direct API cURL Command (Single Call)</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                This command calls the prompt serving API directly. You will need to replace <code>YOUR_AUTH_TOKEN</code> with a valid token.
+                            </p>
+                            {isClient && curlCommand && curlCommand !== CURL_PLACEHOLDER_MSG && (
+                                <div className="mb-2 flex items-center space-x-2">
+                                    <CopyButton textToCopy={curlCommand} />
                                 </div>
-                                <textarea
-                                    id="execution-result-text"
-                                    readOnly
-                                    value={executionResult.result || "No result text received."}
-                                    className={`font-mono ${getFontSizeClass(selectedFontSize)} w-full p-3 border border-gray-700 dark:border-gray-600 rounded-md bg-gray-800 dark:bg-gray-800 text-gray-100 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 resize-none`}
-                                    rows={16}
-                                />
-                            </>
-                        )}
-                        {!executionResult && !isExecuting && (
-                            <p className="text-gray-500 dark:text-gray-400">Execute a prompt to see the results here.</p>
-                        )}
-                        {isExecuting && (
-                            <p className="text-gray-500 dark:text-gray-400">Executing...</p>
-                        )}
+                            )}
+                            <div className="relative">
+                                <pre id="curl-command-display" className="p-3 bg-gray-100 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 rounded-md overflow-x-auto whitespace-pre-wrap break-all">
+                                    {curlCommand}
+                                </pre>
+                            </div>
+                            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                The API base URL for this command is <code>{displayedCurlBaseUrl}</code>.
+                            </p>
+                        </div>
+                    )}
+
+                    {activeCommandTab === 'bash' && (
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Example Bash Script (Login &amp; API Call)</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                This script demonstrates a common pattern: first, authenticate to get a token, then use that token to make the API call to serve the prompt.
+                                You will need <code>jq</code> installed to parse the JSON response for the token (e.g., <code>sudo apt install jq</code> or <code>brew install jq</code>).
+                            </p>
+                            {isClient && bashScriptExample && bashScriptExample !== BASH_PLACEHOLDER_MSG && (
+                                <div className="mb-2 flex items-center space-x-2">
+                                    <CopyButton textToCopy={bashScriptExample} />
+                                </div>
+                            )}
+                            <div className="relative">
+
+                                <pre className="p-3 bg-gray-100 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 rounded-md overflow-x-auto whitespace-pre-wrap break-all">
+                                    {bashScriptExample}
+                                </pre>
+                            </div>
+                            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                <strong>Important:</strong> This is an example. You MUST adjust the configuration variables at the top of the script (<code>LOGIN_ENDPOINT_URL</code>, <code>USERNAME</code>, <code>PASSWORD</code>) to match your specific API's authentication mechanism and user credentials.
+                                <br />An error like <strong>401 Unauthorized</strong> during "Step 1: Authenticating" typically means the <code>USERNAME</code>, <code>PASSWORD</code>, or <code>LOGIN_ENDPOINT_URL</code> in the script are incorrect for your API.
+                                <br />The script assumes the login endpoint is on the same base URL (<code>{displayedCurlBaseUrl}</code>) as the prompt serving API; adjust <code>LOGIN_ENDPOINT_URL</code> if it's different.
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Selectors Grid */}
+                <div className={styles.selectorsGrid}>
+                    <input id="project-select" type="hidden" value={selectedProjectId || 'No Project Selected'} readOnly disabled className={`${styles.inputDisplay} bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300`} />
+                    <div className={styles.selectWrapper}>
+                        <label htmlFor="prompt-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">1. Select Prompt:</label>
+                        <AsyncSelect
+                            key={selectedProjectId || 'no-project'}
+                            id="prompt-select"
+                            cacheOptions
+                            defaultOptions
+                            loadOptions={loadPromptOptions}
+                            value={selectedPrompt}
+                            onChange={handlePromptChange}
+                            isDisabled={!selectedProjectId}
+                            placeholder={selectedProjectId ? "Type to search prompts..." : "Select a project first"}
+                            classNamePrefix="react-select"
+                            className="react-select-container dark:react-select-container-dark"
+                        />
+                    </div>
+                    <div className={styles.selectWrapper}>
+                        <label htmlFor="version-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">2. Select Version:</label>
+                        <Select
+                            id="version-select"
+                            options={versionOptions}
+                            value={selectedVersion}
+                            onChange={handleVersionChange}
+                            isLoading={loadingVersions}
+                            isDisabled={!selectedPrompt || loadingVersions}
+                            placeholder={selectedPrompt ? "Select version..." : "Select prompt first"}
+                            classNamePrefix="react-select"
+                            className="react-select-container dark:react-select-container-dark"
+                        />
+                    </div>
+                    <div className={styles.selectWrapper}>
+                        <label htmlFor="language-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">3. Select Language:</label>
+                        <Select
+                            id="language-select"
+                            options={languageOptions}
+                            value={selectedLanguage}
+                            onChange={handleLanguageChange}
+                            isLoading={loadingTranslations}
+                            isDisabled={!selectedVersion || loadingTranslations}
+                            placeholder={selectedVersion ? "Select language (or base)..." : "Select version first"}
+                            classNamePrefix="react-select"
+                            className="react-select-container dark:react-select-container-dark"
+                        />
+                    </div>
+                    <div className={styles.selectWrapper}>
+                        <label htmlFor="aimodel-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">4. Select AI Model:</label>
+                        <Select
+                            id="aimodel-select"
+                            options={aiModelOptions}
+                            value={selectedAiModel}
+                            onChange={handleAiModelChange}
+                            isLoading={loadingAiModels}
+                            isDisabled={loadingAiModels || !selectedProjectId}
+                            placeholder={selectedProjectId ? "Select AI Model..." : "Select a project first"}
+                            classNamePrefix="react-select"
+                            className="react-select-container dark:react-select-container-dark"
+                        />
                     </div>
                 </div>
-            )}
-        </div>
+
+                {isClient && selectedPrompt && selectedVersion && (
+                    <div className={`${styles.detailsResultsContainer} md:grid md:grid-cols-2 md:gap-6`}>
+                        <div className={`${styles.promptDetailsSection} bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow`}>
+                            <h2 className="text-xl font-semibold mb-3 text-black dark:text-white">Prompt Details & Variables</h2>
+                            <div className="mb-4">
+                                <label htmlFor="font-size-selector" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Text Size:</label>
+                                <div className={styles.fontSizeSelectorContainer}>
+                                    <span className={`${styles.fontSizeSelectorLabel} text-gray-700 dark:text-gray-300`}>Font Size:</span>
+                                    <div className={styles.fontSizeSelector}>
+                                        {fontSizes.map(size => (
+                                            <button
+                                                key={size}
+                                                onClick={() => handleFontSizeChange(size)}
+                                                className={`${styles.fontSizeButton} ${selectedFontSize === size ? styles.active : 'dark:bg-gray-600 dark:text-gray-200'}`}
+                                            >
+                                                {size.toUpperCase()}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            <textarea
+                                id="prompt-preview"
+                                readOnly
+                                value={currentPromptText || "Loading prompt text..."}
+                                className={`${styles.promptPreview} ${getFontSizeClass(selectedFontSize)} w-full p-3 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500`}
+                                rows={10}
+                            />
+                            {Object.keys(promptVariables).length > 0 && (
+                                <div className={`${styles.variablesSection} mt-4 pt-4 border-t border-gray-300 dark:border-gray-600`}>
+                                    <h3 className="text-lg font-medium mb-2 text-black dark:text-white">Variables:</h3>
+                                    {Object.entries(promptVariables).map(([varName, defaultValue]) => (
+                                        <div key={varName} className={`${styles.variableInput} mb-3`}>
+                                            <label htmlFor={`var-${varName}`} className={`${styles.variableLabel} font-mono font-semibold text-sm text-gray-700 dark:text-gray-300`}>{`{{${varName}}}:`}</label>
+                                            <input
+                                                type="text"
+                                                id={`var-${varName}`}
+                                                value={variableInputs[varName] || ''}
+                                                onChange={(e) => handleVariableInputChange(varName, e.target.value)}
+                                                placeholder={`Enter value for ${varName}${defaultValue ? ` (default: ${defaultValue})` : ''}`}
+                                                className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <button
+                                onClick={handleExecute}
+                                disabled={isExecuting || !selectedAiModel || !currentPromptText}
+                                className={`${styles.executeButton} mt-6 w-full py-2 px-4 rounded-md text-white font-semibold transition-colors duration-150 ease-in-out bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-gray-500`}
+                            >
+                                {isExecuting ? 'Executing...' : 'Execute Prompt'}
+                            </button>
+                        </div>
+                        <div className={`${styles.resultsSection} bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow`}>
+                            <h2 className="text-xl font-semibold mb-3 text-black dark:text-white">Execution Results</h2>
+                            {executionResult && (
+                                <>
+                                    <div className={`${styles.metadataContainer} text-gray-600 dark:text-gray-400 mb-3`}>
+                                        {executionResult.modelUsed && (
+                                            <p><span className={`${styles.infoLabel} text-gray-800 dark:text-gray-200`}>Model Used:</span> {executionResult.modelUsed}</p>
+                                        )}
+                                        {executionResult.providerUsed && (
+                                            <p><span className={`${styles.infoLabel} text-gray-800 dark:text-gray-200`}>Provider Used:</span> {executionResult.providerUsed}</p>
+                                        )}
+                                    </div>
+                                    <textarea
+                                        id="execution-result-text"
+                                        readOnly
+                                        value={executionResult.result || "No result text received."}
+                                        className={`font-mono ${getFontSizeClass(selectedFontSize)} w-full p-3 border border-gray-700 dark:border-gray-600 rounded-md bg-gray-800 dark:bg-gray-800 text-gray-100 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 resize-none`}
+                                        rows={16}
+                                    />
+                                </>
+                            )}
+                            {!executionResult && !isExecuting && (
+                                <p className="text-gray-500 dark:text-gray-400">Execute a prompt to see the results here.</p>
+                            )}
+                            {isExecuting && (
+                                <p className="text-gray-500 dark:text-gray-400">Executing...</p>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
     );
 };
 

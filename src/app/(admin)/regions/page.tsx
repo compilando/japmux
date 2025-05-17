@@ -165,46 +165,27 @@ const RegionsPage: React.FC = () => {
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Regions</h1>
+                    <button
+                        onClick={handleAdd}
+                        className="bg-brand-500 hover:bg-brand-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        disabled={!selectedProjectId || isModalOpen}
+                    >
+                        Add New Region
+                    </button>
+                </div>
 
-            {/* Page Title and Subtitle */}
-            <div className="my-6">
-                <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
-                    Regions
-                </h2>
-                <p className="text-base font-medium dark:text-white">
-                    Create, view, and manage all Regions in the system.
-                </p>
-            </div>
-
-            {!selectedProjectId ? (
-                <p className="text-center text-yellow-500 dark:text-yellow-400">Please select a project from the header dropdown to manage regions.</p>
-            ) : (
-                <>
-                    <div className="flex justify-end mb-4">
-                        <button
-                            onClick={handleAdd}
-                            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
-                        >
-                            Add Region
-                        </button>
+                {error && (
+                    <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <strong className="font-bold">Error: </strong>
+                        <span className="block sm:inline">{error}</span>
                     </div>
-                    {(loading || isLoadingSelectedProjectFull) && <p>Loading regions...</p>}
-                    {error && <p className="text-red-500">{error}</p>}
-                    {!loading && !error && !isLoadingSelectedProjectFull && (
-                        <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                            <RegionsTable
-                                regions={regions}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                            />
-                            {regions.length === 0 && <p>No regions found for this project.</p>}
-                        </div>
-                    )}
-                </>
-            )}
-            {isModalOpen && selectedProjectId && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
-                    <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
+                )}
+
+                {isModalOpen && selectedProjectId && (
+                    <div className="mb-6 p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900">
                         <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                             {editingRegion ? 'Edit Region' : 'Add New Region'}
                         </h3>
@@ -215,8 +196,14 @@ const RegionsPage: React.FC = () => {
                             projectId={selectedProjectId}
                         />
                     </div>
-                </div>
-            )}
+                )}
+
+                <RegionsTable
+                    regions={regions}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                />
+            </div>
         </>
     );
 };

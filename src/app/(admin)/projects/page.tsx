@@ -1,179 +1,188 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import {
-    CreateProjectDto,
-    UpdateProjectDto,
-    CreateUserDto,
-} from '@/services/generated/api';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     projectService,
-    userService
+    userService,
+    CreateProjectDto,
+    UpdateProjectDto,
+    UserProfileResponse,
 } from '@/services/api';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
-import ProjectsTable from '@/components/tables/ProjectsTable';
 import ProjectForm from '@/components/form/ProjectForm';
-import axios from 'axios';
+import ProjectsDisplay from '@/components/projects/ProjectsDisplay';
+import { useProjects } from '@/context/ProjectContext';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
-interface UserData extends CreateUserDto {
-    id: string;
-}
-
+// Interfaz para los datos del proyecto que se usarán en la UI
 interface ProjectData extends CreateProjectDto {
     id: string;
+    createdAt?: string;
+    ownerUserId?: string; // Asegurar que esté aquí para que coincida con el mapeo
 }
 
 const ProjectsPage: React.FC = () => {
-    const [projectsList, setProjectsList] = useState<ProjectData[]>([]);
+    const [projects, setProjects] = useState<ProjectData[]>([]);
+    const [usersList, setUsersList] = useState<UserProfileResponse[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [showForm, setShowForm] = useState<boolean>(false);
     const [editingProject, setEditingProject] = useState<ProjectData | null>(null);
-    const [usersList, setUsersList] = useState<UserData[]>([]);
 
-    const fetchData = async () => {
-        setError(null);
+    const { selectedProjectId, setSelectedProjectId, refreshProjects: refreshProjectsFromContext } = useProjects();
+
+    const fetchData = useCallback(async () => {
         setLoading(true);
+        setError(null);
         try {
             const [projectsData, usersData] = await Promise.all([
                 projectService.findAll(),
                 userService.findAll()
             ]);
 
-            if (Array.isArray(projectsData)) {
-                setProjectsList(projectsData as ProjectData[]);
-            } else {
-                console.error("API response for /projects is not an array:", projectsData);
-                setError('Received invalid data format for projects.');
-                setProjectsList([]);
-            }
+            // Castear cada proyecto `p` a `any` para acceder a `id`, `createdAt`, `ownerUserId`
+            // que esperamos que el backend devuelva, aunque el tipo inferido de `projectService.findAll()` sea `CreateProjectDto[]`
+            const mappedProjects = projectsData.map((p: any) => ({
+                name: p.name,
+                description: p.description,
+                ownerUserId: p.ownerUserId,
+                id: p.id,
+                createdAt: p.createdAt,
+            })) as ProjectData[];
 
-            if (Array.isArray(usersData)) {
-                setUsersList(usersData as UserData[]);
-            } else {
-                console.error("API response for /users is not an array:", usersData);
-                setError(prev => prev ? `${prev} Also failed to load users.` : 'Failed to load users.');
-                setUsersList([]);
-            }
+            setProjects(mappedProjects);
+            setUsersList(usersData as UserProfileResponse[]);
 
-        } catch (err) {
-            console.error("Error fetching data:", err);
-            if (axios.isAxiosError(err)) {
-                console.error("Axios error details:", err.response?.status, err.response?.data);
-            }
-            setError('Failed to fetch projects and users.');
-            setProjectsList([]);
+        } catch (err: any) {
+            console.error("Failed to fetch projects or users:", err);
+            setError(err.message || 'Failed to fetch data.');
+            setProjects([]);
             setUsersList([]);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
-    const handleAdd = () => {
+    const handleAddProject = () => {
         setEditingProject(null);
-        setIsModalOpen(true);
+        setShowForm(true);
     };
 
-    const handleEdit = (project: ProjectData) => {
+    const handleEditProject = (project: ProjectData) => {
         setEditingProject(project);
-        setIsModalOpen(true);
+        setShowForm(true);
     };
 
-    const handleDelete = async (id: string) => {
-        if (window.confirm('Are you sure you want to delete this project?')) {
+    const handleSelectProject = (project: ProjectData) => {
+        setSelectedProjectId(project.id);
+        if (showForm && editingProject && editingProject.id !== project.id) {
+            setShowForm(false);
+            setEditingProject(null);
+        }
+    };
+
+    const handleDeleteProject = async (id: string) => {
+        if (window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
             try {
                 await projectService.remove(id);
+                showSuccessToast('Project deleted successfully');
                 fetchData();
-            } catch (err) {
-                setError('Failed to delete project');
-                console.error(err);
+                refreshProjectsFromContext();
+                if (selectedProjectId === id) {
+                    setSelectedProjectId(null);
+                }
+                if (editingProject && editingProject.id === id) {
+                    setShowForm(false);
+                    setEditingProject(null);
+                }
+            } catch (error: any) {
+                console.error("Error deleting project:", error);
+                showErrorToast(error.message || 'Error deleting project. Check console for details.');
             }
         }
     };
 
-    const handleSave = async (payload: CreateProjectDto | UpdateProjectDto) => {
+    const handleSaveProject = async (projectData: CreateProjectDto | UpdateProjectDto) => {
         try {
             if (editingProject) {
-                await projectService.update(editingProject.id, payload as UpdateProjectDto);
+                await projectService.update(editingProject.id, projectData as UpdateProjectDto);
+                showSuccessToast('Project updated successfully');
             } else {
-                await projectService.create(payload as CreateProjectDto);
+                await projectService.create(projectData as CreateProjectDto);
+                showSuccessToast('Project created successfully');
             }
-            setIsModalOpen(false);
+            setShowForm(false);
+            setEditingProject(null);
             fetchData();
-        } catch (err) {
-            setError('Failed to save project');
-            console.error(err);
-            if (axios.isAxiosError(err)) {
-                alert(`Error saving: ${err.response?.data?.message || err.message}`);
-            } else if (err instanceof Error) {
-                alert(`Error saving: ${err.message}`);
-            }
+            refreshProjectsFromContext();
+        } catch (error: any) {
+            console.error("Error saving project:", error);
+            showErrorToast(error.message || 'Error saving project. Check console for details.');
         }
     };
 
-    // Define crumbs for this page
-    const breadcrumbs = [
-        { label: "Home", href: "/" },
-        // { label: "Management", href: "/projects" }, // Optional
-        { label: "Projects" } // Last element without href
-    ];
+    const handleCancelForm = () => {
+        setShowForm(false);
+        setEditingProject(null);
+    };
+
+    const breadcrumbs = [{ label: "Home", href: "/" }, { label: "Projects" }];
 
     return (
         <>
-            {/* Use the crumbs prop */}
             <Breadcrumb crumbs={breadcrumbs} />
-
-            {/* Page Title and Subtitle */}
             <div className="my-6">
                 <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
                     Projects
                 </h2>
                 <p className="text-base font-medium dark:text-white">
-                    Create, view, and manage all projects in the system.
+                    Manage all your projects or create a new one.
                 </p>
             </div>
 
-            <div className="flex justify-end mb-4">
-                <button
-                    onClick={handleAdd}
-                    className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={loading}
-                >
-                    Add Project
-                </button>
-            </div>
-            {loading && <p>Loading projects...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            {!loading && !error && (
-                <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                    <ProjectsTable
-                        projects={projectsList}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        users={usersList}
-                        loading={loading}
-                    />
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <div className="flex justify-end mb-4">
+                    <button
+                        onClick={handleAddProject}
+                        className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={loading || showForm}
+                    >
+                        Add New Project
+                    </button>
                 </div>
-            )}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
-                    <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
+
+                {loading && <p className="text-center py-4">Loading projects...</p>}
+                {error && <p className="text-red-500 text-center py-4">Error: {error}</p>}
+
+                {showForm && (
+                    <div className="mb-6 p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900">
                         <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                             {editingProject ? 'Edit Project' : 'Add New Project'}
                         </h3>
                         <ProjectForm
-                            initialData={editingProject}
-                            onSave={handleSave}
-                            onCancel={() => setIsModalOpen(false)}
+                            initialData={editingProject as any}
                             users={usersList}
+                            onSave={handleSaveProject}
+                            onCancel={handleCancelForm}
                         />
                     </div>
-                </div>
-            )}
+                )}
+
+                {!loading && !error && (
+                    <ProjectsDisplay
+                        projectsList={projects}
+                        usersList={usersList}
+                        onEdit={handleEditProject}
+                        onDelete={handleDeleteProject}
+                        onSelectProject={handleSelectProject}
+                        selectedProjectId={selectedProjectId}
+                    />
+                )}
+            </div>
         </>
     );
 };

@@ -62,12 +62,12 @@ const AiModelsTable: React.FC<AiModelsTableProps> = ({ aiModels, onEdit, onDelet
                                         {model.provider ? <ProviderBadge provider={model.provider} /> : <span className="text-gray-400 dark:text-gray-500">N/A</span>}
                                     </TableCell>
                                     <TableCell className="px-5 py-4 text-left text-gray-500 dark:text-gray-400 text-sm font-mono">{model.apiIdentifier ?? 'N/A'}</TableCell>
-                                    <TableCell className="px-5 py-4 text-left text-gray-500 dark:text-gray-400 text-sm truncate max-w-xs" title={model.description}>{model.description ?? 'N/A'}</TableCell>
+                                    <TableCell className="px-5 py-4 text-left text-gray-500 dark:text-gray-400 text-sm truncate max-w-xs" title={model.description ?? undefined}>{model.description ?? 'N/A'}</TableCell>
                                     <TableCell className="px-5 py-4 text-center">
                                         <div className="flex items-center justify-center gap-2">
                                             <button
                                                 onClick={() => onEdit(model)}
-                                                className="text-brand-500 hover:text-brand-700 p-1.5 rounded-md hover:bg-brand-50 dark:hover:bg-brand-700/20 transition-colors"
+                                                className="text-brand-500 hover:text-brand-700 p-1.5 rounded-md hover:bg-brand-50 dark:hover:bg-brand-700/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
                                                 aria-label="Edit AI Model"
                                                 title="Edit"
                                             >
@@ -75,7 +75,7 @@ const AiModelsTable: React.FC<AiModelsTableProps> = ({ aiModels, onEdit, onDelet
                                             </button>
                                             <button
                                                 onClick={() => onDelete(model.id)}
-                                                className="text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-700/20 transition-colors"
+                                                className="text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-700/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
                                                 aria-label="Delete AI Model"
                                                 title="Delete"
                                             >

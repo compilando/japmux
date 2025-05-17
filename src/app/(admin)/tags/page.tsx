@@ -5,13 +5,14 @@ import {
     tagService,
     CreateTagDto,
     UpdateTagDto,
+    TagDto as ApiTagResponse,
 } from '@/services/api';
 import * as generated from '../../../../generated/japmux-api';
 import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
-import TagsTable from '@/components/tables/TagsTable';
-import TagForm from '@/components/form/TagForm';
+import TagsDisplay from '@/components/tags/TagsDisplay';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import { TagResponse } from '@/components/tags/TagCardItem';
 
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
     if (typeof error === 'object' && error !== null && 'message' in error) {
@@ -21,173 +22,227 @@ const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
 };
 
 const TagsPage: React.FC = () => {
-    const [tagsList, setTagsList] = useState<generated.TagDto[]>([]);
+    const { selectedProjectId } = useProjects();
+    const [tags, setTags] = useState<TagResponse[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingTag, setEditingTag] = useState<generated.TagDto | null>(null);
 
-    const {
-        selectedProjectId,
-        selectedProjectFull,
-        isLoadingSelectedProjectFull
-    } = useProjects();
+    // Estados para la edición inline
+    const [editingTagId, setEditingTagId] = useState<string | null>(null);
+    const [editTagName, setEditTagName] = useState('');
+    const [editTagDescription, setEditTagDescription] = useState('');
 
-    const fetchData = useCallback(async () => {
+    // Estados para la adición inline
+    const [isAdding, setIsAdding] = useState(false);
+    const [newTagName, setNewTagName] = useState('');
+    const [newTagDescription, setNewTagDescription] = useState('');
+
+    const breadcrumbs = [
+        { label: "Home", href: "/" },
+        { label: "Tags" }
+    ];
+
+    const mapApiTagToUiTag = (apiTag: ApiTagResponse): TagResponse => ({
+        id: apiTag.id,
+        name: apiTag.name,
+        description: apiTag.description,
+    });
+
+    const fetchTags = useCallback(async () => {
         if (!selectedProjectId) {
+            setTags([]);
             setLoading(false);
-            setError("Please select a project first.");
-            setTagsList([]);
             return;
         }
         setLoading(true);
         setError(null);
         try {
             const data = await tagService.findAll(selectedProjectId);
-            if (Array.isArray(data)) {
-                setTagsList(data as generated.TagDto[]);
-            } else {
-                console.error("API response for /tags is not an array:", data);
-                setError('Received invalid data format for tags.');
-                setTagsList([]);
-            }
-        } catch (err) {
-            console.error("Error fetching tags:", err);
-            setError(getApiErrorMessage(err, 'Failed to fetch tags.'));
-            setTagsList([]);
+            setTags(data.map(mapApiTagToUiTag));
+        } catch (err: any) {
+            console.error("Failed to fetch tags:", err);
+            setError(err.message || 'Failed to fetch tags.');
+            setTags([]);
         } finally {
             setLoading(false);
         }
     }, [selectedProjectId]);
 
     useEffect(() => {
-        if (selectedProjectId) {
-            fetchData();
-        } else {
-            setTagsList([]);
-            setLoading(false);
-            setError("Please select a project to manage tags.");
+        fetchTags();
+    }, [fetchTags]);
+
+    // Funciones para la edición
+    const handleStartEdit = (tag: TagResponse) => {
+        setIsAdding(false); // Cancelar adición si se inicia edición
+        setEditingTagId(tag.id);
+        setEditTagName(tag.name);
+        setEditTagDescription(tag.description || '');
+    };
+
+    const handleCancelEdit = () => {
+        setEditingTagId(null);
+        setEditTagName('');
+        setEditTagDescription('');
+    };
+
+    const handleSaveEdit = async (tagId: string) => {
+        if (!editTagName.trim()) {
+            showErrorToast('Tag name cannot be empty.');
+            return;
         }
-    }, [selectedProjectId, fetchData]);
-
-    const handleAdd = () => {
-        setEditingTag(null);
-        setIsModalOpen(true);
-    };
-
-    const handleEdit = (tag: generated.TagDto) => {
-        setEditingTag(tag);
-        setIsModalOpen(true);
-    };
-
-    const handleDelete = async (id: string) => {
         if (!selectedProjectId) {
-            showErrorToast("No project selected.");
+            showErrorToast('No project selected.');
+            return;
+        }
+
+        const updateDto: UpdateTagDto = {
+            name: editTagName,
+            description: editTagDescription,
+        };
+
+        try {
+            await tagService.update(selectedProjectId, tagId, updateDto);
+            showSuccessToast('Tag updated successfully!');
+            setEditingTagId(null);
+            fetchTags(); // Recargar tags
+        } catch (error: any) {
+            console.error("Error updating tag:", error);
+            showErrorToast(error.message || 'Failed to update tag.');
+        }
+    };
+
+    const handleDeleteTag = async (id: string) => {
+        if (!selectedProjectId) {
+            showErrorToast('No project selected for deletion.');
             return;
         }
         if (window.confirm('Are you sure you want to delete this tag?')) {
-            setLoading(true);
             try {
                 await tagService.delete(selectedProjectId, id);
-                showSuccessToast("Tag deleted successfully.");
-                fetchData();
-            } catch (err: unknown) {
-                console.error("Error deleting tag:", err);
-                showErrorToast(getApiErrorMessage(err, "Failed to delete tag."));
-            } finally {
-                setLoading(false);
+                showSuccessToast('Tag deleted successfully');
+                fetchTags();
+                if (editingTagId === id) {
+                    handleCancelEdit();
+                }
+            } catch (error: any) {
+                console.error("Error deleting tag:", error);
+                showErrorToast(error.message || 'Failed to delete tag.');
             }
         }
     };
 
-    const handleSave = async (payload: CreateTagDto | UpdateTagDto) => {
-        if (!selectedProjectId) {
-            showErrorToast("No project selected.");
+    // Funciones para añadir nuevo tag
+    const handleAddNewTag = () => {
+        handleCancelEdit(); // Cancelar edición si se inicia adición
+        setIsAdding(true);
+        setNewTagName('');
+        setNewTagDescription('');
+    };
+
+    const handleCancelNewTag = () => {
+        setIsAdding(false);
+        setNewTagName('');
+        setNewTagDescription('');
+    };
+
+    const handleSaveNewTag = async () => {
+        if (!newTagName.trim()) {
+            showErrorToast('Tag name cannot be empty.');
             return;
         }
-        setLoading(true);
+        if (!selectedProjectId) {
+            showErrorToast('Cannot add tag: No project selected.');
+            return;
+        }
+
+        const createDto: CreateTagDto = {
+            name: newTagName,
+            description: newTagDescription,
+        };
+
         try {
-            let message = "";
-            if (editingTag && editingTag.id) {
-                await tagService.update(selectedProjectId, editingTag.id, payload as UpdateTagDto);
-                message = "Tag updated successfully.";
-            } else {
-                await tagService.create(selectedProjectId, payload as CreateTagDto);
-                message = "Tag created successfully.";
-            }
-            setIsModalOpen(false);
-            showSuccessToast(message);
-            fetchData();
-        } catch (err: unknown) {
-            console.error("Error saving tag:", err);
-            showErrorToast(getApiErrorMessage(err, "Failed to save tag."));
-        } finally {
-            setLoading(false);
+            await tagService.create(selectedProjectId, createDto);
+            showSuccessToast('Tag added successfully!');
+            setIsAdding(false);
+            setNewTagName('');
+            setNewTagDescription('');
+            fetchTags(); // Recargar tags
+        } catch (error: any) {
+            console.error("Error creating tag:", error);
+            showErrorToast(error.message || 'Failed to create tag.');
         }
     };
 
-    const breadcrumbs: { label: string; href?: string }[] = [
-        { label: "Home", href: "/" },
-    ];
-    if (selectedProjectId) {
-        breadcrumbs.push({
-            label: isLoadingSelectedProjectFull ? selectedProjectId : (selectedProjectFull?.name || selectedProjectId),
-        });
-        breadcrumbs.push({ label: "Tags" });
-    } else {
-        breadcrumbs.push({ label: "Tags (Select Project)" });
+    if (!selectedProjectId) {
+        return (
+            <>
+                <Breadcrumb crumbs={breadcrumbs} />
+                <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 mt-4">
+                    <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Tags Management</h1>
+                    <p className="text-center text-gray-600 dark:text-gray-300">Please select a project to manage tags.</p>
+                </div>
+            </>
+        );
+    }
+
+    if (loading) {
+        return (
+            <>
+                <Breadcrumb crumbs={breadcrumbs} />
+                <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 mt-4">
+                    <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Tags Management</h1>
+                    <p className="text-center text-gray-600 dark:text-gray-300">Loading tags...</p>
+                </div>
+            </>
+        );
+    }
+
+    if (error) {
+        return (
+            <>
+                <Breadcrumb crumbs={breadcrumbs} />
+                <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 mt-4">
+                    <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Tags Management</h1>
+                    <p className="text-center text-red-500">Error loading tags: {error}</p>
+                </div>
+            </>
+        );
     }
 
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
-
-            {/* Page Title and Subtitle */}
             <div className="my-6">
                 <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
-                    Tags
+                    Tags Management
                 </h2>
                 <p className="text-base font-medium dark:text-white">
-                    Create, view, and manage all Tags in the system.
+                    Organize and manage your tags for the selected project.
                 </p>
             </div>
-
-            {!selectedProjectId ? (
-                <p className="text-center text-yellow-500 dark:text-yellow-400">Please select a project from the header dropdown to manage tags.</p>
-            ) : (
-                <>
-                    <div className="flex justify-end mb-4">
-                        <button onClick={handleAdd} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
-                            Add Tag
-                        </button>
-                    </div>
-                    {(loading || isLoadingSelectedProjectFull) && <p>Loading tags...</p>}
-                    {error && <p className="text-red-500">{error}</p>}
-                    {!loading && !error && !isLoadingSelectedProjectFull && (
-                        <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                            <TagsTable
-                                tags={tagsList}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                            />
-                        </div>
-                    )}
-                </>
-            )}
-            {isModalOpen && selectedProjectId && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
-                    <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
-                        <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-                            {editingTag ? 'Edit Tag' : 'Add New Tag'}
-                        </h3>
-                        <TagForm
-                            initialData={editingTag}
-                            onSave={handleSave}
-                            onCancel={() => setIsModalOpen(false)}
-                        />
-                    </div>
-                </div>
-            )}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <TagsDisplay
+                    tagsList={tags}
+                    editingTagId={editingTagId}
+                    editTagName={editTagName}
+                    editTagDescription={editTagDescription}
+                    isAdding={isAdding}
+                    newTagName={newTagName}
+                    newTagDescription={newTagDescription}
+                    onStartEdit={handleStartEdit}
+                    onCancelEdit={handleCancelEdit}
+                    onSaveEdit={handleSaveEdit}
+                    onDeleteTag={handleDeleteTag}
+                    onEditTagNameChange={setEditTagName}
+                    onEditTagDescriptionChange={setEditTagDescription}
+                    onAddNewTag={handleAddNewTag}
+                    onCancelNewTag={handleCancelNewTag}
+                    onSaveNewTag={handleSaveNewTag}
+                    onNewTagNameChange={setNewTagName}
+                    onNewTagDescriptionChange={setNewTagDescription}
+                />
+            </div>
         </>
     );
 };

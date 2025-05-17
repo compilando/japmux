@@ -71,14 +71,14 @@ const RegionsTable: React.FC<RegionsTableProps> = ({ regions, onEdit, onDelete }
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
                                                     onClick={() => onEdit(region)}
-                                                    className="text-brand-500 hover:text-brand-700 p-1.5 rounded-md hover:bg-brand-50 dark:hover:bg-brand-700/20 transition-colors"
+                                                    className="text-brand-500 hover:text-brand-700 p-1.5 rounded-md hover:bg-brand-50 dark:hover:bg-brand-700/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
                                                     aria-label="Edit Region" title="Edit"
                                                 >
                                                     <PencilIcon className="w-5 h-5" />
                                                 </button>
                                                 <button
                                                     onClick={() => onDelete(region.languageCode)}
-                                                    className="text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-700/20 transition-colors"
+                                                    className="text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-700/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
                                                     aria-label="Delete Region" title="Delete"
                                                 >
                                                     <TrashBinIcon className="w-5 h-5" />

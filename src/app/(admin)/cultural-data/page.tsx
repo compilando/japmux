@@ -5,6 +5,7 @@ import {
     culturalDataService,
     CreateCulturalDataDto,
     UpdateCulturalDataDto,
+    regionService,
 } from '@/services/api';
 import * as generated from '../../../../generated/japmux-api';
 import { useProjects } from '@/context/ProjectContext';
@@ -16,6 +17,7 @@ import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 const CulturalDataPage: React.FC = () => {
     const [culturalDataList, setCulturalDataList] = useState<generated.CulturalDataResponse[]>([]);
+    const [regionsList, setRegionsList] = useState<generated.CreateRegionDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -27,6 +29,7 @@ const CulturalDataPage: React.FC = () => {
     const fetchData = useCallback(async () => {
         if (!selectedProjectId) {
             setCulturalDataList([]);
+            setRegionsList([]);
             setError("Please select a project to view cultural data.");
             setLoading(false);
             return;
@@ -36,16 +39,25 @@ const CulturalDataPage: React.FC = () => {
         setError(null);
         console.log("Attempting to fetch cultural data for project:", selectedProjectId);
         try {
-            const data = await culturalDataService.findAll(selectedProjectId);
-            console.log(`API response for /projects/${selectedProjectId}/cultural-data received:`, data);
+            const culturalData = await culturalDataService.findAll(selectedProjectId);
+            console.log(`API response for /projects/${selectedProjectId}/cultural-data received:`, culturalData);
 
-            if (Array.isArray(data)) {
-                setCulturalDataList(data as generated.CulturalDataResponse[]);
+            if (Array.isArray(culturalData)) {
+                setCulturalDataList(culturalData as generated.CulturalDataResponse[]);
             } else {
-                console.error("API response for /cultural-data is not an array:", data);
+                console.error("API response for /cultural-data is not an array:", culturalData);
                 setError('Received invalid data format for cultural data.');
                 setCulturalDataList([]);
             }
+
+            const regions = await regionService.findAll(selectedProjectId);
+            if (Array.isArray(regions)) {
+                setRegionsList(regions as generated.CreateRegionDto[]);
+            } else {
+                console.error("API response for /regions is not an array:", regions);
+                setRegionsList([]);
+            }
+
         } catch (err) {
             console.error("Error fetching cultural data:", err);
             if (axios.isAxiosError(err)) {
@@ -53,6 +65,7 @@ const CulturalDataPage: React.FC = () => {
             }
             setError(`Failed to fetch cultural data: ${err instanceof Error ? err.message : String(err)}`);
             setCulturalDataList([]);
+            setRegionsList([]);
         } finally {
             setLoading(false);
         }
@@ -63,6 +76,7 @@ const CulturalDataPage: React.FC = () => {
             fetchData();
         } else {
             setCulturalDataList([]);
+            setRegionsList([]);
             setLoading(false);
             setError("Please select a project to manage cultural data.");
         }
@@ -140,49 +154,27 @@ const CulturalDataPage: React.FC = () => {
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Cultural Data</h1>
+                    <button
+                        onClick={handleAdd}
+                        className="bg-brand-500 hover:bg-brand-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        disabled={!selectedProjectId || isModalOpen}
+                    >
+                        Add New Cultural Data
+                    </button>
+                </div>
 
-            {/* Page Title and Subtitle */}
-            <div className="my-6">
-                <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
-                    Cultural Data
-                </h2>
-                <p className="text-base font-medium dark:text-white">
-                    Create, view, and manage all Cultural Data in the system.
-                </p>
-            </div>
-
-            {!selectedProjectId ? (
-                <p className="text-center text-yellow-500 dark:text-yellow-400">Please select a project from the header dropdown to manage cultural data.</p>
-            ) : (
-                <>
-                    <div className="flex justify-end mb-4">
-                        <button
-                            onClick={handleAdd}
-                            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
-                        >
-                            Add Cultural Data
-                        </button>
+                {error && (
+                    <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <strong className="font-bold">Error: </strong>
+                        <span className="block sm:inline">{error}</span>
                     </div>
+                )}
 
-                    {(loading || isLoadingSelectedProjectFull) && <p>Loading cultural data...</p>}
-                    {error && <p className="text-red-500">{error}</p>}
-
-                    {!loading && !error && !isLoadingSelectedProjectFull && (
-                        <div className="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                            <CulturalDataTable
-                                culturalDataList={culturalDataList}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                            />
-                        </div>
-                    )}
-                </>
-            )}
-
-            {/* Modal con Formulario - Mostrar solo si hay proyecto */}
-            {isModalOpen && selectedProjectId && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60 flex items-center justify-center">
-                    <div className="relative p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-900">
+                {isModalOpen && selectedProjectId && (
+                    <div className="mb-6 p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900">
                         <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                             {editingCulturalData ? 'Edit Cultural Data' : 'Add New Cultural Data'}
                         </h3>
@@ -192,8 +184,15 @@ const CulturalDataPage: React.FC = () => {
                             onCancel={() => setIsModalOpen(false)}
                         />
                     </div>
-                </div>
-            )}
+                )}
+
+                <CulturalDataTable
+                    culturalDataList={culturalDataList}
+                    regions={regionsList}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                />
+            </div>
         </>
     );
 };
