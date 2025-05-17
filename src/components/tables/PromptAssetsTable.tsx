@@ -26,7 +26,6 @@ interface PromptAssetsTableProps {
 
 const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, projectId, promptId, onEdit, onDelete, loading }) => {
     const [versionsCount, setVersionsCount] = useState<Record<string, number>>({});
-    const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchVersionsCount = async () => {
@@ -56,86 +55,69 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
 
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-            <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead>
-                        <tr className="bg-gray-50 dark:bg-gray-800/50">
-                            <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Key</th>
-                            <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
-                            <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                            <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {Array.isArray(promptAssets) && promptAssets.map((item) => (
-                            <tr
-                                key={item.key}
-                                className={`transition-colors duration-200 ${hoveredRow === item.key
-                                        ? 'bg-gray-50 dark:bg-gray-700/50'
-                                        : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                                    }`}
-                                onMouseEnter={() => setHoveredRow(item.key)}
-                                onMouseLeave={() => setHoveredRow(null)}
+            <div className="p-4 md:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.isArray(promptAssets) && promptAssets.map((item) => (
+                    <div
+                        key={item.key}
+                        className="bg-white dark:bg-gray-800 shadow-md dark:shadow-lg rounded-lg p-3 border border-gray-200 dark:border-gray-600 hover:shadow-lg dark:hover:shadow-xl transition-shadow duration-200 flex flex-col"
+                    >
+                        <div className="flex justify-between items-center mb-2 pb-2 border-b border-gray-200 dark:border-gray-600">
+                            <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate" title={item.key}>
+                                {item.key ?? 'N/A'}
+                            </h3>
+                            {item.key && <CopyButton textToCopy={item.key} size="sm" />}
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-x-3 gap-y-1 mb-3 flex-grow">
+                            <div>
+                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Category: </span>
+                                <span className="text-sm text-gray-700 dark:text-gray-300">{item.category || '-'}</span>
+                            </div>
+                            <div>
+                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Status: </span>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${item.enabled
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-300'
+                                    : 'bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-300'
+                                    }`}>
+                                    {item.enabled ? 'Active' : 'Inactive'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-end space-x-2 pt-2 border-t border-gray-200 dark:border-gray-600 mt-auto">
+                            <Link
+                                href={`/projects/${projectId}/prompts/${promptId}/assets/${item.key}/versions`}
+                                className="inline-flex items-center text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors duration-200 px-2.5 py-1.5 rounded-md hover:bg-green-50 dark:hover:bg-gray-700"
+                                title="Manage Versions"
                             >
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center space-x-3">
-                                        <span className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[200px]" title={item.key}>
-                                            {item.key ?? 'N/A'}
-                                        </span>
-                                        {item.key && <CopyButton textToCopy={item.key} />}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className="text-sm text-gray-600 dark:text-gray-300">
-                                        {item.category || '-'}
+                                <ClockIcon className="w-4 h-4 mr-1.5" />
+                                <span>Versions</span>
+                                {versionsCount[item.key] !== undefined && (
+                                    <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full dark:bg-green-900 dark:text-green-200">
+                                        {versionsCount[item.key]}
                                     </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${item.enabled
-                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                        }`}>
-                                        {item.enabled ? 'Active' : 'Inactive'}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right">
-                                    <div className="flex items-center justify-end space-x-3">
-                                        <Link
-                                            href={`/projects/${projectId}/prompts/${promptId}/assets/${item.key}/versions`}
-                                            className="inline-flex items-center text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors duration-200"
-                                            title="Manage Versions"
-                                        >
-                                            <ClockIcon className="w-4 h-4 mr-1.5" />
-                                            <span>Versions</span>
-                                            {versionsCount[item.key] !== undefined && (
-                                                <span className="ml-1.5 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full dark:bg-green-900 dark:text-green-200">
-                                                    {versionsCount[item.key]}
-                                                </span>
-                                            )}
-                                        </Link>
-                                        <button
-                                            onClick={() => onEdit(item)}
-                                            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
-                                            title="Edit Asset"
-                                        >
-                                            <PencilIcon className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => onDelete(item.key)}
-                                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200"
-                                            title="Delete Asset"
-                                        >
-                                            <TrashBinIcon className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                )}
+                            </Link>
+                            <button
+                                onClick={() => onEdit(item)}
+                                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200 p-2 rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
+                                title="Edit Asset"
+                            >
+                                <PencilIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => onDelete(item.key)}
+                                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200 p-2 rounded-md hover:bg-red-50 dark:hover:bg-gray-700"
+                                title="Delete Asset"
+                            >
+                                <TrashBinIcon className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                ))}
             </div>
             {(!Array.isArray(promptAssets) || promptAssets.length === 0) && (
-                <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50">
+                <div className="text-center py-12 px-4">
                     <DocumentDuplicateIcon className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
                     <p className="text-gray-500 dark:text-gray-400">No prompt assets found</p>
                 </div>

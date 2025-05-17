@@ -114,17 +114,22 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                             </span>
                                         </div>
 
-                                        {/* Vista previa del contenido con animación mejorada */}
-                                        <div className="relative">
+                                        {/* Vista previa del contenido - Restaurada a expandible/colapsable */}
+                                        <div className="relative mt-2">
                                             <button
                                                 onClick={() => toggleExpand(item.id)}
                                                 className="w-full text-left group/prompt"
+                                                aria-expanded={isExpanded}
+                                                aria-controls={`prompt-text-${item.id}`}
                                             >
                                                 <div className="flex items-center justify-between">
-                                                    <p className={`text-sm text-gray-600 dark:text-gray-300 ${!isExpanded ? 'line-clamp-3' : ''} transition-all duration-300 group-hover/prompt:text-gray-900 dark:group-hover/prompt:text-gray-100`}>
+                                                    <p
+                                                        id={`prompt-text-${item.id}`}
+                                                        className={`text-sm text-gray-700 dark:text-gray-300 ${!isExpanded ? 'line-clamp-3' : ''} whitespace-pre-line transition-all duration-300 group-hover/prompt:text-gray-900 dark:group-hover/prompt:text-gray-100`}
+                                                    >
                                                         {item.promptText}
                                                     </p>
-                                                    <span className="ml-2 text-gray-400 group-hover/prompt:text-brand-500 dark:group-hover/prompt:text-brand-400 transition-colors duration-200">
+                                                    <span className="ml-2 text-gray-400 group-hover/prompt:text-brand-500 dark:group-hover/prompt:text-brand-400 transition-colors duration-200 flex-shrink-0">
                                                         {isExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
                                                     </span>
                                                 </div>
