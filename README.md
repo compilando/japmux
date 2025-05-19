@@ -1,127 +1,130 @@
-# japm.app
+# JAPM (Just Another Prompt Manager)
 
-This project is an Prompt Manager built with Next.js and Tailwind CSS, designed to interact with a backend API to manage various application data.
+A comprehensive web application designed to streamline the process of prompt engineering, management, and utilization. JAPM serves as a centralized platform for creating, organizing, versioning, and deploying prompts effectively for interaction with various AI models.
 
-## Overview
+## 🌟 Features
 
-The app provides a user interface to perform CRUD (Create, Read, Update, Delete) operations on different entities managed by the backend API. It is built on:
+### Core Functionality
+- **Project Management**: Create and manage projects to organize prompts
+- **Prompt Management**: Create, view, update, and delete prompts within projects
+- **Version Control**: Create and manage different versions of prompts with semantic versioning
+- **Asset Management**: Define and manage reusable text pieces and variables
+- **Translation Support**: Manage translations for prompts and assets in multiple languages
+- **Prompt Wizard**: AI-assisted tool for creating structured prompts from natural language descriptions
 
-- Next.js 15+
-- React 19+
-- TypeScript
-- Tailwind CSS V4
-- Axios (for API calls)
+### Advanced Features
+- **AI Model Integration**: Configure and manage AI models for prompt generation
+- **Marketplace**: Publish and share prompts (coming soon)
+- **Collaboration**: Work within projects with multiple users
+- **Responsive Design**: Works across all devices and screen sizes
 
-## Implemented Features
-
--   **Region Management:**
-    -   View existing regions.
-    -   Create new regions (specifying `languageCode`, `name`, and optional fields).
-    -   Edit existing regions (except `languageCode`).
-    -   Delete regions.
--   **Cultural Data Management:**
-    -   View existing cultural data.
-    -   Create new cultural data (specifying `id` (slug), `regionId` selected from a list, and optional fields).
-    -   Edit existing cultural data (except `id` and `regionId`).
-    -   Delete cultural data.
--   **Backend API Connection:** Centralized configuration of the API URL using environment variables.
--   **User Interface:** Includes reusable components like tables, modals, and forms, with dark mode support.
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-
--   Node.js 18.x or later (Node.js 20.x or later recommended)
--   An instance of the backend API running (see API section).
--   `pnpm` (or `npm`/`yarn`) as the package manager.
+- Node.js 18+ 
+- npm or yarn
+- A modern web browser
 
 ### Installation
 
-1.  Clone the repository:
-    ```bash
-    git clone <your-repository-url>
-    cd <directory-name>
-    ```
+1. Clone the repository:
+```bash
+git clone https://github.com/your-username/japm.git
+cd japm
+```
 
-2.  Install dependencies:
-    ```bash
-    pnpm install
-    # or
-    # npm install
-    # or
-    # yarn install
-    ```
-    *(You might need the `--legacy-peer-deps` flag if you encounter peer dependency errors)*
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
 
-### Environment Configuration
+3. Set up environment variables:
+```bash
+cp .env.example .env.local
+```
+Edit `.env.local` with your configuration.
 
-This project needs to connect to your backend API. You must specify your API URL in an environment file.
+4. Start the development server:
+```bash
+npm run dev
+# or
+yarn dev
+```
 
-1.  Create a file named `.env.local` in the project root.
-2.  Add the following line, replacing the URL with your local API's URL:
-    ```env
-    NEXT_PUBLIC_API_URL=http://localhost:3001
-    ```
-    *(The `NEXT_PUBLIC_` prefix is important to expose the variable to the browser).* 
+The application will be available at `http://localhost:3000`.
 
-### Running the Development Server
+## 🛠️ Technology Stack
 
-Once dependencies are installed and `.env.local` is configured:
+### Frontend
+- **Framework**: Next.js 15 (React 19)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **State Management**: React Context API
+- **API Client**: Axios with OpenAPI-generated client
+- **UI Components**: Custom components with Heroicons
+
+### Backend (API)
+- RESTful API with OpenAPI specification
+- JWT Authentication
+- Prisma ORM for database operations
+
+## 📚 Documentation
+
+- [Product Requirements](docs/product_requirement_docs.md)
+- [Technical Documentation](docs/technical.md)
+- [Architecture Overview](docs/architecture.md)
+
+## 🔧 Development
+
+### Available Scripts
 
 ```bash
-pnpm dev
-# or
-# npm run dev
-# or
-# yarn dev
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm run start
+
+# Run linter
+npm run lint
+
+# Generate API client
+npm run generate:api
 ```
 
-This will start the development server, typically at `http://localhost:3000` (unless another port is specified with `-p`). Remember that any changes to `.env.local` require restarting the development server.
-
-## Available Scripts
-
-In the `package.json` file, you'll find several scripts:
-
--   `pnpm dev`: Starts the application in development mode.
--   `pnpm build`: Compiles the application for production.
--   `pnpm start`: Starts a production server (after `build`).
--   `pnpm lint`: Runs the linter (ESLint) to check the code.
-
-## API Connection
-
-The service for interacting with the API is located in `src/services/api.ts`. It uses `axios` and reads the base URL from the `NEXT_PUBLIC_API_URL` variable defined in your `.env.local` file.
-
-Specific functions for each endpoint (e.g., `getRegions`, `createCulturalData`) are defined in this file.
-
-## Folder Structure (Simplified)
+### Project Structure
 
 ```
-.
-├── public/           # Static files
-├── service/          # Contains openapi.json
-├── src/
-│   ├── app/          # Routes and Layouts (App Router)
-│   │   ├── (admin)/  # Route group for the main layout
-│   │   │   ├── layout.tsx
-│   │   │   ├── regions/page.tsx
-│   │   │   └── cultural-data/page.tsx
-│   │   └── ...
-│   ├── components/   # Reusable UI components
-│   │   ├── common/
-│   │   ├── form/
-│   │   ├── tables/
-│   │   └── ui/       # (Potential base UI components)
-│   ├── context/      # React Context (e.g., SidebarContext)
-│   ├── icons/        # SVG icon components
-│   ├── layout/       # Main Layout components (Sidebar, Header)
-│   └── services/     # API communication logic (api.ts)
-├── .env.local      # Environment variables (Do not commit to Git!)
-├── next.config.ts    # Next.js configuration
-├── package.json
-├── tsconfig.json
-└── README.md
+src/
+├── app/                    # Next.js app router pages
+├── components/            # React components
+│   ├── common/           # Shared components
+│   ├── form/            # Form components
+│   └── tables/          # Table components
+├── services/             # API services
+├── context/             # React context providers
+└── utils/               # Utility functions
 ```
 
-## License
+## 🤝 Contributing
 
-Distributed under the MIT License. See `LICENSE` for more information.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team for the amazing framework
+- Tailwind CSS for the utility-first CSS framework
+- All contributors who have helped shape this project
