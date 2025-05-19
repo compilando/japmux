@@ -1,9 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CreatePromptVersionDto, UpdatePromptVersionDto, promptAssetService, promptVersionService } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
-import { DocumentDuplicateIcon, LanguageIcon } from '@heroicons/react/24/outline';
+import {
+    DocumentDuplicateIcon,
+    LanguageIcon,
+} from '@heroicons/react/24/outline';
 import CopyButton from '../common/CopyButton';
+import PromptEditor from '../common/PromptEditor';
 
 // Interface local para los datos del formulario, incluyendo versionTag
 export interface PromptVersionFormData extends CreatePromptVersionDto {
@@ -56,10 +60,7 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
     const [versionTag, setVersionTag] = useState('v1.0.0');
     const [changeMessage, setChangeMessage] = useState('');
     const [assets, setAssets] = useState<PromptAssetData[]>([]);
-    const [showAssetMenu, setShowAssetMenu] = useState(false);
-    const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
     const [previousVersion, setPreviousVersion] = useState<{ versionTag: string; promptText: string } | null>(null);
-    const editorRef = useRef<HTMLTextAreaElement>(null);
 
     const isEditing = !!initialData;
 
@@ -77,19 +78,13 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
     }, [initialData, latestVersionTag]);
 
     useEffect(() => {
-        if (editorRef.current) {
-            editorRef.current.value = promptText;
-        }
-    }, [promptText]);
-
-    useEffect(() => {
         const fetchAssets = async () => {
             if (!projectId || !promptId) return;
             try {
                 const assetsData = await promptAssetService.findAll(projectId, promptId);
                 setAssets(assetsData);
             } catch (error) {
-                console.error('Error al cargar los assets:', error);
+                console.error('Error loading assets:', error);
             }
         };
 
@@ -108,7 +103,7 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                     });
                 }
             } catch (error) {
-                console.error('Error al cargar la versión anterior:', error);
+                console.error('Error loading previous version:', error);
             }
         };
 
@@ -116,35 +111,6 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
             fetchPreviousVersion();
         }
     }, [projectId, promptId, latestVersionTag, isEditing]);
-
-    const handleContextMenu = (e: React.MouseEvent) => {
-        e.preventDefault();
-        setMenuPosition({ x: e.clientX, y: e.clientY });
-        setShowAssetMenu(true);
-    };
-
-    const handleAssetSelect = (asset: PromptAssetData) => {
-        if (editorRef.current) {
-            const textarea = editorRef.current;
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const text = textarea.value;
-            const variable = `{{${asset.key}}}`;
-
-            const newText = text.substring(0, start) + variable + text.substring(end);
-            setPromptText(newText);
-
-            setTimeout(() => {
-                textarea.focus();
-                textarea.setSelectionRange(start + variable.length, start + variable.length);
-            }, 0);
-        }
-        setShowAssetMenu(false);
-    };
-
-    const handleEditorChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setPromptText(e.target.value);
-    };
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -174,7 +140,7 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Columna izquierda: Versión anterior */}
+                {/* Left Column: Previous Version */}
                 <div className="space-y-4">
                     {!isEditing && previousVersion && (
                         <>
@@ -210,7 +176,7 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                     )}
                 </div>
 
-                {/* Columna derecha: Formulario */}
+                {/* Right Column: Form */}
                 <div className="space-y-4">
                     <div>
                         <label htmlFor="versionTagInput" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Version Tag</label>
@@ -231,18 +197,15 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                         <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             {isEditing ? 'Prompt Text (Editing)' : 'New Prompt Text'}
                         </label>
-                        <textarea
-                            ref={editorRef}
+
+                        <PromptEditor
                             value={promptText}
-                            onChange={handleEditorChange}
-                            onContextMenu={handleContextMenu}
-                            className="mt-1 block w-full min-h-[240px] px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono"
-                            style={{ resize: 'vertical' }}
+                            onChange={setPromptText}
                             placeholder={isEditing ? "Edit the prompt text..." : "Enter the new prompt text here..."}
+                            rows={26}
+                            assets={assets}
+                            showHistory={true}
                         />
-                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Right-click in the editor to open the asset (variables) menu. Select a variable to insert it into the text.
-                        </p>
                     </div>
 
                     <div>
@@ -258,30 +221,6 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                     </div>
                 </div>
             </div>
-
-            {showAssetMenu && (
-                <div
-                    className="fixed z-50 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700"
-                    style={{
-                        left: menuPosition.x,
-                        top: menuPosition.y,
-                        maxHeight: '300px',
-                        overflowY: 'auto'
-                    }}
-                >
-                    <div className="py-1">
-                        {assets.map((asset) => (
-                            <button
-                                key={asset.key}
-                                onClick={() => handleAssetSelect(asset)}
-                                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                            >
-                                {asset.name} ({asset.key})
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
 
             <div className="flex justify-end space-x-3 pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
                 <button

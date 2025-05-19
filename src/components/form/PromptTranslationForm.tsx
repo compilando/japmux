@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { CreatePromptTranslationDto, UpdatePromptTranslationDto, regionService, rawExecutionService, aiModelService } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import { CreateRegionDto } from '@/services/generated/api';
-import { LanguageIcon, DocumentDuplicateIcon, ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
+import {
+    LanguageIcon,
+    DocumentDuplicateIcon,
+    ChevronDoubleRightIcon,
+} from '@heroicons/react/24/outline';
+import PromptEditor from '../common/PromptEditor';
 
 interface PromptTranslationFormProps {
     initialData: CreatePromptTranslationDto | null;
@@ -28,33 +33,29 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
     originalVersionLanguageCode
 }) => {
     const [formData, setFormData] = useState<CreatePromptTranslationDto>({
-        versionId: versionId || '',
         languageCode: initialData?.languageCode || '',
-        promptText: initialData?.promptText || ''
+        promptText: initialData?.promptText || '',
+        versionId: versionId || ''
     });
-
+    const [loadingRegions, setLoadingRegions] = useState<boolean>(false);
+    const [isTranslating, setIsTranslating] = useState<boolean>(false);
+    const [defaultAiModelId, setDefaultAiModelId] = useState<string | null>(null);
+    const [regionList, setRegionList] = useState<CreateRegionDto[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { selectedProjectId } = useProjects();
 
-    // States from PromptAssetTranslationForm for translation feature
-    const [regionList, setRegionList] = useState<CreateRegionDto[]>([]);
-    const [loadingRegions, setLoadingRegions] = useState<boolean>(true); // To disable translate button while loading regions/model
-    const [isTranslating, setIsTranslating] = useState<boolean>(false);
-    const [defaultAiModelId, setDefaultAiModelId] = useState<string | null>(null);
-
     useEffect(() => {
         // Populate form data when initialData or isEditing changes
         setFormData({
-            versionId: versionId || '',
-            languageCode: initialData?.languageCode || (isEditing ? '' : (availableLanguages[0]?.code || '')),
-            promptText: initialData?.promptText || ''
+            languageCode: initialData?.languageCode || '',
+            promptText: initialData?.promptText || '',
+            versionId: versionId || ''
         });
         if (!isEditing && availableLanguages && availableLanguages.length > 0 && !initialData?.languageCode) {
-            // Pre-select first available language if not editing and no language is set
-            // setFormData(prev => ({ ...prev, languageCode: availableLanguages[0].code }));
+            setFormData(prev => ({ ...prev, languageCode: availableLanguages[0].code }));
         }
-    }, [initialData, versionId, isEditing, availableLanguages]);
+    }, [initialData, isEditing, availableLanguages, versionId]);
 
     useEffect(() => {
         const fetchRegionsAndModel = async () => {
@@ -96,14 +97,10 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
         setError(null);
 
         try {
-            // For existing translations (isEditing=true), the payload for update might not need versionId or languageCode
-            // as they are part of the URL / path params for the API endpoint.
-            // The onSave prop will receive the formData which should be structured correctly by the parent.
-            // If initialData exists, it means we are editing.
             if (isEditing && initialData) {
                 await onSave({ promptText: formData.promptText } as UpdatePromptTranslationDto);
             } else {
-                await onSave(formData); // This is CreatePromptTranslationDto
+                await onSave(formData);
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred while saving the translation.');
@@ -116,8 +113,8 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
         setFormData(prev => ({ ...prev, languageCode: e.target.value, promptText: '' }));
     };
 
-    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setFormData(prev => ({ ...prev, promptText: e.target.value }));
+    const handleTextChange = (newText: string) => {
+        setFormData(prev => ({ ...prev, promptText: newText }));
     };
 
     const handleTranslate = async () => {
@@ -141,8 +138,8 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
         setIsTranslating(true);
         try {
             const executionDto = {
-                userText: versionText, // Original text to translate
-                systemPromptName: 'prompt-translator', // System prompt for translation
+                userText: versionText,
+                systemPromptName: 'prompt-translator',
                 aiModelId: defaultAiModelId,
                 variables: {
                     text: versionText,
@@ -164,7 +161,6 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
 
                     const parsedResponse = JSON.parse(cleanResponse);
                     if (parsedResponse && typeof parsedResponse === 'object' && 'translatedText' in parsedResponse) {
-                        // Restore line breaks more simply for prompt text
                         const translatedText = String(parsedResponse.translatedText).replace(/\\n/g, '\n');
                         setFormData(prev => ({ ...prev, promptText: translatedText }));
                     } else {
@@ -184,7 +180,6 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
         }
     };
 
-
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
@@ -202,7 +197,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
                 )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                    {/* Columna Izquierda: Texto Original */}
+                    {/* Left Column: Original Text */}
                     <div className="space-y-4">
                         <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900/50">
                             <h4 className="text-md font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center flex-wrap gap-x-2 gap-y-1">
@@ -230,13 +225,13 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
                         </div>
                     </div>
 
-                    {/* Columna Derecha: Campos del Formulario de Traducción */}
+                    {/* Right Column: Translation Form Fields */}
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="language" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Language for Translation
                             </label>
-                            <div className="flex items-center gap-2"> {/* Contenedor para select y botón */}
+                            <div className="flex items-center gap-2">
                                 <select
                                     id="language"
                                     value={formData.languageCode}
@@ -254,7 +249,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
                                 </select>
                                 <button
                                     type="button"
-                                    onClick={handleTranslate} // Reutilizar la misma función handleTranslate
+                                    onClick={handleTranslate}
                                     disabled={isTranslating || loadingRegions || !formData.languageCode || !defaultAiModelId || isEditing}
                                     title={!defaultAiModelId ? "AI Model for translation not configured" : (isEditing ? "Auto-translate available for new translations only" : "Auto-translate using AI")}
                                     className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex items-center shrink-0"
@@ -267,7 +262,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
                                     ) : (
                                         <ChevronDoubleRightIcon className="w-5 h-5" />
                                     )}
-                                    <span className="ml-1 hidden sm:inline">{isTranslating ? 'Translating...' : 'Translate'}</span> {/* Ocultar texto en móviles si es necesario */}
+                                    <span className="ml-1 hidden sm:inline">{isTranslating ? 'Translating...' : 'Translate'}</span>
                                 </button>
                             </div>
                         </div>
@@ -276,20 +271,20 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
                             <label htmlFor="translation" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Translated Text
                             </label>
-                            <textarea
-                                id="translation"
+
+                            <PromptEditor
                                 value={formData.promptText}
                                 onChange={handleTextChange}
-                                rows={18}
-                                className="w-full px-4 py-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-mono text-sm"
                                 placeholder="Enter translated text here or use auto-translate..."
-                                required
+                                rows={18}
+                                assets={[]}
+                                showHistory={true}
                             />
                         </div>
                     </div>
                 </div>
 
-                {/* Botones de Guardar/Cancelar */}
+                {/* Save/Cancel Buttons */}
                 <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
                     <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
                         Cancel

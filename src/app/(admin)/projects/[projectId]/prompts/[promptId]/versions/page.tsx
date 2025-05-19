@@ -412,7 +412,7 @@ const PromptVersionsPage: React.FC = () => {
             {formMode && (
                 <div className="mb-6 p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 shadow-md">
                     <h3 className="text-xl font-semibold leading-7 text-gray-900 dark:text-white mb-6">
-                        {formMode === 'edit' ? `Editando Versión: ${editingItem?.versionTag}` : 'Crear Nueva Versión del Prompt'}
+                        {formMode === 'edit' ? `Editing Version: ${editingItem?.versionTag}` : 'Crear Nueva Versión del Prompt'}
                     </h3>
                     <PromptVersionForm
                         initialData={editingItem ? {

@@ -9,14 +9,30 @@ import {
     rawExecutionService,
     ExecuteRawDto,
     aiModelService,
+    promptAssetService,
 } from '@/services/api';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
+import { useProjects } from '@/context/ProjectContext';
+import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
+import {
+    DocumentDuplicateIcon,
+    LanguageIcon,
+} from '@heroicons/react/24/outline';
+import PromptEditor from '../common/PromptEditor';
 
 interface PromptFormProps {
-    initialData: PromptDto | CreatePromptDto | null;
-    onSave: (payload: CreatePromptDto | UpdatePromptDto) => void;
+    initialData?: CreatePromptDto | UpdatePromptDto;
+    onSave: (data: CreatePromptDto | UpdatePromptDto) => Promise<void>;
     onCancel: () => void;
-    projectId: string;
+    projectId?: string;
+}
+
+interface FormData {
+    name: string;
+    description: string;
+    promptText: string;
+    projectId?: string;
+    tenantId: string;
 }
 
 interface TagOption {
@@ -25,12 +41,20 @@ interface TagOption {
 }
 
 const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, projectId }) => {
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
+    const [formData, setFormData] = useState<FormData>({
+        name: '',
+        description: '',
+        promptText: '',
+        projectId: projectId || '',
+        tenantId: ''
+    });
+    const [assets, setAssets] = useState<PromptAssetData[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const { selectedProjectId } = useProjects();
     const [availableTags, setAvailableTags] = useState<TagDto[]>([]);
     const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
     const [isLoadingTags, setIsLoadingTags] = useState(false);
-    const [promptTextBody, setPromptTextBody] = useState('');
     const [isImproving, setIsImproving] = useState(false);
     const [defaultAiModelId, setDefaultAiModelId] = useState<string>('');
 
@@ -75,28 +99,27 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
     useEffect(() => {
         console.log("[PromptForm Effect InitForm] Running. initialData:", initialData, "isEditing:", isEditing);
         if (initialData) {
-            setName(initialData.name || '');
-            setDescription(initialData.description || '');
-
-            if (!isEditing && 'promptText' in initialData && initialData.promptText) {
-                setPromptTextBody((initialData as CreatePromptDto).promptText || '');
-            } else {
-                setPromptTextBody('');
-            }
+            const data = initialData as any;
+            setFormData({
+                name: data.name || '',
+                description: data.description || '',
+                promptText: data.promptText || '',
+                projectId: projectId || '',
+                tenantId: data.tenantId || ''
+            });
 
             let initialTagIds: string[] = [];
             if (isEditing) {
-                const currentPromptData = initialData as any;
-                console.log("[PromptForm Effect InitForm - EDITING] currentPromptData.tags:", currentPromptData.tags);
-                if (currentPromptData.tags && Array.isArray(currentPromptData.tags)) {
-                    initialTagIds = (currentPromptData.tags as TagDto[]).map(tag => tag.id).filter(id => id !== undefined) as string[];
+                console.log("[PromptForm Effect InitForm - EDITING] currentPromptData.tags:", data.tags);
+                if (data.tags && Array.isArray(data.tags)) {
+                    initialTagIds = (data.tags as TagDto[]).map(tag => tag.id).filter(id => id !== undefined) as string[];
                     console.log("[PromptForm Effect InitForm - EDITING] Extracted initialTagIds from PromptDto:", initialTagIds);
                 } else {
-                    console.log("[PromptForm Effect InitForm - EDITING] 'tags' not found or not an array in initialData (PromptDto).", currentPromptData);
+                    console.log("[PromptForm Effect InitForm - EDITING] 'tags' not found or not an array in initialData (PromptDto).", data);
                 }
             } else {
-                if ('tags' in initialData && initialData.tags instanceof Set && initialData.tags.size > 0 && availableTags.length > 0) {
-                    const initialTagNames = Array.from(initialData.tags as Set<string>);
+                if ('tags' in data && data.tags instanceof Set && data.tags.size > 0 && availableTags.length > 0) {
+                    const initialTagNames = Array.from(data.tags as Set<string>);
                     initialTagIds = initialTagNames.map(tagName => availableTags.find(t => t.name === tagName)?.id)
                         .filter(id => id !== undefined) as string[];
                     console.log("[PromptForm Effect InitForm - CREATION] Mapped tag names to IDs:", initialTagIds);
@@ -106,12 +129,30 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
 
         } else {
             console.log("[PromptForm Effect InitForm] No initialData. Resetting form fields for creation.");
-            setName('');
-            setDescription('');
+            setFormData({
+                name: '',
+                description: '',
+                promptText: '',
+                projectId: projectId || '',
+                tenantId: ''
+            });
             setSelectedTagIds([]);
-            setPromptTextBody('');
         }
     }, [initialData, availableTags, isEditing]);
+
+    useEffect(() => {
+        const fetchAssets = async () => {
+            if (!projectId) return;
+            try {
+                const assetsData = await promptAssetService.findAll(projectId, (initialData as any)?.id || '');
+                setAssets(assetsData);
+            } catch (error) {
+                console.error('Error loading assets:', error);
+            }
+        };
+
+        fetchAssets();
+    }, [projectId, initialData]);
 
     const handleTagSelectChange = (selectedOptions: MultiValue<TagOption>) => {
         const newIds = selectedOptions ? selectedOptions.map(option => option.value) : [];
@@ -136,80 +177,50 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         return selected;
     }, [tagOptions, selectedTagIds]);
 
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formData.name || !formData.promptText) {
+            setError('Please fill in all required fields.');
+            return;
+        }
 
-        if (isEditing && initialData && 'id' in initialData) {
-            const updatePayload: UpdatePromptDto = {};
-            let hasChanges = false;
+        setIsLoading(true);
+        setError(null);
 
-            if (description !== (initialData.description || '')) {
-                updatePayload.description = description;
-                hasChanges = true;
-            }
-
-            const originalPromptData = initialData as any;
-            console.log("[PromptForm handleSubmit Edit] initialData for originalTagIds:", originalPromptData);
-            const originalTagIds = (originalPromptData.tags && Array.isArray(originalPromptData.tags))
-                ? new Set((originalPromptData.tags as TagDto[]).map(t => t.id))
-                : new Set<string>();
-
-            const currentSelectedTagIdsSet = new Set(selectedTagIds);
-
-            console.log("[PromptForm handleSubmit Edit] originalTagIds Set:", originalTagIds);
-            console.log("[PromptForm handleSubmit Edit] currentSelectedTagIdsSet:", currentSelectedTagIdsSet);
-
-            if (originalTagIds.size !== currentSelectedTagIdsSet.size ||
-                !Array.from(originalTagIds).every(id => currentSelectedTagIdsSet.has(id))) {
-                updatePayload.tagIds = selectedTagIds;
-                hasChanges = true;
-                console.log("[PromptForm handleSubmit Edit] Tag changes DETECTED.");
+        try {
+            if (initialData) {
+                const updateData = {
+                    description: formData.description,
+                    promptText: formData.promptText
+                } as UpdatePromptDto;
+                await onSave(updateData);
             } else {
-                console.log("[PromptForm handleSubmit Edit] Tag changes NOT detected.");
+                const createData: CreatePromptDto = {
+                    name: formData.name,
+                    description: formData.description,
+                    promptText: formData.promptText,
+                    tenantId: formData.tenantId || ''
+                };
+                await onSave(createData);
             }
-
-            console.log("[PromptForm handleSubmit Edit] hasChanges before onSave:", hasChanges);
-            if (hasChanges) {
-                console.log("[PromptForm handleSubmit Edit] Sending update payload:", updatePayload);
-                onSave(updatePayload);
-            } else {
-                showSuccessToast("No changes detected.");
-            }
-
-        } else {
-            if (!name.trim()) {
-                showErrorToast("Prompt name cannot be empty.");
-                return;
-            }
-            if (!promptTextBody.trim()) {
-                showErrorToast("Prompt text cannot be empty.");
-                return;
-            }
-
-            const tagNamesForCreationSet = new Set<string>();
-            selectedTagIds.forEach(id => {
-                const foundTag = availableTags.find(t => t.id === id);
-                if (foundTag) {
-                    tagNamesForCreationSet.add(foundTag.name);
-                }
-            });
-
-            const tagsArrayForPayload = tagNamesForCreationSet.size > 0 ? Array.from(tagNamesForCreationSet) : undefined;
-
-            const createPayload: CreatePromptDto = {
-                name: name.trim(),
-                description: description.trim() || undefined,
-                tags: tagsArrayForPayload,
-                promptText: promptTextBody.trim(),
-            } as CreatePromptDto;
-
-            console.log("[PromptForm handleSubmit Create] Sending create payload:", createPayload);
-            onSave(createPayload);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred while saving the prompt.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handlePromptTextChange = (newText: string) => {
+        setFormData(prev => ({ ...prev, promptText: newText }));
+    };
+
     const handleImprovePrompt = async () => {
-        if (!promptTextBody.trim()) {
+        if (!formData.promptText.trim()) {
             showErrorToast("Please write a prompt to improve.");
             return;
         }
@@ -222,18 +233,18 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         setIsImproving(true);
         try {
             const payload: ExecuteRawDto & { variables?: Record<string, string> } = {
-                userText: promptTextBody,
+                userText: formData.promptText,
                 systemPromptName: "prompt-improver",
                 aiModelId: defaultAiModelId,
                 variables: {
-                    text: promptTextBody
+                    text: formData.promptText
                 }
             };
 
             const response = await rawExecutionService.executeRaw(payload);
 
             if (response && typeof response === 'object' && 'response' in response && response.response) {
-                setPromptTextBody(response.response as string);
+                setFormData(prev => ({ ...prev, promptText: response.response as string }));
                 showSuccessToast("Prompt improved successfully.");
             } else {
                 console.error("Invalid response format:", response);
@@ -248,133 +259,84 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
     };
 
     return (
-        <>
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                    <label htmlFor="promptName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Prompt Name / ID
-                    </label>
-                    <input
-                        type="text"
-                        name="promptName"
-                        id="promptName"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-                        disabled={isEditing}
-                        required={!isEditing}
-                    />
-                    {isEditing && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Prompt Name (ID) cannot be changed after creation.</p>}
+        <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
                 </div>
+            )}
 
-                <div>
-                    <label htmlFor="promptDescription" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Description
-                    </label>
-                    <textarea
-                        name="promptDescription"
-                        id="promptDescription"
-                        rows={2}
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-                    />
-                </div>
-
-                {!isEditing && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Left Column: Basic Information */}
+                <div className="space-y-4">
                     <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <label htmlFor="promptTextBody" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Prompt Text
-                            </label>
-                            <button
-                                type="button"
-                                onClick={handleImprovePrompt}
-                                disabled={isImproving || !promptTextBody.trim()}
-                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/20 rounded-md hover:bg-brand-100 dark:hover:bg-brand-500/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isImproving ? (
-                                    <>
-                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-brand-600 dark:text-brand-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Improving...
-                                    </>
-                                ) : (
-                                    <>
-                                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                        </svg>
-                                        Help me write
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                        <textarea
-                            name="promptTextBody"
-                            id="promptTextBody"
-                            rows={10}
-                            value={promptTextBody}
-                            onChange={(e) => setPromptTextBody(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Name *
+                        </label>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleInputChange}
                             required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                            placeholder="Enter prompt name"
                         />
-                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                            This text will be used to create the first version of this prompt.
-                        </p>
                     </div>
-                )}
 
-                <div>
-                    <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Tags
-                    </label>
-                    <Select
-                        isMulti
-                        name="tags"
-                        options={tagOptions}
-                        isLoading={isLoadingTags}
-                        value={currentSelectedTagOptions}
-                        onChange={handleTagSelectChange}
-                        className="mt-1 react-select-container"
-                        classNamePrefix="react-select"
-                    />
+                    <div>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Description
+                        </label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            value={formData.description}
+                            onChange={handleInputChange}
+                            rows={4}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                            placeholder="Enter prompt description"
+                        />
+                    </div>
                 </div>
 
-                {!isEditing && (
-                    <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-md border border-blue-200 dark:border-blue-800">
-                        <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">About Prompt Creation</h3>
-                        <p className="text-sm text-blue-700 dark:text-blue-300">
-                            When you create a prompt, two things will happen:
-                        </p>
-                        <ul className="mt-2 text-sm text-blue-700 dark:text-blue-300 list-disc list-inside space-y-1">
-                            <li>A new prompt will be created as a parent container</li>
-                            <li>A first version will be automatically created with the <strong>Prompt text</strong> you provided</li>
-                        </ul>
-                        <p className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                            You can later add more versions and translations to this prompt.
-                        </p>
-                    </div>
-                )}
+                {/* Right Column: Prompt Text */}
+                <div className="space-y-4">
+                    <div>
+                        <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Prompt Text *
+                        </label>
 
-                <div className="flex justify-end space-x-3 pt-4">
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        {isEditing ? 'Save Changes' : 'Create Prompt'}
-                    </button>
+                        <PromptEditor
+                            value={formData.promptText}
+                            onChange={handlePromptTextChange}
+                            placeholder="Enter the prompt text here..."
+                            rows={26}
+                            assets={assets}
+                            showHistory={true}
+                        />
+                    </div>
                 </div>
-            </form>
-        </>
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                >
+                    {isLoading ? 'Saving...' : (initialData ? 'Update Prompt' : 'Create Prompt')}
+                </button>
+            </div>
+        </form>
     );
 };
 
