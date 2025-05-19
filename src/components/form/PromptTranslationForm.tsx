@@ -35,7 +35,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
     const [formData, setFormData] = useState<CreatePromptTranslationDto>({
         languageCode: initialData?.languageCode || '',
         promptText: initialData?.promptText || '',
-        versionId: versionId || ''
+        versionId: versionId || initialData?.versionId || ''
     });
     const [loadingRegions, setLoadingRegions] = useState<boolean>(false);
     const [isTranslating, setIsTranslating] = useState<boolean>(false);
@@ -50,7 +50,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
         setFormData({
             languageCode: initialData?.languageCode || '',
             promptText: initialData?.promptText || '',
-            versionId: versionId || ''
+            versionId: versionId || initialData?.versionId || ''
         });
         if (!isEditing && availableLanguages && availableLanguages.length > 0 && !initialData?.languageCode) {
             setFormData(prev => ({ ...prev, languageCode: availableLanguages[0].code }));
@@ -93,6 +93,11 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
             return;
         }
 
+        if (!versionId && !isEditing) {
+            setError('Version ID is required for new translations.');
+            return;
+        }
+
         setIsLoading(true);
         setError(null);
 
@@ -100,7 +105,12 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
             if (isEditing && initialData) {
                 await onSave({ promptText: formData.promptText } as UpdatePromptTranslationDto);
             } else {
-                await onSave(formData);
+                // Aseguramos que el versionId esté presente para nuevas traducciones
+                const payload = {
+                    ...formData,
+                    versionId: versionId || initialData?.versionId
+                };
+                await onSave(payload);
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred while saving the translation.');

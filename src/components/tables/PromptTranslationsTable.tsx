@@ -7,14 +7,46 @@ interface PromptTranslationsTableProps {
     onEdit: (item: CreatePromptTranslationDto) => void;
     onDelete: (item: CreatePromptTranslationDto) => void;
     projectId: string;
+    loading?: boolean;
+    error?: string | null;
 }
 
 const PromptTranslationsTable: React.FC<PromptTranslationsTableProps> = ({
     promptTranslations,
     onEdit,
     onDelete,
-    projectId
+    projectId,
+    loading = false,
+    error = null
 }) => {
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            </div>
+        );
+    }
+
+    if (!Array.isArray(promptTranslations) || promptTranslations.length === 0) {
+        return (
+            <div className="text-center py-8">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-900/30 mb-4">
+                    <LanguageIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                </div>
+                <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Translations Found</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">There are no translations available for this version.</p>
+            </div>
+        );
+    }
+
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

@@ -126,6 +126,13 @@ const PromptTranslationsPage: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
+            const version = await promptVersionService.findOne(projectId, promptId, versionTag);
+            if (!version) {
+                throw new Error("Version not found");
+            }
+
+            setCurrentVersionId(version.id);
+
             const data = await promptTranslationService.findAll(projectId, promptId, versionTag);
             if (Array.isArray(data)) {
                 setItemsList(data);
@@ -200,11 +207,9 @@ const PromptTranslationsPage: React.FC = () => {
     };
 
     const handleSave = async (payload: CreatePromptTranslationDto | UpdatePromptTranslationDto) => {
-        if (!projectId || !promptId || !versionTag) return;
-
-        let finalPayload: CreatePromptTranslationDto | UpdatePromptTranslationDto = payload;
-        if (!editingItem && currentVersionId && !(payload as CreatePromptTranslationDto).versionId) {
-            finalPayload = { ...payload, versionId: currentVersionId } as CreatePromptTranslationDto;
+        if (!projectId || !promptId || !versionTag || !currentVersionId) {
+            setError("Missing required data for saving translation.");
+            return;
         }
 
         setLoading(true);
@@ -214,8 +219,13 @@ const PromptTranslationsPage: React.FC = () => {
                 await promptTranslationService.update(projectId, promptId, versionTag, editingItem.languageCode, payload as UpdatePromptTranslationDto);
                 message = `Translation for ${editingItem.languageCode} updated.`;
             } else {
-                await promptTranslationService.create(projectId, promptId, versionTag, finalPayload as CreatePromptTranslationDto);
-                message = `Translation for ${(finalPayload as CreatePromptTranslationDto).languageCode} created.`;
+                const createPayload = {
+                    ...payload,
+                    versionId: currentVersionId
+                } as CreatePromptTranslationDto;
+
+                await promptTranslationService.create(projectId, promptId, versionTag, createPayload);
+                message = `Translation for ${(createPayload as CreatePromptTranslationDto).languageCode} created.`;
             }
             setShowTranslationForm(false);
             setEditingItem(null);
@@ -393,6 +403,8 @@ const PromptTranslationsPage: React.FC = () => {
                                             onEdit={handleEdit}
                                             onDelete={handleDelete}
                                             projectId={projectId}
+                                            loading={loading}
+                                            error={error}
                                         />
                                     </div>
                                 )}
