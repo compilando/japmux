@@ -103,14 +103,14 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
                                 className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200 p-2 rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
                                 title="Edit Asset"
                             >
-                                <PencilIcon className="w-4 h-4" />
+                                <PencilIcon />
                             </button>
                             <button
                                 onClick={() => onDelete(item.key)}
                                 className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200 p-2 rounded-md hover:bg-red-50 dark:hover:bg-gray-700"
                                 title="Delete Asset"
                             >
-                                <TrashBinIcon className="w-4 h-4" />
+                                <TrashBinIcon />
                             </button>
                         </div>
                     </div>

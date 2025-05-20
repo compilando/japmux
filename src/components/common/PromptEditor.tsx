@@ -17,6 +17,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
 import { Tooltip } from 'react-tooltip';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 /**
  * Props para el componente PromptEditor
@@ -31,6 +32,7 @@ import { Tooltip } from 'react-tooltip';
  * @property {string} [id] - ID único para el editor
  * @property {string} [aria-label] - Etiqueta ARIA para accesibilidad
  * @property {string} [aria-describedby] - ID del elemento que describe el editor
+ * @property {React.ReactNode} [extraToolbarButtons] - Botones adicionales para la barra de herramientas
  */
 interface PromptEditorProps {
     value: string;
@@ -43,6 +45,7 @@ interface PromptEditorProps {
     id?: string;
     'aria-label'?: string;
     'aria-describedby'?: string;
+    extraToolbarButtons?: React.ReactNode;
 }
 
 interface HistoryEntry {
@@ -96,7 +99,8 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
     showHistory = true,
     id,
     'aria-label': ariaLabel,
-    'aria-describedby': ariaDescribedby
+    'aria-describedby': ariaDescribedby,
+    extraToolbarButtons
 }) => {
     const editorRef = useRef<HTMLTextAreaElement>(null);
     const [showAssetMenu, setShowAssetMenu] = useState(false);
@@ -177,23 +181,44 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
         if (editorRef.current) {
             const textarea = editorRef.current;
             const text = textarea.value;
+
+            // Mejorar el formato del texto
             const formattedText = text
-                .replace(/\n{3,}/g, '\n\n')
+                // Eliminar espacios múltiples
                 .replace(/\s+/g, ' ')
+                // Eliminar espacios al inicio y final de cada línea
+                .split('\n')
+                .map(line => line.trim())
+                .join('\n')
+                // Eliminar líneas vacías múltiples
+                .replace(/\n{3,}/g, '\n\n')
+                // Eliminar espacios al inicio y final del texto
                 .trim();
+
             onChange(formattedText);
+
+            // Mostrar mensaje de éxito
+            showSuccessToast('Text formatted successfully');
         }
     }, [onChange]);
 
     const handleClearText = useCallback(() => {
-        if (window.confirm('¿Estás seguro de que quieres borrar el texto?')) {
+        if (window.confirm('Are you sure you want to clear the text?')) {
             onChange('');
         }
     }, [onChange]);
 
     const handleCopyText = useCallback(() => {
         if (editorRef.current) {
-            navigator.clipboard.writeText(editorRef.current.value);
+            const text = editorRef.current.value;
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    showSuccessToast('Text copied to clipboard');
+                })
+                .catch((error) => {
+                    console.error('Error copying text:', error);
+                    showErrorToast('Failed to copy text');
+                });
         }
     }, []);
 
@@ -205,11 +230,35 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
                 const start = textarea.selectionStart;
                 const end = textarea.selectionEnd;
                 const currentText = textarea.value;
-                const newText = currentText.substring(0, start) + text + currentText.substring(end);
+
+                // Formatear el texto pegado
+                const formattedPastedText = text
+                    // Eliminar espacios múltiples
+                    .replace(/\s+/g, ' ')
+                    // Eliminar espacios al inicio y final de cada línea
+                    .split('\n')
+                    .map(line => line.trim())
+                    .join('\n')
+                    // Eliminar líneas vacías múltiples
+                    .replace(/\n{3,}/g, '\n\n')
+                    // Eliminar espacios al inicio y final del texto
+                    .trim();
+
+                const newText = currentText.substring(0, start) + formattedPastedText + currentText.substring(end);
                 onChange(newText);
+
+                // Mostrar mensaje de éxito
+                showSuccessToast('Text pasted and formatted successfully');
+
+                // Mantener el foco en el editor y posicionar el cursor después del texto pegado
+                setTimeout(() => {
+                    textarea.focus();
+                    textarea.setSelectionRange(start + formattedPastedText.length, start + formattedPastedText.length);
+                }, 0);
             }
         } catch (err) {
-            console.error('Error al pegar texto:', err);
+            console.error('Error pasting text:', err);
+            showErrorToast('Failed to paste text');
         }
     }, [onChange]);
 
@@ -289,136 +338,136 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
         <div
             className="space-y-2"
             role="region"
-            aria-label={ariaLabel || "Editor de prompt"}
+            aria-label={ariaLabel || "Editor of prompt"}
             aria-describedby={ariaDescribedby}
         >
             {/* Barra de herramientas mejorada */}
             <div
                 className="flex flex-wrap gap-2 p-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-t-lg shadow-sm"
                 role="toolbar"
-                aria-label="Herramientas del editor"
+                aria-label="Editor tools"
             >
-                {/* Grupo de Plantillas Básicas */}
-                <div className="flex gap-2" role="group" aria-label="Plantillas básicas">
+                {/* Basic Templates Group */}
+                <div className="flex gap-2" role="group" aria-label="Basic templates">
                     <ToolbarButton
                         onClick={() => insertTemplate('You are a helpful AI assistant.')}
                         icon={DocumentTextIcon}
-                        label="Plantilla Básica"
+                        label="Basic Template"
                         disabled={readOnly}
-                        tooltip="Insertar plantilla básica de asistente"
-                        aria-label="Insertar plantilla básica de asistente"
+                        tooltip="Insert basic assistant template"
+                        aria-label="Insert basic assistant template"
                         aria-describedby="template-basic-desc"
                     />
                     <ToolbarButton
                         onClick={() => insertTemplate('```\n\n```')}
                         icon={CodeBracketIcon}
-                        label="Bloque de Código"
+                        label="Code Block"
                         disabled={readOnly}
-                        tooltip="Insertar bloque de código"
-                        aria-label="Insertar bloque de código"
+                        tooltip="Insert code block"
+                        aria-label="Insert code block"
                         aria-describedby="template-code-desc"
                     />
                     <ToolbarButton
                         onClick={() => insertTemplate('- \n- \n- ')}
                         icon={ListBulletIcon}
-                        label="Lista"
+                        label="List"
                         disabled={readOnly}
-                        tooltip="Insertar lista"
-                        aria-label="Insertar lista"
+                        tooltip="Insert list"
+                        aria-label="Insert list"
                         aria-describedby="template-list-desc"
                     />
                 </div>
 
-                {/* Grupo de Elementos Markdown */}
-                <div className="flex gap-2" role="group" aria-label="Elementos markdown">
+                {/* Markdown Elements Group */}
+                <div className="flex gap-2" role="group" aria-label="Markdown elements">
                     <ToolbarButton
                         onClick={() => insertTemplate('| Header 1 | Header 2 | Header 3 |\n|----------|----------|----------|\n| Cell 1   | Cell 2   | Cell 3   |')}
                         icon={TableCellsIcon}
-                        label="Tabla"
+                        label="Table"
                         disabled={readOnly}
-                        tooltip="Insertar tabla markdown"
-                        aria-label="Insertar tabla markdown"
+                        tooltip="Insert markdown table"
+                        aria-label="Insert markdown table"
                         aria-describedby="template-table-desc"
                     />
                     <ToolbarButton
-                        onClick={() => insertTemplate('[texto del enlace](https://ejemplo.com)')}
+                        onClick={() => insertTemplate('[link text](https://example.com)')}
                         icon={LinkIcon}
-                        label="Enlace"
+                        label="Link"
                         disabled={readOnly}
-                        tooltip="Insertar enlace markdown"
-                        aria-label="Insertar enlace markdown"
+                        tooltip="Insert markdown link"
+                        aria-label="Insert markdown link"
                         aria-describedby="template-link-desc"
                     />
                     <ToolbarButton
-                        onClick={() => insertTemplate('![texto alternativo](https://ejemplo.com/imagen.jpg)')}
+                        onClick={() => insertTemplate('![alt text](https://example.com/image.jpg)')}
                         icon={PhotoIcon}
-                        label="Imagen"
+                        label="Image"
                         disabled={readOnly}
-                        tooltip="Insertar imagen markdown"
-                        aria-label="Insertar imagen markdown"
+                        tooltip="Insert markdown image"
+                        aria-label="Insert markdown image"
                         aria-describedby="template-image-desc"
                     />
                 </div>
 
-                {/* Grupo de Utilidades */}
-                <div className="flex gap-2" role="group" aria-label="Utilidades">
+                {/* Utilities Group */}
+                <div className="flex gap-2" role="group" aria-label="Utilities">
                     <ToolbarButton
                         onClick={handleFormatText}
                         icon={ArrowPathIcon}
-                        label="Formatear"
+                        label="Format"
                         disabled={readOnly}
-                        tooltip="Formatear texto"
-                        aria-label="Formatear texto"
+                        tooltip="Format text"
+                        aria-label="Format text"
                         aria-describedby="format-desc"
                     />
                     <ToolbarButton
                         onClick={handleCopyText}
                         icon={ClipboardIcon}
-                        label="Copiar Todo"
-                        tooltip="Copiar todo el texto"
-                        aria-label="Copiar todo el texto"
+                        label="Copy All"
+                        tooltip="Copy all text"
+                        aria-label="Copy all text"
                         aria-describedby="copy-desc"
                     />
                     <ToolbarButton
                         onClick={handlePasteFormatted}
                         icon={ClipboardDocumentIcon}
-                        label="Pegar"
+                        label="Paste"
                         disabled={readOnly}
-                        tooltip="Pegar texto formateado"
-                        aria-label="Pegar texto formateado"
+                        tooltip="Paste formatted text"
+                        aria-label="Paste formatted text"
                         aria-describedby="paste-desc"
                     />
                     <ToolbarButton
                         onClick={handleClearText}
                         icon={ClipboardDocumentIcon}
-                        label="Limpiar"
+                        label="Clear"
                         disabled={readOnly}
-                        tooltip="Limpiar todo el texto"
-                        aria-label="Limpiar todo el texto"
+                        tooltip="Clear all text"
+                        aria-label="Clear all text"
                         aria-describedby="clear-desc"
                         className="text-red-600 dark:text-red-400"
                     />
                 </div>
 
-                {/* Controles de Historial */}
+                {/* History Controls */}
                 {showHistory && (
-                    <div className="flex gap-2" role="group" aria-label="Controles de historial">
+                    <div className="flex gap-2" role="group" aria-label="History controls">
                         <ToolbarButton
                             onClick={handleUndo}
                             icon={ArrowUturnLeftIcon}
-                            label="Deshacer"
+                            label="Undo"
                             disabled={readOnly || currentHistoryIndex <= 0}
-                            tooltip="Deshacer último cambio (Ctrl+Z)"
-                            aria-label="Deshacer último cambio"
+                            tooltip="Undo last change (Ctrl+Z)"
+                            aria-label="Undo last change"
                             aria-describedby="undo-desc"
                         />
                         <ToolbarButton
                             onClick={handleRedo}
                             icon={ArrowUturnRightIcon}
-                            label="Rehacer"
+                            label="Redo"
                             disabled={readOnly || currentHistoryIndex >= history.length - 1}
-                            tooltip="Rehacer último cambio (Ctrl+Y)"
-                            aria-label="Rehacer último cambio"
+                            tooltip="Redo last change (Ctrl+Y)"
+                            aria-label="Redo last change"
                             aria-describedby="redo-desc"
                         />
                     </div>
@@ -426,30 +475,24 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
 
                 <div className="flex-grow"></div>
 
-                {/* Botón de Variables */}
-                <ToolbarButton
-                    onClick={() => setShowAssetMenu(true)}
-                    icon={VariableIcon}
-                    label="Insertar Variable"
-                    disabled={readOnly}
-                    tooltip="Insertar variable (clic derecho en el editor)"
-                    aria-label="Insertar variable"
-                    aria-describedby="variable-desc"
-                    className="text-indigo-600 dark:text-indigo-400"
-                />
+                {/* Insert Reference Buttons */}
+                <div className="flex gap-2" role="group" aria-label="Insert references">
+                    {extraToolbarButtons}
+                </div>
 
-                {/* Botón de ayuda mejorado */}
-                <button
-                    type="button"
-                    className="flex items-center gap-1 px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600"
-                    data-tooltip-id="editor-help"
-                    data-tooltip-content="Atajos de teclado y ayuda"
-                    aria-label="Mostrar ayuda y atajos de teclado"
-                    aria-describedby="help-desc"
-                >
-                    <InformationCircleIcon className="w-4 h-4" aria-hidden="true" />
-                    <span>Ayuda</span>
-                </button>
+                {/* Variables Button */}
+                <div className="flex gap-2" role="group" aria-label="Variables">
+                    <ToolbarButton
+                        onClick={() => setShowAssetMenu(true)}
+                        icon={VariableIcon}
+                        label="Insert Variable"
+                        disabled={readOnly || memoizedAssets.length === 0}
+                        tooltip="Insert variable (right-click in editor)"
+                        aria-label="Insert variable"
+                        aria-describedby="variable-desc"
+                        className="text-indigo-600 dark:text-indigo-400"
+                    />
+                </div>
             </div>
 
             {/* Editor de texto mejorado */}
@@ -464,7 +507,7 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
                     readOnly={readOnly}
                     className="w-full px-4 py-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-mono text-sm shadow-sm transition-shadow duration-200 hover:shadow-md"
                     placeholder={placeholder}
-                    aria-label={ariaLabel || "Editor de prompt"}
+                    aria-label={ariaLabel || "Editor of prompt"}
                     aria-describedby={ariaDescribedby}
                     aria-multiline="true"
                     aria-readonly={readOnly}
@@ -476,19 +519,19 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
                         role="status"
                         aria-live="polite"
                     >
-                        Guardando...
+                        Guarding...
                     </div>
                 )}
             </div>
 
             {/* Panel de ayuda mejorado */}
             <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Atajos de teclado</h3>
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Keyboard Shortcuts</h3>
                 <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                    <li>• <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">Z</kbd> - Deshacer</li>
-                    <li>• <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">Y</kbd> - Rehacer</li>
-                    <li>• <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">B</kbd> - Negrita</li>
-                    <li>• <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">I</kbd> - Cursiva</li>
+                    <li>• <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">Z</kbd> - Undo</li>
+                    <li>• <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">Y</kbd> - Redo</li>
+                    <li>• <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">B</kbd> - Bold</li>
+                    <li>• <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">I</kbd> - Italic</li>
                 </ul>
             </div>
 
@@ -503,7 +546,7 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
                         overflowY: 'auto'
                     }}
                     role="menu"
-                    aria-label="Menú de variables"
+                    aria-label="Variables menu"
                 >
                     <div className="py-1">
                         {memoizedAssets.map((asset) => (
@@ -512,7 +555,7 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
                                 onClick={() => handleAssetSelect(asset)}
                                 className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                 role="menuitem"
-                                aria-label={`Insertar variable ${asset.name}`}
+                                aria-label={`Insert variable ${asset.name}`}
                             >
                                 {asset.name} ({asset.key})
                             </button>
@@ -529,19 +572,19 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
 
             {/* Descripciones ocultas para lectores de pantalla */}
             <div className="sr-only">
-                <p id="template-basic-desc">Inserta una plantilla básica de asistente de IA</p>
-                <p id="template-code-desc">Inserta un bloque de código con formato markdown</p>
-                <p id="template-list-desc">Inserta una lista con viñetas</p>
-                <p id="template-table-desc">Inserta una tabla en formato markdown</p>
-                <p id="template-link-desc">Inserta un enlace en formato markdown</p>
-                <p id="template-image-desc">Inserta una imagen en formato markdown</p>
+                <p id="template-basic-desc">Insert a basic AI assistant template</p>
+                <p id="template-code-desc">Insert a markdown formatted code block</p>
+                <p id="template-list-desc">Insert a bullet list</p>
+                <p id="template-table-desc">Insert a markdown table</p>
+                <p id="template-link-desc">Insert a markdown link</p>
+                <p id="template-image-desc">Insert a markdown image</p>
                 <p id="format-desc">Formatea el texto eliminando espacios extra y saltos de línea innecesarios</p>
                 <p id="copy-desc">Copia todo el texto al portapapeles</p>
                 <p id="paste-desc">Pega texto formateado desde el portapapeles</p>
                 <p id="clear-desc">Borra todo el texto del editor</p>
-                <p id="undo-desc">Deshace el último cambio realizado (Ctrl+Z)</p>
-                <p id="redo-desc">Rehace el último cambio deshecho (Ctrl+Y)</p>
-                <p id="variable-desc">Inserta una variable del proyecto en el texto</p>
+                <p id="undo-desc">Undo last change (Ctrl+Z)</p>
+                <p id="redo-desc">Redo last change (Ctrl+Y)</p>
+                <p id="variable-desc">Insert a project variable in the text</p>
                 <p id="help-desc">Muestra los atajos de teclado disponibles</p>
             </div>
         </div>

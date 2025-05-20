@@ -137,9 +137,9 @@ const PromptVersionsPage: React.FC = () => {
     }, [projectId, promptId]);
 
     const fetchData = useCallback(async () => {
-        // --- INICIO: Limpiar error SIEMPRE al intentar cargar datos ---
+        // --- START: Clear error ALWAYS when trying to load data ---
         setError(null);
-        // --- FIN: Limpiar error ---
+        // --- END: Clear error ---
 
         if (!projectId || !promptId) {
             setError("Missing Project or Prompt ID in URL.");
@@ -313,11 +313,11 @@ const PromptVersionsPage: React.FC = () => {
                         : item
                 )
             );
-            showSuccessToast(`Versión ${versionTag} retirada del marketplace.`);
+            showSuccessToast(`Version ${versionTag} removed from marketplace.`);
             fetchData(); // Opcional: re-fetch
         } catch (err) {
             console.error(`Error unpublishing version ${versionTag}:`, err);
-            showErrorToast(getApiErrorMessage(err, `Error al retirar ${versionTag} del marketplace.`));
+            showErrorToast(getApiErrorMessage(err, `Error unpublishing ${versionTag} from marketplace.`));
         } finally {
             setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: false }));
         }
@@ -332,7 +332,7 @@ const PromptVersionsPage: React.FC = () => {
 
             if (editingItem) {
                 await promptVersionService.update(projectId, promptId, editingItem.versionTag, payload as UpdatePromptVersionDto);
-                showSuccessToast('Versión actualizada correctamente');
+                showSuccessToast('Version updated successfully');
             } else {
                 const rawPayload = {
                     promptText: (payload as CreatePromptVersionDto).promptText,
@@ -352,13 +352,13 @@ const PromptVersionsPage: React.FC = () => {
                 // Castear a 'any' temporalmente para diagnóstico, 
                 // para permitir que versionTag se envíe en el payload a pesar de la definición de CreatePromptVersionDto.
                 await promptVersionService.create(projectId, promptId, rawPayload as any);
-                showSuccessToast('Nueva versión creada correctamente');
+                showSuccessToast('New version created successfully');
             }
             setFormMode(null);
             fetchData();
         } catch (error: any) {
             console.error('Error saving version:', error);
-            const apiErrorMessage = error.response?.data?.message || error.message || 'Error al guardar la versión';
+            const apiErrorMessage = error.response?.data?.message || error.message || 'Error saving version';
             showErrorToast(apiErrorMessage);
         }
     };
@@ -412,7 +412,7 @@ const PromptVersionsPage: React.FC = () => {
             {formMode && (
                 <div className="mb-6 p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 shadow-md">
                     <h3 className="text-xl font-semibold leading-7 text-gray-900 dark:text-white mb-6">
-                        {formMode === 'edit' ? `Editing Version: ${editingItem?.versionTag}` : 'Crear Nueva Versión del Prompt'}
+                        {formMode === 'edit' ? `Editing Version: ${editingItem?.versionTag}` : 'Create New Version of Prompt'}
                     </h3>
                     <PromptVersionForm
                         initialData={editingItem ? {
@@ -435,28 +435,28 @@ const PromptVersionsPage: React.FC = () => {
                     <button
                         onClick={handleCompareVersions}
                         disabled={selectedVersionsForDiff.length !== 2}
-                        title={selectedVersionsForDiff.length !== 2 ? "Selecciona 2 versiones de la tabla para comparar" : "Comparar versiones seleccionadas"}
+                        title={selectedVersionsForDiff.length !== 2 ? "Select 2 versions from the table to compare" : "Compare selected versions"}
                         className="px-4 py-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h4.5M12 3v1.5M12 9v1.5m0 3v1.5m0 3v1.5M12 21v-1.5m6-10.5h-1.5m0 0V5.25m0 3V9m0 3v1.5m0 3V18M3 10.5h1.5m0 0V9m0 3v1.5m0 3V18" />
                         </svg>
-                        <span>Comparar ({selectedVersionsForDiff.length}/2)</span>
+                        <span>Compare ({selectedVersionsForDiff.length}/2)</span>
                     </button>
                     {selectedVersionsForDiff.length > 0 && (
                         <button
                             onClick={() => setSelectedVersionsForDiff([])}
-                            title="Limpiar selección"
+                            title="Clear selection"
                             className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                         >
-                            Limpiar Selección
+                            Clear Selection
                         </button>
                     )}
                 </div>
             )}
 
             {/* Tabla de versiones */}
-            {loading && <p className="text-center py-10 text-gray-500 dark:text-gray-400">Cargando versiones...</p>}
+            {loading && <p className="text-center py-10 text-gray-500 dark:text-gray-400">Loading versions...</p>}
             {error && (
                 <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-700/30 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg my-4 shadow" role="alert">
                     <strong className="font-bold">Error:</strong>
@@ -468,8 +468,8 @@ const PromptVersionsPage: React.FC = () => {
                     <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                     </svg>
-                    <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No hay versiones</h3>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Empieza creando una nueva versión para este prompt.</p>
+                    <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No versions</h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Start creating a new version for this prompt.</p>
                 </div>
             )}
             {!loading && !error && itemsList.length > 0 && (
@@ -499,7 +499,7 @@ const PromptVersionsPage: React.FC = () => {
                         onClose={() => {
                             setShowDiffModal(false);
                             setDiffResult(null);
-                            // setSelectedVersionsForDiff([]); // Opcional: limpiar selección
+                            // setSelectedVersionsForDiff([]); // Optional: clear selection
                         }}
                         diffResult={diffResult}
                         versionInfo1={{
