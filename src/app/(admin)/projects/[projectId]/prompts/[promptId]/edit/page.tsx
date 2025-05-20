@@ -8,11 +8,13 @@ import {
     projectService,
     CreateProjectDto,
     PromptDto, // Para tipar el prompt cargado
-    CreatePromptDto as CreatePromptDtoType // Alias para evitar conflicto con el DTO del proyecto
+    CreatePromptDto as CreatePromptDtoType, // Alias para evitar conflicto con el DTO del proyecto
+    CreatePromptDto as GeneratedCreatePromptDto,
 } from '@/services/api';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptForm from '@/components/form/PromptForm';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import * as generated from '@/services/generated/api';
 
 // Helper para extraer mensajes de error de forma segura
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
@@ -70,18 +72,21 @@ const EditPromptPage: React.FC = () => {
         }
     }, [projectId, promptId]);
 
-    const handleSavePrompt = async (payloadFromForm: UpdatePromptDto) => {
-        console.log("[EditPromptPage handleSavePrompt] Received payload from PromptForm:", payloadFromForm);
+    const handleCreatePrompt = async (promptPayload: Omit<GeneratedCreatePromptDto, 'tenantId'>) => {
+        // Esta función no debería ser llamada en la página de edición
+        showErrorToast("Cannot create a prompt in the edit page.");
+    };
 
+    const handleUpdatePrompt = async (promptPayload: UpdatePromptDto) => {
         if (!projectId || !promptId) {
-            showErrorToast("Project ID or Prompt ID is missing for update.");
+            showErrorToast("Project ID or Prompt ID is missing.");
             return;
         }
 
         setIsSaving(true);
         try {
-            await promptService.update(projectId, promptId, payloadFromForm);
-            showSuccessToast(`Prompt "${promptData?.name || promptId}" updated successfully.`);
+            await promptService.update(projectId, promptId, promptPayload);
+            showSuccessToast(`Prompt updated successfully.`);
             router.push(`/projects/${projectId}/prompts`);
         } catch (err: unknown) {
             console.error("Error updating prompt:", err);
@@ -125,19 +130,20 @@ const EditPromptPage: React.FC = () => {
             <Breadcrumb crumbs={breadcrumbs} />
             <div className="my-6">
                 <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
-                    Edit Prompt: <span className="text-indigo-600 dark:text-indigo-400">{promptData?.name || promptId}</span> for <span className="text-indigo-600 dark:text-indigo-400">{project?.name || projectId}</span>
+                    Edit Prompt: <span className="text-indigo-600 dark:text-indigo-400">{promptData?.name || promptId}</span>
                 </h2>
             </div>
             <div className="bg-white dark:bg-gray-800 shadow-md rounded p-6">
                 {promptData ? (
                     <PromptForm
-                        initialData={promptData} // Pasamos promptData directamente
+                        initialData={promptData}
                         projectId={projectId}
-                        onSave={handleSavePrompt}
+                        isEditing={true}
+                        onCreate={handleCreatePrompt}
+                        onUpdate={handleUpdatePrompt}
                         onCancel={handleCancel}
                     />
                 ) : (
-                    // Este caso se maneja arriba, pero por seguridad lo dejamos.
                     <p>Prompt data could not be loaded or project details are missing.</p>
                 )}
             </div>

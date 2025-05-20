@@ -19,20 +19,22 @@ import {
     LanguageIcon,
 } from '@heroicons/react/24/outline';
 import PromptEditor from '../common/PromptEditor';
+import * as generated from '@/services/generated/api';
 
 interface PromptFormProps {
     initialData?: CreatePromptDto | UpdatePromptDto;
-    onSave: (data: CreatePromptDto | UpdatePromptDto) => Promise<void>;
+    projectId: string;
+    isEditing?: boolean;
+    onCreate: (promptPayload: Omit<CreatePromptDto, 'tenantId'>) => Promise<void>;
+    onUpdate: (promptPayload: UpdatePromptDto) => Promise<void>;
     onCancel: () => void;
-    projectId?: string;
 }
 
 interface FormData {
     name: string;
     description: string;
     promptText: string;
-    projectId?: string;
-    tenantId: string;
+    projectId: string;
 }
 
 interface TagOption {
@@ -40,13 +42,12 @@ interface TagOption {
     label: string;
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, projectId }) => {
+const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate, onCancel, projectId, isEditing = false }) => {
     const [formData, setFormData] = useState<FormData>({
         name: '',
         description: '',
         promptText: '',
-        projectId: projectId || '',
-        tenantId: ''
+        projectId: projectId
     });
     const [assets, setAssets] = useState<PromptAssetData[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -57,8 +58,6 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
     const [isLoadingTags, setIsLoadingTags] = useState(false);
     const [isImproving, setIsImproving] = useState(false);
     const [defaultAiModelId, setDefaultAiModelId] = useState<string>('');
-
-    const isEditing = useMemo(() => !!(initialData && 'id' in initialData && initialData.id), [initialData]);
 
     useEffect(() => {
         console.log("[PromptForm Effect FetchTags] Fetching tags for projectId:", projectId);
@@ -100,51 +99,38 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         console.log("[PromptForm Effect InitForm] Running. initialData:", initialData, "isEditing:", isEditing);
         if (initialData) {
             const data = initialData as any;
-            setFormData({
+            setFormData(prev => ({
+                ...prev,
                 name: data.name || '',
                 description: data.description || '',
                 promptText: data.promptText || '',
-                projectId: projectId || '',
-                tenantId: data.tenantId || ''
-            });
+                projectId: projectId
+            }));
 
             let initialTagIds: string[] = [];
             if (isEditing) {
                 console.log("[PromptForm Effect InitForm - EDITING] currentPromptData.tags:", data.tags);
                 if (data.tags && Array.isArray(data.tags)) {
-                    initialTagIds = (data.tags as TagDto[]).map(tag => tag.id).filter(id => id !== undefined) as string[];
-                    console.log("[PromptForm Effect InitForm - EDITING] Extracted initialTagIds from PromptDto:", initialTagIds);
-                } else {
-                    console.log("[PromptForm Effect InitForm - EDITING] 'tags' not found or not an array in initialData (PromptDto).", data);
-                }
-            } else {
-                if ('tags' in data && data.tags instanceof Set && data.tags.size > 0 && availableTags.length > 0) {
-                    const initialTagNames = Array.from(data.tags as Set<string>);
-                    initialTagIds = initialTagNames.map(tagName => availableTags.find(t => t.name === tagName)?.id)
-                        .filter(id => id !== undefined) as string[];
-                    console.log("[PromptForm Effect InitForm - CREATION] Mapped tag names to IDs:", initialTagIds);
+                    initialTagIds = data.tags.map((tag: any) => tag.id);
                 }
             }
             setSelectedTagIds(initialTagIds);
-
         } else {
-            console.log("[PromptForm Effect InitForm] No initialData. Resetting form fields for creation.");
             setFormData({
                 name: '',
                 description: '',
                 promptText: '',
-                projectId: projectId || '',
-                tenantId: ''
+                projectId: projectId
             });
             setSelectedTagIds([]);
         }
-    }, [initialData, availableTags, isEditing]);
+    }, [initialData, availableTags, isEditing, projectId]);
 
     useEffect(() => {
         const fetchAssets = async () => {
-            if (!projectId) return;
+            if (!projectId || !isEditing || !(initialData as any)?.id) return;
             try {
-                const assetsData = await promptAssetService.findAll(projectId, (initialData as any)?.id || '');
+                const assetsData = await promptAssetService.findAll(projectId, (initialData as any).id);
                 setAssets(assetsData);
             } catch (error) {
                 console.error('Error loading assets:', error);
@@ -152,7 +138,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
         };
 
         fetchAssets();
-    }, [projectId, initialData]);
+    }, [projectId, initialData, isEditing]);
 
     const handleTagSelectChange = (selectedOptions: MultiValue<TagOption>) => {
         const newIds = selectedOptions ? selectedOptions.map(option => option.value) : [];
@@ -179,34 +165,36 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.name || !formData.promptText) {
-            setError('Please fill in all required fields.');
+        setError('');
+
+        if (!formData.name.trim()) {
+            setError('El nombre es requerido');
             return;
         }
 
-        setIsLoading(true);
-        setError(null);
+        if (!isEditing && !formData.promptText.trim()) {
+            setError('El texto del prompt es requerido');
+            return;
+        }
 
         try {
-            if (initialData) {
-                const updateData = {
-                    description: formData.description,
-                    promptText: formData.promptText
-                } as UpdatePromptDto;
-                await onSave(updateData);
+            if (isEditing) {
+                const updateData: UpdatePromptDto = {
+                    description: formData.description
+                };
+                await onUpdate(updateData);
             } else {
-                const createData: CreatePromptDto = {
+                const createData: Omit<CreatePromptDto, 'tenantId'> = {
                     name: formData.name,
                     description: formData.description,
                     promptText: formData.promptText,
-                    tenantId: formData.tenantId || ''
+                    tags: new Set(selectedTagIds)
                 };
-                await onSave(createData);
+                await onCreate(createData);
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred while saving the prompt.');
-        } finally {
-            setIsLoading(false);
+            console.error('Error saving prompt:', err);
+            setError('Error al guardar el prompt');
         }
     };
 
@@ -303,20 +291,37 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
 
                 {/* Right Column: Prompt Text */}
                 <div className="space-y-4">
-                    <div>
-                        <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Prompt Text *
-                        </label>
-
-                        <PromptEditor
-                            value={formData.promptText}
-                            onChange={handlePromptTextChange}
-                            placeholder="Enter the prompt text here..."
-                            rows={26}
-                            assets={assets}
-                            showHistory={true}
-                        />
-                    </div>
+                    {!isEditing && (
+                        <div>
+                            <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Prompt Text
+                            </label>
+                            <div className="mt-1">
+                                <PromptEditor
+                                    value={formData.promptText}
+                                    onChange={handlePromptTextChange}
+                                    placeholder="Enter your prompt text here..."
+                                />
+                            </div>
+                            <div className="mt-2 flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={handleImprovePrompt}
+                                    disabled={isImproving || !formData.promptText.trim()}
+                                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                                >
+                                    {isImproving ? 'Improving...' : 'Improve Prompt'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    {isEditing && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                El texto del prompt no se puede editar una vez creado.
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -333,7 +338,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onSave, onCancel, 
                     disabled={isLoading}
                     className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                 >
-                    {isLoading ? 'Saving...' : (initialData ? 'Update Prompt' : 'Create Prompt')}
+                    {isLoading ? 'Saving...' : (isEditing ? 'Update Prompt' : 'Create Prompt')}
                 </button>
             </div>
         </form>

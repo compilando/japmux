@@ -365,30 +365,28 @@ export const tagService = {
 
 // Servicio de Prompts (Actualizado para usar generado donde aplique)
 export const promptService = {
-    create: async (projectId: string, payload: generated.CreatePromptDto): Promise<generated.PromptDto> => {
-        const response = await promptsGeneratedApi.promptControllerCreate(projectId, payload);
-        return response.data;
+    create: async (projectId: string, payload: Omit<generated.CreatePromptDto, 'tenantId'>): Promise<generated.PromptDto> => {
+        try {
+            const response = await promptsGeneratedApi.promptControllerCreate(projectId, payload as generated.CreatePromptDto);
+            return response.data;
+        } catch (error) {
+            console.error('Error creating prompt:', error);
+            throw error;
+        }
     },
     findAll: async (projectId: string): Promise<generated.PromptDto[]> => {
         const response = await promptsGeneratedApi.promptControllerFindAllByProject(projectId);
         return response.data;
     },
-    // findOne ahora usa promptId según la API generada
     findOne: async (projectId: string, promptId: string): Promise<generated.PromptDto> => {
         const response = await promptsGeneratedApi.promptControllerFindOne(projectId, promptId);
         return response.data;
     },
-    // update espera el CUID del prompt (promptInternalId) como segundo argumento, 
-    // que se pasa como el parámetro 'promptName' a la API generada.
     update: async (projectId: string, promptInternalId: string, payload: generated.UpdatePromptDto): Promise<generated.PromptDto> => {
         const response = await promptsGeneratedApi.promptControllerUpdate(projectId, promptInternalId, payload);
         return response.data;
     },
-    // remove todavía usa promptIdSlug según la API generada.
     remove: async (projectId: string, promptIdSlug: string): Promise<void> => {
-        // El método promptControllerRemove no existe en PromptsApi según la lectura del generado.
-        // Se usará apiClient.delete directamente como solución temporal.
-        // Asegúrate de que la ruta y los parámetros coinciden con tu API.
         await apiClient.delete(`/api/projects/${projectId}/prompts/${promptIdSlug}`);
     },
     generatePromptStructure: async (projectId: string, userPromptText: string): Promise<generated.LoadPromptStructureDto> => {

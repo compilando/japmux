@@ -12,6 +12,7 @@ import {
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptForm from '@/components/form/PromptForm';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import * as generated from '@/services/generated/api';
 
 // Helper para extraer mensajes de error de forma segura
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
@@ -38,11 +39,10 @@ const NewPromptPage: React.FC = () => {
 
     // Definir initialData para un nuevo prompt
     // tenantId ya no se necesita aquí, se infiere en el backend
-    const initialDataForNewPrompt: CreatePromptDto = {
+    const initialDataForNewPrompt: Omit<generated.CreatePromptDto, 'tenantId'> = {
         name: '',
         description: '',
         promptText: '',
-        // tenantId: projectId, // Eliminado
     };
 
     useEffect(() => {
@@ -59,35 +59,35 @@ const NewPromptPage: React.FC = () => {
         }
     }, [projectId]);
 
-    // La firma de onSave en PromptForm espera (payload: CreatePromptDto | UpdatePromptDto)
-    // Aquí sabemos que siempre será CreatePromptDto porque es la página de "nuevo".
-    const handleSavePrompt = async (promptPayload: CreatePromptDto | UpdatePromptDto) => {
+    const handleCreatePrompt = async (promptPayload: Omit<generated.CreatePromptDto, 'tenantId'>) => {
         if (!projectId) {
             showErrorToast("Project ID is missing.");
             return;
         }
 
-        const createPayload = promptPayload as CreatePromptDto;
-
-        // Validar que los campos necesarios para CreatePromptDto están presentes
-        // Se elimina la comprobación de tenantId
-        if (!createPayload.name || typeof createPayload.promptText === 'undefined') {
-            showErrorToast("Missing required fields for creating a prompt: name or promptText.");
-            console.error("Payload incompleto para crear:", createPayload);
-            return;
-        }
-
         setIsSaving(true);
         try {
-            await promptService.create(projectId, createPayload);
-            showSuccessToast(`Prompt "${createPayload.name}" created successfully.`);
-            router.push(`/projects/${projectId}/prompts`);
+            console.log('Creating prompt with payload:', { projectId, ...promptPayload });
+            const createdPrompt = await promptService.create(projectId, promptPayload);
+            if (createdPrompt && createdPrompt.id) {
+                showSuccessToast(`Prompt "${promptPayload.name}" created successfully.`);
+                router.push(`/projects/${projectId}/prompts`);
+            } else {
+                throw new Error("Failed to create prompt: No prompt ID returned");
+            }
         } catch (err: unknown) {
             console.error("Error creating prompt:", err);
-            showErrorToast(getApiErrorMessage(err, "Failed to create prompt."));
+            const errorMessage = getApiErrorMessage(err, "Failed to create prompt.");
+            showErrorToast(errorMessage);
+            // No redirigir en caso de error
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const handleUpdatePrompt = async (promptPayload: UpdatePromptDto) => {
+        // Esta función no debería ser llamada en la página de creación
+        showErrorToast("Cannot update a prompt in the creation page.");
     };
 
     const handleCancel = () => {
@@ -126,7 +126,8 @@ const NewPromptPage: React.FC = () => {
                 <PromptForm
                     initialData={initialDataForNewPrompt}
                     projectId={projectId}
-                    onSave={handleSavePrompt}
+                    onCreate={handleCreatePrompt}
+                    onUpdate={handleUpdatePrompt}
                     onCancel={handleCancel}
                 />
             </div>
