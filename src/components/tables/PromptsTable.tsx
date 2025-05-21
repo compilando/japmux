@@ -83,7 +83,7 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                                 </h3>
                                 <div className="flex items-center mt-1">
                                     <span className="text-sm text-gray-500 dark:text-gray-400 font-mono" title={item.name}>
-                                        {item.name.substring(0, 50)}...
+                                        {item.name}
                                     </span>
                                 </div>
                             </div>

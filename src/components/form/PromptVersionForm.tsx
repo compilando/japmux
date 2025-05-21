@@ -8,6 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import CopyButton from '../common/CopyButton';
 import PromptEditor from '../common/PromptEditor';
+import InsertReferenceButton from '../common/InsertReferenceButton';
 
 // Interface local para los datos del formulario, incluyendo versionTag
 export interface PromptVersionFormData extends CreatePromptVersionDto {
@@ -25,34 +26,35 @@ interface PromptVersionFormProps {
 
 // Helper para calcular la siguiente versión (simplificado)
 const calculateNextVersionTag = (latestTag: string | null | undefined): string => {
-    // Primero, intenta manejar prefijos y sufijos comunes como -beta, etc.
-    // Esta es una lógica muy básica y podría necesitar ajustes para casos más complejos.
-    let baseTag = latestTag;
-    let suffix = '';
-    if (latestTag) {
-        const suffixMatch = latestTag.match(/(-[a-zA-Z0-9-.]+)?(\+[a-zA-Z0-9-.]+)?$/);
-        if (suffixMatch && suffixMatch[0]) {
-            suffix = suffixMatch[0];
-            baseTag = latestTag.substring(0, latestTag.length - suffix.length);
-        }
+    if (!latestTag) {
+        return '1.0.0';
     }
 
-    if (!baseTag || !baseTag.startsWith('v')) {
-        return 'v1.0.0'; // Default si no hay tag anterior o formato inesperado
+    // Extraer el número de versión base y cualquier sufijo
+    const match = latestTag.match(/^(\d+)\.(\d+)\.(\d+)(-[a-zA-Z0-9-.]+)?(\+[a-zA-Z0-9-.]+)?$/);
+    if (!match) {
+        return '1.0.0';
     }
 
-    const parts = baseTag.substring(1).split('.');
-    if (parts.length === 3) {
-        const major = parseInt(parts[0], 10);
-        const minor = parseInt(parts[1], 10);
-        const patch = parseInt(parts[2], 10);
-        if (!isNaN(major) && !isNaN(minor) && !isNaN(patch)) {
-            // Solo incrementa patch, no maneja sufijos complejos
-            return `v${major}.${minor}.${patch + 1}`;
-        }
+    const [, major, minor, patch, prerelease, build] = match;
+    
+    // Incrementar el número de patch
+    const newPatch = parseInt(patch, 10) + 1;
+    
+    // Reconstruir el tag con el nuevo número de patch
+    let newTag = `${major}.${minor}.${newPatch}`;
+    
+    // Añadir el sufijo de prerelease si existía
+    if (prerelease) {
+        newTag += prerelease;
     }
-    // Fallback si el parseo falla
-    return 'v1.0.0';
+    
+    // Añadir el sufijo de build si existía
+    if (build) {
+        newTag += build;
+    }
+    
+    return newTag;
 };
 
 const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSave, onCancel, latestVersionTag, projectId, promptId }) => {
@@ -187,8 +189,8 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                             onChange={(e) => setVersionTag(e.target.value)}
                             required
                             disabled={isEditing}
-                            pattern="^v\d+\.\d+\.\d+(-[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?(\+[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?$"
-                            title="Semantic Versioning format (e.g., v1.0.0, v1.2.3-beta)"
+                            pattern="^\d+\.\d+\.\d+(-[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?(\+[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?$"
+                            title="Semantic Versioning format (e.g., 1.0.0, 1.2.3-beta)"
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500 font-mono"
                         />
                     </div>
@@ -205,6 +207,26 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                             rows={26}
                             assets={assets}
                             showHistory={true}
+                            extraToolbarButtons={
+                                <div className="flex gap-2">
+                                    <InsertReferenceButton
+                                        projectId={projectId}
+                                        type="prompt"
+                                        currentPromptId={promptId}
+                                        onInsert={(text) => {
+                                            setPromptText(prev => prev + text);
+                                        }}
+                                    />
+                                    <InsertReferenceButton
+                                        projectId={projectId}
+                                        type="asset"
+                                        currentPromptId={promptId}
+                                        onInsert={(text) => {
+                                            setPromptText(prev => prev + text);
+                                        }}
+                                    />
+                                </div>
+                            }
                         />
                     </div>
 

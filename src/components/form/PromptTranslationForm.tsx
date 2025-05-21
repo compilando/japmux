@@ -8,6 +8,7 @@ import {
     ChevronDoubleRightIcon,
 } from '@heroicons/react/24/outline';
 import PromptEditor from '../common/PromptEditor';
+import InsertReferenceButton from '../common/InsertReferenceButton';
 
 interface PromptTranslationFormProps {
     initialData: CreatePromptTranslationDto | null;
@@ -289,6 +290,26 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
                                 rows={18}
                                 assets={[]}
                                 showHistory={true}
+                                extraToolbarButtons={
+                                    <div className="flex gap-2">
+                                        <InsertReferenceButton
+                                            projectId={selectedProjectId || ''}
+                                            type="prompt"
+                                            currentPromptId={versionId || ''}
+                                            onInsert={(text) => {
+                                                setFormData(prev => ({ ...prev, promptText: prev.promptText + text }));
+                                            }}
+                                        />
+                                        <InsertReferenceButton
+                                            projectId={selectedProjectId || ''}
+                                            type="asset"
+                                            currentPromptId={versionId || ''}
+                                            onInsert={(text) => {
+                                                setFormData(prev => ({ ...prev, promptText: prev.promptText + text }));
+                                            }}
+                                        />
+                                    </div>
+                                }
                             />
                         </div>
                     </div>

@@ -18,6 +18,8 @@ import {
 import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
 import { Tooltip } from 'react-tooltip';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import TemplateSelector from './TemplateSelector';
+import { PromptTemplate } from '@/config/promptTemplates';
 
 /**
  * Props para el componente PromptEditor
@@ -111,6 +113,7 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
     const [isAutoSaving, setIsAutoSaving] = useState(false);
     const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [focusedButton, setFocusedButton] = useState<string | null>(null);
+    const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
     // Memoizar los assets para evitar re-renders innecesarios
     const memoizedAssets = useMemo(() => assets, [assets]);
@@ -334,6 +337,22 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
         };
     }, []);
 
+    const handleTemplateSelect = useCallback((template: PromptTemplate) => {
+        if (editorRef.current) {
+            const textarea = editorRef.current;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const newText = text.substring(0, start) + template.content + text.substring(end);
+            onChange(newText);
+
+            setTimeout(() => {
+                textarea.focus();
+                textarea.setSelectionRange(start + template.content.length, start + template.content.length);
+            }, 0);
+        }
+    }, [onChange]);
+
     return (
         <div
             className="space-y-2"
@@ -350,13 +369,13 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
                 {/* Basic Templates Group */}
                 <div className="flex gap-2" role="group" aria-label="Basic templates">
                     <ToolbarButton
-                        onClick={() => insertTemplate('You are a helpful AI assistant.')}
+                        onClick={() => setShowTemplateSelector(true)}
                         icon={DocumentTextIcon}
-                        label="Basic Template"
+                        label="Templates"
                         disabled={readOnly}
-                        tooltip="Insert basic assistant template"
-                        aria-label="Insert basic assistant template"
-                        aria-describedby="template-basic-desc"
+                        tooltip="Insert template"
+                        aria-label="Insert template"
+                        aria-describedby="template-desc"
                     />
                     <ToolbarButton
                         onClick={() => insertTemplate('```\n\n```')}
@@ -499,7 +518,7 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
             <div className="relative">
                 <textarea
                     ref={editorRef}
-                    id={id}
+                    id="promptText"
                     value={value}
                     onChange={handleTextChange}
                     onContextMenu={handleContextMenu}
@@ -587,6 +606,13 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
                 <p id="variable-desc">Insert a project variable in the text</p>
                 <p id="help-desc">Muestra los atajos de teclado disponibles</p>
             </div>
+
+            {/* Template Selector */}
+            <TemplateSelector
+                isOpen={showTemplateSelector}
+                onClose={() => setShowTemplateSelector(false)}
+                onSelect={handleTemplateSelect}
+            />
         </div>
     );
 });

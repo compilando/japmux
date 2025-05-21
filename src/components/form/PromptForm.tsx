@@ -292,61 +292,53 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
 
                 {/* Right Column: Prompt Text */}
                 <div className="space-y-4">
-                    <div>
-                        <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Prompt Text
-                        </label>
-                        <div className="mt-1">
-                            <PromptEditor
-                                value={formData.promptText}
-                                onChange={handlePromptTextChange}
-                                placeholder="Enter your prompt text here..."
-                                assets={assets}
-                                extraToolbarButtons={
-                                    <div className="flex gap-2">
-                                        <InsertReferenceButton
-                                            projectId={projectId}
-                                            type="prompt"
-                                            currentPromptId={isEditing ? (initialData as any)?.id : undefined}
-                                            onInsert={(text) => {
-                                                const textarea = document.getElementById('promptText') as HTMLTextAreaElement;
-                                                if (textarea) {
-                                                    const start = textarea.selectionStart;
-                                                    const end = textarea.selectionEnd;
-                                                    const newText = formData.promptText.substring(0, start) + text + formData.promptText.substring(end);
+                    {!isEditing && (
+                        <div>
+                            <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Prompt Text
+                            </label>
+                            <div className="mt-1">
+                                <PromptEditor
+                                    value={formData.promptText}
+                                    onChange={handlePromptTextChange}
+                                    placeholder="Enter your prompt text here..."
+                                    assets={assets}
+                                    extraToolbarButtons={
+                                        <div className="flex gap-2">
+                                            <InsertReferenceButton
+                                                projectId={projectId}
+                                                type="prompt"
+                                                currentPromptId={isEditing ? (initialData as any)?.id : undefined}
+                                                onInsert={(text) => {
+                                                    const newText = formData.promptText + text;
                                                     setFormData(prev => ({ ...prev, promptText: newText }));
-                                                }
-                                            }}
-                                        />
-                                        <InsertReferenceButton
-                                            projectId={projectId}
-                                            type="asset"
-                                            currentPromptId={isEditing ? (initialData as any)?.id : undefined}
-                                            onInsert={(text) => {
-                                                const textarea = document.getElementById('promptText') as HTMLTextAreaElement;
-                                                if (textarea) {
-                                                    const start = textarea.selectionStart;
-                                                    const end = textarea.selectionEnd;
-                                                    const newText = formData.promptText.substring(0, start) + text + formData.promptText.substring(end);
+                                                }}
+                                            />
+                                            <InsertReferenceButton
+                                                projectId={projectId}
+                                                type="asset"
+                                                currentPromptId={isEditing ? (initialData as any)?.id : undefined}
+                                                onInsert={(text) => {
+                                                    const newText = formData.promptText + text;
                                                     setFormData(prev => ({ ...prev, promptText: newText }));
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                }
-                            />
+                                                }}
+                                            />
+                                        </div>
+                                    }
+                                />
+                            </div>
+                            <div className="mt-2 flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={handleImprovePrompt}
+                                    disabled={isImproving || !formData.promptText.trim()}
+                                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                                >
+                                    {isImproving ? 'Improving...' : 'Improve Prompt'}
+                                </button>
+                            </div>
                         </div>
-                        <div className="mt-2 flex justify-end">
-                            <button
-                                type="button"
-                                onClick={handleImprovePrompt}
-                                disabled={isImproving || !formData.promptText.trim()}
-                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                            >
-                                {isImproving ? 'Improving...' : 'Improve Prompt'}
-                            </button>
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
