@@ -79,6 +79,7 @@ const ServePromptPage: React.FC = () => {
 
     // --- Estado para Tamaño de Fuente ---
     const [selectedFontSize, setSelectedFontSize] = useState<FontSize>('m'); // Default 'm'
+    const [isProcessed, setIsProcessed] = useState<boolean>(false); // Nuevo estado para el checkbox
 
     // --- Estados UI/Generales ---
     const [loadingVersions, setLoadingVersions] = useState<boolean>(false);
@@ -212,9 +213,6 @@ const ServePromptPage: React.FC = () => {
             return [];
         }
         try {
-            // promptService.findAll no toma un segundo argumento para búsqueda/filtrado.
-            // AsyncSelect cargará todos y filtrará en el cliente.
-            // Si initialPromptData está seteado y coincide con alguna opción, AsyncSelect debería mostrarlo.
             const fetchedPrompts = await promptService.findAll(selectedProjectId);
             let options: PromptDto[] = [];
             if (Array.isArray(fetchedPrompts)) {
@@ -226,7 +224,16 @@ const ServePromptPage: React.FC = () => {
                 option.name.toLowerCase().includes(inputValue.toLowerCase())
             );
 
-            return filteredOptions.map(p => ({ value: p.id, label: p.name }));
+            return filteredOptions.map(p => {
+                // Extraer el tipo del ID (asumiendo que el ID tiene un formato como "type-name")
+                const typeMatch = p.id.match(/^([^-]+)-/);
+                const type = typeMatch ? typeMatch[1].toUpperCase() : 'PROMPT';
+                
+                return {
+                    value: p.id,
+                    label: `[${type}]: ${p.name}`
+                };
+            });
 
         } catch (err) {
             console.error("Error fetching prompts for async select:", err);
@@ -329,20 +336,27 @@ const ServePromptPage: React.FC = () => {
         setVariableInputs({});
         setExecutionResult(null);
 
-        if (!selectedProjectId || !selectedPrompt?.value || !selectedVersion?.value || !selectedLanguage?.value) {
+        if (!selectedProjectId || !selectedPrompt?.value || !selectedVersion?.value) {
             return;
         }
 
+        // Si la versión seleccionada es "latest", usar la versión más reciente
+        const versionToUse = selectedVersion.value === 'latest' ? 'latest' : selectedVersion.value;
+        
         let fetchPromise: Promise<CreatePromptVersionDto | CreatePromptTranslationDto | null | undefined>;
 
-        if (selectedLanguage.value === '__BASE__') {
-            // Si la versión seleccionada es "latest", usar la versión más reciente
-            const versionToUse = selectedVersion.value === 'latest' ? 'latest' : selectedVersion.value;
-            fetchPromise = promptVersionService.findOne(selectedProjectId, selectedPrompt.value, versionToUse);
+        if (!selectedLanguage || selectedLanguage.value === '__BASE__') {
+            // Cargar el texto base de la versión
+            fetchPromise = promptVersionService.findOne(selectedProjectId, selectedPrompt.value, versionToUse, isProcessed);
         } else {
-            // Si la versión seleccionada es "latest", usar la versión más reciente
-            const versionToUse = selectedVersion.value === 'latest' ? 'latest' : selectedVersion.value;
-            fetchPromise = promptTranslationService.findByLanguage(selectedProjectId, selectedPrompt.value, versionToUse, selectedLanguage.value);
+            // Cargar la traducción seleccionada
+            fetchPromise = promptTranslationService.findByLanguage(
+                selectedProjectId, 
+                selectedPrompt.value, 
+                versionToUse, 
+                selectedLanguage.value,
+                isProcessed
+            );
         }
 
         fetchPromise
@@ -370,7 +384,7 @@ const ServePromptPage: React.FC = () => {
                 setVariableInputs({});
             });
 
-    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage]);
+    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, isProcessed]);
 
     // --- Efecto para generar el comando cURL y el script Bash ---
     useEffect(() => {
@@ -416,7 +430,7 @@ const ServePromptPage: React.FC = () => {
         }
 
         let curlNote = `\n\n# NOTE (for single cURL):`;
-        curlNote += `\n# Replace 'YOUR_AUTH_TOKEN' with your actual token.`;
+        curlNote += `# Replace 'YOUR_AUTH_TOKEN' with your actual token.`;
         // Eliminada la nota sobre aiModelId
         if (bodyPayload.variables && Object.keys(bodyPayload.variables).length > 0) {
             curlNote += `\n# Variables provided are included in the example body.`;
@@ -755,6 +769,19 @@ fi
                             className="react-select-container dark:react-select-container-dark"
                         />
                     </div>
+                </div>
+
+                {/* Checkbox para procesar el prompt */}
+                <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <input
+                            type="checkbox"
+                            checked={isProcessed}
+                            onChange={(e) => setIsProcessed(e.target.checked)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                        />
+                        <span>Mostrar prompt procesado (resolver referencias y variables)</span>
+                    </label>
                 </div>
 
                 {isClient && selectedPrompt && selectedVersion && (

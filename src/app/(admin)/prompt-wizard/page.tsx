@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import { promptService } from '@/services/api';
 import { loadPromptStructure } from '@/services/promptApi';
-import { LoadPromptStructureDto } from '@/types/prompt-structure';
+import { LoadPromptStructureDto, PromptAssetStructureDto, PromptMetaDto, PromptVersionStructureDto, PromptVersionTranslationDto, AssetTranslationStructureDto } from '@/services/generated/api';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 import { useProjects } from '@/context/ProjectContext'; // Importar contexto de proyectos
 
@@ -34,11 +34,7 @@ interface AssetInfo {
     translations?: Translation[];
 }
 
-interface StructureData {
-    prompt?: PromptInfo;
-    version?: VersionInfo;
-    assets?: AssetInfo[];
-}
+type StructureData = LoadPromptStructureDto;
 
 const PromptWizardPage: React.FC = () => {
     const { selectedProjectId } = useProjects(); // Obtener projectId del contexto
@@ -138,20 +134,21 @@ const PromptWizardPage: React.FC = () => {
                     {data.version.assets && data.version.assets.length > 0 ? renderList(data.version.assets, (assetName: string) => <span className="font-mono bg-gray-200 dark:bg-gray-600 px-1 rounded">{assetName}</span>) : <p className="text-xs text-gray-500 dark:text-gray-400">None</p>}
 
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mt-2 mb-1">Version Translations:</p>
-                    {data.version.translations && data.version.translations.length > 0 ? renderList(data.version.translations, (trans: Translation) => (
+                    {data.version.translations && data.version.translations.length > 0 ? renderList(data.version.translations, (trans: PromptVersionTranslationDto) => (
                         <><strong>{trans.languageCode}:</strong> {trans.promptText}</>
                     )) : <p className="text-xs text-gray-500 dark:text-gray-400">None</p>}
                 </>, "bg-teal-50 dark:bg-teal-800/30")}
 
                 {data.assets && data.assets.length > 0 && renderBlock("Defined Assets",
                     <div className="space-y-3">
-                        {data.assets.map((asset: AssetInfo, index: number) => (
+                        {data.assets.map((asset: PromptAssetStructureDto, index: number) => (
                             <div key={index} className="p-3 border border-gray-300 dark:border-gray-500 rounded-md bg-white dark:bg-gray-800">
                                 {renderKeyValue("Key", asset.key)}
+                                {renderKeyValue("Name", asset.name)}
                                 {renderKeyValue("Default Value", asset.value)}
                                 {renderKeyValue("Change Message", asset.changeMessage)}
                                 <p className="text-xs font-medium text-gray-700 dark:text-gray-200 mt-1 mb-0.5">Asset Translations:</p>
-                                {asset.translations && asset.translations.length > 0 ? renderList(asset.translations, (trans: Translation) => (
+                                {asset.translations && asset.translations.length > 0 ? renderList(asset.translations, (trans: AssetTranslationStructureDto) => (
                                     <><strong>{trans.languageCode}:</strong> {trans.value}</>
                                 )) : <p className="text-xs text-gray-500 dark:text-gray-400">None</p>}
                             </div>
@@ -188,29 +185,22 @@ const PromptWizardPage: React.FC = () => {
         setLoadStatusMessage(null);
 
         try {
-            const result = await loadPromptStructure(selectedProjectId, parsedJson);
-            if (result.success) {
-                const successMessage = result.message || 'JSON structure loaded successfully.';
-                showSuccessToast(successMessage);
-                setLoadStatusMessage({ type: 'success', message: successMessage });
-                setGeneratedJson(parsedJson as StructureData);
-            } else {
-                let detailedErrorMessage = result.message || 'Error loading JSON structure.';
-                if (result.errorDetails) {
-                    const detailsString = typeof result.errorDetails === 'string'
-                        ? result.errorDetails
-                        : JSON.stringify(result.errorDetails, null, 2);
-                    detailedErrorMessage += `\nDetails: ${detailsString}`;
-                }
-                showErrorToast(detailedErrorMessage);
-                setLoadStatusMessage({ type: 'error', message: `KO. ${detailedErrorMessage}` });
+            const result = await promptService.loadPromptStructure(selectedProjectId, parsedJson);
+            showSuccessToast('JSON structure loaded successfully.');
+            setLoadStatusMessage({ type: 'success', message: 'JSON structure loaded successfully.' });
+            setGeneratedJson(parsedJson);
+        } catch (error) {
+            console.error("Error loading structure:", error);
+            let errorMessage = 'Error loading JSON structure.';
+            if (error && typeof error === 'object' && 'response' in error &&
+                error.response && typeof error.response === 'object' &&
+                'data' in error.response && error.response.data &&
+                typeof error.response.data === 'object' &&
+                'message' in error.response.data) {
+                errorMessage = String(error.response.data.message);
             }
-        } catch (err: unknown) {
-            // Este catch es para errores inesperados en la propia función loadPromptStructure o de red, no errores de API manejados
-            console.error("Unexpected error calling loadPromptStructure:", err);
-            const unexpectedError = (err instanceof Error) ? err.message : 'Unexpected error in load operation.';
-            showErrorToast(unexpectedError);
-            setLoadStatusMessage({ type: 'error', message: `KO. ${unexpectedError}` });
+            showErrorToast(errorMessage);
+            setLoadStatusMessage({ type: 'error', message: errorMessage });
         } finally {
             setIsLoadingLoad(false);
         }

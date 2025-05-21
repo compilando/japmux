@@ -391,10 +391,12 @@ export const promptService = {
     },
     generatePromptStructure: async (projectId: string, userPromptText: string): Promise<generated.LoadPromptStructureDto> => {
         const payload: generated.GeneratePromptStructureDto = { userPrompt: userPromptText };
-        const response = await promptsGeneratedApi.promptControllerGenerateStructure(projectId, payload);
-        // Asumiendo que la respuesta de generateStructure es compatible con LoadPromptStructureDto o un tipo específico.
-        // El tipo de retorno real de la API debería verificarse. Por ahora, usamos LoadPromptStructureDto como suposición.
-        return response.data as generated.LoadPromptStructureDto;
+        const response = await apiClient.post<generated.LoadPromptStructureDto>(`/api/projects/${projectId}/prompts/generate-structure`, payload);
+        return response.data;
+    },
+    loadPromptStructure: async (projectId: string, structure: generated.LoadPromptStructureDto): Promise<generated.LoadPromptStructureDto> => {
+        const response = await apiClient.post<generated.LoadPromptStructureDto>(`/api/projects/${projectId}/prompts/load-structure`, structure);
+        return response.data;
     }
 };
 
@@ -411,19 +413,21 @@ interface PromptVersionDetail extends generated.CreatePromptVersionDto {
 export const promptVersionService = {
     findAll: async (projectId: string, promptId: string): Promise<generated.CreatePromptVersionDto[]> => {
         const response = await promptVersionsGeneratedApi.promptVersionControllerFindAll(projectId, promptId);
-        return response.data as generated.CreatePromptVersionDto[];
+        return response.data;
     },
-    findOne: async (projectId: string, promptId: string, versionTag: string): Promise<PromptVersionDetail> => {
-        const response = await promptVersionsGeneratedApi.promptVersionControllerFindOneByTag(projectId, promptId, versionTag);
-        return response.data as PromptVersionDetail;
+    findOne: async (projectId: string, promptId: string, versionTag: string, processed?: boolean): Promise<generated.CreatePromptVersionDto> => {
+        let url = `/api/projects/${projectId}/prompts/${promptId}/versions/${versionTag}`;
+        if (processed) url += '?processed=true';
+        const response = await apiClient.get<generated.CreatePromptVersionDto>(url);
+        return response.data;
     },
     create: async (projectId: string, promptId: string, payload: generated.CreatePromptVersionDto): Promise<generated.CreatePromptVersionDto> => {
         const response = await promptVersionsGeneratedApi.promptVersionControllerCreate(projectId, promptId, payload);
-        return response.data as generated.CreatePromptVersionDto;
+        return response.data;
     },
     update: async (projectId: string, promptId: string, versionTag: string, payload: generated.UpdatePromptVersionDto): Promise<generated.CreatePromptVersionDto> => {
         const response = await promptVersionsGeneratedApi.promptVersionControllerUpdate(projectId, promptId, versionTag, payload);
-        return response.data as generated.CreatePromptVersionDto;
+        return response.data;
     },
     remove: async (projectId: string, promptId: string, versionTag: string): Promise<void> => {
         await promptVersionsGeneratedApi.promptVersionControllerRemove(projectId, promptId, versionTag);
@@ -447,19 +451,21 @@ export const promptVersionService = {
 export const promptTranslationService = {
     findAll: async (projectId: string, promptId: string, versionTag: string): Promise<generated.CreatePromptTranslationDto[]> => {
         const response = await promptTranslationsGeneratedApi.promptTranslationControllerFindAll(projectId, promptId, versionTag);
-        return response.data as generated.CreatePromptTranslationDto[];
+        return response.data;
     },
-    findByLanguage: async (projectId: string, promptId: string, versionTag: string, languageCode: string): Promise<generated.CreatePromptTranslationDto> => {
-        const response = await promptTranslationsGeneratedApi.promptTranslationControllerFindOneByLanguage(projectId, promptId, versionTag, languageCode);
-        return response.data as generated.CreatePromptTranslationDto;
+    findByLanguage: async (projectId: string, promptId: string, versionTag: string, languageCode: string, processed?: boolean): Promise<generated.CreatePromptTranslationDto> => {
+        let url = `/api/projects/${projectId}/prompts/${promptId}/versions/${versionTag}/translations/${languageCode}`;
+        if (processed) url += '?processed=true';
+        const response = await apiClient.get<generated.CreatePromptTranslationDto>(url);
+        return response.data;
     },
     create: async (projectId: string, promptId: string, versionTag: string, payload: generated.CreatePromptTranslationDto): Promise<generated.CreatePromptTranslationDto> => {
         const response = await promptTranslationsGeneratedApi.promptTranslationControllerCreate(projectId, promptId, versionTag, payload);
-        return response.data as generated.CreatePromptTranslationDto;
+        return response.data;
     },
     update: async (projectId: string, promptId: string, versionTag: string, languageCode: string, payload: generated.UpdatePromptTranslationDto): Promise<generated.CreatePromptTranslationDto> => {
         const response = await promptTranslationsGeneratedApi.promptTranslationControllerUpdate(projectId, promptId, versionTag, languageCode, payload);
-        return response.data as generated.CreatePromptTranslationDto;
+        return response.data;
     },
     remove: async (projectId: string, promptId: string, versionTag: string, languageCode: string): Promise<void> => {
         await promptTranslationsGeneratedApi.promptTranslationControllerRemove(projectId, promptId, versionTag, languageCode);
@@ -606,118 +612,17 @@ export const promptAssetService = {
         const response = await apiClient.post<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations`, payload);
         return response.data;
     },
-    updateTranslation: async (projectId: string, promptId: string, assetKey: string, versionTag: string, languageCode: string, payload: generated.UpdateAssetTranslationDto): Promise<generated.CreateAssetTranslationDto> => {
-        const response = await apiClient.patch<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`, payload);
-        return response.data;
-    },
-    removeTranslation: async (projectId: string, promptId: string, assetKey: string, versionTag: string, languageCode: string): Promise<void> => {
-        await apiClient.delete(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`);
-    },
 };
 
-// Servicio de Health Check (Mantener manual o reemplazar con generated.HealthApi)
+// Servicio de Health Check
 export const healthService = {
-    check: async (): Promise<generated.HealthControllerCheck200Response> => {
-        const response = await apiClient.get<generated.HealthControllerCheck200Response>('/api/health');
-        return response.data;
-    },
-};
-
-// --- Comentando servicios que parecen incorrectos según la API generada ---
-/*
-// Servicio de Serve (Mantener manual o reemplazar con generated.ServePromptApi)
-export const serveService = {
-    // ... todo el contenido comentado ...
-};
-*/
-
-// Servicio de Cultural Data (Mantener manual o reemplazar con generated.CulturalDataApi)
-export const culturalDataService = {
-    findAll: async (projectId: string): Promise<generated.CulturalDataResponse[]> => {
-        const response = await apiClient.get<generated.CulturalDataResponse[]>(`/api/projects/${projectId}/cultural-data`);
-        return response.data;
-    },
-    findOne: async (projectId: string, culturalDataKey: string): Promise<generated.CulturalDataResponse> => {
-        const response = await apiClient.get<generated.CulturalDataResponse>(`/api/projects/${projectId}/cultural-data/${culturalDataKey}`);
-        return response.data;
-    },
-    create: async (projectId: string, payload: generated.CreateCulturalDataDto): Promise<generated.CulturalDataResponse> => {
-        const response = await apiClient.post<generated.CulturalDataResponse>(`/api/projects/${projectId}/cultural-data`, payload);
-        return response.data;
-    },
-    update: async (projectId: string, culturalDataKey: string, payload: generated.UpdateCulturalDataDto): Promise<generated.CulturalDataResponse> => {
-        const response = await apiClient.patch<generated.CulturalDataResponse>(`/api/projects/${projectId}/cultural-data/${culturalDataKey}`, payload);
-        return response.data;
-    },
-    remove: async (projectId: string, culturalDataKey: string): Promise<void> => {
-        await apiClient.delete(`/api/projects/${projectId}/cultural-data/${culturalDataKey}`);
-    },
-};
-
-// --- Servicios Actualizados / Nuevos usando Generador ---
-
-// Servicio de LLM Execution (Actualizado para usar generado)
-export const llmExecutionService = {
-    execute: async (payload: generated.ExecuteLlmDto): Promise<unknown> => {
-        const response = await llmExecutionGeneratedApi.llmExecutionControllerExecuteLlm(payload);
-        return response.data;
-    },
-};
-
-// Servicio de System Prompts
-export const systemPromptService = {
-    findAll: async (): Promise<generated.CreateSystemPromptDto[]> => {
+    check: async (): Promise<boolean> => {
         try {
-            await systemPromptsGeneratedApi.systemPromptControllerFindAll();
-            console.warn('[systemPromptService.findAll] systemPromptControllerFindAll está tipado como void. Devolviendo array vacío.');
-            return [];
+            const response = await apiClient.get('/api/health');
+            return response.status === 200;
         } catch (error) {
-            console.error("Error fetching system prompts:", error);
-            showErrorToast('Failed to fetch system prompts.');
-            return [];
+            console.error('Health check failed:', error);
+            return false;
         }
-    },
-    findOne: async (name: string): Promise<generated.CreateSystemPromptDto | null> => {
-        try {
-            await systemPromptsGeneratedApi.systemPromptControllerFindOne(name);
-            console.warn(`[systemPromptService.findOne] systemPromptControllerFindOne(${name}) está tipado como void. Devolviendo null.`);
-            return null;
-        } catch (error) {
-            if (error && typeof error === 'object' && 'response' in error) {
-                const axiosError = error as AxiosError;
-                if (axiosError.response && axiosError.response.status === 404) {
-                    return null;
-                }
-            }
-            console.error(`Error fetching system prompt ${name}:`, error);
-            showErrorToast(`Failed to fetch system prompt ${name}.`);
-            return null;
-        }
-    },
-    create: async (payload: generated.CreateSystemPromptDto): Promise<void> => {
-        await systemPromptsGeneratedApi.systemPromptControllerCreate(payload);
-    },
-    update: async (name: string, payload: generated.UpdateSystemPromptDto): Promise<void> => {
-        await systemPromptsGeneratedApi.systemPromptControllerUpdate(name, payload);
-    },
-    remove: async (name: string): Promise<void> => {
-        await systemPromptsGeneratedApi.systemPromptControllerRemove(name);
     }
 };
-
-// Añadir función para execute-raw (podría ir en llmExecutionService o uno nuevo)
-export const rawExecutionService = {
-    executeRaw: async (payload: generated.ExecuteRawDto & { variables?: Record<string, string> }): Promise<unknown> => {
-        const response = await rawExecutionGeneratedApi.rawExecutionControllerExecuteRawText(payload);
-        return response.data;
-    }
-};
-
-// Exportación predeterminada del cliente Axios configurado
-export default apiClient;
-
-// Re-exportar puede causar conflictos si hay nombres duplicados o no deseados.
-// Considera importar explícitamente lo necesario o usar alias.
-export * from './generated';
-
-
