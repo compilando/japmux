@@ -79,7 +79,7 @@ This is a non-exhaustive list based on observed usage:
 ## 7. Configuration
 
 *   **Environment Variables:** `NEXT_PUBLIC_API_URL` is used to configure the API base URL (defaults to `/api`).
-*   **Next.js Config:** `next.config.ts`.
+*   **Next.js Config:** `next.config.ts` - configured with `output: 'standalone'` for Docker deployment.
 *   **TypeScript Config:** `tsconfig.json`.
 *   **Tailwind Config:** `tailwind.config.js` (not directly inspected but assumed standard).
 *   **ESLint/Prettier:** Configuration files in project root.
@@ -92,5 +92,81 @@ From `package.json`:
 *   `start`: Starts the Next.js production server.
 *   `lint`: Runs ESLint.
 *   `generate:api`: Generates the API client.
+*   **Docker Scripts:**
+    *   `docker:dev`: Starts development environment with Docker.
+    *   `docker:build`: Builds production Docker image.
+    *   `docker:run`: Runs production container.
+    *   `docker:deploy`: Deploys using simple Docker script.
+    *   `docker:logs`: Views Docker container logs.
+    *   `docker:stop`: Stops Docker container.
+    *   `docker:clean`: Cleans up Docker resources.
+
+## 9. Simplified Docker Configuration & Deployment
+
+The application includes a simplified Docker configuration focused on ease of use and minimal complexity:
+
+### 9.1. Simple Architecture
+
+*   **Single Container:** Self-contained Next.js application running on port 3000
+*   **No External Dependencies:** No nginx, Redis, or Docker Compose required
+*   **Direct Serving:** Next.js serves the application directly
+*   **Minimal Setup:** Quick deployment with single commands
+
+### 9.2. Production Deployment
+
+*   **Optimized Dockerfile:** Multi-stage build for production efficiency
+*   **Security Features:** Non-root user execution and minimal Alpine base
+*   **Health Checks:** Built-in health monitoring at `/api/health` endpoint
+*   **Environment Configuration:** Optional environment variables for API URLs
+
+### 9.3. Development Environment
+
+*   **Hot Reload:** Live code updates without container rebuilds
+*   **Volume Mounting:** Source code mounted for real-time development
+*   **Simple Setup:** Single command deployment with `./scripts/dev.sh`
+
+### 9.4. Key Files
+
+*   `Dockerfile`: Production-optimized build with multi-stage approach
+*   `Dockerfile.dev`: Development environment with hot reload support
+*   `scripts/deploy.sh`: Simple production deployment script
+*   `scripts/dev.sh`: Development environment startup script
+*   `.dockerignore`: Build context optimization
+
+### 9.5. Deployment Commands
+
+```bash
+# Development
+./scripts/dev.sh                    # Start development container
+npm run docker:dev                  # Alternative development start
+
+# Production  
+./scripts/deploy.sh                 # Full deployment script
+npm run docker:deploy               # Alternative deployment
+docker build -t japmux:latest .     # Manual build
+docker run -d --name japmux -p 3000:3000 japmux:latest  # Manual run
+```
+
+### 9.6. Environment Variables
+
+Optional configuration:
+*   `NEXT_PUBLIC_API_URL`: Backend API endpoint (default: http://localhost:8000)
+*   `NODE_ENV`: Environment mode (development/production)
+*   Standard Next.js environment variables
+
+### 9.7. Monitoring & Health Checks
+
+*   **Health Endpoint:** `/api/health` provides application status and metrics
+*   **Docker Health Checks:** Automatic container health monitoring
+*   **Simple Logging:** Direct container logs via `docker logs`
+*   **Container Management:** Standard Docker commands for monitoring
+
+### 9.8. Benefits of Simplified Approach
+
+*   **Easy to Understand:** No complex orchestration or multiple services
+*   **Quick Deployment:** Single command deployment
+*   **Lightweight:** Minimal resource usage and dependencies
+*   **Portable:** Runs anywhere Docker is available
+*   **Debuggable:** Simple architecture makes troubleshooting easier
 
 This technical documentation should be expanded as new complex features are added or significant technical decisions are made. 

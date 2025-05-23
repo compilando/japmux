@@ -618,11 +618,27 @@ export const promptAssetService = {
 export const healthService = {
     check: async (): Promise<boolean> => {
         try {
-            const response = await apiClient.get('/api/health');
+            const response = await apiClient.get('/health');
             return response.status === 200;
         } catch (error) {
             console.error('Health check failed:', error);
             return false;
         }
+    }
+};
+
+// Servicio de Ejecución de LLM
+export const llmExecutionService = {
+    execute: async (payload: generated.ExecuteLlmDto): Promise<any> => {
+        const response = await llmExecutionGeneratedApi.llmExecutionControllerExecuteLlm(payload);
+        return response.data;
+    }
+};
+
+// Servicio de Ejecución Bruta
+export const rawExecutionService = {
+    execute: async (payload: generated.ExecuteRawDto): Promise<any> => {
+        const response = await rawExecutionGeneratedApi.rawExecutionControllerExecuteRawText(payload);
+        return response.data;
     }
 };

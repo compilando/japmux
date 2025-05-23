@@ -60,6 +60,37 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
         }
     }, [prompts, projectId]);
 
+    // Función para determinar el tipo de prompt basándose en palabras clave
+    const determinePromptType = (prompt: PromptDto): string => {
+        const name = prompt.name?.toLowerCase() || '';
+        const description = prompt.description?.toLowerCase() || '';
+        const combined = `${name} ${description}`;
+
+        if (combined.includes('expert') || combined.includes('specialist') || combined.includes('consultant')) {
+            return 'EXPERT';
+        }
+        if (combined.includes('assistant') || combined.includes('helper') || combined.includes('support')) {
+            return 'ASSISTANT';
+        }
+        if (combined.includes('task') || combined.includes('workflow') || combined.includes('process')) {
+            return 'TASK';
+        }
+        if (combined.includes('creative') || combined.includes('writing') || combined.includes('content') || combined.includes('story')) {
+            return 'CREATIVE';
+        }
+        if (combined.includes('analysis') || combined.includes('report') || combined.includes('analyze') || combined.includes('data')) {
+            return 'ANALYSIS';
+        }
+        if (combined.includes('technical') || combined.includes('code') || combined.includes('programming') || combined.includes('developer')) {
+            return 'TECHNICAL';
+        }
+        if (combined.includes('template') || combined.includes('basic') || combined.includes('simple')) {
+            return 'TEMPLATE';
+        }
+        
+        return 'GENERAL';
+    };
+
     if (loading && prompts.length === 0) {
         return (
             <div className="flex items-center justify-center py-12">
@@ -79,6 +110,9 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex-1 min-w-0">
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate" title={item.name}>
+                                    <span className="text-sm font-mono text-indigo-600 dark:text-indigo-400 mr-2">
+                                        [{determinePromptType(item)}]
+                                    </span>
                                     {item.id} <CopyButton textToCopy={item.id} />
                                 </h3>
                                 <div className="flex items-center mt-1">

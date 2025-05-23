@@ -2293,7 +2293,7 @@
         ]
       }
     },
-    "/api/health": {
+    "/health": {
       "get": {
         "operationId": "HealthController_check",
         "parameters": [],
