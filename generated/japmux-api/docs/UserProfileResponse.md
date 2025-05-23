@@ -5,10 +5,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **string** |  | [default to undefined]
-**email** | **string** |  | [default to undefined]
-**name** | **string** |  | [default to undefined]
-**createdAt** | **string** |  | [default to undefined]
+**id** | **string** | Unique user identifier | [default to undefined]
+**email** | **string** | User\&#39;s email address | [default to undefined]
+**name** | **string** | User\&#39;s full name | [default to undefined]
+**createdAt** | **string** | Account creation timestamp | [default to undefined]
 
 ## Example
 

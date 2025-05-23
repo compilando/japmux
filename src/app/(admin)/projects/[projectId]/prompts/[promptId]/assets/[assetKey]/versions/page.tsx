@@ -252,7 +252,8 @@ const PromptAssetVersionsPage: React.FC = () => {
                     Versions for Asset: <span className="text-indigo-600 dark:text-indigo-400">{asset?.name || assetKey}</span>
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Prompt: <span className="font-medium">{currentPrompt?.name || promptId}</span> | Project: <span className="font-medium">{project?.name || projectId}</span>
+                    Project: <span className="font-medium">{project?.name || projectId}</span><br />
+                    Prompt: <span className="font-medium">{currentPrompt?.name || promptId}</span>
                 </p>
             </div>
 

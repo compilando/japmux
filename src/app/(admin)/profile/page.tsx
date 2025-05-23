@@ -25,11 +25,11 @@ const UserProfilePage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="md:col-span-1">
                     {/* Data placeholder - Pass real data to components */}
-                    <UserInfoCard userData={null} />
-                    <UserMetaCard userData={null} />
+                    <UserInfoCard />
+                    <UserMetaCard />
                 </div>
                 <div className="md:col-span-2">
-                    <UserAddressCard userData={null} />
+                    <UserAddressCard />
                     {/* Other profile components or sections could go here */}
                 </div>
             </div>

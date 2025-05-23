@@ -4,16 +4,17 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**projectControllerCreate**](#projectcontrollercreate) | **POST** /api/projects | Create a new project|
-|[**projectControllerFindAll**](#projectcontrollerfindall) | **GET** /api/projects | Get all projects for the authenticated user\&#39;s tenant|
-|[**projectControllerFindMine**](#projectcontrollerfindmine) | **GET** /api/projects/mine | Get projects accessible by the current user|
-|[**projectControllerFindOne**](#projectcontrollerfindone) | **GET** /api/projects/{id} | Get a project by ID|
-|[**projectControllerRemove**](#projectcontrollerremove) | **DELETE** /api/projects/{id} | Delete a project by ID|
-|[**projectControllerUpdate**](#projectcontrollerupdate) | **PATCH** /api/projects/{id} | Update a project by ID|
+|[**projectControllerCreate**](#projectcontrollercreate) | **POST** /api/projects | Create new project|
+|[**projectControllerFindAll**](#projectcontrollerfindall) | **GET** /api/projects | Get all projects|
+|[**projectControllerFindMine**](#projectcontrollerfindmine) | **GET** /api/projects/mine | Obtener proyectos del usuario actual|
+|[**projectControllerFindOne**](#projectcontrollerfindone) | **GET** /api/projects/{id} | Get project by ID|
+|[**projectControllerRemove**](#projectcontrollerremove) | **DELETE** /api/projects/{id} | Delete project|
+|[**projectControllerUpdate**](#projectcontrollerupdate) | **PATCH** /api/projects/{id} | Update project|
 
 # **projectControllerCreate**
-> CreateProjectDto projectControllerCreate(createProjectDto)
+> ProjectDto projectControllerCreate(createProjectDto)
 
+Creates a new project for the current tenant. Accessible by global admins or tenant admins.
 
 ### Example
 
@@ -43,7 +44,7 @@ const { status, data } = await apiInstance.projectControllerCreate(
 
 ### Return type
 
-**CreateProjectDto**
+**ProjectDto**
 
 ### Authorization
 
@@ -58,15 +59,18 @@ const { status, data } = await apiInstance.projectControllerCreate(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**201** | The project has been successfully created. |  -  |
-|**400** | Bad Request. |  -  |
-|**401** | Unauthorized. |  -  |
+|**201** | Project successfully created |  -  |
+|**400** | Invalid input data - Check the request body format |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Insufficient permissions to create projects |  -  |
+|**409** | Project already exists - A project with this name already exists for this tenant |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **projectControllerFindAll**
-> projectControllerFindAll()
+> Array<ProjectDto> projectControllerFindAll()
 
+Retrieves a list of all projects for the current tenant. Results are cached for 1 hour.
 
 ### Example
 
@@ -88,29 +92,30 @@ This endpoint does not have any parameters.
 
 ### Return type
 
-void (empty response body)
+**Array<ProjectDto>**
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | List of projects |  -  |
-|**401** | Unauthorized |  -  |
+|**200** | List of projects retrieved successfully |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **projectControllerFindMine**
 > Array<CreateProjectDto> projectControllerFindMine()
 
+Retorna todos los proyectos a los que tiene acceso el usuario autenticado
 
 ### Example
 
@@ -147,14 +152,16 @@ This endpoint does not have any parameters.
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | List of user projects. |  -  |
-|**401** | Unauthorized. |  -  |
+|**200** | Lista de proyectos del usuario |  -  |
+|**401** | No autorizado - Token inválido o expirado |  -  |
+|**403** | Acceso denegado - Información de tenant no disponible |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **projectControllerFindOne**
-> CreateProjectDto projectControllerFindOne()
+> ProjectDto projectControllerFindOne()
 
+Retrieves a specific project by its unique ID. Results are cached for 1 hour.
 
 ### Example
 
@@ -167,7 +174,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new ProjectsApi(configuration);
 
-let id: string; //Project CUID (default to undefined)
+let id: string; //Unique project identifier (UUID) (default to undefined)
 
 const { status, data } = await apiInstance.projectControllerFindOne(
     id
@@ -178,12 +185,12 @@ const { status, data } = await apiInstance.projectControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **id** | [**string**] | Project CUID | defaults to undefined|
+| **id** | [**string**] | Unique project identifier (UUID) | defaults to undefined|
 
 
 ### Return type
 
-**CreateProjectDto**
+**ProjectDto**
 
 ### Authorization
 
@@ -198,14 +205,16 @@ const { status, data } = await apiInstance.projectControllerFindOne(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | The found project record |  -  |
-|**404** | Project not found. |  -  |
+|**200** | Project found successfully |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**404** | Project not found - The specified ID does not exist for this tenant |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **projectControllerRemove**
-> CreateProjectDto projectControllerRemove()
+> projectControllerRemove()
 
+Permanently deletes a project. This is a destructive operation that requires admin privileges.
 
 ### Example
 
@@ -218,7 +227,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new ProjectsApi(configuration);
 
-let id: string; //Project CUID (default to undefined)
+let id: string; //Unique project identifier to delete (UUID) (default to undefined)
 
 const { status, data } = await apiInstance.projectControllerRemove(
     id
@@ -229,12 +238,12 @@ const { status, data } = await apiInstance.projectControllerRemove(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **id** | [**string**] | Project CUID | defaults to undefined|
+| **id** | [**string**] | Unique project identifier to delete (UUID) | defaults to undefined|
 
 
 ### Return type
 
-**CreateProjectDto**
+void (empty response body)
 
 ### Authorization
 
@@ -243,20 +252,23 @@ const { status, data } = await apiInstance.projectControllerRemove(
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: application/json
+ - **Accept**: Not defined
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | The project has been successfully deleted. |  -  |
-|**404** | Project not found. |  -  |
+|**204** | Project successfully deleted |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Insufficient permissions to delete projects |  -  |
+|**404** | Project not found - The specified ID does not exist for this tenant |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **projectControllerUpdate**
-> CreateProjectDto projectControllerUpdate(updateProjectDto)
+> ProjectDto projectControllerUpdate(updateProjectDto)
 
+Updates an existing project\'s information. Accessible by global admins or tenant admins.
 
 ### Example
 
@@ -270,7 +282,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new ProjectsApi(configuration);
 
-let id: string; //Project CUID (default to undefined)
+let id: string; //Unique project identifier to update (UUID) (default to undefined)
 let updateProjectDto: UpdateProjectDto; //
 
 const { status, data } = await apiInstance.projectControllerUpdate(
@@ -284,12 +296,12 @@ const { status, data } = await apiInstance.projectControllerUpdate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **updateProjectDto** | **UpdateProjectDto**|  | |
-| **id** | [**string**] | Project CUID | defaults to undefined|
+| **id** | [**string**] | Unique project identifier to update (UUID) | defaults to undefined|
 
 
 ### Return type
 
-**CreateProjectDto**
+**ProjectDto**
 
 ### Authorization
 
@@ -304,9 +316,12 @@ const { status, data } = await apiInstance.projectControllerUpdate(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | The project has been successfully updated. |  -  |
-|**400** | Bad Request. |  -  |
-|**404** | Project not found. |  -  |
+|**200** | Project updated successfully |  -  |
+|**400** | Invalid input data - Check the request body format |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Insufficient permissions to update projects |  -  |
+|**404** | Project not found - The specified ID does not exist for this tenant |  -  |
+|**409** | Project name already exists - The provided name is already in use |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

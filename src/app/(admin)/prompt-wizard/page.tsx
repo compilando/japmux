@@ -4,9 +4,16 @@ import React, { useState } from 'react';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import { promptService } from '@/services/api';
 import { loadPromptStructure } from '@/services/promptApi';
-import { LoadPromptStructureDto, PromptAssetStructureDto, PromptMetaDto, PromptVersionStructureDto, PromptVersionTranslationDto, AssetTranslationStructureDto } from '@/services/generated/api';
+import { LoadPromptStructureDto } from '@/types/prompt-structure';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 import { useProjects } from '@/context/ProjectContext'; // Importar contexto de proyectos
+
+// Tipos locales para los que no están exportados
+type PromptAssetStructureDto = any;
+type PromptMetaDto = any;
+type PromptVersionStructureDto = any;
+type PromptVersionTranslationDto = any;
+type AssetTranslationStructureDto = any;
 
 // Definir interfaces para los datos generados
 interface PromptInfo {
@@ -55,11 +62,7 @@ const PromptWizardPage: React.FC = () => {
 
     const handleGenerateStructure = async () => {
         if (!selectedProjectId) {
-            showErrorToast('Please select a project first.');
-            return;
-        }
-        if (!promptContent.trim()) {
-            showErrorToast('Please write the prompt in the text area.');
+            showErrorToast('Please select a project first to generate the structure.');
             return;
         }
 
@@ -67,10 +70,13 @@ const PromptWizardPage: React.FC = () => {
         setErrorGenerate(null);
         setGeneratedJson(null);
         try {
-            const result = await promptService.generatePromptStructure(selectedProjectId, promptContent);
-            setGeneratedJson(result as StructureData);
-            setJsonToLoadInput(JSON.stringify(result, null, 2));
-            showSuccessToast('Structure generated successfully from the prompt.');
+            // TODO: Implementar generatePromptStructure en promptService
+            // const result = await promptService.generatePromptStructure(selectedProjectId, promptContent);
+            showErrorToast('Generate structure functionality is not yet implemented.');
+            setErrorGenerate('Generate structure functionality is not yet implemented.');
+            // setGeneratedJson(result as StructureData);
+            // setJsonToLoadInput(JSON.stringify(result, null, 2));
+            // showSuccessToast('Structure generated successfully from the prompt.');
         } catch (err: unknown) {
             console.error("Error generando estructura:", err);
             let apiErrorMessage = 'Error generating prompt structure.';
@@ -185,10 +191,13 @@ const PromptWizardPage: React.FC = () => {
         setLoadStatusMessage(null);
 
         try {
-            const result = await promptService.loadPromptStructure(selectedProjectId, parsedJson);
-            showSuccessToast('JSON structure loaded successfully.');
-            setLoadStatusMessage({ type: 'success', message: 'JSON structure loaded successfully.' });
-            setGeneratedJson(parsedJson);
+            // TODO: Implementar loadPromptStructure en promptService
+            // const result = await promptService.loadPromptStructure(selectedProjectId, parsedJson);
+            showErrorToast('Load structure functionality is not yet implemented.');
+            setLoadStatusMessage({ type: 'error', message: 'Load structure functionality is not yet implemented.' });
+            // showSuccessToast('JSON structure loaded successfully.');
+            // setLoadStatusMessage({ type: 'success', message: 'JSON structure loaded successfully.' });
+            // setGeneratedJson(parsedJson);
         } catch (error) {
             console.error("Error loading structure:", error);
             let errorMessage = 'Error loading JSON structure.';

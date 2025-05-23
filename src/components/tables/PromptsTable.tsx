@@ -6,6 +6,7 @@ import CopyButton from '../common/CopyButton';
 import { TrashBinIcon, PencilIcon, BoxCubeIcon } from "@/icons";
 import { BoltIcon, ClockIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import { promptVersionService, promptAssetService } from '@/services/api';
+import { getPromptTypeLabel, getPromptTypeColor } from '@/config/promptTypes';
 
 interface PromptsTableProps {
     prompts: PromptDto[];
@@ -60,35 +61,46 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
         }
     }, [prompts, projectId]);
 
-    // Función para determinar el tipo de prompt basándose en palabras clave
-    const determinePromptType = (prompt: PromptDto): string => {
+    // Función refactorizada para obtener el tipo del prompt
+    const getPromptType = (prompt: PromptDto): { label: string; color: string } => {
+        // Primero, intentar obtener el tipo del campo type si existe
+        const typeValue = (prompt as any).type?.value || (prompt as any).type;
+
+        if (typeValue && typeof typeValue === 'string') {
+            return {
+                label: getPromptTypeLabel(typeValue),
+                color: getPromptTypeColor(typeValue)
+            };
+        }
+
+        // Fallback: usar el sistema anterior de determinación automática
         const name = prompt.name?.toLowerCase() || '';
         const description = prompt.description?.toLowerCase() || '';
         const combined = `${name} ${description}`;
 
         if (combined.includes('expert') || combined.includes('specialist') || combined.includes('consultant')) {
-            return 'EXPERT';
+            return { label: 'EXPERT', color: getPromptTypeColor('EXPERT') };
         }
         if (combined.includes('assistant') || combined.includes('helper') || combined.includes('support')) {
-            return 'ASSISTANT';
+            return { label: 'ASSISTANT', color: getPromptTypeColor('ASSISTANT') };
         }
         if (combined.includes('task') || combined.includes('workflow') || combined.includes('process')) {
-            return 'TASK';
+            return { label: 'TASK', color: getPromptTypeColor('TASK') };
         }
         if (combined.includes('creative') || combined.includes('writing') || combined.includes('content') || combined.includes('story')) {
-            return 'CREATIVE';
+            return { label: 'CREATIVE', color: getPromptTypeColor('CREATIVE') };
         }
         if (combined.includes('analysis') || combined.includes('report') || combined.includes('analyze') || combined.includes('data')) {
-            return 'ANALYSIS';
+            return { label: 'ANALYSIS', color: getPromptTypeColor('ANALYSIS') };
         }
         if (combined.includes('technical') || combined.includes('code') || combined.includes('programming') || combined.includes('developer')) {
-            return 'TECHNICAL';
+            return { label: 'TECHNICAL', color: getPromptTypeColor('TECHNICAL') };
         }
         if (combined.includes('template') || combined.includes('basic') || combined.includes('simple')) {
-            return 'TEMPLATE';
+            return { label: 'TEMPLATE', color: getPromptTypeColor('TEMPLATE') };
         }
-        
-        return 'GENERAL';
+
+        return { label: 'GENERAL', color: getPromptTypeColor('GENERAL') };
     };
 
     if (loading && prompts.length === 0) {
@@ -110,8 +122,8 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex-1 min-w-0">
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate" title={item.name}>
-                                    <span className="text-sm font-mono text-indigo-600 dark:text-indigo-400 mr-2">
-                                        [{determinePromptType(item)}]
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mr-2 ${getPromptType(item).color}`}>
+                                        {getPromptType(item).label}
                                     </span>
                                     {item.id} <CopyButton textToCopy={item.id} />
                                 </h3>

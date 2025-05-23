@@ -159,7 +159,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
                 }
             };
 
-            const result = await rawExecutionService.executeRaw(executionDto);
+            const result = await rawExecutionService.execute(executionDto);
 
             if (result && typeof result === 'object' && 'response' in result) {
                 const resultWithResponse = result as { response: any };

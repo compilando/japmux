@@ -323,7 +323,7 @@ const PromptVersionsPage: React.FC = () => {
         }
     };
 
-    const handleSave = async (payload: CreatePromptVersionDto | UpdatePromptVersionDto, versionTagFromForm?: string) => {
+    const handleSave = async (payload: CreatePromptVersionDto | UpdatePromptVersionDto, versionTagFromForm?: string, languageCode?: string) => {
         try {
             if (!versionTagFromForm && !editingItem) {
                 showErrorToast('Version tag is required for new versions.');
@@ -338,7 +338,8 @@ const PromptVersionsPage: React.FC = () => {
                     promptText: (payload as CreatePromptVersionDto).promptText,
                     changeMessage: payload.changeMessage,
                     initialTranslations: (payload as CreatePromptVersionDto).initialTranslations,
-                    versionTag: versionTagFromForm
+                    versionTag: versionTagFromForm,
+                    languageCode: languageCode
                 };
 
                 if (!rawPayload.promptText) {
@@ -349,8 +350,12 @@ const PromptVersionsPage: React.FC = () => {
                     showErrorToast('Version tag is somehow missing before API call.');
                     return;
                 }
+                if (!rawPayload.languageCode) {
+                    showErrorToast('Language code is required for new versions.');
+                    return;
+                }
                 // Castear a 'any' temporalmente para diagnóstico, 
-                // para permitir que versionTag se envíe en el payload a pesar de la definición de CreatePromptVersionDto.
+                // para permitir que versionTag y languageCode se envíen en el payload a pesar de la definición de CreatePromptVersionDto.
                 await promptVersionService.create(projectId, promptId, rawPayload as any);
                 showSuccessToast('New version created successfully');
             }

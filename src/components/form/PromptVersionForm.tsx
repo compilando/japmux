@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { CreatePromptVersionDto, UpdatePromptVersionDto, promptAssetService, promptVersionService } from '@/services/api';
+import { CreatePromptVersionDto, UpdatePromptVersionDto } from '@/services/generated/api';
+import { promptAssetService, promptVersionService, regionService } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
 import {
@@ -9,15 +10,20 @@ import {
 import CopyButton from '../common/CopyButton';
 import PromptEditor from '../common/PromptEditor';
 import InsertReferenceButton from '../common/InsertReferenceButton';
+import { CreateRegionDto } from '@/services/generated/api';
 
-// Interface local para los datos del formulario, incluyendo versionTag
-export interface PromptVersionFormData extends CreatePromptVersionDto {
+// Interface local para los datos del formulario, incluyendo versionTag y languageCode
+export interface PromptVersionFormData {
+    promptText: string;
+    changeMessage?: string;
     versionTag?: string;
+    languageCode?: string;
+    initialTranslations?: Array<any>; // Mantener por compatibilidad si es necesario
 }
 
 interface PromptVersionFormProps {
     initialData: PromptVersionFormData | null;
-    onSave: (payload: CreatePromptVersionDto | UpdatePromptVersionDto, versionTag: string) => void;
+    onSave: (payload: CreatePromptVersionDto | UpdatePromptVersionDto, versionTag: string, languageCode?: string) => void;
     onCancel: () => void;
     latestVersionTag?: string;
     projectId: string;
@@ -37,45 +43,85 @@ const calculateNextVersionTag = (latestTag: string | null | undefined): string =
     }
 
     const [, major, minor, patch, prerelease, build] = match;
-    
+
     // Incrementar el número de patch
     const newPatch = parseInt(patch, 10) + 1;
-    
+
     // Reconstruir el tag con el nuevo número de patch
     let newTag = `${major}.${minor}.${newPatch}`;
-    
+
     // Añadir el sufijo de prerelease si existía
     if (prerelease) {
         newTag += prerelease;
     }
-    
+
     // Añadir el sufijo de build si existía
     if (build) {
         newTag += build;
     }
-    
+
     return newTag;
 };
 
 const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSave, onCancel, latestVersionTag, projectId, promptId }) => {
     const [promptText, setPromptText] = useState('');
-    const [versionTag, setVersionTag] = useState('v1.0.0');
+    const [versionTag, setVersionTag] = useState('1.0.0');
     const [changeMessage, setChangeMessage] = useState('');
+    const [languageCode, setLanguageCode] = useState('');
     const [assets, setAssets] = useState<PromptAssetData[]>([]);
     const [previousVersion, setPreviousVersion] = useState<{ versionTag: string; promptText: string } | null>(null);
+    const [regions, setRegions] = useState<CreateRegionDto[]>([]);
+    const [loadingRegions, setLoadingRegions] = useState(false);
 
     const isEditing = !!initialData;
+
+    // Fetch regions para el selector de language code
+    useEffect(() => {
+        const fetchRegions = async () => {
+            if (!projectId) return;
+            setLoadingRegions(true);
+            try {
+                const regionsData = await regionService.findAll(projectId);
+                setRegions(regionsData);
+
+                // Establecer valor por defecto
+                const defaultLanguageCode = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE_CODE || 'en-US';
+                const hasDefaultRegion = regionsData.some(region => region.languageCode === defaultLanguageCode);
+
+                if (hasDefaultRegion) {
+                    setLanguageCode(defaultLanguageCode);
+                } else if (regionsData.length > 0) {
+                    setLanguageCode(regionsData[0].languageCode);
+                } else {
+                    setLanguageCode('en-US'); // fallback
+                }
+            } catch (error) {
+                console.error('Error loading regions:', error);
+                // Fallback en caso de error
+                setLanguageCode('en-US');
+            } finally {
+                setLoadingRegions(false);
+            }
+        };
+
+        fetchRegions();
+    }, [projectId]);
 
     useEffect(() => {
         if (initialData) {
             setPromptText(initialData.promptText || '');
-            setVersionTag(initialData.versionTag || 'v1.0.0');
+            setVersionTag(initialData.versionTag || '1.0.0');
             setChangeMessage(initialData.changeMessage || '');
+            // Si hay languageCode en initialData y es válido, usarlo; sino esperar al efecto de regions
+            if (initialData.languageCode && initialData.languageCode.length >= 2) {
+                setLanguageCode(initialData.languageCode);
+            }
         } else {
             setPromptText('');
             const suggestedTag = calculateNextVersionTag(latestVersionTag);
             setVersionTag(suggestedTag);
             setChangeMessage('');
+            // languageCode se establece en el useEffect de regions
         }
     }, [initialData, latestVersionTag]);
 
@@ -99,8 +145,10 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
             try {
                 const version = await promptVersionService.findOne(projectId, promptId, latestVersionTag);
                 if (version) {
+                    // El backend incluye versionTag aunque los tipos generados no lo reflejen
+                    const versionWithTag = version as any;
                     setPreviousVersion({
-                        versionTag: version.versionTag,
+                        versionTag: versionWithTag.versionTag || latestVersionTag,
                         promptText: version.promptText || ''
                     });
                 }
@@ -134,9 +182,14 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                 alert("Prompt Text is required!");
                 return;
             }
+
+            if (!languageCode || languageCode.length < 2) {
+                alert("Language Code is required and must be at least 2 characters long!");
+                return;
+            }
         }
 
-        onSave(payload, versionTag);
+        onSave(payload, versionTag, languageCode);
     };
 
     return (
@@ -193,6 +246,40 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                             title="Semantic Versioning format (e.g., 1.0.0, 1.2.3-beta)"
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500 font-mono"
                         />
+                    </div>
+
+                    <div>
+                        <label htmlFor="languageCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Language Code *
+                        </label>
+                        <select
+                            id="languageCode"
+                            value={languageCode}
+                            onChange={(e) => setLanguageCode(e.target.value)}
+                            required
+                            disabled={loadingRegions}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-500"
+                        >
+                            {loadingRegions ? (
+                                <option value={languageCode || 'en-US'}>Cargando regiones...</option>
+                            ) : regions.length === 0 ? (
+                                <option value="en-US">en-US (default)</option>
+                            ) : (
+                                <>
+                                    {!regions.some(region => region.languageCode === languageCode) && languageCode && (
+                                        <option value={languageCode}>{languageCode} (actual)</option>
+                                    )}
+                                    {regions.map((region) => (
+                                        <option key={region.languageCode} value={region.languageCode}>
+                                            {region.languageCode} - {region.name}
+                                        </option>
+                                    ))}
+                                </>
+                            )}
+                        </select>
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Selecciona el idioma base para esta versión del prompt
+                        </p>
                     </div>
 
                     <div>

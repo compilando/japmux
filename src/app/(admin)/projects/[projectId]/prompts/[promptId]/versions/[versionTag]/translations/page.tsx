@@ -99,8 +99,9 @@ const PromptTranslationsPage: React.FC = () => {
                 if (version?.promptText) {
                     setVersionText(version.promptText);
                 }
-                if (version?.languageCode) {
-                    setOriginalVersionLanguageCode(version.languageCode);
+                const versionWithExtras = version as any;
+                if (versionWithExtras?.languageCode) {
+                    setOriginalVersionLanguageCode(versionWithExtras.languageCode);
                 } else {
                     setOriginalVersionLanguageCode(null);
                 }
@@ -131,7 +132,8 @@ const PromptTranslationsPage: React.FC = () => {
                 throw new Error("Version not found");
             }
 
-            setCurrentVersionId(version.id);
+            const versionWithExtras = version as any;
+            setCurrentVersionId(versionWithExtras.id || versionTag);
 
             const data = await promptTranslationService.findAll(projectId, promptId, versionTag);
             if (Array.isArray(data)) {

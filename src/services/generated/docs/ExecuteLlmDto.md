@@ -5,9 +5,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**modelId** | **string** | ID of the AIModel to use (from the AIModel table) | [default to undefined]
-**promptText** | **string** | The complete prompt text already processed and ready to send to the LLM | [default to undefined]
-**variables** | **object** | Original variables used to assemble the prompt (optional, for logging/context) | [optional] [default to undefined]
+**modelId** | **string** | ID del modelo de IA a utilizar | [default to undefined]
+**promptId** | **string** | ID del prompt a ejecutar | [optional] [default to undefined]
+**projectId** | **string** | ID del proyecto al que pertenece el prompt | [optional] [default to undefined]
+**versionTag** | **string** | Versión del prompt a ejecutar | [optional] [default to 'latest']
+**languageCode** | **string** | Código de idioma para el prompt | [optional] [default to undefined]
+**variables** | **object** | Variables para sustituir en el prompt | [optional] [default to undefined]
+**promptText** | **string** | Texto del prompt a ejecutar (solo si no se proporciona promptId) | [optional] [default to undefined]
 
 ## Example
 
@@ -16,8 +20,12 @@ import { ExecuteLlmDto } from './api';
 
 const instance: ExecuteLlmDto = {
     modelId,
-    promptText,
+    promptId,
+    projectId,
+    versionTag,
+    languageCode,
     variables,
+    promptText,
 };
 ```
 

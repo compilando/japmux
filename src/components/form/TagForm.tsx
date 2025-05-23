@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Tag, TagCreatePayload, TagUpdatePayload } from '@/services/api'; // Make sure the path is correct
+import { TagDto, CreateTagDto, UpdateTagDto } from '@/services/api'; // Usar los tipos correctos
 
 interface TagFormProps {
-    initialData: Tag | null;
-    onSave: (payload: TagCreatePayload | TagUpdatePayload) => void;
+    initialData: TagDto | null;
+    onSave: (payload: CreateTagDto | UpdateTagDto) => void;
     onCancel: () => void;
 }
 
@@ -23,7 +23,7 @@ const TagForm: React.FC<TagFormProps> = ({ initialData, onSave, onCancel }) => {
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        const payload: TagCreatePayload | TagUpdatePayload = {
+        const payload: CreateTagDto | UpdateTagDto = {
             name,
             // TODO: Add other fields to the payload
         };

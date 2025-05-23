@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CreatePromptAssetVersionDto, UpdatePromptAssetVersionDto } from '@/services/api';
+import { regionService } from '@/services/api';
+import { CreateRegionDto } from '@/services/generated/api';
 
 interface PromptAssetVersionFormProps {
     initialData: CreatePromptAssetVersionDto | null;
@@ -24,39 +26,81 @@ const calculateNextAssetVersionTag = (latestTag: string | null | undefined): str
         }
     }
 
-    if (!baseTag || !baseTag.startsWith('v')) return 'v1.0.0'; // Default si no hay base o formato incorrecto
+    if (!baseTag) return '1.0.0'; // Default si no hay base
 
-    const parts = baseTag.substring(1).split('.').map(Number);
-    if (parts.length !== 3 || parts.some(isNaN)) return 'v1.0.0'; // Default si el formato no es vX.Y.Z
+    // Normalizar: quitar "v" si existe
+    const normalizedBase = baseTag.startsWith('v') ? baseTag.substring(1) : baseTag;
+    const parts = normalizedBase.split('.').map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) return '1.0.0'; // Default si el formato no es X.Y.Z
 
     parts[2]++; // Incrementar patch
     // Podría añadirse lógica para incrementar minor/major si es necesario
 
-    return `v${parts.join('.')}${suffix}`;
+    return `${parts.join('.')}${suffix}`;
 };
 
 const PromptAssetVersionForm: React.FC<PromptAssetVersionFormProps> = ({ initialData, onSave, onCancel, latestVersionTag, projectId, promptId, assetKey }) => {
     const [value, setValue] = useState('');
     // Usar latestVersionTag para inicializar el estado de versionTag en modo creación
     const [versionTag, setVersionTag] = useState(() => {
-        if (initialData) return initialData.versionTag || 'v1.0.0';
+        if (initialData) return initialData.versionTag || '1.0.0';
         return calculateNextAssetVersionTag(latestVersionTag);
     });
     const [changeMessage, setChangeMessage] = useState('');
+    const [languageCode, setLanguageCode] = useState('');
+    const [regions, setRegions] = useState<CreateRegionDto[]>([]);
+    const [loadingRegions, setLoadingRegions] = useState(false);
 
     const isEditing = !!initialData;
+
+    // Fetch regions para el selector de language code
+    useEffect(() => {
+        const fetchRegions = async () => {
+            if (!projectId) return;
+            setLoadingRegions(true);
+            try {
+                const regionsData = await regionService.findAll(projectId);
+                setRegions(regionsData);
+
+                // Establecer valor por defecto
+                const defaultLanguageCode = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE_CODE || 'en-US';
+                const hasDefaultRegion = regionsData.some(region => region.languageCode === defaultLanguageCode);
+
+                if (hasDefaultRegion) {
+                    setLanguageCode(defaultLanguageCode);
+                } else if (regionsData.length > 0) {
+                    setLanguageCode(regionsData[0].languageCode);
+                } else {
+                    setLanguageCode('en-US'); // fallback
+                }
+            } catch (error) {
+                console.error('Error loading regions:', error);
+                // Fallback en caso de error
+                setLanguageCode('en-US');
+            } finally {
+                setLoadingRegions(false);
+            }
+        };
+
+        fetchRegions();
+    }, [projectId]);
 
     useEffect(() => {
         if (initialData) {
             setValue(initialData.value || '');
-            setVersionTag(initialData.versionTag || 'v1.0.0'); // Si es edición, usar el tag existente
+            setVersionTag(initialData.versionTag || '1.0.0'); // Si es edición, usar el tag existente
             setChangeMessage(initialData.changeMessage || '');
+            // Si hay languageCode en initialData y es válido, usarlo; sino esperar al efecto de regions
+            if (initialData.languageCode && initialData.languageCode.length >= 2) {
+                setLanguageCode(initialData.languageCode);
+            }
         } else {
             // En modo creación, ya se establece arriba con calculateNextAssetVersionTag
             // así que solo reseteamos los otros campos
             setValue('');
             setVersionTag(calculateNextAssetVersionTag(latestVersionTag)); // Asegurar que se recalcula si latestVersionTag cambia
             setChangeMessage('');
+            // languageCode se establece en el useEffect de regions
         }
     }, [initialData, latestVersionTag]);
 
@@ -74,6 +118,7 @@ const PromptAssetVersionForm: React.FC<PromptAssetVersionFormProps> = ({ initial
                 value,
                 versionTag: versionTag,
                 changeMessage: changeMessage || undefined,
+                languageCode: languageCode,
             } as CreatePromptAssetVersionDto;
             if (!value) {
                 alert("Value is required for a new version!");
@@ -81,6 +126,14 @@ const PromptAssetVersionForm: React.FC<PromptAssetVersionFormProps> = ({ initial
             }
             if (!versionTag) {
                 alert("Version Tag is required for a new version!");
+                return;
+            }
+            if (!languageCode) {
+                alert("Language Code is required for a new version!");
+                return;
+            }
+            if (languageCode.length < 2) {
+                alert("Language Code must be at least 2 characters long!");
                 return;
             }
         }
@@ -98,13 +151,49 @@ const PromptAssetVersionForm: React.FC<PromptAssetVersionFormProps> = ({ initial
                     onChange={(e) => setVersionTag(e.target.value)}
                     required
                     disabled={isEditing}
-                    pattern="^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?(\+[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?$"
-                    title="Semantic Versioning format (e.g., v1.0.0, v1.2.3-beta)"
+                    pattern="^\d+\.\d+\.\d+(-[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?(\+[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?$"
+                    title="Semantic Versioning format (e.g., 1.0.0, 1.2.3-beta)"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500 disabled:text-gray-400"
-                    placeholder="e.g., v1.0.1"
+                    placeholder="e.g., 1.0.1"
                 />
                 {isEditing && <p className="text-xs text-gray-500 dark:text-gray-400">Version tag cannot be changed after creation.</p>}
             </div>
+
+            <div>
+                <label htmlFor="languageCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Language Code *
+                </label>
+                <select
+                    id="languageCode"
+                    value={languageCode}
+                    onChange={(e) => setLanguageCode(e.target.value)}
+                    required
+                    disabled={isEditing || loadingRegions}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-500"
+                >
+                    {loadingRegions ? (
+                        <option value={languageCode || 'en-US'}>Cargando regiones...</option>
+                    ) : regions.length === 0 ? (
+                        <option value="en-US">en-US (default)</option>
+                    ) : (
+                        <>
+                            {!regions.some(region => region.languageCode === languageCode) && languageCode && (
+                                <option value={languageCode}>{languageCode} (actual)</option>
+                            )}
+                            {regions.map((region) => (
+                                <option key={region.languageCode} value={region.languageCode}>
+                                    {region.languageCode} - {region.name}
+                                </option>
+                            ))}
+                        </>
+                    )}
+                </select>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Selecciona el idioma base para esta versión del asset
+                </p>
+                {isEditing && <p className="text-xs text-gray-500 dark:text-gray-400">Language code cannot be changed after creation.</p>}
+            </div>
+
             <div>
                 <label htmlFor="value" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Value / Content</label>
                 <textarea

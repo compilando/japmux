@@ -25,7 +25,7 @@ const apiInstance = new ServePromptApi(configuration);
 
 let projectId: string; //Project ID (default to undefined)
 let promptName: string; //The unique name of the prompt within the project (default to undefined)
-let versionTag: string; //Specific version tag (e.g., \"v1.2.0\") (default to undefined)
+let versionTag: string; //Specific version tag (e.g., \"v1.2.0\") or \"latest\" to use the most recent version (default to undefined)
 let languageCode: string; //Language code for translation (e.g., \"es\") (default to undefined)
 let executePromptBodyDto: ExecutePromptBodyDto; //Input variables for the prompt
 
@@ -45,7 +45,7 @@ const { status, data } = await apiInstance.servePromptControllerExecutePromptWit
 | **executePromptBodyDto** | **ExecutePromptBodyDto**| Input variables for the prompt | |
 | **projectId** | [**string**] | Project ID | defaults to undefined|
 | **promptName** | [**string**] | The unique name of the prompt within the project | defaults to undefined|
-| **versionTag** | [**string**] | Specific version tag (e.g., \&quot;v1.2.0\&quot;) | defaults to undefined|
+| **versionTag** | [**string**] | Specific version tag (e.g., \&quot;v1.2.0\&quot;) or \&quot;latest\&quot; to use the most recent version | defaults to undefined|
 | **languageCode** | [**string**] | Language code for translation (e.g., \&quot;es\&quot;) | defaults to undefined|
 
 
@@ -93,16 +93,14 @@ const apiInstance = new ServePromptApi(configuration);
 
 let projectId: string; //Project ID (default to undefined)
 let promptName: string; //The unique name of the prompt within the project (default to undefined)
-let versionTag: string; //Specific version tag (e.g., \"v1.2.0\") (default to undefined)
+let versionTag: string; //Specific version tag (e.g., \"v1.2.0\") or \"latest\" to use the most recent version (default to undefined)
 let executePromptBodyDto: ExecutePromptBodyDto; //Input variables for the prompt
-let languageCode: string; // (optional) (default to undefined)
 
 const { status, data } = await apiInstance.servePromptControllerExecutePromptWithoutLanguage(
     projectId,
     promptName,
     versionTag,
-    executePromptBodyDto,
-    languageCode
+    executePromptBodyDto
 );
 ```
 
@@ -113,8 +111,7 @@ const { status, data } = await apiInstance.servePromptControllerExecutePromptWit
 | **executePromptBodyDto** | **ExecutePromptBodyDto**| Input variables for the prompt | |
 | **projectId** | [**string**] | Project ID | defaults to undefined|
 | **promptName** | [**string**] | The unique name of the prompt within the project | defaults to undefined|
-| **versionTag** | [**string**] | Specific version tag (e.g., \&quot;v1.2.0\&quot;) | defaults to undefined|
-| **languageCode** | [**string**] |  | (optional) defaults to undefined|
+| **versionTag** | [**string**] | Specific version tag (e.g., \&quot;v1.2.0\&quot;) or \&quot;latest\&quot; to use the most recent version | defaults to undefined|
 
 
 ### Return type

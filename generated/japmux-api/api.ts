@@ -105,25 +105,6 @@ export interface AiModelResponseDto {
 /**
  * 
  * @export
- * @interface AssetTranslationStructureDto
- */
-export interface AssetTranslationStructureDto {
-    /**
-     * Language code for the asset value translation.
-     * @type {string}
-     * @memberof AssetTranslationStructureDto
-     */
-    'languageCode': string;
-    /**
-     * Translated value of the asset.
-     * @type {string}
-     * @memberof AssetTranslationStructureDto
-     */
-    'value': string;
-}
-/**
- * 
- * @export
  * @interface CreateAiModelDto
  */
 export interface CreateAiModelDto {
@@ -196,25 +177,13 @@ export interface CreateCulturalDataDto {
      */
     'regionId': string;
     /**
-     * Formality level (1-10)
-     * @type {number}
-     * @memberof CreateCulturalDataDto
-     */
-    'formalityLevel'?: number;
-    /**
-     * Description of the communication style
+     * The style of communication
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
-    'style'?: string;
+    'style': string;
     /**
-     * Specific cultural considerations
-     * @type {string}
-     * @memberof CreateCulturalDataDto
-     */
-    'considerations'?: string;
-    /**
-     * General notes
+     * Additional notes
      * @type {string}
      * @memberof CreateCulturalDataDto
      */
@@ -283,7 +252,7 @@ export interface CreatePromptAssetDto {
      */
     'category'?: string;
     /**
-     * Valor inicial del asset para la primera versión (v1.0.0)
+     * Valor inicial del asset para la primera versión (1.0.0)
      * @type {string}
      * @memberof CreatePromptAssetDto
      */
@@ -314,7 +283,7 @@ export interface CreatePromptAssetVersionDto {
      */
     'value': string;
     /**
-     * Etiqueta de versión (e.g., v1.0.1, v1.1.0). Si no se provee, se podría auto-incrementar o requerir.
+     * Etiqueta de versión (e.g., 1.0.1, 1.1.0). Si no se provee, se podría auto-incrementar o requerir.
      * @type {string}
      * @memberof CreatePromptAssetVersionDto
      */
@@ -325,6 +294,12 @@ export interface CreatePromptAssetVersionDto {
      * @memberof CreatePromptAssetVersionDto
      */
     'changeMessage'?: string;
+    /**
+     * Código de idioma para la versión del asset (ej: en-US, es-ES).
+     * @type {string}
+     * @memberof CreatePromptAssetVersionDto
+     */
+    'languageCode'?: string;
 }
 /**
  * 
@@ -351,7 +326,13 @@ export interface CreatePromptDto {
      */
     'tags'?: Set<string>;
     /**
-     * Base prompt text for the first version (v1.0.0)
+     * The type of prompt
+     * @type {object}
+     * @memberof CreatePromptDto
+     */
+    'type': object;
+    /**
+     * Base prompt text for the first version (1.0.0)
      * @type {string}
      * @memberof CreatePromptDto
      */
@@ -401,7 +382,7 @@ export interface CreatePromptVersionDto {
      */
     'promptText': string;
     /**
-     * Tag de versión para esta nueva versión (e.g., v1.0.0, v1.0.0-beta.1). Debe ser único por prompt.
+     * Tag de versión para esta nueva versión (e.g., 1.0.0, 1.0.0-beta.1). Debe ser único por prompt.
      * @type {string}
      * @memberof CreatePromptVersionDto
      */
@@ -638,9 +619,9 @@ export interface CreateUserDto {
 }
 
 export const CreateUserDtoRoleEnum = {
-    User: 'USER',
-    Admin: 'ADMIN',
-    TenantAdmin: 'TENANT_ADMIN'
+    User: 'user',
+    Admin: 'admin',
+    TenantAdmin: 'tenant_admin'
 } as const;
 
 export type CreateUserDtoRoleEnum = typeof CreateUserDtoRoleEnum[keyof typeof CreateUserDtoRoleEnum];
@@ -664,25 +645,13 @@ export interface CulturalDataResponse {
      */
     'regionId': string;
     /**
-     * Formality level (1-10)
-     * @type {number}
-     * @memberof CulturalDataResponse
-     */
-    'formalityLevel'?: number;
-    /**
-     * Description of the communication style
+     * The style of communication
      * @type {string}
      * @memberof CulturalDataResponse
      */
-    'style'?: string;
+    'style': string;
     /**
-     * Specific cultural considerations
-     * @type {string}
-     * @memberof CulturalDataResponse
-     */
-    'considerations'?: string;
-    /**
-     * General notes
+     * Additional notes
      * @type {string}
      * @memberof CulturalDataResponse
      */
@@ -707,23 +676,47 @@ export interface CulturalDataResponse {
  */
 export interface ExecuteLlmDto {
     /**
-     * ID of the AIModel to use (from the AIModel table)
+     * ID del modelo de IA a utilizar
      * @type {string}
      * @memberof ExecuteLlmDto
      */
     'modelId': string;
     /**
-     * The complete prompt text already processed and ready to send to the LLM
+     * ID del prompt a ejecutar
      * @type {string}
      * @memberof ExecuteLlmDto
      */
-    'promptText': string;
+    'promptId'?: string;
     /**
-     * Original variables used to assemble the prompt (optional, for logging/context)
+     * ID del proyecto al que pertenece el prompt
+     * @type {string}
+     * @memberof ExecuteLlmDto
+     */
+    'projectId'?: string;
+    /**
+     * Versión del prompt a ejecutar
+     * @type {string}
+     * @memberof ExecuteLlmDto
+     */
+    'versionTag'?: string;
+    /**
+     * Código de idioma para el prompt
+     * @type {string}
+     * @memberof ExecuteLlmDto
+     */
+    'languageCode'?: string;
+    /**
+     * Variables para sustituir en el prompt
      * @type {object}
      * @memberof ExecuteLlmDto
      */
     'variables'?: object;
+    /**
+     * Texto del prompt a ejecutar (solo si no se proporciona promptId)
+     * @type {string}
+     * @memberof ExecuteLlmDto
+     */
+    'promptText'?: string;
 }
 /**
  * 
@@ -881,37 +874,6 @@ export interface InitialTranslationDto {
 /**
  * 
  * @export
- * @interface LoadPromptStructureDto
- */
-export interface LoadPromptStructureDto {
-    /**
-     * Metadata for the prompt to be created.
-     * @type {PromptMetaDto}
-     * @memberof LoadPromptStructureDto
-     */
-    'prompt': PromptMetaDto;
-    /**
-     * Structure for the initial prompt version.
-     * @type {PromptVersionStructureDto}
-     * @memberof LoadPromptStructureDto
-     */
-    'version': PromptVersionStructureDto;
-    /**
-     * List of assets to be created and associated with the prompt (conceptually via placeholders).
-     * @type {Array<PromptAssetStructureDto>}
-     * @memberof LoadPromptStructureDto
-     */
-    'assets': Array<PromptAssetStructureDto>;
-    /**
-     * Optional list of tag names to associate with the prompt.
-     * @type {Array<string>}
-     * @memberof LoadPromptStructureDto
-     */
-    'tags'?: Array<string>;
-}
-/**
- * 
- * @export
  * @interface LoginDto
  */
 export interface LoginDto {
@@ -935,7 +897,7 @@ export interface LoginDto {
  */
 export interface LoginResponse {
     /**
-     * 
+     * JWT access token for authentication
      * @type {string}
      * @memberof LoginResponse
      */
@@ -944,39 +906,70 @@ export interface LoginResponse {
 /**
  * 
  * @export
- * @interface PromptAssetStructureDto
+ * @interface ProjectDto
  */
-export interface PromptAssetStructureDto {
+export interface ProjectDto {
     /**
-     * Unique key for the asset in slug-case format. This key is used in {{placeholders}}.
+     * Unique identifier for the project
      * @type {string}
-     * @memberof PromptAssetStructureDto
+     * @memberof ProjectDto
      */
-    'key': string;
+    'id': string;
     /**
-     * Descriptive name for the asset.
+     * Name of the project
      * @type {string}
-     * @memberof PromptAssetStructureDto
+     * @memberof ProjectDto
      */
     'name': string;
     /**
-     * The original extracted value for the asset.
+     * Optional description of the project
      * @type {string}
-     * @memberof PromptAssetStructureDto
+     * @memberof ProjectDto
      */
-    'value': string;
+    'description'?: string;
     /**
-     * Change message for this asset version.
+     * ID of the tenant this project belongs to
      * @type {string}
-     * @memberof PromptAssetStructureDto
+     * @memberof ProjectDto
      */
-    'changeMessage': string;
+    'tenantId': string;
     /**
-     * Translations for the asset value.
-     * @type {Array<AssetTranslationStructureDto>}
-     * @memberof PromptAssetStructureDto
+     * ID of the user who owns this project
+     * @type {string}
+     * @memberof ProjectDto
      */
-    'translations': Array<AssetTranslationStructureDto>;
+    'ownerUserId': string;
+    /**
+     * Creation timestamp
+     * @type {string}
+     * @memberof ProjectDto
+     */
+    'createdAt': string;
+    /**
+     * Last update timestamp
+     * @type {string}
+     * @memberof ProjectDto
+     */
+    'updatedAt': string;
+}
+/**
+ * 
+ * @export
+ * @interface PromptControllerGenerateStructure200Response
+ */
+export interface PromptControllerGenerateStructure200Response {
+    /**
+     * Estructura sugerida para el prompt
+     * @type {object}
+     * @memberof PromptControllerGenerateStructure200Response
+     */
+    'structure'?: object;
+    /**
+     * Explicación de la estructura sugerida
+     * @type {string}
+     * @memberof PromptControllerGenerateStructure200Response
+     */
+    'explanation'?: string;
 }
 /**
  * 
@@ -1008,75 +1001,6 @@ export interface PromptDto {
      * @memberof PromptDto
      */
     'projectId': string;
-}
-/**
- * 
- * @export
- * @interface PromptMetaDto
- */
-export interface PromptMetaDto {
-    /**
-     * Suggested name for the prompt.
-     * @type {string}
-     * @memberof PromptMetaDto
-     */
-    'name': string;
-    /**
-     * Suggested description for the prompt.
-     * @type {string}
-     * @memberof PromptMetaDto
-     */
-    'description': string;
-}
-/**
- * 
- * @export
- * @interface PromptVersionStructureDto
- */
-export interface PromptVersionStructureDto {
-    /**
-     * Core prompt text, potentially including {{asset_key}} placeholders.
-     * @type {string}
-     * @memberof PromptVersionStructureDto
-     */
-    'promptText': string;
-    /**
-     * Change message for this version.
-     * @type {string}
-     * @memberof PromptVersionStructureDto
-     */
-    'changeMessage': string;
-    /**
-     * Array of asset keys (slug-case) used in this prompt version. These keys must correspond to assets defined in the main \"assets\" list.
-     * @type {Array<string>}
-     * @memberof PromptVersionStructureDto
-     */
-    'assets': Array<string>;
-    /**
-     * Translations for the prompt text.
-     * @type {Array<PromptVersionTranslationDto>}
-     * @memberof PromptVersionStructureDto
-     */
-    'translations': Array<PromptVersionTranslationDto>;
-}
-/**
- * 
- * @export
- * @interface PromptVersionTranslationDto
- */
-export interface PromptVersionTranslationDto {
-    /**
-     * Language code for the translation.
-     * @type {string}
-     * @memberof PromptVersionTranslationDto
-     */
-    'languageCode': string;
-    /**
-     * Translated prompt text, potentially including {{asset_key}} placeholders.
-     * @type {string}
-     * @memberof PromptVersionTranslationDto
-     */
-    'promptText': string;
 }
 /**
  * 
@@ -1138,6 +1062,79 @@ export interface RagDocumentMetadataResponse {
      * @memberof RagDocumentMetadataResponse
      */
     'projectId': string;
+}
+/**
+ * 
+ * @export
+ * @interface RegionDto
+ */
+export interface RegionDto {
+    /**
+     * Unique identifier for the region
+     * @type {string}
+     * @memberof RegionDto
+     */
+    'id': string;
+    /**
+     * Name of the region
+     * @type {string}
+     * @memberof RegionDto
+     */
+    'name': string;
+    /**
+     * Optional description of the region
+     * @type {string}
+     * @memberof RegionDto
+     */
+    'description'?: string;
+    /**
+     * ID of the project this region belongs to
+     * @type {string}
+     * @memberof RegionDto
+     */
+    'projectId': string;
+    /**
+     * Language code for the region
+     * @type {string}
+     * @memberof RegionDto
+     */
+    'languageCode': string;
+    /**
+     * ID of the parent region, if any
+     * @type {string}
+     * @memberof RegionDto
+     */
+    'parentRegionId'?: string | null;
+    /**
+     * Time zone for the region
+     * @type {string}
+     * @memberof RegionDto
+     */
+    'timeZone': string;
+    /**
+     * Default formality level for the region
+     * @type {string}
+     * @memberof RegionDto
+     */
+    'defaultFormalityLevel'?: string | null;
+    /**
+     * Optional notes about the region
+     * @type {string}
+     * @memberof RegionDto
+     */
+    'notes'?: string;
+    /**
+     * Creation timestamp
+     * @type {string}
+     * @memberof RegionDto
+     */
+    'createdAt': string;
+    /**
+     * Last update timestamp
+     * @type {string}
+     * @memberof RegionDto
+     */
+    'updatedAt': string;
 }
 /**
  * 
@@ -1283,29 +1280,23 @@ export interface UpdateAssetTranslationDto {
  */
 export interface UpdateCulturalDataDto {
     /**
-     * Formality level (1-10)
-     * @type {number}
-     * @memberof UpdateCulturalDataDto
-     */
-    'formalityLevel'?: number;
-    /**
-     * Description of the communication style
+     * The style of communication
      * @type {string}
      * @memberof UpdateCulturalDataDto
      */
     'style'?: string;
     /**
-     * Specific cultural considerations
-     * @type {string}
-     * @memberof UpdateCulturalDataDto
-     */
-    'considerations'?: string;
-    /**
-     * General notes
+     * Additional notes
      * @type {string}
      * @memberof UpdateCulturalDataDto
      */
     'notes'?: string;
+    /**
+     * The key identifier for the cultural data
+     * @type {string}
+     * @memberof UpdateCulturalDataDto
+     */
+    'key'?: string;
 }
 /**
  * 
@@ -1388,6 +1379,12 @@ export interface UpdatePromptAssetVersionDto {
      * @memberof UpdatePromptAssetVersionDto
      */
     'changeMessage'?: string;
+    /**
+     * Código de idioma para la versión del asset (ej: en-US, es-ES).
+     * @type {string}
+     * @memberof UpdatePromptAssetVersionDto
+     */
+    'languageCode'?: string;
 }
 /**
  * 
@@ -1434,7 +1431,7 @@ export interface UpdatePromptVersionDto {
      */
     'promptText'?: string;
     /**
-     * Tag de versión para esta nueva versión (e.g., v1.0.0, v1.0.0-beta.1). Debe ser único por prompt.
+     * Tag de versión para esta nueva versión (e.g., 1.0.0, 1.0.0-beta.1). Debe ser único por prompt.
      * @type {string}
      * @memberof UpdatePromptVersionDto
      */
@@ -1565,25 +1562,25 @@ export interface UpdateTenantDto {
  */
 export interface UserProfileResponse {
     /**
-     * 
+     * Unique user identifier
      * @type {string}
      * @memberof UserProfileResponse
      */
     'id': string;
     /**
-     * 
+     * User\'s email address
      * @type {string}
      * @memberof UserProfileResponse
      */
     'email': string;
     /**
-     * 
+     * User\'s full name
      * @type {string}
      * @memberof UserProfileResponse
      */
     'name': string;
     /**
-     * 
+     * Account creation timestamp
      * @type {string}
      * @memberof UserProfileResponse
      */
@@ -2107,105 +2104,18 @@ export class AIModelsProjectSpecificApi extends BaseAPI {
 
 
 /**
- * AppApi - axios parameter creator
+ * AssetApi - axios parameter creator
  * @export
  */
-export const AppApiAxiosParamCreator = function (configuration?: Configuration) {
+export const AssetApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
          * 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        appControllerAdminCheck: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/admin-check`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        appControllerAnyAuthenticatedCheck: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/any-authenticated-check`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        appControllerTenantAdminCheck: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/tenant-admin-check`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        appControllerUserCheck: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/user-check`;
+        assetControllerFindAll: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/assets`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -2232,146 +2142,59 @@ export const AppApiAxiosParamCreator = function (configuration?: Configuration) 
 };
 
 /**
- * AppApi - functional programming interface
+ * AssetApi - functional programming interface
  * @export
  */
-export const AppApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = AppApiAxiosParamCreator(configuration)
+export const AssetApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = AssetApiAxiosParamCreator(configuration)
     return {
         /**
          * 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async appControllerAdminCheck(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.appControllerAdminCheck(options);
+        async assetControllerFindAll(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.assetControllerFindAll(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AppApi.appControllerAdminCheck']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async appControllerAnyAuthenticatedCheck(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.appControllerAnyAuthenticatedCheck(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AppApi.appControllerAnyAuthenticatedCheck']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async appControllerTenantAdminCheck(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.appControllerTenantAdminCheck(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AppApi.appControllerTenantAdminCheck']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async appControllerUserCheck(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.appControllerUserCheck(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AppApi.appControllerUserCheck']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AssetApi.assetControllerFindAll']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
 };
 
 /**
- * AppApi - factory interface
+ * AssetApi - factory interface
  * @export
  */
-export const AppApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = AppApiFp(configuration)
+export const AssetApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = AssetApiFp(configuration)
     return {
         /**
          * 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        appControllerAdminCheck(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.appControllerAdminCheck(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        appControllerAnyAuthenticatedCheck(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.appControllerAnyAuthenticatedCheck(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        appControllerTenantAdminCheck(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.appControllerTenantAdminCheck(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        appControllerUserCheck(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.appControllerUserCheck(options).then((request) => request(axios, basePath));
+        assetControllerFindAll(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.assetControllerFindAll(options).then((request) => request(axios, basePath));
         },
     };
 };
 
 /**
- * AppApi - object-oriented interface
+ * AssetApi - object-oriented interface
  * @export
- * @class AppApi
+ * @class AssetApi
  * @extends {BaseAPI}
  */
-export class AppApi extends BaseAPI {
+export class AssetApi extends BaseAPI {
     /**
      * 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof AppApi
+     * @memberof AssetApi
      */
-    public appControllerAdminCheck(options?: RawAxiosRequestConfig) {
-        return AppApiFp(this.configuration).appControllerAdminCheck(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AppApi
-     */
-    public appControllerAnyAuthenticatedCheck(options?: RawAxiosRequestConfig) {
-        return AppApiFp(this.configuration).appControllerAnyAuthenticatedCheck(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AppApi
-     */
-    public appControllerTenantAdminCheck(options?: RawAxiosRequestConfig) {
-        return AppApiFp(this.configuration).appControllerTenantAdminCheck(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AppApi
-     */
-    public appControllerUserCheck(options?: RawAxiosRequestConfig) {
-        return AppApiFp(this.configuration).appControllerUserCheck(options).then((request) => request(this.axios, this.basePath));
+    public assetControllerFindAll(options?: RawAxiosRequestConfig) {
+        return AssetApiFp(this.configuration).assetControllerFindAll(options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -2926,14 +2749,317 @@ export class AssetTranslationsProjectPromptAssetVersionTranslationApi extends Ba
 
 
 /**
+ * AutenticacinYRolesApi - axios parameter creator
+ * @export
+ */
+export const AutenticacinYRolesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Endpoint para verificar si el usuario tiene rol de administrador
+         * @summary Verificar acceso de administrador
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        appControllerAdminCheck: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/admin-check`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Endpoint para verificar si el usuario está autenticado (sin requerir rol específico)
+         * @summary Verificar autenticación
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        appControllerAnyAuthenticatedCheck: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/any-authenticated-check`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Endpoint para verificar si el usuario tiene rol de administrador de tenant
+         * @summary Verificar acceso de administrador de tenant
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        appControllerTenantAdminCheck: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/tenant-admin-check`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Endpoint para verificar si el usuario tiene rol de usuario básico
+         * @summary Verificar acceso de usuario
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        appControllerUserCheck: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/user-check`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * AutenticacinYRolesApi - functional programming interface
+ * @export
+ */
+export const AutenticacinYRolesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = AutenticacinYRolesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Endpoint para verificar si el usuario tiene rol de administrador
+         * @summary Verificar acceso de administrador
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async appControllerAdminCheck(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.appControllerAdminCheck(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AutenticacinYRolesApi.appControllerAdminCheck']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Endpoint para verificar si el usuario está autenticado (sin requerir rol específico)
+         * @summary Verificar autenticación
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async appControllerAnyAuthenticatedCheck(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.appControllerAnyAuthenticatedCheck(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AutenticacinYRolesApi.appControllerAnyAuthenticatedCheck']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Endpoint para verificar si el usuario tiene rol de administrador de tenant
+         * @summary Verificar acceso de administrador de tenant
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async appControllerTenantAdminCheck(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.appControllerTenantAdminCheck(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AutenticacinYRolesApi.appControllerTenantAdminCheck']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Endpoint para verificar si el usuario tiene rol de usuario básico
+         * @summary Verificar acceso de usuario
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async appControllerUserCheck(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.appControllerUserCheck(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AutenticacinYRolesApi.appControllerUserCheck']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * AutenticacinYRolesApi - factory interface
+ * @export
+ */
+export const AutenticacinYRolesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = AutenticacinYRolesApiFp(configuration)
+    return {
+        /**
+         * Endpoint para verificar si el usuario tiene rol de administrador
+         * @summary Verificar acceso de administrador
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        appControllerAdminCheck(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.appControllerAdminCheck(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Endpoint para verificar si el usuario está autenticado (sin requerir rol específico)
+         * @summary Verificar autenticación
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        appControllerAnyAuthenticatedCheck(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.appControllerAnyAuthenticatedCheck(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Endpoint para verificar si el usuario tiene rol de administrador de tenant
+         * @summary Verificar acceso de administrador de tenant
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        appControllerTenantAdminCheck(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.appControllerTenantAdminCheck(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Endpoint para verificar si el usuario tiene rol de usuario básico
+         * @summary Verificar acceso de usuario
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        appControllerUserCheck(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.appControllerUserCheck(options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * AutenticacinYRolesApi - object-oriented interface
+ * @export
+ * @class AutenticacinYRolesApi
+ * @extends {BaseAPI}
+ */
+export class AutenticacinYRolesApi extends BaseAPI {
+    /**
+     * Endpoint para verificar si el usuario tiene rol de administrador
+     * @summary Verificar acceso de administrador
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AutenticacinYRolesApi
+     */
+    public appControllerAdminCheck(options?: RawAxiosRequestConfig) {
+        return AutenticacinYRolesApiFp(this.configuration).appControllerAdminCheck(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Endpoint para verificar si el usuario está autenticado (sin requerir rol específico)
+     * @summary Verificar autenticación
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AutenticacinYRolesApi
+     */
+    public appControllerAnyAuthenticatedCheck(options?: RawAxiosRequestConfig) {
+        return AutenticacinYRolesApiFp(this.configuration).appControllerAnyAuthenticatedCheck(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Endpoint para verificar si el usuario tiene rol de administrador de tenant
+     * @summary Verificar acceso de administrador de tenant
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AutenticacinYRolesApi
+     */
+    public appControllerTenantAdminCheck(options?: RawAxiosRequestConfig) {
+        return AutenticacinYRolesApiFp(this.configuration).appControllerTenantAdminCheck(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Endpoint para verificar si el usuario tiene rol de usuario básico
+     * @summary Verificar acceso de usuario
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AutenticacinYRolesApi
+     */
+    public appControllerUserCheck(options?: RawAxiosRequestConfig) {
+        return AutenticacinYRolesApiFp(this.configuration).appControllerUserCheck(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * AuthenticationApi - axios parameter creator
  * @export
  */
 export const AuthenticationApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * 
-         * @summary Get current user profile
+         * Retrieves the profile information of the currently authenticated user
+         * @summary Get user profile
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2966,9 +3092,9 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * 
-         * @summary Log in a user
-         * @param {LoginDto} loginDto 
+         * Authenticates a user and returns a JWT token for subsequent API calls
+         * @summary User login
+         * @param {LoginDto} loginDto User credentials for authentication
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3002,8 +3128,8 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * 
-         * @summary Register a new user
+         * Creates a new user account in the system. This endpoint is publicly accessible.
+         * @summary Register new user
          * @param {RegisterDto} registerDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3048,8 +3174,8 @@ export const AuthenticationApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AuthenticationApiAxiosParamCreator(configuration)
     return {
         /**
-         * 
-         * @summary Get current user profile
+         * Retrieves the profile information of the currently authenticated user
+         * @summary Get user profile
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3060,9 +3186,9 @@ export const AuthenticationApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Log in a user
-         * @param {LoginDto} loginDto 
+         * Authenticates a user and returns a JWT token for subsequent API calls
+         * @summary User login
+         * @param {LoginDto} loginDto User credentials for authentication
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3073,8 +3199,8 @@ export const AuthenticationApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Register a new user
+         * Creates a new user account in the system. This endpoint is publicly accessible.
+         * @summary Register new user
          * @param {RegisterDto} registerDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3096,8 +3222,8 @@ export const AuthenticationApiFactory = function (configuration?: Configuration,
     const localVarFp = AuthenticationApiFp(configuration)
     return {
         /**
-         * 
-         * @summary Get current user profile
+         * Retrieves the profile information of the currently authenticated user
+         * @summary Get user profile
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3105,9 +3231,9 @@ export const AuthenticationApiFactory = function (configuration?: Configuration,
             return localVarFp.authControllerGetProfile(options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Log in a user
-         * @param {LoginDto} loginDto 
+         * Authenticates a user and returns a JWT token for subsequent API calls
+         * @summary User login
+         * @param {LoginDto} loginDto User credentials for authentication
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3115,8 +3241,8 @@ export const AuthenticationApiFactory = function (configuration?: Configuration,
             return localVarFp.authControllerLogin(loginDto, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Register a new user
+         * Creates a new user account in the system. This endpoint is publicly accessible.
+         * @summary Register new user
          * @param {RegisterDto} registerDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3135,8 +3261,8 @@ export const AuthenticationApiFactory = function (configuration?: Configuration,
  */
 export class AuthenticationApi extends BaseAPI {
     /**
-     * 
-     * @summary Get current user profile
+     * Retrieves the profile information of the currently authenticated user
+     * @summary Get user profile
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AuthenticationApi
@@ -3146,9 +3272,9 @@ export class AuthenticationApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Log in a user
-     * @param {LoginDto} loginDto 
+     * Authenticates a user and returns a JWT token for subsequent API calls
+     * @summary User login
+     * @param {LoginDto} loginDto User credentials for authentication
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AuthenticationApi
@@ -3158,8 +3284,8 @@ export class AuthenticationApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Register a new user
+     * Creates a new user account in the system. This endpoint is publicly accessible.
+     * @summary Register new user
      * @param {RegisterDto} registerDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -4356,17 +4482,18 @@ export class LLMExecutionApi extends BaseAPI {
 export const MarketplaceApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * 
-         * @summary Get published assets from the marketplace for the current tenant
-         * @param {MarketplaceControllerGetPublishedAssetsSortOrderEnum} [sortOrder] Sort order
-         * @param {MarketplaceControllerGetPublishedAssetsSortByEnum} [sortBy] Sort by field
-         * @param {number} [limit] Items per page
-         * @param {number} [page] Page number for pagination
-         * @param {string} [search] Search term for asset key
+         * Retrieves a paginated list of published assets for the current tenant. Results can be filtered, sorted and searched.
+         * @summary Get published assets
+         * @param {string} [search] Search term to filter assets by name or description
+         * @param {number} [page] Page number for pagination (starts at 1)
+         * @param {number} [limit] Number of items per page
+         * @param {string} [sortBy] Field to sort by (e.g. name, createdAt)
+         * @param {MarketplaceControllerGetPublishedAssetsSortOrderEnum} [sortOrder] Sort order direction
+         * @param {string} [languageCode] Language code to filter assets (e.g., en-US, es-ES)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        marketplaceControllerGetPublishedAssets: async (sortOrder?: MarketplaceControllerGetPublishedAssetsSortOrderEnum, sortBy?: MarketplaceControllerGetPublishedAssetsSortByEnum, limit?: number, page?: number, search?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        marketplaceControllerGetPublishedAssets: async (search?: string, page?: number, limit?: number, sortBy?: string, sortOrder?: MarketplaceControllerGetPublishedAssetsSortOrderEnum, languageCode?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/marketplace/assets`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -4383,24 +4510,28 @@ export const MarketplaceApiAxiosParamCreator = function (configuration?: Configu
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-            if (sortOrder !== undefined) {
-                localVarQueryParameter['sortOrder'] = sortOrder;
-            }
-
-            if (sortBy !== undefined) {
-                localVarQueryParameter['sortBy'] = sortBy;
-            }
-
-            if (limit !== undefined) {
-                localVarQueryParameter['limit'] = limit;
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
             }
 
             if (page !== undefined) {
                 localVarQueryParameter['page'] = page;
             }
 
-            if (search !== undefined) {
-                localVarQueryParameter['search'] = search;
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (sortBy !== undefined) {
+                localVarQueryParameter['sortBy'] = sortBy;
+            }
+
+            if (sortOrder !== undefined) {
+                localVarQueryParameter['sortOrder'] = sortOrder;
+            }
+
+            if (languageCode !== undefined) {
+                localVarQueryParameter['languageCode'] = languageCode;
             }
 
 
@@ -4415,17 +4546,18 @@ export const MarketplaceApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
-         * 
-         * @summary Get published prompts from the marketplace for the current tenant
-         * @param {MarketplaceControllerGetPublishedPromptsSortOrderEnum} [sortOrder] Sort order
-         * @param {MarketplaceControllerGetPublishedPromptsSortByEnum} [sortBy] Sort by field
-         * @param {number} [limit] Items per page
-         * @param {number} [page] Page number for pagination
-         * @param {string} [search] Search term for prompt name or description
+         * Retrieves a paginated list of published prompts for the current tenant. Results can be filtered, sorted and searched.
+         * @summary Get published prompts
+         * @param {string} [search] Search term to filter prompts by name or description
+         * @param {number} [page] Page number for pagination (starts at 1)
+         * @param {number} [limit] Number of items per page
+         * @param {string} [sortBy] Field to sort by (e.g. name, createdAt)
+         * @param {MarketplaceControllerGetPublishedPromptsSortOrderEnum} [sortOrder] Sort order direction
+         * @param {string} [languageCode] Language code to filter prompts (e.g., en-US, es-ES)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        marketplaceControllerGetPublishedPrompts: async (sortOrder?: MarketplaceControllerGetPublishedPromptsSortOrderEnum, sortBy?: MarketplaceControllerGetPublishedPromptsSortByEnum, limit?: number, page?: number, search?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        marketplaceControllerGetPublishedPrompts: async (search?: string, page?: number, limit?: number, sortBy?: string, sortOrder?: MarketplaceControllerGetPublishedPromptsSortOrderEnum, languageCode?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/marketplace/prompts`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -4442,24 +4574,28 @@ export const MarketplaceApiAxiosParamCreator = function (configuration?: Configu
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-            if (sortOrder !== undefined) {
-                localVarQueryParameter['sortOrder'] = sortOrder;
-            }
-
-            if (sortBy !== undefined) {
-                localVarQueryParameter['sortBy'] = sortBy;
-            }
-
-            if (limit !== undefined) {
-                localVarQueryParameter['limit'] = limit;
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
             }
 
             if (page !== undefined) {
                 localVarQueryParameter['page'] = page;
             }
 
-            if (search !== undefined) {
-                localVarQueryParameter['search'] = search;
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (sortBy !== undefined) {
+                localVarQueryParameter['sortBy'] = sortBy;
+            }
+
+            if (sortOrder !== undefined) {
+                localVarQueryParameter['sortOrder'] = sortOrder;
+            }
+
+            if (languageCode !== undefined) {
+                localVarQueryParameter['languageCode'] = languageCode;
             }
 
 
@@ -4484,35 +4620,37 @@ export const MarketplaceApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = MarketplaceApiAxiosParamCreator(configuration)
     return {
         /**
-         * 
-         * @summary Get published assets from the marketplace for the current tenant
-         * @param {MarketplaceControllerGetPublishedAssetsSortOrderEnum} [sortOrder] Sort order
-         * @param {MarketplaceControllerGetPublishedAssetsSortByEnum} [sortBy] Sort by field
-         * @param {number} [limit] Items per page
-         * @param {number} [page] Page number for pagination
-         * @param {string} [search] Search term for asset key
+         * Retrieves a paginated list of published assets for the current tenant. Results can be filtered, sorted and searched.
+         * @summary Get published assets
+         * @param {string} [search] Search term to filter assets by name or description
+         * @param {number} [page] Page number for pagination (starts at 1)
+         * @param {number} [limit] Number of items per page
+         * @param {string} [sortBy] Field to sort by (e.g. name, createdAt)
+         * @param {MarketplaceControllerGetPublishedAssetsSortOrderEnum} [sortOrder] Sort order direction
+         * @param {string} [languageCode] Language code to filter assets (e.g., en-US, es-ES)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async marketplaceControllerGetPublishedAssets(sortOrder?: MarketplaceControllerGetPublishedAssetsSortOrderEnum, sortBy?: MarketplaceControllerGetPublishedAssetsSortByEnum, limit?: number, page?: number, search?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.marketplaceControllerGetPublishedAssets(sortOrder, sortBy, limit, page, search, options);
+        async marketplaceControllerGetPublishedAssets(search?: string, page?: number, limit?: number, sortBy?: string, sortOrder?: MarketplaceControllerGetPublishedAssetsSortOrderEnum, languageCode?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.marketplaceControllerGetPublishedAssets(search, page, limit, sortBy, sortOrder, languageCode, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['MarketplaceApi.marketplaceControllerGetPublishedAssets']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Get published prompts from the marketplace for the current tenant
-         * @param {MarketplaceControllerGetPublishedPromptsSortOrderEnum} [sortOrder] Sort order
-         * @param {MarketplaceControllerGetPublishedPromptsSortByEnum} [sortBy] Sort by field
-         * @param {number} [limit] Items per page
-         * @param {number} [page] Page number for pagination
-         * @param {string} [search] Search term for prompt name or description
+         * Retrieves a paginated list of published prompts for the current tenant. Results can be filtered, sorted and searched.
+         * @summary Get published prompts
+         * @param {string} [search] Search term to filter prompts by name or description
+         * @param {number} [page] Page number for pagination (starts at 1)
+         * @param {number} [limit] Number of items per page
+         * @param {string} [sortBy] Field to sort by (e.g. name, createdAt)
+         * @param {MarketplaceControllerGetPublishedPromptsSortOrderEnum} [sortOrder] Sort order direction
+         * @param {string} [languageCode] Language code to filter prompts (e.g., en-US, es-ES)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async marketplaceControllerGetPublishedPrompts(sortOrder?: MarketplaceControllerGetPublishedPromptsSortOrderEnum, sortBy?: MarketplaceControllerGetPublishedPromptsSortByEnum, limit?: number, page?: number, search?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.marketplaceControllerGetPublishedPrompts(sortOrder, sortBy, limit, page, search, options);
+        async marketplaceControllerGetPublishedPrompts(search?: string, page?: number, limit?: number, sortBy?: string, sortOrder?: MarketplaceControllerGetPublishedPromptsSortOrderEnum, languageCode?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.marketplaceControllerGetPublishedPrompts(search, page, limit, sortBy, sortOrder, languageCode, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['MarketplaceApi.marketplaceControllerGetPublishedPrompts']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -4528,32 +4666,34 @@ export const MarketplaceApiFactory = function (configuration?: Configuration, ba
     const localVarFp = MarketplaceApiFp(configuration)
     return {
         /**
-         * 
-         * @summary Get published assets from the marketplace for the current tenant
-         * @param {MarketplaceControllerGetPublishedAssetsSortOrderEnum} [sortOrder] Sort order
-         * @param {MarketplaceControllerGetPublishedAssetsSortByEnum} [sortBy] Sort by field
-         * @param {number} [limit] Items per page
-         * @param {number} [page] Page number for pagination
-         * @param {string} [search] Search term for asset key
+         * Retrieves a paginated list of published assets for the current tenant. Results can be filtered, sorted and searched.
+         * @summary Get published assets
+         * @param {string} [search] Search term to filter assets by name or description
+         * @param {number} [page] Page number for pagination (starts at 1)
+         * @param {number} [limit] Number of items per page
+         * @param {string} [sortBy] Field to sort by (e.g. name, createdAt)
+         * @param {MarketplaceControllerGetPublishedAssetsSortOrderEnum} [sortOrder] Sort order direction
+         * @param {string} [languageCode] Language code to filter assets (e.g., en-US, es-ES)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        marketplaceControllerGetPublishedAssets(sortOrder?: MarketplaceControllerGetPublishedAssetsSortOrderEnum, sortBy?: MarketplaceControllerGetPublishedAssetsSortByEnum, limit?: number, page?: number, search?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.marketplaceControllerGetPublishedAssets(sortOrder, sortBy, limit, page, search, options).then((request) => request(axios, basePath));
+        marketplaceControllerGetPublishedAssets(search?: string, page?: number, limit?: number, sortBy?: string, sortOrder?: MarketplaceControllerGetPublishedAssetsSortOrderEnum, languageCode?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.marketplaceControllerGetPublishedAssets(search, page, limit, sortBy, sortOrder, languageCode, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Get published prompts from the marketplace for the current tenant
-         * @param {MarketplaceControllerGetPublishedPromptsSortOrderEnum} [sortOrder] Sort order
-         * @param {MarketplaceControllerGetPublishedPromptsSortByEnum} [sortBy] Sort by field
-         * @param {number} [limit] Items per page
-         * @param {number} [page] Page number for pagination
-         * @param {string} [search] Search term for prompt name or description
+         * Retrieves a paginated list of published prompts for the current tenant. Results can be filtered, sorted and searched.
+         * @summary Get published prompts
+         * @param {string} [search] Search term to filter prompts by name or description
+         * @param {number} [page] Page number for pagination (starts at 1)
+         * @param {number} [limit] Number of items per page
+         * @param {string} [sortBy] Field to sort by (e.g. name, createdAt)
+         * @param {MarketplaceControllerGetPublishedPromptsSortOrderEnum} [sortOrder] Sort order direction
+         * @param {string} [languageCode] Language code to filter prompts (e.g., en-US, es-ES)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        marketplaceControllerGetPublishedPrompts(sortOrder?: MarketplaceControllerGetPublishedPromptsSortOrderEnum, sortBy?: MarketplaceControllerGetPublishedPromptsSortByEnum, limit?: number, page?: number, search?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.marketplaceControllerGetPublishedPrompts(sortOrder, sortBy, limit, page, search, options).then((request) => request(axios, basePath));
+        marketplaceControllerGetPublishedPrompts(search?: string, page?: number, limit?: number, sortBy?: string, sortOrder?: MarketplaceControllerGetPublishedPromptsSortOrderEnum, languageCode?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.marketplaceControllerGetPublishedPrompts(search, page, limit, sortBy, sortOrder, languageCode, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -4566,35 +4706,37 @@ export const MarketplaceApiFactory = function (configuration?: Configuration, ba
  */
 export class MarketplaceApi extends BaseAPI {
     /**
-     * 
-     * @summary Get published assets from the marketplace for the current tenant
-     * @param {MarketplaceControllerGetPublishedAssetsSortOrderEnum} [sortOrder] Sort order
-     * @param {MarketplaceControllerGetPublishedAssetsSortByEnum} [sortBy] Sort by field
-     * @param {number} [limit] Items per page
-     * @param {number} [page] Page number for pagination
-     * @param {string} [search] Search term for asset key
+     * Retrieves a paginated list of published assets for the current tenant. Results can be filtered, sorted and searched.
+     * @summary Get published assets
+     * @param {string} [search] Search term to filter assets by name or description
+     * @param {number} [page] Page number for pagination (starts at 1)
+     * @param {number} [limit] Number of items per page
+     * @param {string} [sortBy] Field to sort by (e.g. name, createdAt)
+     * @param {MarketplaceControllerGetPublishedAssetsSortOrderEnum} [sortOrder] Sort order direction
+     * @param {string} [languageCode] Language code to filter assets (e.g., en-US, es-ES)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof MarketplaceApi
      */
-    public marketplaceControllerGetPublishedAssets(sortOrder?: MarketplaceControllerGetPublishedAssetsSortOrderEnum, sortBy?: MarketplaceControllerGetPublishedAssetsSortByEnum, limit?: number, page?: number, search?: string, options?: RawAxiosRequestConfig) {
-        return MarketplaceApiFp(this.configuration).marketplaceControllerGetPublishedAssets(sortOrder, sortBy, limit, page, search, options).then((request) => request(this.axios, this.basePath));
+    public marketplaceControllerGetPublishedAssets(search?: string, page?: number, limit?: number, sortBy?: string, sortOrder?: MarketplaceControllerGetPublishedAssetsSortOrderEnum, languageCode?: string, options?: RawAxiosRequestConfig) {
+        return MarketplaceApiFp(this.configuration).marketplaceControllerGetPublishedAssets(search, page, limit, sortBy, sortOrder, languageCode, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * 
-     * @summary Get published prompts from the marketplace for the current tenant
-     * @param {MarketplaceControllerGetPublishedPromptsSortOrderEnum} [sortOrder] Sort order
-     * @param {MarketplaceControllerGetPublishedPromptsSortByEnum} [sortBy] Sort by field
-     * @param {number} [limit] Items per page
-     * @param {number} [page] Page number for pagination
-     * @param {string} [search] Search term for prompt name or description
+     * Retrieves a paginated list of published prompts for the current tenant. Results can be filtered, sorted and searched.
+     * @summary Get published prompts
+     * @param {string} [search] Search term to filter prompts by name or description
+     * @param {number} [page] Page number for pagination (starts at 1)
+     * @param {number} [limit] Number of items per page
+     * @param {string} [sortBy] Field to sort by (e.g. name, createdAt)
+     * @param {MarketplaceControllerGetPublishedPromptsSortOrderEnum} [sortOrder] Sort order direction
+     * @param {string} [languageCode] Language code to filter prompts (e.g., en-US, es-ES)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof MarketplaceApi
      */
-    public marketplaceControllerGetPublishedPrompts(sortOrder?: MarketplaceControllerGetPublishedPromptsSortOrderEnum, sortBy?: MarketplaceControllerGetPublishedPromptsSortByEnum, limit?: number, page?: number, search?: string, options?: RawAxiosRequestConfig) {
-        return MarketplaceApiFp(this.configuration).marketplaceControllerGetPublishedPrompts(sortOrder, sortBy, limit, page, search, options).then((request) => request(this.axios, this.basePath));
+    public marketplaceControllerGetPublishedPrompts(search?: string, page?: number, limit?: number, sortBy?: string, sortOrder?: MarketplaceControllerGetPublishedPromptsSortOrderEnum, languageCode?: string, options?: RawAxiosRequestConfig) {
+        return MarketplaceApiFp(this.configuration).marketplaceControllerGetPublishedPrompts(search, page, limit, sortBy, sortOrder, languageCode, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -4602,34 +4744,18 @@ export class MarketplaceApi extends BaseAPI {
  * @export
  */
 export const MarketplaceControllerGetPublishedAssetsSortOrderEnum = {
-    Asc: 'asc',
-    Desc: 'desc'
+    Asc: 'ASC',
+    Desc: 'DESC'
 } as const;
 export type MarketplaceControllerGetPublishedAssetsSortOrderEnum = typeof MarketplaceControllerGetPublishedAssetsSortOrderEnum[keyof typeof MarketplaceControllerGetPublishedAssetsSortOrderEnum];
 /**
  * @export
  */
-export const MarketplaceControllerGetPublishedAssetsSortByEnum = {
-    CreatedAt: 'createdAt',
-    Name: 'name'
-} as const;
-export type MarketplaceControllerGetPublishedAssetsSortByEnum = typeof MarketplaceControllerGetPublishedAssetsSortByEnum[keyof typeof MarketplaceControllerGetPublishedAssetsSortByEnum];
-/**
- * @export
- */
 export const MarketplaceControllerGetPublishedPromptsSortOrderEnum = {
-    Asc: 'asc',
-    Desc: 'desc'
+    Asc: 'ASC',
+    Desc: 'DESC'
 } as const;
 export type MarketplaceControllerGetPublishedPromptsSortOrderEnum = typeof MarketplaceControllerGetPublishedPromptsSortOrderEnum[keyof typeof MarketplaceControllerGetPublishedPromptsSortOrderEnum];
-/**
- * @export
- */
-export const MarketplaceControllerGetPublishedPromptsSortByEnum = {
-    CreatedAt: 'createdAt',
-    Name: 'name'
-} as const;
-export type MarketplaceControllerGetPublishedPromptsSortByEnum = typeof MarketplaceControllerGetPublishedPromptsSortByEnum[keyof typeof MarketplaceControllerGetPublishedPromptsSortByEnum];
 
 
 /**
@@ -4639,8 +4765,8 @@ export type MarketplaceControllerGetPublishedPromptsSortByEnum = typeof Marketpl
 export const ProjectsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * 
-         * @summary Create a new project
+         * Creates a new project for the current tenant. Accessible by global admins or tenant admins.
+         * @summary Create new project
          * @param {CreateProjectDto} createProjectDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -4679,8 +4805,8 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * 
-         * @summary Get all projects for the authenticated user\'s tenant
+         * Retrieves a list of all projects for the current tenant. Results are cached for 1 hour.
+         * @summary Get all projects
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4697,6 +4823,10 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -4709,8 +4839,8 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * 
-         * @summary Get projects accessible by the current user
+         * Retorna todos los proyectos a los que tiene acceso el usuario autenticado
+         * @summary Obtener proyectos del usuario actual
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4743,9 +4873,9 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * 
-         * @summary Get a project by ID
-         * @param {string} id Project CUID
+         * Retrieves a specific project by its unique ID. Results are cached for 1 hour.
+         * @summary Get project by ID
+         * @param {string} id Unique project identifier (UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4781,9 +4911,9 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * 
-         * @summary Delete a project by ID
-         * @param {string} id Project CUID
+         * Permanently deletes a project. This is a destructive operation that requires admin privileges.
+         * @summary Delete project
+         * @param {string} id Unique project identifier to delete (UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4819,9 +4949,9 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * 
-         * @summary Update a project by ID
-         * @param {string} id Project CUID
+         * Updates an existing project\'s information. Accessible by global admins or tenant admins.
+         * @summary Update project
+         * @param {string} id Unique project identifier to update (UUID)
          * @param {UpdateProjectDto} updateProjectDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -4873,33 +5003,33 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ProjectsApiAxiosParamCreator(configuration)
     return {
         /**
-         * 
-         * @summary Create a new project
+         * Creates a new project for the current tenant. Accessible by global admins or tenant admins.
+         * @summary Create new project
          * @param {CreateProjectDto} createProjectDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async projectControllerCreate(createProjectDto: CreateProjectDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateProjectDto>> {
+        async projectControllerCreate(createProjectDto: CreateProjectDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProjectDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.projectControllerCreate(createProjectDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ProjectsApi.projectControllerCreate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Get all projects for the authenticated user\'s tenant
+         * Retrieves a list of all projects for the current tenant. Results are cached for 1 hour.
+         * @summary Get all projects
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async projectControllerFindAll(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async projectControllerFindAll(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ProjectDto>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.projectControllerFindAll(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ProjectsApi.projectControllerFindAll']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Get projects accessible by the current user
+         * Retorna todos los proyectos a los que tiene acceso el usuario autenticado
+         * @summary Obtener proyectos del usuario actual
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4910,40 +5040,40 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Get a project by ID
-         * @param {string} id Project CUID
+         * Retrieves a specific project by its unique ID. Results are cached for 1 hour.
+         * @summary Get project by ID
+         * @param {string} id Unique project identifier (UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async projectControllerFindOne(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateProjectDto>> {
+        async projectControllerFindOne(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProjectDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.projectControllerFindOne(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ProjectsApi.projectControllerFindOne']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Delete a project by ID
-         * @param {string} id Project CUID
+         * Permanently deletes a project. This is a destructive operation that requires admin privileges.
+         * @summary Delete project
+         * @param {string} id Unique project identifier to delete (UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async projectControllerRemove(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateProjectDto>> {
+        async projectControllerRemove(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.projectControllerRemove(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ProjectsApi.projectControllerRemove']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Update a project by ID
-         * @param {string} id Project CUID
+         * Updates an existing project\'s information. Accessible by global admins or tenant admins.
+         * @summary Update project
+         * @param {string} id Unique project identifier to update (UUID)
          * @param {UpdateProjectDto} updateProjectDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async projectControllerUpdate(id: string, updateProjectDto: UpdateProjectDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateProjectDto>> {
+        async projectControllerUpdate(id: string, updateProjectDto: UpdateProjectDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProjectDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.projectControllerUpdate(id, updateProjectDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ProjectsApi.projectControllerUpdate']?.[localVarOperationServerIndex]?.url;
@@ -4960,27 +5090,27 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
     const localVarFp = ProjectsApiFp(configuration)
     return {
         /**
-         * 
-         * @summary Create a new project
+         * Creates a new project for the current tenant. Accessible by global admins or tenant admins.
+         * @summary Create new project
          * @param {CreateProjectDto} createProjectDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectControllerCreate(createProjectDto: CreateProjectDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateProjectDto> {
+        projectControllerCreate(createProjectDto: CreateProjectDto, options?: RawAxiosRequestConfig): AxiosPromise<ProjectDto> {
             return localVarFp.projectControllerCreate(createProjectDto, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Get all projects for the authenticated user\'s tenant
+         * Retrieves a list of all projects for the current tenant. Results are cached for 1 hour.
+         * @summary Get all projects
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectControllerFindAll(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        projectControllerFindAll(options?: RawAxiosRequestConfig): AxiosPromise<Array<ProjectDto>> {
             return localVarFp.projectControllerFindAll(options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Get projects accessible by the current user
+         * Retorna todos los proyectos a los que tiene acceso el usuario autenticado
+         * @summary Obtener proyectos del usuario actual
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4988,34 +5118,34 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.projectControllerFindMine(options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Get a project by ID
-         * @param {string} id Project CUID
+         * Retrieves a specific project by its unique ID. Results are cached for 1 hour.
+         * @summary Get project by ID
+         * @param {string} id Unique project identifier (UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectControllerFindOne(id: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateProjectDto> {
+        projectControllerFindOne(id: string, options?: RawAxiosRequestConfig): AxiosPromise<ProjectDto> {
             return localVarFp.projectControllerFindOne(id, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Delete a project by ID
-         * @param {string} id Project CUID
+         * Permanently deletes a project. This is a destructive operation that requires admin privileges.
+         * @summary Delete project
+         * @param {string} id Unique project identifier to delete (UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectControllerRemove(id: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateProjectDto> {
+        projectControllerRemove(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.projectControllerRemove(id, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Update a project by ID
-         * @param {string} id Project CUID
+         * Updates an existing project\'s information. Accessible by global admins or tenant admins.
+         * @summary Update project
+         * @param {string} id Unique project identifier to update (UUID)
          * @param {UpdateProjectDto} updateProjectDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectControllerUpdate(id: string, updateProjectDto: UpdateProjectDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateProjectDto> {
+        projectControllerUpdate(id: string, updateProjectDto: UpdateProjectDto, options?: RawAxiosRequestConfig): AxiosPromise<ProjectDto> {
             return localVarFp.projectControllerUpdate(id, updateProjectDto, options).then((request) => request(axios, basePath));
         },
     };
@@ -5029,8 +5159,8 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
  */
 export class ProjectsApi extends BaseAPI {
     /**
-     * 
-     * @summary Create a new project
+     * Creates a new project for the current tenant. Accessible by global admins or tenant admins.
+     * @summary Create new project
      * @param {CreateProjectDto} createProjectDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -5041,8 +5171,8 @@ export class ProjectsApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Get all projects for the authenticated user\'s tenant
+     * Retrieves a list of all projects for the current tenant. Results are cached for 1 hour.
+     * @summary Get all projects
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ProjectsApi
@@ -5052,8 +5182,8 @@ export class ProjectsApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Get projects accessible by the current user
+     * Retorna todos los proyectos a los que tiene acceso el usuario autenticado
+     * @summary Obtener proyectos del usuario actual
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ProjectsApi
@@ -5063,9 +5193,9 @@ export class ProjectsApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Get a project by ID
-     * @param {string} id Project CUID
+     * Retrieves a specific project by its unique ID. Results are cached for 1 hour.
+     * @summary Get project by ID
+     * @param {string} id Unique project identifier (UUID)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ProjectsApi
@@ -5075,9 +5205,9 @@ export class ProjectsApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Delete a project by ID
-     * @param {string} id Project CUID
+     * Permanently deletes a project. This is a destructive operation that requires admin privileges.
+     * @summary Delete project
+     * @param {string} id Unique project identifier to delete (UUID)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ProjectsApi
@@ -5087,9 +5217,9 @@ export class ProjectsApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Update a project by ID
-     * @param {string} id Project CUID
+     * Updates an existing project\'s information. Accessible by global admins or tenant admins.
+     * @summary Update project
+     * @param {string} id Unique project identifier to update (UUID)
      * @param {UpdateProjectDto} updateProjectDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -5166,16 +5296,19 @@ export const PromptAssetVersionsApiAxiosParamCreator = function (configuration?:
          * @param {string} projectId ID of the Project the Prompt belongs to
          * @param {string} promptId ID (slug) of the Prompt
          * @param {string} assetKey Key of the PromptAsset
+         * @param {string} languageCode 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptAssetVersionControllerFindAll: async (projectId: string, promptId: string, assetKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        promptAssetVersionControllerFindAll: async (projectId: string, promptId: string, assetKey: string, languageCode: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('promptAssetVersionControllerFindAll', 'projectId', projectId)
             // verify required parameter 'promptId' is not null or undefined
             assertParamExists('promptAssetVersionControllerFindAll', 'promptId', promptId)
             // verify required parameter 'assetKey' is not null or undefined
             assertParamExists('promptAssetVersionControllerFindAll', 'assetKey', assetKey)
+            // verify required parameter 'languageCode' is not null or undefined
+            assertParamExists('promptAssetVersionControllerFindAll', 'languageCode', languageCode)
             const localVarPath = `/api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
                 .replace(`{${"promptId"}}`, encodeURIComponent(String(promptId)))
@@ -5195,6 +5328,10 @@ export const PromptAssetVersionsApiAxiosParamCreator = function (configuration?:
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            if (languageCode !== undefined) {
+                localVarQueryParameter['languageCode'] = languageCode;
+            }
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -5213,10 +5350,11 @@ export const PromptAssetVersionsApiAxiosParamCreator = function (configuration?:
          * @param {string} promptId ID (slug) of the Prompt
          * @param {string} assetKey Key of the PromptAsset
          * @param {string} versionTag Version tag (e.g., v1.0.0)
+         * @param {string} languageCode 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptAssetVersionControllerFindOneByTag: async (projectId: string, promptId: string, assetKey: string, versionTag: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        promptAssetVersionControllerFindOneByTag: async (projectId: string, promptId: string, assetKey: string, versionTag: string, languageCode: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('promptAssetVersionControllerFindOneByTag', 'projectId', projectId)
             // verify required parameter 'promptId' is not null or undefined
@@ -5225,6 +5363,8 @@ export const PromptAssetVersionsApiAxiosParamCreator = function (configuration?:
             assertParamExists('promptAssetVersionControllerFindOneByTag', 'assetKey', assetKey)
             // verify required parameter 'versionTag' is not null or undefined
             assertParamExists('promptAssetVersionControllerFindOneByTag', 'versionTag', versionTag)
+            // verify required parameter 'languageCode' is not null or undefined
+            assertParamExists('promptAssetVersionControllerFindOneByTag', 'languageCode', languageCode)
             const localVarPath = `/api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag}`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
                 .replace(`{${"promptId"}}`, encodeURIComponent(String(promptId)))
@@ -5244,6 +5384,10 @@ export const PromptAssetVersionsApiAxiosParamCreator = function (configuration?:
             // authentication bearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (languageCode !== undefined) {
+                localVarQueryParameter['languageCode'] = languageCode;
+            }
 
 
     
@@ -5494,11 +5638,12 @@ export const PromptAssetVersionsApiFp = function(configuration?: Configuration) 
          * @param {string} projectId ID of the Project the Prompt belongs to
          * @param {string} promptId ID (slug) of the Prompt
          * @param {string} assetKey Key of the PromptAsset
+         * @param {string} languageCode 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptAssetVersionControllerFindAll(projectId: string, promptId: string, assetKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CreatePromptAssetVersionDto>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetVersionControllerFindAll(projectId, promptId, assetKey, options);
+        async promptAssetVersionControllerFindAll(projectId: string, promptId: string, assetKey: string, languageCode: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CreatePromptAssetVersionDto>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetVersionControllerFindAll(projectId, promptId, assetKey, languageCode, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsApi.promptAssetVersionControllerFindAll']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5510,11 +5655,12 @@ export const PromptAssetVersionsApiFp = function(configuration?: Configuration) 
          * @param {string} promptId ID (slug) of the Prompt
          * @param {string} assetKey Key of the PromptAsset
          * @param {string} versionTag Version tag (e.g., v1.0.0)
+         * @param {string} languageCode 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptAssetVersionControllerFindOneByTag(projectId: string, promptId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptAssetVersionDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag, options);
+        async promptAssetVersionControllerFindOneByTag(projectId: string, promptId: string, assetKey: string, versionTag: string, languageCode: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptAssetVersionDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag, languageCode, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptAssetVersionsApi.promptAssetVersionControllerFindOneByTag']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5613,11 +5759,12 @@ export const PromptAssetVersionsApiFactory = function (configuration?: Configura
          * @param {string} projectId ID of the Project the Prompt belongs to
          * @param {string} promptId ID (slug) of the Prompt
          * @param {string} assetKey Key of the PromptAsset
+         * @param {string} languageCode 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptAssetVersionControllerFindAll(projectId: string, promptId: string, assetKey: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreatePromptAssetVersionDto>> {
-            return localVarFp.promptAssetVersionControllerFindAll(projectId, promptId, assetKey, options).then((request) => request(axios, basePath));
+        promptAssetVersionControllerFindAll(projectId: string, promptId: string, assetKey: string, languageCode: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreatePromptAssetVersionDto>> {
+            return localVarFp.promptAssetVersionControllerFindAll(projectId, promptId, assetKey, languageCode, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -5626,11 +5773,12 @@ export const PromptAssetVersionsApiFactory = function (configuration?: Configura
          * @param {string} promptId ID (slug) of the Prompt
          * @param {string} assetKey Key of the PromptAsset
          * @param {string} versionTag Version tag (e.g., v1.0.0)
+         * @param {string} languageCode 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptAssetVersionControllerFindOneByTag(projectId: string, promptId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetVersionDto> {
-            return localVarFp.promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag, options).then((request) => request(axios, basePath));
+        promptAssetVersionControllerFindOneByTag(projectId: string, promptId: string, assetKey: string, versionTag: string, languageCode: string, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptAssetVersionDto> {
+            return localVarFp.promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag, languageCode, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -5716,12 +5864,13 @@ export class PromptAssetVersionsApi extends BaseAPI {
      * @param {string} projectId ID of the Project the Prompt belongs to
      * @param {string} promptId ID (slug) of the Prompt
      * @param {string} assetKey Key of the PromptAsset
+     * @param {string} languageCode 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptAssetVersionsApi
      */
-    public promptAssetVersionControllerFindAll(projectId: string, promptId: string, assetKey: string, options?: RawAxiosRequestConfig) {
-        return PromptAssetVersionsApiFp(this.configuration).promptAssetVersionControllerFindAll(projectId, promptId, assetKey, options).then((request) => request(this.axios, this.basePath));
+    public promptAssetVersionControllerFindAll(projectId: string, promptId: string, assetKey: string, languageCode: string, options?: RawAxiosRequestConfig) {
+        return PromptAssetVersionsApiFp(this.configuration).promptAssetVersionControllerFindAll(projectId, promptId, assetKey, languageCode, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -5731,12 +5880,13 @@ export class PromptAssetVersionsApi extends BaseAPI {
      * @param {string} promptId ID (slug) of the Prompt
      * @param {string} assetKey Key of the PromptAsset
      * @param {string} versionTag Version tag (e.g., v1.0.0)
+     * @param {string} languageCode 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptAssetVersionsApi
      */
-    public promptAssetVersionControllerFindOneByTag(projectId: string, promptId: string, assetKey: string, versionTag: string, options?: RawAxiosRequestConfig) {
-        return PromptAssetVersionsApiFp(this.configuration).promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag, options).then((request) => request(this.axios, this.basePath));
+    public promptAssetVersionControllerFindOneByTag(projectId: string, promptId: string, assetKey: string, versionTag: string, languageCode: string, options?: RawAxiosRequestConfig) {
+        return PromptAssetVersionsApiFp(this.configuration).promptAssetVersionControllerFindOneByTag(projectId, promptId, assetKey, versionTag, languageCode, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -6396,10 +6546,11 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
          * @param {string} [environmentId] Environment ID for context.
          * @param {string} [regionCode] Region code for context (e.g., for asset translations - overrides languageCode for assets if provided).
          * @param {string} [variables] JSON stringified object of variables for substitution.
+         * @param {boolean} [processed] Whether to return the processed prompt with all references and variables resolved. Defaults to false.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptTranslationControllerFindOneByLanguage: async (projectId: string, promptId: string, versionTag: string, languageCode: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        promptTranslationControllerFindOneByLanguage: async (projectId: string, promptId: string, versionTag: string, languageCode: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, processed?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('promptTranslationControllerFindOneByLanguage', 'projectId', projectId)
             // verify required parameter 'promptId' is not null or undefined
@@ -6442,6 +6593,10 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
 
             if (variables !== undefined) {
                 localVarQueryParameter['variables'] = variables;
+            }
+
+            if (processed !== undefined) {
+                localVarQueryParameter['processed'] = processed;
             }
 
 
@@ -6613,11 +6768,12 @@ export const PromptTranslationsWithinProjectPromptVersionApiFp = function(config
          * @param {string} [environmentId] Environment ID for context.
          * @param {string} [regionCode] Region code for context (e.g., for asset translations - overrides languageCode for assets if provided).
          * @param {string} [variables] JSON stringified object of variables for substitution.
+         * @param {boolean} [processed] Whether to return the processed prompt with all references and variables resolved. Defaults to false.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptTranslationControllerFindOneByLanguage(projectId: string, promptId: string, versionTag: string, languageCode: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptTranslationDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptTranslationControllerFindOneByLanguage(projectId, promptId, versionTag, languageCode, resolveAssets, environmentId, regionCode, variables, options);
+        async promptTranslationControllerFindOneByLanguage(projectId: string, promptId: string, versionTag: string, languageCode: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, processed?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptTranslationDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptTranslationControllerFindOneByLanguage(projectId, promptId, versionTag, languageCode, resolveAssets, environmentId, regionCode, variables, processed, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptTranslationsWithinProjectPromptVersionApi.promptTranslationControllerFindOneByLanguage']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6701,11 +6857,12 @@ export const PromptTranslationsWithinProjectPromptVersionApiFactory = function (
          * @param {string} [environmentId] Environment ID for context.
          * @param {string} [regionCode] Region code for context (e.g., for asset translations - overrides languageCode for assets if provided).
          * @param {string} [variables] JSON stringified object of variables for substitution.
+         * @param {boolean} [processed] Whether to return the processed prompt with all references and variables resolved. Defaults to false.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptTranslationControllerFindOneByLanguage(projectId: string, promptId: string, versionTag: string, languageCode: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptTranslationDto> {
-            return localVarFp.promptTranslationControllerFindOneByLanguage(projectId, promptId, versionTag, languageCode, resolveAssets, environmentId, regionCode, variables, options).then((request) => request(axios, basePath));
+        promptTranslationControllerFindOneByLanguage(projectId: string, promptId: string, versionTag: string, languageCode: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, processed?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptTranslationDto> {
+            return localVarFp.promptTranslationControllerFindOneByLanguage(projectId, promptId, versionTag, languageCode, resolveAssets, environmentId, regionCode, variables, processed, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -6784,12 +6941,13 @@ export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI {
      * @param {string} [environmentId] Environment ID for context.
      * @param {string} [regionCode] Region code for context (e.g., for asset translations - overrides languageCode for assets if provided).
      * @param {string} [variables] JSON stringified object of variables for substitution.
+     * @param {boolean} [processed] Whether to return the processed prompt with all references and variables resolved. Defaults to false.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptTranslationsWithinProjectPromptVersionApi
      */
-    public promptTranslationControllerFindOneByLanguage(projectId: string, promptId: string, versionTag: string, languageCode: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, options?: RawAxiosRequestConfig) {
-        return PromptTranslationsWithinProjectPromptVersionApiFp(this.configuration).promptTranslationControllerFindOneByLanguage(projectId, promptId, versionTag, languageCode, resolveAssets, environmentId, regionCode, variables, options).then((request) => request(this.axios, this.basePath));
+    public promptTranslationControllerFindOneByLanguage(projectId: string, promptId: string, versionTag: string, languageCode: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, processed?: boolean, options?: RawAxiosRequestConfig) {
+        return PromptTranslationsWithinProjectPromptVersionApiFp(this.configuration).promptTranslationControllerFindOneByLanguage(projectId, promptId, versionTag, languageCode, resolveAssets, environmentId, regionCode, variables, processed, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -6932,10 +7090,11 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
          * @param {string} [environmentId] Environment ID for context.
          * @param {string} [regionCode] Region code for context (e.g., for asset translations).
          * @param {string} [variables] JSON stringified object of variables for substitution.
+         * @param {boolean} [processed] Whether to return the processed prompt with all references and variables resolved. Defaults to false.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptVersionControllerFindOneByTag: async (projectId: string, promptId: string, versionTag: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        promptVersionControllerFindOneByTag: async (projectId: string, promptId: string, versionTag: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, processed?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('promptVersionControllerFindOneByTag', 'projectId', projectId)
             // verify required parameter 'promptId' is not null or undefined
@@ -6975,6 +7134,10 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
 
             if (variables !== undefined) {
                 localVarQueryParameter['variables'] = variables;
+            }
+
+            if (processed !== undefined) {
+                localVarQueryParameter['processed'] = processed;
             }
 
 
@@ -7227,11 +7390,12 @@ export const PromptVersionsWithinProjectPromptApiFp = function(configuration?: C
          * @param {string} [environmentId] Environment ID for context.
          * @param {string} [regionCode] Region code for context (e.g., for asset translations).
          * @param {string} [variables] JSON stringified object of variables for substitution.
+         * @param {boolean} [processed] Whether to return the processed prompt with all references and variables resolved. Defaults to false.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptVersionControllerFindOneByTag(projectId: string, promptId: string, versionTag: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptVersionDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptVersionControllerFindOneByTag(projectId, promptId, versionTag, resolveAssets, environmentId, regionCode, variables, options);
+        async promptVersionControllerFindOneByTag(projectId: string, promptId: string, versionTag: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, processed?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreatePromptVersionDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptVersionControllerFindOneByTag(projectId, promptId, versionTag, resolveAssets, environmentId, regionCode, variables, processed, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptVersionsWithinProjectPromptApi.promptVersionControllerFindOneByTag']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -7340,11 +7504,12 @@ export const PromptVersionsWithinProjectPromptApiFactory = function (configurati
          * @param {string} [environmentId] Environment ID for context.
          * @param {string} [regionCode] Region code for context (e.g., for asset translations).
          * @param {string} [variables] JSON stringified object of variables for substitution.
+         * @param {boolean} [processed] Whether to return the processed prompt with all references and variables resolved. Defaults to false.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptVersionControllerFindOneByTag(projectId: string, promptId: string, versionTag: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptVersionDto> {
-            return localVarFp.promptVersionControllerFindOneByTag(projectId, promptId, versionTag, resolveAssets, environmentId, regionCode, variables, options).then((request) => request(axios, basePath));
+        promptVersionControllerFindOneByTag(projectId: string, promptId: string, versionTag: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, processed?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreatePromptVersionDto> {
+            return localVarFp.promptVersionControllerFindOneByTag(projectId, promptId, versionTag, resolveAssets, environmentId, regionCode, variables, processed, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -7442,12 +7607,13 @@ export class PromptVersionsWithinProjectPromptApi extends BaseAPI {
      * @param {string} [environmentId] Environment ID for context.
      * @param {string} [regionCode] Region code for context (e.g., for asset translations).
      * @param {string} [variables] JSON stringified object of variables for substitution.
+     * @param {boolean} [processed] Whether to return the processed prompt with all references and variables resolved. Defaults to false.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptVersionsWithinProjectPromptApi
      */
-    public promptVersionControllerFindOneByTag(projectId: string, promptId: string, versionTag: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, options?: RawAxiosRequestConfig) {
-        return PromptVersionsWithinProjectPromptApiFp(this.configuration).promptVersionControllerFindOneByTag(projectId, promptId, versionTag, resolveAssets, environmentId, regionCode, variables, options).then((request) => request(this.axios, this.basePath));
+    public promptVersionControllerFindOneByTag(projectId: string, promptId: string, versionTag: string, resolveAssets?: boolean, environmentId?: string, regionCode?: string, variables?: string, processed?: boolean, options?: RawAxiosRequestConfig) {
+        return PromptVersionsWithinProjectPromptApiFp(this.configuration).promptVersionControllerFindOneByTag(projectId, promptId, versionTag, resolveAssets, environmentId, regionCode, variables, processed, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -7517,8 +7683,8 @@ export class PromptVersionsWithinProjectPromptApi extends BaseAPI {
 export const PromptsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * 
-         * @summary Create a new prompt within a project
+         * Creates a new prompt for the current tenant. Accessible by global admins or tenant admins.
+         * @summary Create new prompt
          * @param {string} projectId 
          * @param {CreatePromptDto} createPromptDto 
          * @param {*} [options] Override http request option.
@@ -7542,10 +7708,6 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
 
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
@@ -7561,15 +7723,15 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Get all prompts for a project
+         * Retrieves a list of all prompts for the current tenant. Results are cached for 1 hour.
+         * @summary Get all prompts
          * @param {string} projectId 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerFindAllByProject: async (projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        promptControllerFindAll: async (projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('promptControllerFindAllByProject', 'projectId', projectId)
+            assertParamExists('promptControllerFindAll', 'projectId', projectId)
             const localVarPath = `/api/projects/{projectId}/prompts`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -7583,10 +7745,6 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -7599,21 +7757,21 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Get a specific prompt by its ID (slug) for a project
-         * @param {string} projectId The ID of the project.
-         * @param {string} promptId The ID (slug) of the prompt.
+         * Retrieves a specific prompt by its unique ID. Results are cached for 1 hour.
+         * @summary Get prompt by ID
+         * @param {string} projectId 
+         * @param {string} id Unique prompt identifier (slug)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerFindOne: async (projectId: string, promptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        promptControllerFindOne: async (projectId: string, id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('promptControllerFindOne', 'projectId', projectId)
-            // verify required parameter 'promptId' is not null or undefined
-            assertParamExists('promptControllerFindOne', 'promptId', promptId)
-            const localVarPath = `/api/projects/{projectId}/prompts/{promptId}`
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('promptControllerFindOne', 'id', id)
+            const localVarPath = `/api/projects/{projectId}/prompts/{id}`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
-                .replace(`{${"promptId"}}`, encodeURIComponent(String(promptId)));
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -7625,10 +7783,6 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -7641,9 +7795,9 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Analyzes a user prompt using an LLM and suggests a structure based on project entities.
-         * @param {string} projectId The ID of the project.
+         * Analiza un prompt de usuario usando un LLM y sugiere una estructura basada en las entidades del proyecto.
+         * @summary Genera estructura de prompt
+         * @param {string} projectId ID del proyecto
          * @param {GeneratePromptStructureDto} generatePromptStructureDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -7666,10 +7820,6 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
 
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
@@ -7686,19 +7836,20 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Load a generated prompt structure and create all related entities in the database.
-         * @param {string} projectId 
-         * @param {LoadPromptStructureDto} loadPromptStructureDto 
+         * @summary Load prompt structure
+         * @param {string} projectId Project ID
+         * @param {string} id 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerLoadStructure: async (projectId: string, loadPromptStructureDto: LoadPromptStructureDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        promptControllerLoadStructure: async (projectId: string, id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('promptControllerLoadStructure', 'projectId', projectId)
-            // verify required parameter 'loadPromptStructureDto' is not null or undefined
-            assertParamExists('promptControllerLoadStructure', 'loadPromptStructureDto', loadPromptStructureDto)
-            const localVarPath = `/api/projects/{projectId}/prompts/load-structure`
-                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('promptControllerLoadStructure', 'id', id)
+            const localVarPath = `/api/projects/{projectId}/prompts/{id}/load-structure`
+                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -7710,18 +7861,11 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
 
     
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(loadPromptStructureDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7729,21 +7873,21 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Delete a prompt by its slug within a project
+         * Permanently deletes a prompt. This is a destructive operation that requires admin privileges.
+         * @summary Delete prompt
          * @param {string} projectId 
-         * @param {string} promptIdSlug 
+         * @param {string} id Unique prompt identifier to delete (slug or UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerRemove: async (projectId: string, promptIdSlug: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        promptControllerRemove: async (projectId: string, id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('promptControllerRemove', 'projectId', projectId)
-            // verify required parameter 'promptIdSlug' is not null or undefined
-            assertParamExists('promptControllerRemove', 'promptIdSlug', promptIdSlug)
-            const localVarPath = `/api/projects/{projectId}/prompts/{promptIdSlug}`
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('promptControllerRemove', 'id', id)
+            const localVarPath = `/api/projects/{projectId}/prompts/{id}`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
-                .replace(`{${"promptIdSlug"}}`, encodeURIComponent(String(promptIdSlug)));
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -7755,10 +7899,6 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -7771,24 +7911,24 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Update an existing prompt by its ID (slug)
-         * @param {string} projectId The ID of the project.
-         * @param {string} promptIdSlug The ID (slug) of the prompt to update.
+         * Updates an existing prompt\'s information. Accessible by global admins or tenant admins.
+         * @summary Update prompt
+         * @param {string} projectId 
+         * @param {string} id Unique prompt identifier to update (slug or UUID)
          * @param {UpdatePromptDto} updatePromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerUpdate: async (projectId: string, promptIdSlug: string, updatePromptDto: UpdatePromptDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        promptControllerUpdate: async (projectId: string, id: string, updatePromptDto: UpdatePromptDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('promptControllerUpdate', 'projectId', projectId)
-            // verify required parameter 'promptIdSlug' is not null or undefined
-            assertParamExists('promptControllerUpdate', 'promptIdSlug', promptIdSlug)
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('promptControllerUpdate', 'id', id)
             // verify required parameter 'updatePromptDto' is not null or undefined
             assertParamExists('promptControllerUpdate', 'updatePromptDto', updatePromptDto)
-            const localVarPath = `/api/projects/{projectId}/prompts/{promptIdSlug}`
+            const localVarPath = `/api/projects/{projectId}/prompts/{id}`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
-                .replace(`{${"promptIdSlug"}}`, encodeURIComponent(String(promptIdSlug)));
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -7799,10 +7939,6 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -7829,8 +7965,8 @@ export const PromptsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PromptsApiAxiosParamCreator(configuration)
     return {
         /**
-         * 
-         * @summary Create a new prompt within a project
+         * Creates a new prompt for the current tenant. Accessible by global admins or tenant admins.
+         * @summary Create new prompt
          * @param {string} projectId 
          * @param {CreatePromptDto} createPromptDto 
          * @param {*} [options] Override http request option.
@@ -7843,41 +7979,41 @@ export const PromptsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Get all prompts for a project
+         * Retrieves a list of all prompts for the current tenant. Results are cached for 1 hour.
+         * @summary Get all prompts
          * @param {string} projectId 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptControllerFindAllByProject(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PromptDto>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerFindAllByProject(projectId, options);
+        async promptControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PromptDto>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerFindAll(projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerFindAllByProject']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerFindAll']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Get a specific prompt by its ID (slug) for a project
-         * @param {string} projectId The ID of the project.
-         * @param {string} promptId The ID (slug) of the prompt.
+         * Retrieves a specific prompt by its unique ID. Results are cached for 1 hour.
+         * @summary Get prompt by ID
+         * @param {string} projectId 
+         * @param {string} id Unique prompt identifier (slug)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptControllerFindOne(projectId: string, promptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PromptDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerFindOne(projectId, promptId, options);
+        async promptControllerFindOne(projectId: string, id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PromptDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerFindOne(projectId, id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerFindOne']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Analyzes a user prompt using an LLM and suggests a structure based on project entities.
-         * @param {string} projectId The ID of the project.
+         * Analiza un prompt de usuario usando un LLM y sugiere una estructura basada en las entidades del proyecto.
+         * @summary Genera estructura de prompt
+         * @param {string} projectId ID del proyecto
          * @param {GeneratePromptStructureDto} generatePromptStructureDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptControllerGenerateStructure(projectId: string, generatePromptStructureDto: GeneratePromptStructureDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+        async promptControllerGenerateStructure(projectId: string, generatePromptStructureDto: GeneratePromptStructureDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PromptControllerGenerateStructure200Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerGenerateStructure(projectId, generatePromptStructureDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerGenerateStructure']?.[localVarOperationServerIndex]?.url;
@@ -7885,43 +8021,43 @@ export const PromptsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Load a generated prompt structure and create all related entities in the database.
-         * @param {string} projectId 
-         * @param {LoadPromptStructureDto} loadPromptStructureDto 
+         * @summary Load prompt structure
+         * @param {string} projectId Project ID
+         * @param {string} id 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptControllerLoadStructure(projectId: string, loadPromptStructureDto: LoadPromptStructureDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PromptDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerLoadStructure(projectId, loadPromptStructureDto, options);
+        async promptControllerLoadStructure(projectId: string, id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerLoadStructure(projectId, id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerLoadStructure']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Delete a prompt by its slug within a project
+         * Permanently deletes a prompt. This is a destructive operation that requires admin privileges.
+         * @summary Delete prompt
          * @param {string} projectId 
-         * @param {string} promptIdSlug 
+         * @param {string} id Unique prompt identifier to delete (slug or UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptControllerRemove(projectId: string, promptIdSlug: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerRemove(projectId, promptIdSlug, options);
+        async promptControllerRemove(projectId: string, id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerRemove(projectId, id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerRemove']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Update an existing prompt by its ID (slug)
-         * @param {string} projectId The ID of the project.
-         * @param {string} promptIdSlug The ID (slug) of the prompt to update.
+         * Updates an existing prompt\'s information. Accessible by global admins or tenant admins.
+         * @summary Update prompt
+         * @param {string} projectId 
+         * @param {string} id Unique prompt identifier to update (slug or UUID)
          * @param {UpdatePromptDto} updatePromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptControllerUpdate(projectId: string, promptIdSlug: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PromptDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerUpdate(projectId, promptIdSlug, updatePromptDto, options);
+        async promptControllerUpdate(projectId: string, id: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PromptDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerUpdate(projectId, id, updatePromptDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerUpdate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -7937,8 +8073,8 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = PromptsApiFp(configuration)
     return {
         /**
-         * 
-         * @summary Create a new prompt within a project
+         * Creates a new prompt for the current tenant. Accessible by global admins or tenant admins.
+         * @summary Create new prompt
          * @param {string} projectId 
          * @param {CreatePromptDto} createPromptDto 
          * @param {*} [options] Override http request option.
@@ -7948,70 +8084,70 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.promptControllerCreate(projectId, createPromptDto, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Get all prompts for a project
+         * Retrieves a list of all prompts for the current tenant. Results are cached for 1 hour.
+         * @summary Get all prompts
          * @param {string} projectId 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerFindAllByProject(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<PromptDto>> {
-            return localVarFp.promptControllerFindAllByProject(projectId, options).then((request) => request(axios, basePath));
+        promptControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<PromptDto>> {
+            return localVarFp.promptControllerFindAll(projectId, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Get a specific prompt by its ID (slug) for a project
-         * @param {string} projectId The ID of the project.
-         * @param {string} promptId The ID (slug) of the prompt.
+         * Retrieves a specific prompt by its unique ID. Results are cached for 1 hour.
+         * @summary Get prompt by ID
+         * @param {string} projectId 
+         * @param {string} id Unique prompt identifier (slug)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerFindOne(projectId: string, promptId: string, options?: RawAxiosRequestConfig): AxiosPromise<PromptDto> {
-            return localVarFp.promptControllerFindOne(projectId, promptId, options).then((request) => request(axios, basePath));
+        promptControllerFindOne(projectId: string, id: string, options?: RawAxiosRequestConfig): AxiosPromise<PromptDto> {
+            return localVarFp.promptControllerFindOne(projectId, id, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Analyzes a user prompt using an LLM and suggests a structure based on project entities.
-         * @param {string} projectId The ID of the project.
+         * Analiza un prompt de usuario usando un LLM y sugiere una estructura basada en las entidades del proyecto.
+         * @summary Genera estructura de prompt
+         * @param {string} projectId ID del proyecto
          * @param {GeneratePromptStructureDto} generatePromptStructureDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerGenerateStructure(projectId: string, generatePromptStructureDto: GeneratePromptStructureDto, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+        promptControllerGenerateStructure(projectId: string, generatePromptStructureDto: GeneratePromptStructureDto, options?: RawAxiosRequestConfig): AxiosPromise<PromptControllerGenerateStructure200Response> {
             return localVarFp.promptControllerGenerateStructure(projectId, generatePromptStructureDto, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @summary Load a generated prompt structure and create all related entities in the database.
-         * @param {string} projectId 
-         * @param {LoadPromptStructureDto} loadPromptStructureDto 
+         * @summary Load prompt structure
+         * @param {string} projectId Project ID
+         * @param {string} id 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerLoadStructure(projectId: string, loadPromptStructureDto: LoadPromptStructureDto, options?: RawAxiosRequestConfig): AxiosPromise<PromptDto> {
-            return localVarFp.promptControllerLoadStructure(projectId, loadPromptStructureDto, options).then((request) => request(axios, basePath));
+        promptControllerLoadStructure(projectId: string, id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.promptControllerLoadStructure(projectId, id, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Delete a prompt by its slug within a project
+         * Permanently deletes a prompt. This is a destructive operation that requires admin privileges.
+         * @summary Delete prompt
          * @param {string} projectId 
-         * @param {string} promptIdSlug 
+         * @param {string} id Unique prompt identifier to delete (slug or UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerRemove(projectId: string, promptIdSlug: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.promptControllerRemove(projectId, promptIdSlug, options).then((request) => request(axios, basePath));
+        promptControllerRemove(projectId: string, id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.promptControllerRemove(projectId, id, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Update an existing prompt by its ID (slug)
-         * @param {string} projectId The ID of the project.
-         * @param {string} promptIdSlug The ID (slug) of the prompt to update.
+         * Updates an existing prompt\'s information. Accessible by global admins or tenant admins.
+         * @summary Update prompt
+         * @param {string} projectId 
+         * @param {string} id Unique prompt identifier to update (slug or UUID)
          * @param {UpdatePromptDto} updatePromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerUpdate(projectId: string, promptIdSlug: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): AxiosPromise<PromptDto> {
-            return localVarFp.promptControllerUpdate(projectId, promptIdSlug, updatePromptDto, options).then((request) => request(axios, basePath));
+        promptControllerUpdate(projectId: string, id: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig): AxiosPromise<PromptDto> {
+            return localVarFp.promptControllerUpdate(projectId, id, updatePromptDto, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -8024,8 +8160,8 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
  */
 export class PromptsApi extends BaseAPI {
     /**
-     * 
-     * @summary Create a new prompt within a project
+     * Creates a new prompt for the current tenant. Accessible by global admins or tenant admins.
+     * @summary Create new prompt
      * @param {string} projectId 
      * @param {CreatePromptDto} createPromptDto 
      * @param {*} [options] Override http request option.
@@ -8037,34 +8173,34 @@ export class PromptsApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Get all prompts for a project
+     * Retrieves a list of all prompts for the current tenant. Results are cached for 1 hour.
+     * @summary Get all prompts
      * @param {string} projectId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
      */
-    public promptControllerFindAllByProject(projectId: string, options?: RawAxiosRequestConfig) {
-        return PromptsApiFp(this.configuration).promptControllerFindAllByProject(projectId, options).then((request) => request(this.axios, this.basePath));
+    public promptControllerFindAll(projectId: string, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerFindAll(projectId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * 
-     * @summary Get a specific prompt by its ID (slug) for a project
-     * @param {string} projectId The ID of the project.
-     * @param {string} promptId The ID (slug) of the prompt.
+     * Retrieves a specific prompt by its unique ID. Results are cached for 1 hour.
+     * @summary Get prompt by ID
+     * @param {string} projectId 
+     * @param {string} id Unique prompt identifier (slug)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
      */
-    public promptControllerFindOne(projectId: string, promptId: string, options?: RawAxiosRequestConfig) {
-        return PromptsApiFp(this.configuration).promptControllerFindOne(projectId, promptId, options).then((request) => request(this.axios, this.basePath));
+    public promptControllerFindOne(projectId: string, id: string, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerFindOne(projectId, id, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * 
-     * @summary Analyzes a user prompt using an LLM and suggests a structure based on project entities.
-     * @param {string} projectId The ID of the project.
+     * Analiza un prompt de usuario usando un LLM y sugiere una estructura basada en las entidades del proyecto.
+     * @summary Genera estructura de prompt
+     * @param {string} projectId ID del proyecto
      * @param {GeneratePromptStructureDto} generatePromptStructureDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -8076,42 +8212,42 @@ export class PromptsApi extends BaseAPI {
 
     /**
      * 
-     * @summary Load a generated prompt structure and create all related entities in the database.
-     * @param {string} projectId 
-     * @param {LoadPromptStructureDto} loadPromptStructureDto 
+     * @summary Load prompt structure
+     * @param {string} projectId Project ID
+     * @param {string} id 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
      */
-    public promptControllerLoadStructure(projectId: string, loadPromptStructureDto: LoadPromptStructureDto, options?: RawAxiosRequestConfig) {
-        return PromptsApiFp(this.configuration).promptControllerLoadStructure(projectId, loadPromptStructureDto, options).then((request) => request(this.axios, this.basePath));
+    public promptControllerLoadStructure(projectId: string, id: string, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerLoadStructure(projectId, id, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * 
-     * @summary Delete a prompt by its slug within a project
+     * Permanently deletes a prompt. This is a destructive operation that requires admin privileges.
+     * @summary Delete prompt
      * @param {string} projectId 
-     * @param {string} promptIdSlug 
+     * @param {string} id Unique prompt identifier to delete (slug or UUID)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
      */
-    public promptControllerRemove(projectId: string, promptIdSlug: string, options?: RawAxiosRequestConfig) {
-        return PromptsApiFp(this.configuration).promptControllerRemove(projectId, promptIdSlug, options).then((request) => request(this.axios, this.basePath));
+    public promptControllerRemove(projectId: string, id: string, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerRemove(projectId, id, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * 
-     * @summary Update an existing prompt by its ID (slug)
-     * @param {string} projectId The ID of the project.
-     * @param {string} promptIdSlug The ID (slug) of the prompt to update.
+     * Updates an existing prompt\'s information. Accessible by global admins or tenant admins.
+     * @summary Update prompt
+     * @param {string} projectId 
+     * @param {string} id Unique prompt identifier to update (slug or UUID)
      * @param {UpdatePromptDto} updatePromptDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
      */
-    public promptControllerUpdate(projectId: string, promptIdSlug: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig) {
-        return PromptsApiFp(this.configuration).promptControllerUpdate(projectId, promptIdSlug, updatePromptDto, options).then((request) => request(this.axios, this.basePath));
+    public promptControllerUpdate(projectId: string, id: string, updatePromptDto: UpdatePromptDto, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerUpdate(projectId, id, updatePromptDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -8681,9 +8817,9 @@ export class RawExecutionApi extends BaseAPI {
 export const RegionsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * 
-         * @summary Creates a new region for a specific project
-         * @param {string} projectId Project ID
+         * Creates a new region for the current tenant. Accessible by global admins or tenant admins.
+         * @summary Create new region
+         * @param {string} projectId ID of the project
          * @param {CreateRegionDto} createRegionDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -8725,9 +8861,9 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Gets all regions for a specific project
-         * @param {string} projectId Project ID
+         * Retrieves a list of all regions for the current tenant. Results are cached for 1 hour.
+         * @summary Get all regions
+         * @param {string} projectId ID of the project
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -8763,20 +8899,20 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Gets a specific region within a project
-         * @param {string} languageCode Language code (ID) of the region
-         * @param {string} projectId Project ID
+         * Retrieves a specific region by its language code (e.g., en-US, es-ES). Results are cached for 1 hour.
+         * @summary Get region by language code
+         * @param {string} langCode Language code of the region (e.g., en-US, es-ES)
+         * @param {string} projectId ID of the project
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        regionControllerFindOne: async (languageCode: string, projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'languageCode' is not null or undefined
-            assertParamExists('regionControllerFindOne', 'languageCode', languageCode)
+        regionControllerFindOne: async (langCode: string, projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'langCode' is not null or undefined
+            assertParamExists('regionControllerFindOne', 'langCode', langCode)
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('regionControllerFindOne', 'projectId', projectId)
-            const localVarPath = `/api/projects/{projectId}/regions/{languageCode}`
-                .replace(`{${"languageCode"}}`, encodeURIComponent(String(languageCode)))
+            const localVarPath = `/api/projects/{projectId}/regions/{langCode}`
+                .replace(`{${"langCode"}}`, encodeURIComponent(String(langCode)))
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -8805,20 +8941,20 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Deletes a specific region within a project
-         * @param {string} languageCode Language code (ID) of the region to delete
-         * @param {string} projectId Project ID
+         * Permanently deletes a region. This is a destructive operation that requires admin privileges.
+         * @summary Delete region
+         * @param {string} langCode Language code of the region to delete (e.g., en-US, es-ES)
+         * @param {string} projectId ID of the project
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        regionControllerRemove: async (languageCode: string, projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'languageCode' is not null or undefined
-            assertParamExists('regionControllerRemove', 'languageCode', languageCode)
+        regionControllerRemove: async (langCode: string, projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'langCode' is not null or undefined
+            assertParamExists('regionControllerRemove', 'langCode', langCode)
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('regionControllerRemove', 'projectId', projectId)
-            const localVarPath = `/api/projects/{projectId}/regions/{languageCode}`
-                .replace(`{${"languageCode"}}`, encodeURIComponent(String(languageCode)))
+            const localVarPath = `/api/projects/{projectId}/regions/{langCode}`
+                .replace(`{${"langCode"}}`, encodeURIComponent(String(langCode)))
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -8847,23 +8983,23 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Updates a specific region within a project
-         * @param {string} languageCode Language code (ID) of the region to update
-         * @param {string} projectId Project ID
+         * Updates an existing region\'s information. Accessible by global admins or tenant admins.
+         * @summary Update region
+         * @param {string} langCode Language code of the region to update (e.g., en-US, es-ES)
+         * @param {string} projectId ID of the project
          * @param {UpdateRegionDto} updateRegionDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        regionControllerUpdate: async (languageCode: string, projectId: string, updateRegionDto: UpdateRegionDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'languageCode' is not null or undefined
-            assertParamExists('regionControllerUpdate', 'languageCode', languageCode)
+        regionControllerUpdate: async (langCode: string, projectId: string, updateRegionDto: UpdateRegionDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'langCode' is not null or undefined
+            assertParamExists('regionControllerUpdate', 'langCode', langCode)
             // verify required parameter 'projectId' is not null or undefined
             assertParamExists('regionControllerUpdate', 'projectId', projectId)
             // verify required parameter 'updateRegionDto' is not null or undefined
             assertParamExists('regionControllerUpdate', 'updateRegionDto', updateRegionDto)
-            const localVarPath = `/api/projects/{projectId}/regions/{languageCode}`
-                .replace(`{${"languageCode"}}`, encodeURIComponent(String(languageCode)))
+            const localVarPath = `/api/projects/{projectId}/regions/{langCode}`
+                .replace(`{${"langCode"}}`, encodeURIComponent(String(langCode)))
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -8905,71 +9041,71 @@ export const RegionsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = RegionsApiAxiosParamCreator(configuration)
     return {
         /**
-         * 
-         * @summary Creates a new region for a specific project
-         * @param {string} projectId Project ID
+         * Creates a new region for the current tenant. Accessible by global admins or tenant admins.
+         * @summary Create new region
+         * @param {string} projectId ID of the project
          * @param {CreateRegionDto} createRegionDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async regionControllerCreate(projectId: string, createRegionDto: CreateRegionDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateRegionDto>> {
+        async regionControllerCreate(projectId: string, createRegionDto: CreateRegionDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegionDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.regionControllerCreate(projectId, createRegionDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RegionsApi.regionControllerCreate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Gets all regions for a specific project
-         * @param {string} projectId Project ID
+         * Retrieves a list of all regions for the current tenant. Results are cached for 1 hour.
+         * @summary Get all regions
+         * @param {string} projectId ID of the project
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async regionControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CreateRegionDto>>> {
+        async regionControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RegionDto>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.regionControllerFindAll(projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RegionsApi.regionControllerFindAll']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Gets a specific region within a project
-         * @param {string} languageCode Language code (ID) of the region
-         * @param {string} projectId Project ID
+         * Retrieves a specific region by its language code (e.g., en-US, es-ES). Results are cached for 1 hour.
+         * @summary Get region by language code
+         * @param {string} langCode Language code of the region (e.g., en-US, es-ES)
+         * @param {string} projectId ID of the project
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async regionControllerFindOne(languageCode: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateRegionDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.regionControllerFindOne(languageCode, projectId, options);
+        async regionControllerFindOne(langCode: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegionDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.regionControllerFindOne(langCode, projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RegionsApi.regionControllerFindOne']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Deletes a specific region within a project
-         * @param {string} languageCode Language code (ID) of the region to delete
-         * @param {string} projectId Project ID
+         * Permanently deletes a region. This is a destructive operation that requires admin privileges.
+         * @summary Delete region
+         * @param {string} langCode Language code of the region to delete (e.g., en-US, es-ES)
+         * @param {string} projectId ID of the project
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async regionControllerRemove(languageCode: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.regionControllerRemove(languageCode, projectId, options);
+        async regionControllerRemove(langCode: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.regionControllerRemove(langCode, projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RegionsApi.regionControllerRemove']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Updates a specific region within a project
-         * @param {string} languageCode Language code (ID) of the region to update
-         * @param {string} projectId Project ID
+         * Updates an existing region\'s information. Accessible by global admins or tenant admins.
+         * @summary Update region
+         * @param {string} langCode Language code of the region to update (e.g., en-US, es-ES)
+         * @param {string} projectId ID of the project
          * @param {UpdateRegionDto} updateRegionDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async regionControllerUpdate(languageCode: string, projectId: string, updateRegionDto: UpdateRegionDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateRegionDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.regionControllerUpdate(languageCode, projectId, updateRegionDto, options);
+        async regionControllerUpdate(langCode: string, projectId: string, updateRegionDto: UpdateRegionDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegionDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.regionControllerUpdate(langCode, projectId, updateRegionDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RegionsApi.regionControllerUpdate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8985,59 +9121,59 @@ export const RegionsApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = RegionsApiFp(configuration)
     return {
         /**
-         * 
-         * @summary Creates a new region for a specific project
-         * @param {string} projectId Project ID
+         * Creates a new region for the current tenant. Accessible by global admins or tenant admins.
+         * @summary Create new region
+         * @param {string} projectId ID of the project
          * @param {CreateRegionDto} createRegionDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        regionControllerCreate(projectId: string, createRegionDto: CreateRegionDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateRegionDto> {
+        regionControllerCreate(projectId: string, createRegionDto: CreateRegionDto, options?: RawAxiosRequestConfig): AxiosPromise<RegionDto> {
             return localVarFp.regionControllerCreate(projectId, createRegionDto, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Gets all regions for a specific project
-         * @param {string} projectId Project ID
+         * Retrieves a list of all regions for the current tenant. Results are cached for 1 hour.
+         * @summary Get all regions
+         * @param {string} projectId ID of the project
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        regionControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CreateRegionDto>> {
+        regionControllerFindAll(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<RegionDto>> {
             return localVarFp.regionControllerFindAll(projectId, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Gets a specific region within a project
-         * @param {string} languageCode Language code (ID) of the region
-         * @param {string} projectId Project ID
+         * Retrieves a specific region by its language code (e.g., en-US, es-ES). Results are cached for 1 hour.
+         * @summary Get region by language code
+         * @param {string} langCode Language code of the region (e.g., en-US, es-ES)
+         * @param {string} projectId ID of the project
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        regionControllerFindOne(languageCode: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateRegionDto> {
-            return localVarFp.regionControllerFindOne(languageCode, projectId, options).then((request) => request(axios, basePath));
+        regionControllerFindOne(langCode: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<RegionDto> {
+            return localVarFp.regionControllerFindOne(langCode, projectId, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Deletes a specific region within a project
-         * @param {string} languageCode Language code (ID) of the region to delete
-         * @param {string} projectId Project ID
+         * Permanently deletes a region. This is a destructive operation that requires admin privileges.
+         * @summary Delete region
+         * @param {string} langCode Language code of the region to delete (e.g., en-US, es-ES)
+         * @param {string} projectId ID of the project
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        regionControllerRemove(languageCode: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.regionControllerRemove(languageCode, projectId, options).then((request) => request(axios, basePath));
+        regionControllerRemove(langCode: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.regionControllerRemove(langCode, projectId, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Updates a specific region within a project
-         * @param {string} languageCode Language code (ID) of the region to update
-         * @param {string} projectId Project ID
+         * Updates an existing region\'s information. Accessible by global admins or tenant admins.
+         * @summary Update region
+         * @param {string} langCode Language code of the region to update (e.g., en-US, es-ES)
+         * @param {string} projectId ID of the project
          * @param {UpdateRegionDto} updateRegionDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        regionControllerUpdate(languageCode: string, projectId: string, updateRegionDto: UpdateRegionDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateRegionDto> {
-            return localVarFp.regionControllerUpdate(languageCode, projectId, updateRegionDto, options).then((request) => request(axios, basePath));
+        regionControllerUpdate(langCode: string, projectId: string, updateRegionDto: UpdateRegionDto, options?: RawAxiosRequestConfig): AxiosPromise<RegionDto> {
+            return localVarFp.regionControllerUpdate(langCode, projectId, updateRegionDto, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -9050,9 +9186,9 @@ export const RegionsApiFactory = function (configuration?: Configuration, basePa
  */
 export class RegionsApi extends BaseAPI {
     /**
-     * 
-     * @summary Creates a new region for a specific project
-     * @param {string} projectId Project ID
+     * Creates a new region for the current tenant. Accessible by global admins or tenant admins.
+     * @summary Create new region
+     * @param {string} projectId ID of the project
      * @param {CreateRegionDto} createRegionDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -9063,9 +9199,9 @@ export class RegionsApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Gets all regions for a specific project
-     * @param {string} projectId Project ID
+     * Retrieves a list of all regions for the current tenant. Results are cached for 1 hour.
+     * @summary Get all regions
+     * @param {string} projectId ID of the project
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof RegionsApi
@@ -9075,43 +9211,43 @@ export class RegionsApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Gets a specific region within a project
-     * @param {string} languageCode Language code (ID) of the region
-     * @param {string} projectId Project ID
+     * Retrieves a specific region by its language code (e.g., en-US, es-ES). Results are cached for 1 hour.
+     * @summary Get region by language code
+     * @param {string} langCode Language code of the region (e.g., en-US, es-ES)
+     * @param {string} projectId ID of the project
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof RegionsApi
      */
-    public regionControllerFindOne(languageCode: string, projectId: string, options?: RawAxiosRequestConfig) {
-        return RegionsApiFp(this.configuration).regionControllerFindOne(languageCode, projectId, options).then((request) => request(this.axios, this.basePath));
+    public regionControllerFindOne(langCode: string, projectId: string, options?: RawAxiosRequestConfig) {
+        return RegionsApiFp(this.configuration).regionControllerFindOne(langCode, projectId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * 
-     * @summary Deletes a specific region within a project
-     * @param {string} languageCode Language code (ID) of the region to delete
-     * @param {string} projectId Project ID
+     * Permanently deletes a region. This is a destructive operation that requires admin privileges.
+     * @summary Delete region
+     * @param {string} langCode Language code of the region to delete (e.g., en-US, es-ES)
+     * @param {string} projectId ID of the project
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof RegionsApi
      */
-    public regionControllerRemove(languageCode: string, projectId: string, options?: RawAxiosRequestConfig) {
-        return RegionsApiFp(this.configuration).regionControllerRemove(languageCode, projectId, options).then((request) => request(this.axios, this.basePath));
+    public regionControllerRemove(langCode: string, projectId: string, options?: RawAxiosRequestConfig) {
+        return RegionsApiFp(this.configuration).regionControllerRemove(langCode, projectId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * 
-     * @summary Updates a specific region within a project
-     * @param {string} languageCode Language code (ID) of the region to update
-     * @param {string} projectId Project ID
+     * Updates an existing region\'s information. Accessible by global admins or tenant admins.
+     * @summary Update region
+     * @param {string} langCode Language code of the region to update (e.g., en-US, es-ES)
+     * @param {string} projectId ID of the project
      * @param {UpdateRegionDto} updateRegionDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof RegionsApi
      */
-    public regionControllerUpdate(languageCode: string, projectId: string, updateRegionDto: UpdateRegionDto, options?: RawAxiosRequestConfig) {
-        return RegionsApiFp(this.configuration).regionControllerUpdate(languageCode, projectId, updateRegionDto, options).then((request) => request(this.axios, this.basePath));
+    public regionControllerUpdate(langCode: string, projectId: string, updateRegionDto: UpdateRegionDto, options?: RawAxiosRequestConfig) {
+        return RegionsApiFp(this.configuration).regionControllerUpdate(langCode, projectId, updateRegionDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -10293,8 +10429,8 @@ export class TagsApi extends BaseAPI {
 export const TenantsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * 
-         * @summary Create a new tenant
+         * Creates a new tenant in the system. This operation requires global admin privileges.
+         * @summary Create new tenant
          * @param {CreateTenantDto} createTenantDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10333,7 +10469,7 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
+         * Retrieves a list of all tenants in the system. This operation requires global admin privileges.
          * @summary Get all tenants
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10367,9 +10503,9 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Get a specific tenant by ID
-         * @param {string} tenantId The ID of the tenant
+         * Retrieves a specific tenant by their unique ID. Accessible by global admins or tenant admins of the specified tenant.
+         * @summary Get tenant by ID
+         * @param {string} tenantId Unique tenant identifier (UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10405,9 +10541,9 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Delete a tenant by ID (Caution: Destructive operation)
-         * @param {string} tenantId The ID of the tenant
+         * Permanently deletes a tenant from the system. This is a destructive operation that requires global admin privileges.
+         * @summary Delete tenant
+         * @param {string} tenantId Unique tenant identifier to delete (UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10443,9 +10579,9 @@ export const TenantsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Update a tenant by ID
-         * @param {string} tenantId The ID of the tenant
+         * Updates an existing tenant\'s information. Accessible by global admins or tenant admins of the specified tenant.
+         * @summary Update tenant
+         * @param {string} tenantId Unique tenant identifier to update (UUID)
          * @param {UpdateTenantDto} updateTenantDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10497,8 +10633,8 @@ export const TenantsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = TenantsApiAxiosParamCreator(configuration)
     return {
         /**
-         * 
-         * @summary Create a new tenant
+         * Creates a new tenant in the system. This operation requires global admin privileges.
+         * @summary Create new tenant
          * @param {CreateTenantDto} createTenantDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10510,7 +10646,7 @@ export const TenantsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
+         * Retrieves a list of all tenants in the system. This operation requires global admin privileges.
          * @summary Get all tenants
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10522,9 +10658,9 @@ export const TenantsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Get a specific tenant by ID
-         * @param {string} tenantId The ID of the tenant
+         * Retrieves a specific tenant by their unique ID. Accessible by global admins or tenant admins of the specified tenant.
+         * @summary Get tenant by ID
+         * @param {string} tenantId Unique tenant identifier (UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10535,9 +10671,9 @@ export const TenantsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Delete a tenant by ID (Caution: Destructive operation)
-         * @param {string} tenantId The ID of the tenant
+         * Permanently deletes a tenant from the system. This is a destructive operation that requires global admin privileges.
+         * @summary Delete tenant
+         * @param {string} tenantId Unique tenant identifier to delete (UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10548,9 +10684,9 @@ export const TenantsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Update a tenant by ID
-         * @param {string} tenantId The ID of the tenant
+         * Updates an existing tenant\'s information. Accessible by global admins or tenant admins of the specified tenant.
+         * @summary Update tenant
+         * @param {string} tenantId Unique tenant identifier to update (UUID)
          * @param {UpdateTenantDto} updateTenantDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10572,8 +10708,8 @@ export const TenantsApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = TenantsApiFp(configuration)
     return {
         /**
-         * 
-         * @summary Create a new tenant
+         * Creates a new tenant in the system. This operation requires global admin privileges.
+         * @summary Create new tenant
          * @param {CreateTenantDto} createTenantDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10582,7 +10718,7 @@ export const TenantsApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.tenantControllerCreate(createTenantDto, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
+         * Retrieves a list of all tenants in the system. This operation requires global admin privileges.
          * @summary Get all tenants
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10591,9 +10727,9 @@ export const TenantsApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.tenantControllerFindAll(options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Get a specific tenant by ID
-         * @param {string} tenantId The ID of the tenant
+         * Retrieves a specific tenant by their unique ID. Accessible by global admins or tenant admins of the specified tenant.
+         * @summary Get tenant by ID
+         * @param {string} tenantId Unique tenant identifier (UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10601,9 +10737,9 @@ export const TenantsApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.tenantControllerFindOne(tenantId, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Delete a tenant by ID (Caution: Destructive operation)
-         * @param {string} tenantId The ID of the tenant
+         * Permanently deletes a tenant from the system. This is a destructive operation that requires global admin privileges.
+         * @summary Delete tenant
+         * @param {string} tenantId Unique tenant identifier to delete (UUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10611,9 +10747,9 @@ export const TenantsApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.tenantControllerRemove(tenantId, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Update a tenant by ID
-         * @param {string} tenantId The ID of the tenant
+         * Updates an existing tenant\'s information. Accessible by global admins or tenant admins of the specified tenant.
+         * @summary Update tenant
+         * @param {string} tenantId Unique tenant identifier to update (UUID)
          * @param {UpdateTenantDto} updateTenantDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10632,8 +10768,8 @@ export const TenantsApiFactory = function (configuration?: Configuration, basePa
  */
 export class TenantsApi extends BaseAPI {
     /**
-     * 
-     * @summary Create a new tenant
+     * Creates a new tenant in the system. This operation requires global admin privileges.
+     * @summary Create new tenant
      * @param {CreateTenantDto} createTenantDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -10644,7 +10780,7 @@ export class TenantsApi extends BaseAPI {
     }
 
     /**
-     * 
+     * Retrieves a list of all tenants in the system. This operation requires global admin privileges.
      * @summary Get all tenants
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -10655,9 +10791,9 @@ export class TenantsApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Get a specific tenant by ID
-     * @param {string} tenantId The ID of the tenant
+     * Retrieves a specific tenant by their unique ID. Accessible by global admins or tenant admins of the specified tenant.
+     * @summary Get tenant by ID
+     * @param {string} tenantId Unique tenant identifier (UUID)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TenantsApi
@@ -10667,9 +10803,9 @@ export class TenantsApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Delete a tenant by ID (Caution: Destructive operation)
-     * @param {string} tenantId The ID of the tenant
+     * Permanently deletes a tenant from the system. This is a destructive operation that requires global admin privileges.
+     * @summary Delete tenant
+     * @param {string} tenantId Unique tenant identifier to delete (UUID)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TenantsApi
@@ -10679,9 +10815,9 @@ export class TenantsApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Update a tenant by ID
-     * @param {string} tenantId The ID of the tenant
+     * Updates an existing tenant\'s information. Accessible by global admins or tenant admins of the specified tenant.
+     * @summary Update tenant
+     * @param {string} tenantId Unique tenant identifier to update (UUID)
      * @param {UpdateTenantDto} updateTenantDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -10701,9 +10837,9 @@ export class TenantsApi extends BaseAPI {
 export const UsersApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * 
-         * @summary Create a new user (within the authenticated admin user\'s tenant)
-         * @param {CreateUserDto} createUserDto 
+         * Creates a new user within the authenticated admin\'s tenant. Requires admin privileges.
+         * @summary Create new user
+         * @param {CreateUserDto} createUserDto User data to create
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10741,7 +10877,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * 
+         * Retrieves a list of all users in the system. Requires admin privileges.
          * @summary Get all users
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10759,6 +10895,10 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -10771,9 +10911,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * 
-         * @summary Get a user by ID
-         * @param {string} id User ID
+         * Retrieves a specific user by their unique ID. Requires admin privileges.
+         * @summary Get user by ID
+         * @param {string} id Unique user identifier (CUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10793,6 +10933,10 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -10805,9 +10949,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * 
-         * @summary Delete a user by ID
-         * @param {string} id ID of the user to delete
+         * Permanently deletes a user from the system. Requires admin privileges.
+         * @summary Delete user
+         * @param {string} id Unique user identifier to delete (CUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10827,6 +10971,10 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -10839,10 +10987,10 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * 
-         * @summary Update a user by ID
-         * @param {string} id ID of the user to update
-         * @param {object} body 
+         * Updates an existing user\'s information. Requires admin privileges.
+         * @summary Update user
+         * @param {string} id Unique user identifier to update (CUID)
+         * @param {object} body User data to update
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10863,6 +11011,10 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -10889,20 +11041,20 @@ export const UsersApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = UsersApiAxiosParamCreator(configuration)
     return {
         /**
-         * 
-         * @summary Create a new user (within the authenticated admin user\'s tenant)
-         * @param {CreateUserDto} createUserDto 
+         * Creates a new user within the authenticated admin\'s tenant. Requires admin privileges.
+         * @summary Create new user
+         * @param {CreateUserDto} createUserDto User data to create
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async userControllerCreate(createUserDto: CreateUserDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async userControllerCreate(createUserDto: CreateUserDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateUserDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.userControllerCreate(createUserDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.userControllerCreate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
+         * Retrieves a list of all users in the system. Requires admin privileges.
          * @summary Get all users
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10914,9 +11066,9 @@ export const UsersApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Get a user by ID
-         * @param {string} id User ID
+         * Retrieves a specific user by their unique ID. Requires admin privileges.
+         * @summary Get user by ID
+         * @param {string} id Unique user identifier (CUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10927,23 +11079,23 @@ export const UsersApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Delete a user by ID
-         * @param {string} id ID of the user to delete
+         * Permanently deletes a user from the system. Requires admin privileges.
+         * @summary Delete user
+         * @param {string} id Unique user identifier to delete (CUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async userControllerRemove(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async userControllerRemove(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateUserDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.userControllerRemove(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.userControllerRemove']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Update a user by ID
-         * @param {string} id ID of the user to update
-         * @param {object} body 
+         * Updates an existing user\'s information. Requires admin privileges.
+         * @summary Update user
+         * @param {string} id Unique user identifier to update (CUID)
+         * @param {object} body User data to update
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10964,17 +11116,17 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
     const localVarFp = UsersApiFp(configuration)
     return {
         /**
-         * 
-         * @summary Create a new user (within the authenticated admin user\'s tenant)
-         * @param {CreateUserDto} createUserDto 
+         * Creates a new user within the authenticated admin\'s tenant. Requires admin privileges.
+         * @summary Create new user
+         * @param {CreateUserDto} createUserDto User data to create
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        userControllerCreate(createUserDto: CreateUserDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        userControllerCreate(createUserDto: CreateUserDto, options?: RawAxiosRequestConfig): AxiosPromise<CreateUserDto> {
             return localVarFp.userControllerCreate(createUserDto, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
+         * Retrieves a list of all users in the system. Requires admin privileges.
          * @summary Get all users
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -10983,9 +11135,9 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.userControllerFindAll(options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Get a user by ID
-         * @param {string} id User ID
+         * Retrieves a specific user by their unique ID. Requires admin privileges.
+         * @summary Get user by ID
+         * @param {string} id Unique user identifier (CUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -10993,20 +11145,20 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.userControllerFindOne(id, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Delete a user by ID
-         * @param {string} id ID of the user to delete
+         * Permanently deletes a user from the system. Requires admin privileges.
+         * @summary Delete user
+         * @param {string} id Unique user identifier to delete (CUID)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        userControllerRemove(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        userControllerRemove(id: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateUserDto> {
             return localVarFp.userControllerRemove(id, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Update a user by ID
-         * @param {string} id ID of the user to update
-         * @param {object} body 
+         * Updates an existing user\'s information. Requires admin privileges.
+         * @summary Update user
+         * @param {string} id Unique user identifier to update (CUID)
+         * @param {object} body User data to update
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -11024,9 +11176,9 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
  */
 export class UsersApi extends BaseAPI {
     /**
-     * 
-     * @summary Create a new user (within the authenticated admin user\'s tenant)
-     * @param {CreateUserDto} createUserDto 
+     * Creates a new user within the authenticated admin\'s tenant. Requires admin privileges.
+     * @summary Create new user
+     * @param {CreateUserDto} createUserDto User data to create
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi
@@ -11036,7 +11188,7 @@ export class UsersApi extends BaseAPI {
     }
 
     /**
-     * 
+     * Retrieves a list of all users in the system. Requires admin privileges.
      * @summary Get all users
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -11047,9 +11199,9 @@ export class UsersApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Get a user by ID
-     * @param {string} id User ID
+     * Retrieves a specific user by their unique ID. Requires admin privileges.
+     * @summary Get user by ID
+     * @param {string} id Unique user identifier (CUID)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi
@@ -11059,9 +11211,9 @@ export class UsersApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Delete a user by ID
-     * @param {string} id ID of the user to delete
+     * Permanently deletes a user from the system. Requires admin privileges.
+     * @summary Delete user
+     * @param {string} id Unique user identifier to delete (CUID)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi
@@ -11071,10 +11223,10 @@ export class UsersApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Update a user by ID
-     * @param {string} id ID of the user to update
-     * @param {object} body 
+     * Updates an existing user\'s information. Requires admin privileges.
+     * @summary Update user
+     * @param {string} id Unique user identifier to update (CUID)
+     * @param {object} body User data to update
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi

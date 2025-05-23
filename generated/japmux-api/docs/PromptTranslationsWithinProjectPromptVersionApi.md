@@ -157,6 +157,7 @@ let resolveAssets: boolean; //Whether to resolve asset placeholders. Defaults to
 let environmentId: string; //Environment ID for context. (optional) (default to undefined)
 let regionCode: string; //Region code for context (e.g., for asset translations - overrides languageCode for assets if provided). (optional) (default to undefined)
 let variables: string; //JSON stringified object of variables for substitution. (optional) (default to undefined)
+let processed: boolean; //Whether to return the processed prompt with all references and variables resolved. Defaults to false. (optional) (default to undefined)
 
 const { status, data } = await apiInstance.promptTranslationControllerFindOneByLanguage(
     projectId,
@@ -166,7 +167,8 @@ const { status, data } = await apiInstance.promptTranslationControllerFindOneByL
     resolveAssets,
     environmentId,
     regionCode,
-    variables
+    variables,
+    processed
 );
 ```
 
@@ -182,6 +184,7 @@ const { status, data } = await apiInstance.promptTranslationControllerFindOneByL
 | **environmentId** | [**string**] | Environment ID for context. | (optional) defaults to undefined|
 | **regionCode** | [**string**] | Region code for context (e.g., for asset translations - overrides languageCode for assets if provided). | (optional) defaults to undefined|
 | **variables** | [**string**] | JSON stringified object of variables for substitution. | (optional) defaults to undefined|
+| **processed** | [**boolean**] | Whether to return the processed prompt with all references and variables resolved. Defaults to false. | (optional) defaults to undefined|
 
 
 ### Return type

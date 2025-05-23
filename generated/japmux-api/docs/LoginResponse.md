@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**access_token** | **string** |  | [default to undefined]
+**access_token** | **string** | JWT access token for authentication | [default to undefined]
 
 ## Example
 

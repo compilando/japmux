@@ -102,20 +102,19 @@ const environmentsGeneratedApi = new generated.EnvironmentsApi(generatedApiConfi
 // Instanciar PromptAssetsApi aquí para que esté disponible para el servicio
 const promptAssetsGeneratedApi = new generated.PromptAssetsForASpecificPromptApi(generatedApiConfig, undefined, apiClient);
 // Instanciar PromptAssetVersionsApi aquí para que esté disponible para el servicio, CON EL NOMBRE CORRECTO
-const promptAssetVersionsGeneratedApi = new generated.PromptAssetVersionsWithinProjectAssetApi(generatedApiConfig, undefined, apiClient);
+const promptAssetVersionsGeneratedApi = new generated.PromptAssetVersionsApi(generatedApiConfig, undefined, apiClient);
 // Instanciar PromptAssetTranslationsApi aquí para que esté disponible para el servicio
 // Esta constante no se utiliza actualmente, podría ser necesaria en el futuro
 // const promptAssetTranslationsGeneratedApi = new generated.AssetTranslationsWithinProjectAssetVersionApi(generatedApiConfig, undefined, apiClient);
 // const authGeneratedApi = new generated.AuthenticationApi(generatedApiConfig, undefined, apiClient); // Si decides reemplazar authService
 
 // Variable para la instancia de PromptAssetVersionsApi con el nombre corregido (inicialización perezosa)
-let _promptAssetVersionsGeneratedApi: generated.PromptAssetVersionsWithinProjectAssetApi | null = null;
+let _promptAssetVersionsGeneratedApi: generated.PromptAssetVersionsApi | null = null;
 
 // Función getter para PromptAssetVersionsApi con el nombre corregido
-function getPromptAssetVersionsGeneratedApi(): generated.PromptAssetVersionsWithinProjectAssetApi {
+function getPromptAssetVersionsGeneratedApi(): generated.PromptAssetVersionsApi {
     if (!_promptAssetVersionsGeneratedApi) {
-        // Usar el nombre de clase correcto aquí:
-        _promptAssetVersionsGeneratedApi = new generated.PromptAssetVersionsWithinProjectAssetApi(generatedApiConfig, undefined, apiClient);
+        _promptAssetVersionsGeneratedApi = new generated.PromptAssetVersionsApi(generatedApiConfig, undefined, apiClient);
     }
     return _promptAssetVersionsGeneratedApi;
 }
@@ -363,41 +362,37 @@ export const tagService = {
     }
 };
 
-// Servicio de Prompts (Actualizado para usar generado donde aplique)
+// Servicio de Prompts (Corregido para usar generated.PromptsApi)
 export const promptService = {
-    create: async (projectId: string, payload: Omit<generated.CreatePromptDto, 'tenantId'>): Promise<generated.PromptDto> => {
-        try {
-            const response = await promptsGeneratedApi.promptControllerCreate(projectId, payload as generated.CreatePromptDto);
-            return response.data;
-        } catch (error) {
-            console.error('Error creating prompt:', error);
-            throw error;
-        }
-    },
     findAll: async (projectId: string): Promise<generated.PromptDto[]> => {
-        const response = await promptsGeneratedApi.promptControllerFindAllByProject(projectId);
+        const response = await promptsGeneratedApi.promptControllerFindAll(projectId);
         return response.data;
     },
     findOne: async (projectId: string, promptId: string): Promise<generated.PromptDto> => {
         const response = await promptsGeneratedApi.promptControllerFindOne(projectId, promptId);
         return response.data;
     },
-    update: async (projectId: string, promptInternalId: string, payload: generated.UpdatePromptDto): Promise<generated.PromptDto> => {
-        const response = await promptsGeneratedApi.promptControllerUpdate(projectId, promptInternalId, payload);
+    create: async (projectId: string, payload: generated.CreatePromptDto): Promise<generated.PromptDto> => {
+        const response = await promptsGeneratedApi.promptControllerCreate(projectId, payload);
         return response.data;
     },
-    remove: async (projectId: string, promptIdSlug: string): Promise<void> => {
-        await apiClient.delete(`/api/projects/${projectId}/prompts/${promptIdSlug}`);
-    },
-    generatePromptStructure: async (projectId: string, userPromptText: string): Promise<generated.LoadPromptStructureDto> => {
-        const payload: generated.GeneratePromptStructureDto = { userPrompt: userPromptText };
-        const response = await apiClient.post<generated.LoadPromptStructureDto>(`/api/projects/${projectId}/prompts/generate-structure`, payload);
+    update: async (projectId: string, promptId: string, payload: generated.UpdatePromptDto): Promise<generated.PromptDto> => {
+        const response = await promptsGeneratedApi.promptControllerUpdate(projectId, promptId, payload);
         return response.data;
     },
-    loadPromptStructure: async (projectId: string, structure: generated.LoadPromptStructureDto): Promise<generated.LoadPromptStructureDto> => {
-        const response = await apiClient.post<generated.LoadPromptStructureDto>(`/api/projects/${projectId}/prompts/load-structure`, structure);
-        return response.data;
-    }
+    remove: async (projectId: string, promptId: string): Promise<void> => {
+        await promptsGeneratedApi.promptControllerRemove(projectId, promptId);
+    },
+    // Funciones comentadas temporalmente porque LoadPromptStructureDto no existe en los tipos generados
+    // generatePromptStructure: async (projectId: string, userPromptText: string): Promise<generated.LoadPromptStructureDto> => {
+    //     const payload = { userPromptText };
+    //     const response = await apiClient.post<generated.LoadPromptStructureDto>(`/api/projects/${projectId}/prompts/generate-structure`, payload);
+    //     return response.data;
+    // },
+    // loadPromptStructure: async (projectId: string, structure: generated.LoadPromptStructureDto): Promise<generated.LoadPromptStructureDto> => {
+    //     const response = await apiClient.post<generated.LoadPromptStructureDto>(`/api/projects/${projectId}/prompts/load-structure`, structure);
+    //     return response.data;
+    // },
 };
 
 // Interfaz local para el servicio, debería coincidir o ser compatible con PromptVersionData de la página
@@ -472,6 +467,10 @@ export const promptTranslationService = {
     },
 };
 
+// --- Tipos personalizados para el frontend ---
+// Tipo para crear assets sin tenantId (el backend lo maneja automáticamente)
+export type CreatePromptAssetDtoFrontend = Omit<generated.CreatePromptAssetDto, 'tenantId'>;
+
 // Servicio de Prompt Assets (Corregido para usar generated.PromptAssetsApi)
 export const promptAssetService = {
     findAll: async (projectId: string, promptId: string): Promise<PromptAssetData[]> => {
@@ -491,6 +490,7 @@ export const promptAssetService = {
         console.warn("[promptAssetService.findAll] response.data no es un array o es void. Devolviendo array vacío.");
         return [];
     },
+
     findOne: async (projectId: string, promptId: string, assetKey: string): Promise<PromptAssetData> => {
         const response = await promptAssetsGeneratedApi.promptAssetControllerFindOne(promptId, projectId, assetKey);
         const asset = response.data as any;
@@ -501,8 +501,59 @@ export const promptAssetService = {
             promptId: promptId,
         } as PromptAssetData;
     },
-    create: async (projectId: string, promptId: string, payload: generated.CreatePromptAssetDto): Promise<void> => {
-        await promptAssetsGeneratedApi.promptAssetControllerCreate(promptId, projectId, payload);
+
+    // Método para crear assets de prompt específicos
+    create: async (projectId: string, promptId: string, payload: CreatePromptAssetDtoFrontend): Promise<void> => {
+
+        // Obtener tenantId del localStorage/sessionStorage del token JWT
+        let tenantId = 'default-tenant'; // Valor por defecto
+        if (typeof window !== 'undefined') {
+            const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+            if (token) {
+                try {
+                    // Decodificar JWT para obtener tenantId (simple base64 decode del payload)
+                    const payload_jwt = JSON.parse(atob(token.split('.')[1]));
+                    if (payload_jwt.tenantId) {
+                        tenantId = payload_jwt.tenantId;
+                    }
+                } catch (e) {
+
+                }
+            }
+        }
+
+        // Crear un payload completamente limpio sin tenantId
+        const cleanPayload: {
+            key: string;
+            name: string;
+            initialValue: string;
+            category?: string;
+            initialChangeMessage?: string;
+            tenantId: string; // Requerido por el backend hasta que se actualice
+        } = {
+            key: payload.key,
+            name: payload.name,
+            initialValue: payload.initialValue,
+            tenantId: tenantId // Usar el tenantId obtenido del JWT
+        };
+
+        // Solo añadir campos opcionales si existen
+        if (payload.category) {
+            cleanPayload.category = payload.category;
+        }
+        if (payload.initialChangeMessage) {
+            cleanPayload.initialChangeMessage = payload.initialChangeMessage;
+        }
+
+        try {
+            const response = await apiClient.post(`/api/projects/${projectId}/prompts/${promptId}/assets`, cleanPayload);
+        } catch (error: any) {
+
+            if (error.config?.data) {
+
+            }
+            throw error;
+        }
     },
     update: async (projectId: string, promptId: string, assetKey: string, payload: generated.UpdatePromptAssetDto): Promise<void> => {
         await promptAssetsGeneratedApi.promptAssetControllerUpdate(promptId, projectId, assetKey, payload);
@@ -511,13 +562,12 @@ export const promptAssetService = {
         await promptAssetsGeneratedApi.promptAssetControllerRemove(promptId, projectId, assetKey);
     },
     findVersions: async (projectId: string, promptId: string, assetKey: string): Promise<generated.CreatePromptAssetVersionDto[]> => {
-        // Construcción manual de la URL para asegurar que promptId está incluido y se usa /assets/
         const response = await apiClient.get<generated.CreatePromptAssetVersionDto[]>(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions`);
         return response.data;
     },
     findOneVersion: async (
         projectId: string,
-        promptId: string, // Necesario para construir la URL correcta
+        promptId: string,
         assetKey: string,
         versionTag: string
     ): Promise<generated.CreatePromptAssetVersionDto> => {
@@ -539,19 +589,15 @@ export const promptAssetService = {
         }
     },
     createVersion: async (projectId: string, promptId: string, assetKey: string, payload: generated.CreatePromptAssetVersionDto): Promise<generated.CreatePromptAssetVersionDto> => {
-        // El método generado promptAssetVersionControllerCreate probablemente omite promptId en la URL,
-        // construyendo algo como /api/projects/{projectId}/assets/{assetKey}/versions.
-        // Necesitamos POST a /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions.
         const url = `/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions`;
         console.log('[promptAssetService.createVersion] Usando apiClient.post. URL:', url, 'Payload:', payload);
         try {
             const response = await apiClient.post<generated.CreatePromptAssetVersionDto>(url, payload);
             return response.data;
         } catch (error) {
-            // Mostrar un error más específico o relanzar
             showErrorToast(`Failed to create asset version: ${error instanceof Error ? error.message : 'Unknown error'}`);
             console.error(`Error creating asset version (${url}):`, error);
-            throw error; // Relanzar para que la página pueda manejar el estado de carga/error si es necesario
+            throw error;
         }
     },
     updateVersion: async (
@@ -579,17 +625,14 @@ export const promptAssetService = {
         }
     },
     removeVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<void> => {
-        // El método generado promptAssetVersionControllerRemove probablemente omite promptId en la URL.
-        // Construir manualmente la URL para asegurar que promptId está incluido.
         const url = `/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}`;
         console.log('[promptAssetService.removeVersion] Usando apiClient.delete directamente. URL:', url);
         try {
             await apiClient.delete(url);
         } catch (error) {
-            // Mostrar un error más específico o relanzar
             showErrorToast(`Failed to delete asset version ${versionTag}: ${error instanceof Error ? error.message : 'Unknown error'}`);
             console.error(`Error deleting asset version ${versionTag} (${url}):`, error);
-            throw error; // Relanzar para que la página pueda manejar el estado de carga/error si es necesario
+            throw error;
         }
     },
     requestPublishVersion: async (projectId: string, promptId: string, assetKey: string, versionTag: string): Promise<generated.CreatePromptAssetVersionDto> => {
@@ -611,6 +654,13 @@ export const promptAssetService = {
     createTranslation: async (projectId: string, promptId: string, assetKey: string, versionTag: string, payload: generated.CreateAssetTranslationDto): Promise<generated.CreateAssetTranslationDto> => {
         const response = await apiClient.post<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations`, payload);
         return response.data;
+    },
+    updateTranslation: async (projectId: string, promptId: string, assetKey: string, versionTag: string, languageCode: string, payload: generated.UpdateAssetTranslationDto): Promise<generated.CreateAssetTranslationDto> => {
+        const response = await apiClient.put<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`, payload);
+        return response.data;
+    },
+    removeTranslation: async (projectId: string, promptId: string, assetKey: string, versionTag: string, languageCode: string): Promise<void> => {
+        await apiClient.delete(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`);
     },
 };
 
@@ -641,4 +691,69 @@ export const rawExecutionService = {
         const response = await rawExecutionGeneratedApi.rawExecutionControllerExecuteRawText(payload);
         return response.data;
     }
+};
+
+// --- Exportaciones de tipos para compatibilidad ---
+// Re-exportar tipos importantes desde generated para mantener compatibilidad
+export type CreateProjectDto = generated.CreateProjectDto;
+export type UpdateProjectDto = generated.UpdateProjectDto;
+export type CreatePromptDto = generated.CreatePromptDto;
+export type UpdatePromptDto = generated.UpdatePromptDto;
+export type CreatePromptVersionDto = generated.CreatePromptVersionDto;
+export type UpdatePromptVersionDto = generated.UpdatePromptVersionDto;
+export type CreatePromptTranslationDto = generated.CreatePromptTranslationDto;
+export type UpdatePromptTranslationDto = generated.UpdatePromptTranslationDto;
+export type CreatePromptAssetDto = generated.CreatePromptAssetDto;
+export type UpdatePromptAssetDto = generated.UpdatePromptAssetDto;
+export type CreatePromptAssetVersionDto = generated.CreatePromptAssetVersionDto;
+export type UpdatePromptAssetVersionDto = generated.UpdatePromptAssetVersionDto;
+export type CreateAssetTranslationDto = generated.CreateAssetTranslationDto;
+export type UpdateAssetTranslationDto = generated.UpdateAssetTranslationDto;
+export type CreateRegionDto = generated.CreateRegionDto;
+export type UpdateRegionDto = generated.UpdateRegionDto;
+export type CreateTagDto = generated.CreateTagDto;
+export type UpdateTagDto = generated.UpdateTagDto;
+export type TagDto = generated.TagDto;
+export type CreateUserDto = generated.CreateUserDto;
+export type UserProfileResponse = generated.UserProfileResponse;
+export type LoginDto = generated.LoginDto;
+export type RegisterDto = generated.RegisterDto;
+export type CreateEnvironmentDto = generated.CreateEnvironmentDto;
+export type UpdateEnvironmentDto = generated.UpdateEnvironmentDto;
+export type CreateCulturalDataDto = generated.CreateCulturalDataDto;
+export type UpdateCulturalDataDto = generated.UpdateCulturalDataDto;
+export type CulturalDataResponse = generated.CulturalDataResponse;
+export type PromptDto = generated.PromptDto;
+export type ExecuteRawDto = generated.ExecuteRawDto;
+export type ExecuteLlmDto = generated.ExecuteLlmDto;
+export type AiModelResponseDto = generated.AiModelResponseDto;
+export type CreateSystemPromptDto = generated.CreateSystemPromptDto;
+
+// Tipos alias para compatibilidad hacia atrás
+export type Project = generated.CreateProjectDto;
+export type User = generated.UserProfileResponse;
+export type Tag = generated.TagDto;
+export type Environment = generated.CreateEnvironmentDto;
+
+// Servicio de Data Cultural (Datos culturales)
+export const culturalDataService = {
+    findAll: async (projectId: string): Promise<generated.CulturalDataResponse[]> => {
+        const response = await apiClient.get<generated.CulturalDataResponse[]>(`/api/projects/${projectId}/cultural-data`);
+        return response.data;
+    },
+    findOne: async (projectId: string, key: string): Promise<generated.CulturalDataResponse> => {
+        const response = await apiClient.get<generated.CulturalDataResponse>(`/api/projects/${projectId}/cultural-data/${key}`);
+        return response.data;
+    },
+    create: async (projectId: string, payload: generated.CreateCulturalDataDto): Promise<generated.CulturalDataResponse> => {
+        const response = await apiClient.post<generated.CulturalDataResponse>(`/api/projects/${projectId}/cultural-data`, payload);
+        return response.data;
+    },
+    update: async (projectId: string, key: string, payload: generated.UpdateCulturalDataDto): Promise<generated.CulturalDataResponse> => {
+        const response = await apiClient.patch<generated.CulturalDataResponse>(`/api/projects/${projectId}/cultural-data/${key}`, payload);
+        return response.data;
+    },
+    remove: async (projectId: string, key: string): Promise<void> => {
+        await apiClient.delete(`/api/projects/${projectId}/cultural-data/${key}`);
+    },
 };

@@ -8,8 +8,6 @@ All URIs are relative to *http://localhost*
 |[**promptAssetVersionControllerFindAll**](#promptassetversioncontrollerfindall) | **GET** /api/projects/{projectId}/assets/{assetKey}/versions | Get all versions for a specific asset within a project|
 |[**promptAssetVersionControllerFindOneByTag**](#promptassetversioncontrollerfindonebytag) | **GET** /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag} | Get a specific asset version by its tag within a project/asset|
 |[**promptAssetVersionControllerRemove**](#promptassetversioncontrollerremove) | **DELETE** /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag} | Delete a specific asset version by its tag within a project/asset|
-|[**promptAssetVersionControllerRequestPublish**](#promptassetversioncontrollerrequestpublish) | **POST** /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/request-publish | Request to publish an asset version to the marketplace|
-|[**promptAssetVersionControllerUnpublish**](#promptassetversioncontrollerunpublish) | **POST** /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag}/unpublish | Unpublish an asset version from the marketplace|
 |[**promptAssetVersionControllerUpdate**](#promptassetversioncontrollerupdate) | **PATCH** /api/projects/{projectId}/assets/{assetKey}/versions/{versionTag} | Update a specific asset version by its tag within a project/asset|
 
 # **promptAssetVersionControllerCreate**
@@ -244,124 +242,6 @@ void (empty response body)
 |**401** | Unauthorized. |  -  |
 |**403** | Forbidden Access to Project. |  -  |
 |**404** | Project, Asset, or Version not found. |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **promptAssetVersionControllerRequestPublish**
-> CreatePromptAssetVersionDto promptAssetVersionControllerRequestPublish()
-
-
-### Example
-
-```typescript
-import {
-    PromptAssetVersionsWithinProjectAssetApi,
-    Configuration
-} from './api';
-
-const configuration = new Configuration();
-const apiInstance = new PromptAssetVersionsWithinProjectAssetApi(configuration);
-
-let projectId: string; //Project ID (default to undefined)
-let assetKey: string; //Asset Key (default to undefined)
-let versionTag: string; //Version tag (default to undefined)
-
-const { status, data } = await apiInstance.promptAssetVersionControllerRequestPublish(
-    projectId,
-    assetKey,
-    versionTag
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **projectId** | [**string**] | Project ID | defaults to undefined|
-| **assetKey** | [**string**] | Asset Key | defaults to undefined|
-| **versionTag** | [**string**] | Version tag | defaults to undefined|
-
-
-### Return type
-
-**CreatePromptAssetVersionDto**
-
-### Authorization
-
-[bearer](../README.md#bearer)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Publish request processed. |  -  |
-|**401** | Unauthorized. |  -  |
-|**403** | Forbidden Access to Project. |  -  |
-|**404** | Resource not found. |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **promptAssetVersionControllerUnpublish**
-> CreatePromptAssetVersionDto promptAssetVersionControllerUnpublish()
-
-
-### Example
-
-```typescript
-import {
-    PromptAssetVersionsWithinProjectAssetApi,
-    Configuration
-} from './api';
-
-const configuration = new Configuration();
-const apiInstance = new PromptAssetVersionsWithinProjectAssetApi(configuration);
-
-let projectId: string; //Project ID (default to undefined)
-let assetKey: string; //Asset Key (default to undefined)
-let versionTag: string; //Version tag (default to undefined)
-
-const { status, data } = await apiInstance.promptAssetVersionControllerUnpublish(
-    projectId,
-    assetKey,
-    versionTag
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **projectId** | [**string**] | Project ID | defaults to undefined|
-| **assetKey** | [**string**] | Asset Key | defaults to undefined|
-| **versionTag** | [**string**] | Version tag | defaults to undefined|
-
-
-### Return type
-
-**CreatePromptAssetVersionDto**
-
-### Authorization
-
-[bearer](../README.md#bearer)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Version unpublished. |  -  |
-|**401** | Unauthorized. |  -  |
-|**403** | Forbidden Access to Project. |  -  |
-|**404** | Resource not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

@@ -5,10 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**formalityLevel** | **number** | Formality level (1-10) | [optional] [default to undefined]
-**style** | **string** | Description of the communication style | [optional] [default to undefined]
-**considerations** | **string** | Specific cultural considerations | [optional] [default to undefined]
-**notes** | **string** | General notes | [optional] [default to undefined]
+**style** | **string** | The style of communication | [optional] [default to undefined]
+**notes** | **string** | Additional notes | [optional] [default to undefined]
+**key** | **string** | The key identifier for the cultural data | [optional] [default to undefined]
 
 ## Example
 
@@ -16,10 +15,9 @@ Name | Type | Description | Notes
 import { UpdateCulturalDataDto } from './api';
 
 const instance: UpdateCulturalDataDto = {
-    formalityLevel,
     style,
-    considerations,
     notes,
+    key,
 };
 ```
 

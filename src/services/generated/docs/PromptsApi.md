@@ -4,16 +4,18 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**promptControllerCreate**](#promptcontrollercreate) | **POST** /api/projects/{projectId}/prompts | Create a new prompt within a project|
-|[**promptControllerFindAllByProject**](#promptcontrollerfindallbyproject) | **GET** /api/projects/{projectId}/prompts | Get all prompts for a project|
-|[**promptControllerFindOne**](#promptcontrollerfindone) | **GET** /api/projects/{projectId}/prompts/{promptId} | Get a specific prompt by its ID (slug) for a project|
-|[**promptControllerGenerateStructure**](#promptcontrollergeneratestructure) | **POST** /api/projects/{projectId}/prompts/generate-structure | Analyzes a user prompt using an LLM and suggests a structure based on project entities.|
-|[**promptControllerLoadStructure**](#promptcontrollerloadstructure) | **POST** /api/projects/{projectId}/prompts/load-structure | Load a generated prompt structure and create all related entities in the database.|
-|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptName} | Update an existing prompt by name|
+|[**promptControllerCreate**](#promptcontrollercreate) | **POST** /api/projects/{projectId}/prompts | Create new prompt|
+|[**promptControllerFindAll**](#promptcontrollerfindall) | **GET** /api/projects/{projectId}/prompts | Get all prompts|
+|[**promptControllerFindOne**](#promptcontrollerfindone) | **GET** /api/projects/{projectId}/prompts/{id} | Get prompt by ID|
+|[**promptControllerGenerateStructure**](#promptcontrollergeneratestructure) | **POST** /api/projects/{projectId}/prompts/generate-structure | Genera estructura de prompt|
+|[**promptControllerLoadStructure**](#promptcontrollerloadstructure) | **POST** /api/projects/{projectId}/prompts/{id}/load-structure | Load prompt structure|
+|[**promptControllerRemove**](#promptcontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{id} | Delete prompt|
+|[**promptControllerUpdate**](#promptcontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{id} | Update prompt|
 
 # **promptControllerCreate**
 > PromptDto promptControllerCreate(createPromptDto)
 
+Creates a new prompt for the current tenant. Accessible by global admins or tenant admins.
 
 ### Example
 
@@ -50,7 +52,7 @@ const { status, data } = await apiInstance.promptControllerCreate(
 
 ### Authorization
 
-[bearer](../README.md#bearer)
+No authorization required
 
 ### HTTP request headers
 
@@ -61,16 +63,18 @@ const { status, data } = await apiInstance.promptControllerCreate(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**201** | The prompt has been successfully created. |  -  |
-|**400** | Bad Request. |  -  |
-|**401** | Unauthorized. |  -  |
-|**404** | Project not found. |  -  |
+|**201** | Prompt successfully created |  -  |
+|**400** | Invalid input data - Check the request body format |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Insufficient permissions to create prompts |  -  |
+|**409** | Prompt already exists - A prompt with this name already exists for this tenant |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **promptControllerFindAllByProject**
-> Array<PromptDto> promptControllerFindAllByProject()
+# **promptControllerFindAll**
+> Array<PromptDto> promptControllerFindAll()
 
+Retrieves a list of all prompts for the current tenant. Results are cached for 1 hour.
 
 ### Example
 
@@ -85,7 +89,7 @@ const apiInstance = new PromptsApi(configuration);
 
 let projectId: string; // (default to undefined)
 
-const { status, data } = await apiInstance.promptControllerFindAllByProject(
+const { status, data } = await apiInstance.promptControllerFindAll(
     projectId
 );
 ```
@@ -103,7 +107,7 @@ const { status, data } = await apiInstance.promptControllerFindAllByProject(
 
 ### Authorization
 
-[bearer](../README.md#bearer)
+No authorization required
 
 ### HTTP request headers
 
@@ -114,15 +118,15 @@ const { status, data } = await apiInstance.promptControllerFindAllByProject(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Array of prompts for the project. |  -  |
-|**401** | Unauthorized. |  -  |
-|**404** | Project not found. |  -  |
+|**200** | List of prompts retrieved successfully |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **promptControllerFindOne**
 > PromptDto promptControllerFindOne()
 
+Retrieves a specific prompt by its unique ID. Results are cached for 1 hour.
 
 ### Example
 
@@ -135,12 +139,12 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let projectId: string; //The ID of the project. (default to undefined)
-let promptId: string; //The ID (slug) of the prompt. (default to undefined)
+let projectId: string; // (default to undefined)
+let id: string; //Unique prompt identifier (slug) (default to undefined)
 
 const { status, data } = await apiInstance.promptControllerFindOne(
     projectId,
-    promptId
+    id
 );
 ```
 
@@ -148,8 +152,8 @@ const { status, data } = await apiInstance.promptControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **projectId** | [**string**] | The ID of the project. | defaults to undefined|
-| **promptId** | [**string**] | The ID (slug) of the prompt. | defaults to undefined|
+| **projectId** | [**string**] |  | defaults to undefined|
+| **id** | [**string**] | Unique prompt identifier (slug) | defaults to undefined|
 
 
 ### Return type
@@ -158,7 +162,7 @@ const { status, data } = await apiInstance.promptControllerFindOne(
 
 ### Authorization
 
-[bearer](../README.md#bearer)
+No authorization required
 
 ### HTTP request headers
 
@@ -169,15 +173,16 @@ const { status, data } = await apiInstance.promptControllerFindOne(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | The prompt object. |  -  |
-|**401** | Unauthorized. |  -  |
-|**404** | Project or Prompt not found. |  -  |
+|**200** | Prompt found successfully |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**404** | Prompt not found - The specified ID does not exist for this tenant |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **promptControllerGenerateStructure**
-> object promptControllerGenerateStructure(generatePromptStructureDto)
+> PromptControllerGenerateStructure200Response promptControllerGenerateStructure(generatePromptStructureDto)
 
+Analiza un prompt de usuario usando un LLM y sugiere una estructura basada en las entidades del proyecto.
 
 ### Example
 
@@ -191,7 +196,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let projectId: string; //The ID of the project. (default to undefined)
+let projectId: string; //ID del proyecto (default to undefined)
 let generatePromptStructureDto: GeneratePromptStructureDto; //
 
 const { status, data } = await apiInstance.promptControllerGenerateStructure(
@@ -205,16 +210,16 @@ const { status, data } = await apiInstance.promptControllerGenerateStructure(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **generatePromptStructureDto** | **GeneratePromptStructureDto**|  | |
-| **projectId** | [**string**] | The ID of the project. | defaults to undefined|
+| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
 
 
 ### Return type
 
-**object**
+**PromptControllerGenerateStructure200Response**
 
 ### Authorization
 
-[bearer](../README.md#bearer)
+No authorization required
 
 ### HTTP request headers
 
@@ -225,16 +230,15 @@ const { status, data } = await apiInstance.promptControllerGenerateStructure(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Returns the suggested JSON structure. |  -  |
-|**400** | Bad Request (e.g., missing user prompt). |  -  |
-|**401** | Unauthorized. |  -  |
-|**404** | Project not found. |  -  |
-|**500** | Internal Server Error (LLM failure, file read error, etc.). |  -  |
+|**200** | Estructura JSON sugerida para el prompt |  -  |
+|**400** | Datos de entrada inválidos |  -  |
+|**401** | No autorizado |  -  |
+|**404** | Proyecto no encontrado |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **promptControllerLoadStructure**
-> PromptDto promptControllerLoadStructure(loadPromptStructureDto)
+> promptControllerLoadStructure()
 
 
 ### Example
@@ -242,19 +246,18 @@ const { status, data } = await apiInstance.promptControllerGenerateStructure(
 ```typescript
 import {
     PromptsApi,
-    Configuration,
-    LoadPromptStructureDto
+    Configuration
 } from './api';
 
 const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
-let projectId: string; // (default to undefined)
-let loadPromptStructureDto: LoadPromptStructureDto; //
+let projectId: string; //Project ID (default to undefined)
+let id: string; // (default to undefined)
 
 const { status, data } = await apiInstance.promptControllerLoadStructure(
     projectId,
-    loadPromptStructureDto
+    id
 );
 ```
 
@@ -262,38 +265,93 @@ const { status, data } = await apiInstance.promptControllerLoadStructure(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **loadPromptStructureDto** | **LoadPromptStructureDto**|  | |
-| **projectId** | [**string**] |  | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
+| **id** | [**string**] |  | defaults to undefined|
 
 
 ### Return type
 
-**PromptDto**
+void (empty response body)
 
 ### Authorization
 
-[bearer](../README.md#bearer)
+No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**201** | Prompt structure successfully loaded and entities created. |  -  |
-|**400** | Bad Request - Invalid JSON structure or data. |  -  |
-|**401** | Unauthorized. |  -  |
-|**404** | Project not found. |  -  |
-|**409** | Conflict - A prompt with the same identifier already exists or an asset key conflict. |  -  |
+|**200** | Prompt structure loaded successfully |  -  |
+|**201** |  |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **promptControllerRemove**
+> promptControllerRemove()
+
+Permanently deletes a prompt. This is a destructive operation that requires admin privileges.
+
+### Example
+
+```typescript
+import {
+    PromptsApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new PromptsApi(configuration);
+
+let projectId: string; // (default to undefined)
+let id: string; //Unique prompt identifier to delete (slug or UUID) (default to undefined)
+
+const { status, data } = await apiInstance.promptControllerRemove(
+    projectId,
+    id
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **projectId** | [**string**] |  | defaults to undefined|
+| **id** | [**string**] | Unique prompt identifier to delete (slug or UUID) | defaults to undefined|
+
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**204** | Prompt successfully deleted |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Insufficient permissions to delete prompts |  -  |
+|**404** | Prompt not found - The specified ID does not exist for this tenant |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **promptControllerUpdate**
 > PromptDto promptControllerUpdate(updatePromptDto)
 
+Updates an existing prompt\'s information. Accessible by global admins or tenant admins.
 
 ### Example
 
@@ -308,12 +366,12 @@ const configuration = new Configuration();
 const apiInstance = new PromptsApi(configuration);
 
 let projectId: string; // (default to undefined)
-let promptName: string; // (default to undefined)
+let id: string; //Unique prompt identifier to update (slug or UUID) (default to undefined)
 let updatePromptDto: UpdatePromptDto; //
 
 const { status, data } = await apiInstance.promptControllerUpdate(
     projectId,
-    promptName,
+    id,
     updatePromptDto
 );
 ```
@@ -324,7 +382,7 @@ const { status, data } = await apiInstance.promptControllerUpdate(
 |------------- | ------------- | ------------- | -------------|
 | **updatePromptDto** | **UpdatePromptDto**|  | |
 | **projectId** | [**string**] |  | defaults to undefined|
-| **promptName** | [**string**] |  | defaults to undefined|
+| **id** | [**string**] | Unique prompt identifier to update (slug or UUID) | defaults to undefined|
 
 
 ### Return type
@@ -333,7 +391,7 @@ const { status, data } = await apiInstance.promptControllerUpdate(
 
 ### Authorization
 
-[bearer](../README.md#bearer)
+No authorization required
 
 ### HTTP request headers
 
@@ -344,10 +402,12 @@ const { status, data } = await apiInstance.promptControllerUpdate(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | The prompt has been successfully updated. |  -  |
-|**400** | Bad Request. |  -  |
-|**401** | Unauthorized. |  -  |
-|**404** | Prompt or Project not found. |  -  |
+|**200** | Prompt updated successfully |  -  |
+|**400** | Invalid input data - Check the request body format |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Insufficient permissions to update prompts |  -  |
+|**404** | Prompt not found - The specified ID does not exist for this tenant |  -  |
+|**409** | Prompt name already exists - The provided name is already in use |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

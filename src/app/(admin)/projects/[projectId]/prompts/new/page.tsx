@@ -43,6 +43,7 @@ const NewPromptPage: React.FC = () => {
         name: '',
         description: '',
         promptText: '',
+        type: {} // La definición especifica que es de tipo object
     };
 
     useEffect(() => {

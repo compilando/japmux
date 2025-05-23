@@ -27,6 +27,11 @@ This document provides more specific technical details about the JAPM applicatio
 *   **Authentication:** Bearer Token (JWT) authentication. The `apiClient` in `src/services/api.ts` includes an interceptor to attach the token to outgoing requests.
 *   **Data Transfer Objects (DTOs):** The generated API client provides TypeScript interfaces for DTOs used in requests and responses (e.g., `CreateProjectDto`, `PromptDto`, `CreatePromptVersionDto`, `UpdatePromptVersionDto`, etc.). The frontend often extends these DTOs with additional client-side properties (e.g., `PromptVersionData`, `PromptVersionMarketplaceDetails` in the versions page).
 *   **Error Handling:** The `apiClient` includes a response interceptor for global error handling, displaying toasts for errors (except 401).
+*   **Tenant Handling:** The backend automatically manages `tenantId` for all entities. **The frontend should NEVER send `tenantId` in create requests.** When creating assets, prompts, or other tenant-scoped entities, the backend infers the tenant from the authenticated user. The frontend uses custom DTOs like `CreatePromptAssetDtoFrontend` which exclude `tenantId` from the generated `CreatePromptAssetDto`.
+
+    **Important:** The frontend services explicitly create clean payloads without `tenantId` to prevent validation errors like "tenantId should not be empty". Any `tenantId` field sent (even as `undefined` or empty string) will cause backend validation to fail.
+
+    **Temporary Solution (Until Backend Update):** Currently, the backend still requires `tenantId` in the payload. The frontend services extract `tenantId` from the JWT token and include it in requests as a temporary workaround. Once the backend is updated to infer `tenantId` automatically from the JWT, this code should be removed.
 
 ## 3. Key Data Models & Interfaces (Frontend Perspective)
 
@@ -41,6 +46,7 @@ This is a non-exhaustive list based on observed usage:
     *   `PromptVersionDetail` (local interface in `src/services/api.ts` for `findOne` return type, includes `id`, `versionTag`, `isActive`).
 *   **Prompt Asset:**
     *   `CreatePromptAssetDto`, `UpdatePromptAssetDto` (from generated).
+    *   `CreatePromptAssetDtoFrontend` (custom frontend type, excludes `tenantId` from `CreatePromptAssetDto` since backend handles it automatically).
     *   `PromptAssetData` (local interface in `PromptAssetsTable.tsx`, extends `CreatePromptAssetDto` with `enabled`, `projectId`, `promptId`).
     *   `CreatePromptAssetVersionDto`, `UpdatePromptAssetVersionDto` (from generated).
 *   **Translation:** `CreatePromptTranslationDto`, `UpdatePromptTranslationDto`, `CreateAssetTranslationDto`, `UpdateAssetTranslationDto` (from generated).

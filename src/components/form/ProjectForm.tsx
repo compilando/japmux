@@ -13,8 +13,7 @@ interface ProjectFormProps {
 const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, users, onSave, onCancel }) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [ownerUserId, setOwnerUserId] = useState<string>('');
-    // const [availableUsers, setAvailableUsers] = useState<User[]>([]); // For dropdown
+    // const [ownerUserId, setOwnerUserId] = useState<string>(''); // Propiedad no existe en la API
 
     const isEditing = !!initialData;
 
@@ -22,11 +21,11 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, users, onSave, o
         if (initialData) {
             setName(initialData.name ?? '');
             setDescription(initialData.description ?? '');
-            setOwnerUserId(initialData.ownerUserId ?? '');
+            // setOwnerUserId(initialData.ownerUserId ?? ''); // Propiedad no existe en CreateProjectDto
         } else {
             setName('');
             setDescription('');
-            setOwnerUserId('');
+            // setOwnerUserId(''); // Propiedad no existe en la API
         }
         // Here we could load users if it was a dropdown
         // fetchUsers();
@@ -55,13 +54,13 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, users, onSave, o
                 updatePayload.description = trimmedDescription;
             }
 
-            const initialOwnerId = initialData.ownerUserId ?? '';
-            if (ownerUserId !== initialOwnerId) {
-                // Si ownerUserId es "" (ninguno seleccionado), enviar null o undefined según prefiera la API.
-                // Si la API puede manejar "" como "sin propietario", entonces ownerUserId directamente.
-                // Asumiendo que undefined es preferible para "no cambio" o "quitar propietario" si era opcional.
-                updatePayload.ownerUserId = ownerUserId === "" ? undefined : ownerUserId;
-            }
+            // const initialOwnerId = initialData.ownerUserId ?? '';
+            // if (ownerUserId !== initialOwnerId) {
+            //     // Si ownerUserId es "" (ninguno seleccionado), enviar null o undefined según prefiera la API.
+            //     // Si la API puede manejar "" como "sin propietario", entonces ownerUserId directamente.
+            //     // Asumiendo que undefined es preferible para "no cambio" o "quitar propietario" si era opcional.
+            //     updatePayload.ownerUserId = ownerUserId === "" ? undefined : ownerUserId;
+            // }
 
             if (Object.keys(updatePayload).length > 0) {
                 onSave(updatePayload);
@@ -76,15 +75,15 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, users, onSave, o
                 return;
             }
 
-            if (!ownerUserId) {
-                alert('Please select an Owner for the project.');
-                return;
-            }
+            // if (!ownerUserId) {
+            //     alert('Please select an Owner for the project.');
+            //     return;
+            // }
 
             const createPayload: CreateProjectDto = {
                 name: trimmedName,
                 description: trimmedDescription,
-                ownerUserId: ownerUserId,
+                // ownerUserId: ownerUserId,
             };
             onSave(createPayload);
         }
@@ -105,7 +104,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, users, onSave, o
                 />
             </div>
 
-            {/* Owner User ID - Changed to Select */}
+            {/* Owner User ID field removed - not in API
             <div>
                 <label htmlFor="ownerUserId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Owner (Optional)</label>
                 <select
@@ -122,6 +121,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, users, onSave, o
                     ))}
                 </select>
             </div>
+            */}
 
             {/* Description */}
             <div>

@@ -4,15 +4,16 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**regionControllerCreate**](#regioncontrollercreate) | **POST** /api/projects/{projectId}/regions | Creates a new region for a specific project|
-|[**regionControllerFindAll**](#regioncontrollerfindall) | **GET** /api/projects/{projectId}/regions | Gets all regions for a specific project|
-|[**regionControllerFindOne**](#regioncontrollerfindone) | **GET** /api/projects/{projectId}/regions/{languageCode} | Gets a specific region within a project|
-|[**regionControllerRemove**](#regioncontrollerremove) | **DELETE** /api/projects/{projectId}/regions/{languageCode} | Deletes a specific region within a project|
-|[**regionControllerUpdate**](#regioncontrollerupdate) | **PATCH** /api/projects/{projectId}/regions/{languageCode} | Updates a specific region within a project|
+|[**regionControllerCreate**](#regioncontrollercreate) | **POST** /api/projects/{projectId}/regions | Create new region|
+|[**regionControllerFindAll**](#regioncontrollerfindall) | **GET** /api/projects/{projectId}/regions | Get all regions|
+|[**regionControllerFindOne**](#regioncontrollerfindone) | **GET** /api/projects/{projectId}/regions/{langCode} | Get region by language code|
+|[**regionControllerRemove**](#regioncontrollerremove) | **DELETE** /api/projects/{projectId}/regions/{langCode} | Delete region|
+|[**regionControllerUpdate**](#regioncontrollerupdate) | **PATCH** /api/projects/{projectId}/regions/{langCode} | Update region|
 
 # **regionControllerCreate**
-> CreateRegionDto regionControllerCreate(createRegionDto)
+> RegionDto regionControllerCreate(createRegionDto)
 
+Creates a new region for the current tenant. Accessible by global admins or tenant admins.
 
 ### Example
 
@@ -26,7 +27,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new RegionsApi(configuration);
 
-let projectId: string; //Project ID (default to undefined)
+let projectId: string; //ID of the project (default to undefined)
 let createRegionDto: CreateRegionDto; //
 
 const { status, data } = await apiInstance.regionControllerCreate(
@@ -40,12 +41,12 @@ const { status, data } = await apiInstance.regionControllerCreate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **createRegionDto** | **CreateRegionDto**|  | |
-| **projectId** | [**string**] | Project ID | defaults to undefined|
+| **projectId** | [**string**] | ID of the project | defaults to undefined|
 
 
 ### Return type
 
-**CreateRegionDto**
+**RegionDto**
 
 ### Authorization
 
@@ -60,16 +61,18 @@ const { status, data } = await apiInstance.regionControllerCreate(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**201** | Region created. |  -  |
-|**400** | Invalid data. |  -  |
-|**404** | Parent region not found. |  -  |
-|**409** | languageCode already exists. |  -  |
+|**201** | Region successfully created |  -  |
+|**400** | Invalid input data - Check the request body format |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Insufficient permissions to create regions |  -  |
+|**409** | Region already exists - A region with this language code already exists for this tenant |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **regionControllerFindAll**
-> Array<CreateRegionDto> regionControllerFindAll()
+> Array<RegionDto> regionControllerFindAll()
 
+Retrieves a list of all regions for the current tenant. Results are cached for 1 hour.
 
 ### Example
 
@@ -82,7 +85,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new RegionsApi(configuration);
 
-let projectId: string; //Project ID (default to undefined)
+let projectId: string; //ID of the project (default to undefined)
 
 const { status, data } = await apiInstance.regionControllerFindAll(
     projectId
@@ -93,12 +96,12 @@ const { status, data } = await apiInstance.regionControllerFindAll(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **projectId** | [**string**] | Project ID | defaults to undefined|
+| **projectId** | [**string**] | ID of the project | defaults to undefined|
 
 
 ### Return type
 
-**Array<CreateRegionDto>**
+**Array<RegionDto>**
 
 ### Authorization
 
@@ -113,13 +116,16 @@ const { status, data } = await apiInstance.regionControllerFindAll(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | List of regions. |  -  |
+|**200** | List of regions retrieved successfully |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**404** | Project not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **regionControllerFindOne**
-> CreateRegionDto regionControllerFindOne()
+> RegionDto regionControllerFindOne()
 
+Retrieves a specific region by its language code (e.g., en-US, es-ES). Results are cached for 1 hour.
 
 ### Example
 
@@ -132,11 +138,11 @@ import {
 const configuration = new Configuration();
 const apiInstance = new RegionsApi(configuration);
 
-let languageCode: string; //Language code (ID) of the region (default to undefined)
-let projectId: string; //Project ID (default to undefined)
+let langCode: string; //Language code of the region (e.g., en-US, es-ES) (default to undefined)
+let projectId: string; //ID of the project (default to undefined)
 
 const { status, data } = await apiInstance.regionControllerFindOne(
-    languageCode,
+    langCode,
     projectId
 );
 ```
@@ -145,13 +151,13 @@ const { status, data } = await apiInstance.regionControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **languageCode** | [**string**] | Language code (ID) of the region | defaults to undefined|
-| **projectId** | [**string**] | Project ID | defaults to undefined|
+| **langCode** | [**string**] | Language code of the region (e.g., en-US, es-ES) | defaults to undefined|
+| **projectId** | [**string**] | ID of the project | defaults to undefined|
 
 
 ### Return type
 
-**CreateRegionDto**
+**RegionDto**
 
 ### Authorization
 
@@ -166,14 +172,16 @@ const { status, data } = await apiInstance.regionControllerFindOne(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Region found. |  -  |
-|**404** | Project or Region not found. |  -  |
+|**200** | Region found successfully |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**404** | Region not found - The specified language code does not exist for this tenant |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **regionControllerRemove**
 > regionControllerRemove()
 
+Permanently deletes a region. This is a destructive operation that requires admin privileges.
 
 ### Example
 
@@ -186,11 +194,11 @@ import {
 const configuration = new Configuration();
 const apiInstance = new RegionsApi(configuration);
 
-let languageCode: string; //Language code (ID) of the region to delete (default to undefined)
-let projectId: string; //Project ID (default to undefined)
+let langCode: string; //Language code of the region to delete (e.g., en-US, es-ES) (default to undefined)
+let projectId: string; //ID of the project (default to undefined)
 
 const { status, data } = await apiInstance.regionControllerRemove(
-    languageCode,
+    langCode,
     projectId
 );
 ```
@@ -199,8 +207,8 @@ const { status, data } = await apiInstance.regionControllerRemove(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **languageCode** | [**string**] | Language code (ID) of the region to delete | defaults to undefined|
-| **projectId** | [**string**] | Project ID | defaults to undefined|
+| **langCode** | [**string**] | Language code of the region to delete (e.g., en-US, es-ES) | defaults to undefined|
+| **projectId** | [**string**] | ID of the project | defaults to undefined|
 
 
 ### Return type
@@ -220,14 +228,18 @@ void (empty response body)
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Region deleted. |  -  |
-|**404** | Project or Region not found. |  -  |
+|**200** |  |  -  |
+|**204** | Region successfully deleted |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Insufficient permissions to delete regions |  -  |
+|**404** | Region not found - The specified language code does not exist for this tenant |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **regionControllerUpdate**
-> CreateRegionDto regionControllerUpdate(updateRegionDto)
+> RegionDto regionControllerUpdate(updateRegionDto)
 
+Updates an existing region\'s information. Accessible by global admins or tenant admins.
 
 ### Example
 
@@ -241,12 +253,12 @@ import {
 const configuration = new Configuration();
 const apiInstance = new RegionsApi(configuration);
 
-let languageCode: string; //Language code (ID) of the region to update (default to undefined)
-let projectId: string; //Project ID (default to undefined)
+let langCode: string; //Language code of the region to update (e.g., en-US, es-ES) (default to undefined)
+let projectId: string; //ID of the project (default to undefined)
 let updateRegionDto: UpdateRegionDto; //
 
 const { status, data } = await apiInstance.regionControllerUpdate(
-    languageCode,
+    langCode,
     projectId,
     updateRegionDto
 );
@@ -257,13 +269,13 @@ const { status, data } = await apiInstance.regionControllerUpdate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **updateRegionDto** | **UpdateRegionDto**|  | |
-| **languageCode** | [**string**] | Language code (ID) of the region to update | defaults to undefined|
-| **projectId** | [**string**] | Project ID | defaults to undefined|
+| **langCode** | [**string**] | Language code of the region to update (e.g., en-US, es-ES) | defaults to undefined|
+| **projectId** | [**string**] | ID of the project | defaults to undefined|
 
 
 ### Return type
 
-**CreateRegionDto**
+**RegionDto**
 
 ### Authorization
 
@@ -278,9 +290,11 @@ const { status, data } = await apiInstance.regionControllerUpdate(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Region updated. |  -  |
-|**400** | Invalid data (languageCode cannot be changed). |  -  |
-|**404** | Project or Region not found. |  -  |
+|**200** | Region updated successfully |  -  |
+|**400** | Invalid input data - Check the request body format |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Insufficient permissions to update regions |  -  |
+|**404** | Region not found - The specified language code does not exist for this tenant |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

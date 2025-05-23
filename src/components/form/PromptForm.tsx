@@ -10,6 +10,7 @@ import {
     ExecuteRawDto,
     aiModelService,
     promptAssetService,
+    regionService,
 } from '@/services/api';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 import { useProjects } from '@/context/ProjectContext';
@@ -21,6 +22,8 @@ import {
 import PromptEditor from '../common/PromptEditor';
 import * as generated from '@/services/generated/api';
 import InsertReferenceButton from '../common/InsertReferenceButton';
+import { promptTypes, getPromptTypeByValue } from '@/config/promptTypes';
+import { CreateRegionDto } from '@/services/generated/api';
 
 interface PromptFormProps {
     initialData?: CreatePromptDto | UpdatePromptDto;
@@ -36,6 +39,8 @@ interface FormData {
     description: string;
     promptText: string;
     projectId: string;
+    type: string;
+    languageCode: string;
 }
 
 interface TagOption {
@@ -48,7 +53,9 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
         name: '',
         description: '',
         promptText: '',
-        projectId: projectId
+        projectId: projectId,
+        type: 'GENERAL',
+        languageCode: 'en'
     });
     const [assets, setAssets] = useState<PromptAssetData[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -59,6 +66,8 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
     const [isLoadingTags, setIsLoadingTags] = useState(false);
     const [isImproving, setIsImproving] = useState(false);
     const [defaultAiModelId, setDefaultAiModelId] = useState<string>('');
+    const [regions, setRegions] = useState<CreateRegionDto[]>([]);
+    const [loadingRegions, setLoadingRegions] = useState(false);
 
     useEffect(() => {
         console.log("[PromptForm Effect FetchTags] Fetching tags for projectId:", projectId);
@@ -105,7 +114,9 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
                 name: data.name || '',
                 description: data.description || '',
                 promptText: data.promptText || '',
-                projectId: projectId
+                projectId: projectId,
+                type: data.type?.value || data.type || 'GENERAL',
+                languageCode: data.languageCode || 'en'
             }));
 
             let initialTagIds: string[] = [];
@@ -121,7 +132,9 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
                 name: '',
                 description: '',
                 promptText: '',
-                projectId: projectId
+                projectId: projectId,
+                type: 'GENERAL',
+                languageCode: 'en'
             });
             setSelectedTagIds([]);
         }
@@ -140,6 +153,37 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
 
         fetchAssets();
     }, [projectId, initialData, isEditing]);
+
+    useEffect(() => {
+        const fetchRegions = async () => {
+            if (!projectId) return;
+            setLoadingRegions(true);
+            try {
+                const regionsData = await regionService.findAll(projectId);
+                setRegions(regionsData);
+
+                if (!formData.languageCode || formData.languageCode === 'en') {
+                    const defaultLanguageCode = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE_CODE || 'en-US';
+                    const hasDefaultRegion = regionsData.some(region => region.languageCode === defaultLanguageCode);
+
+                    const newLanguageCode = hasDefaultRegion
+                        ? defaultLanguageCode
+                        : regionsData.length > 0
+                            ? regionsData[0].languageCode
+                            : 'en-US';
+
+                    setFormData(prev => ({ ...prev, languageCode: newLanguageCode }));
+                }
+            } catch (error) {
+                console.error('Error loading regions:', error);
+                setFormData(prev => ({ ...prev, languageCode: 'en-US' }));
+            } finally {
+                setLoadingRegions(false);
+            }
+        };
+
+        fetchRegions();
+    }, [projectId]);
 
     const handleTagSelectChange = (selectedOptions: MultiValue<TagOption>) => {
         const newIds = selectedOptions ? selectedOptions.map(option => option.value) : [];
@@ -178,6 +222,11 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
             return;
         }
 
+        if (!isEditing && (!formData.languageCode || formData.languageCode.length < 2)) {
+            setError('Language code is required and must be at least 2 characters long');
+            return;
+        }
+
         try {
             if (isEditing) {
                 const updateData: UpdatePromptDto = {
@@ -185,11 +234,13 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
                 };
                 await onUpdate(updateData);
             } else {
-                const createData: Omit<CreatePromptDto, 'tenantId'> = {
+                const createData: any = {
                     name: formData.name,
+                    type: { value: formData.type },
                     description: formData.description,
                     promptText: formData.promptText,
-                    tags: new Set(selectedTagIds)
+                    languageCode: formData.languageCode,
+                    tags: selectedTagIds.length > 0 ? new Set(selectedTagIds) : undefined,
                 };
                 await onCreate(createData);
             }
@@ -199,7 +250,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
         }
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
@@ -230,7 +281,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
                 }
             };
 
-            const response = await rawExecutionService.executeRaw(payload);
+            const response = await rawExecutionService.execute(payload);
 
             if (response && typeof response === 'object' && 'response' in response && response.response) {
                 setFormData(prev => ({ ...prev, promptText: response.response as string }));
@@ -273,6 +324,66 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
                             placeholder="Enter prompt name"
                         />
                     </div>
+
+                    <div>
+                        <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Type *
+                        </label>
+                        <select
+                            id="type"
+                            name="type"
+                            value={formData.type}
+                            onChange={handleInputChange}
+                            required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        >
+                            {promptTypes.map((type) => (
+                                <option key={type.value} value={type.value}>
+                                    {type.label} - {type.description}
+                                </option>
+                            ))}
+                        </select>
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Selecciona el tipo que mejor describe el propósito de este prompt
+                        </p>
+                    </div>
+
+                    {!isEditing && (
+                        <div>
+                            <label htmlFor="languageCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Language Code *
+                            </label>
+                            <select
+                                id="languageCode"
+                                name="languageCode"
+                                value={formData.languageCode}
+                                onChange={handleInputChange}
+                                required
+                                disabled={loadingRegions}
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-500"
+                            >
+                                {loadingRegions ? (
+                                    <option value={formData.languageCode || 'en-US'}>Cargando regiones...</option>
+                                ) : regions.length === 0 ? (
+                                    <option value="en-US">en-US (default)</option>
+                                ) : (
+                                    <>
+                                        {!regions.some(region => region.languageCode === formData.languageCode) && formData.languageCode && (
+                                            <option value={formData.languageCode}>{formData.languageCode} (actual)</option>
+                                        )}
+                                        {regions.map((region) => (
+                                            <option key={region.languageCode} value={region.languageCode}>
+                                                {region.languageCode} - {region.name}
+                                            </option>
+                                        ))}
+                                    </>
+                                )}
+                            </select>
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Selecciona el idioma base para la primera versión del prompt
+                            </p>
+                        </div>
+                    )}
 
                     <div>
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">

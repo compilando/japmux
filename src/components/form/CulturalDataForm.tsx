@@ -65,9 +65,7 @@ const CulturalDataForm: React.FC<CulturalDataFormProps> = ({ initialData, onSave
         if (initialData) {
             setItemKey(initialData.key);
             setRegionId(initialData.regionId);
-            setFormalityLevel(initialData.formalityLevel ?? '');
             setStyle(initialData.style ?? '');
-            setConsiderations(initialData.considerations ?? '');
             setNotes(initialData.notes ?? '');
         } else {
             setItemKey('');
@@ -100,18 +98,14 @@ const CulturalDataForm: React.FC<CulturalDataFormProps> = ({ initialData, onSave
 
         if (isEditing) {
             payload = {
-                formalityLevel: formalityLevelValue,
                 style: style.trim() || undefined,
-                considerations: considerations.trim() || undefined,
                 notes: notes.trim() || undefined,
             } as UpdateCulturalDataDto;
         } else {
             payload = {
                 key: itemKey.trim(),
                 regionId: regionId,
-                formalityLevel: formalityLevelValue,
                 style: style.trim() || undefined,
-                considerations: considerations.trim() || undefined,
                 notes: notes.trim() || undefined,
             } as CreateCulturalDataDto;
         }
@@ -171,19 +165,6 @@ const CulturalDataForm: React.FC<CulturalDataFormProps> = ({ initialData, onSave
                 {isEditing && <p className="text-xs text-gray-500 mt-1">Region ID cannot be changed after creation.</p>}
             </div>
 
-            <div className="max-w-[95%]">
-                <label htmlFor="formalityLevel" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Formality Level (Optional)
-                </label>
-                <input
-                    type="number"
-                    id="formalityLevel"
-                    value={formalityLevel}
-                    onChange={(e) => setFormalityLevel(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-            </div>
-
             <div>
                 <label htmlFor="style" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Style (Optional)
@@ -193,19 +174,6 @@ const CulturalDataForm: React.FC<CulturalDataFormProps> = ({ initialData, onSave
                     id="style"
                     value={style}
                     onChange={(e) => setStyle(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-            </div>
-
-            <div>
-                <label htmlFor="considerations" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Considerations (Optional)
-                </label>
-                <textarea
-                    id="considerations"
-                    value={considerations}
-                    onChange={(e) => setConsiderations(e.target.value)}
-                    rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
             </div>

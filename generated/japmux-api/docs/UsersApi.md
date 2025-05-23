@@ -4,15 +4,16 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**userControllerCreate**](#usercontrollercreate) | **POST** /api/users | Create a new user (within the authenticated admin user\&#39;s tenant)|
+|[**userControllerCreate**](#usercontrollercreate) | **POST** /api/users | Create new user|
 |[**userControllerFindAll**](#usercontrollerfindall) | **GET** /api/users | Get all users|
-|[**userControllerFindOne**](#usercontrollerfindone) | **GET** /api/users/{id} | Get a user by ID|
-|[**userControllerRemove**](#usercontrollerremove) | **DELETE** /api/users/{id} | Delete a user by ID|
-|[**userControllerUpdate**](#usercontrollerupdate) | **PATCH** /api/users/{id} | Update a user by ID|
+|[**userControllerFindOne**](#usercontrollerfindone) | **GET** /api/users/{id} | Get user by ID|
+|[**userControllerRemove**](#usercontrollerremove) | **DELETE** /api/users/{id} | Delete user|
+|[**userControllerUpdate**](#usercontrollerupdate) | **PATCH** /api/users/{id} | Update user|
 
 # **userControllerCreate**
-> userControllerCreate(createUserDto)
+> CreateUserDto userControllerCreate(createUserDto)
 
+Creates a new user within the authenticated admin\'s tenant. Requires admin privileges.
 
 ### Example
 
@@ -26,7 +27,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new UsersApi(configuration);
 
-let createUserDto: CreateUserDto; //
+let createUserDto: CreateUserDto; //User data to create
 
 const { status, data } = await apiInstance.userControllerCreate(
     createUserDto
@@ -37,12 +38,12 @@ const { status, data } = await apiInstance.userControllerCreate(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **createUserDto** | **CreateUserDto**|  | |
+| **createUserDto** | **CreateUserDto**| User data to create | |
 
 
 ### Return type
 
-void (empty response body)
+**CreateUserDto**
 
 ### Authorization
 
@@ -51,21 +52,23 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**201** | User created successfully. |  -  |
-|**400** | Invalid input data. |  -  |
-|**401** | Unauthorized. |  -  |
+|**201** | User successfully created |  -  |
+|**400** | Invalid input data - Check the request body format |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Admin role required |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **userControllerFindAll**
 > Array<CreateUserDto> userControllerFindAll()
 
+Retrieves a list of all users in the system. Requires admin privileges.
 
 ### Example
 
@@ -91,7 +94,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -102,13 +105,16 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | List of users. |  -  |
+|**200** | List of users retrieved successfully |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Admin role required |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **userControllerFindOne**
 > CreateUserDto userControllerFindOne()
 
+Retrieves a specific user by their unique ID. Requires admin privileges.
 
 ### Example
 
@@ -121,7 +127,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new UsersApi(configuration);
 
-let id: string; //User ID (default to undefined)
+let id: string; //Unique user identifier (CUID) (default to undefined)
 
 const { status, data } = await apiInstance.userControllerFindOne(
     id
@@ -132,7 +138,7 @@ const { status, data } = await apiInstance.userControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **id** | [**string**] | User ID | defaults to undefined|
+| **id** | [**string**] | Unique user identifier (CUID) | defaults to undefined|
 
 
 ### Return type
@@ -141,7 +147,7 @@ const { status, data } = await apiInstance.userControllerFindOne(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -152,14 +158,17 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | User found. |  -  |
-|**404** | User not found. |  -  |
+|**200** | User found successfully |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Admin role required |  -  |
+|**404** | User not found - The specified ID does not exist |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **userControllerRemove**
-> userControllerRemove()
+> CreateUserDto userControllerRemove()
 
+Permanently deletes a user from the system. Requires admin privileges.
 
 ### Example
 
@@ -172,7 +181,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new UsersApi(configuration);
 
-let id: string; //ID of the user to delete (default to undefined)
+let id: string; //Unique user identifier to delete (CUID) (default to undefined)
 
 const { status, data } = await apiInstance.userControllerRemove(
     id
@@ -183,34 +192,37 @@ const { status, data } = await apiInstance.userControllerRemove(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **id** | [**string**] | ID of the user to delete | defaults to undefined|
+| **id** | [**string**] | Unique user identifier to delete (CUID) | defaults to undefined|
 
 
 ### Return type
 
-void (empty response body)
+**CreateUserDto**
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | User deleted successfully. |  -  |
-|**404** | User not found. |  -  |
+|**200** | User deleted successfully |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Admin role required |  -  |
+|**404** | User not found - The specified ID does not exist |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **userControllerUpdate**
 > CreateUserDto userControllerUpdate(body)
 
+Updates an existing user\'s information. Requires admin privileges.
 
 ### Example
 
@@ -223,8 +235,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new UsersApi(configuration);
 
-let id: string; //ID of the user to update (default to undefined)
-let body: object; //
+let id: string; //Unique user identifier to update (CUID) (default to undefined)
+let body: object; //User data to update
 
 const { status, data } = await apiInstance.userControllerUpdate(
     id,
@@ -236,8 +248,8 @@ const { status, data } = await apiInstance.userControllerUpdate(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **body** | **object**|  | |
-| **id** | [**string**] | ID of the user to update | defaults to undefined|
+| **body** | **object**| User data to update | |
+| **id** | [**string**] | Unique user identifier to update (CUID) | defaults to undefined|
 
 
 ### Return type
@@ -246,7 +258,7 @@ const { status, data } = await apiInstance.userControllerUpdate(
 
 ### Authorization
 
-No authorization required
+[bearer](../README.md#bearer)
 
 ### HTTP request headers
 
@@ -257,9 +269,11 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | User updated successfully. |  -  |
-|**400** | Invalid input data. |  -  |
-|**404** | User not found. |  -  |
+|**200** | User updated successfully |  -  |
+|**400** | Invalid input data - Check the request body format |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Forbidden - Admin role required |  -  |
+|**404** | User not found - The specified ID does not exist |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

@@ -10,7 +10,6 @@ export type RegionCreatePayload = {
     name: string;
     parentRegionId?: string;
     timeZone?: string;
-    defaultFormalityLevel?: string;
     notes?: string;
 };
 // Update does not include languageCode
@@ -40,7 +39,6 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel, 
     const [parentRegionId, setParentRegionId] = useState('');
     const [timeZone, setTimeZone] = useState('');
     const [timeZoneOptions, setTimeZoneOptions] = useState<TimeZoneOption[]>([]);
-    const [defaultFormalityLevel, setDefaultFormalityLevel] = useState('');
     const [notes, setNotes] = useState('');
 
     // Estado para las regiones padre
@@ -100,7 +98,6 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel, 
             setName(initialData.name ?? '');
             setParentRegionId(initialData.parentRegionId ?? '');
             setTimeZone(initialData.timeZone ?? '');
-            setDefaultFormalityLevel(initialData.defaultFormalityLevel ?? '');
             setNotes(initialData.notes ?? '');
         } else {
             // Resetear campos para nuevo formulario
@@ -108,7 +105,6 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel, 
             setName('');
             setParentRegionId(''); // Importante resetear para que el select "-- None --" funcione
             setTimeZone('');
-            setDefaultFormalityLevel('');
             setNotes('');
         }
     }, [initialData]);
@@ -132,7 +128,6 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel, 
                 name: name.trim(),
                 parentRegionId: parentRegionId || undefined, // Enviar undefined si está vacío
                 timeZone: timeZone || undefined,
-                defaultFormalityLevel: defaultFormalityLevel.trim() || undefined,
                 notes: notes.trim() || undefined,
             } as RegionUpdatePayload;
         } else {
@@ -141,7 +136,6 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel, 
                 name: name.trim(),
                 parentRegionId: parentRegionId || undefined, // Enviar undefined si está vacío
                 timeZone: timeZone || undefined,
-                defaultFormalityLevel: defaultFormalityLevel.trim() || undefined,
                 notes: notes.trim() || undefined,
             } as RegionCreatePayload;
         }
@@ -247,20 +241,6 @@ const RegionForm: React.FC<RegionFormProps> = ({ initialData, onSave, onCancel, 
                         </option>
                     ))}
                 </select>
-            </div>
-
-            {/* Default Formality Level (Optional) */}
-            <div>
-                <label htmlFor="defaultFormalityLevel" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Default Formality Level (Optional)
-                </label>
-                <input
-                    type="text"
-                    id="defaultFormalityLevel"
-                    value={defaultFormalityLevel}
-                    onChange={(e) => setDefaultFormalityLevel(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
             </div>
 
             {/* Notes (Optional) */}

@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **key** | **string** | Clave única identificadora del asset (e.g., saludo_formal_es) | [default to undefined]
 **name** | **string** | Nombre descriptivo del asset | [default to undefined]
 **category** | **string** | Categoría para organizar assets (e.g., Saludos, Despedidas) | [optional] [default to undefined]
-**initialValue** | **string** | Valor inicial del asset para la primera versión (v1.0.0) | [default to undefined]
+**initialValue** | **string** | Valor inicial del asset para la primera versión (1.0.0) | [default to undefined]
 **initialChangeMessage** | **string** | Mensaje de cambio para la primera versión | [optional] [default to undefined]
 **tenantId** | **string** | ID del tenant al que pertenece este asset | [default to undefined]
 

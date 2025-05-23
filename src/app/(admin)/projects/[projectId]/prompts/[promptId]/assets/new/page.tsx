@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { promptAssetService, projectService, promptService } from '@/services/api';
-import { CreatePromptAssetDto, CreateProjectDto, PromptDto } from '@/services/generated/api';
+import { promptAssetService, projectService, promptService, CreatePromptAssetDtoFrontend } from '@/services/api';
+import { CreateProjectDto, PromptDto } from '@/services/generated/api';
 import Breadcrumb, { Crumb } from '@/components/common/PageBreadCrumb';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import Link from 'next/link';
@@ -32,7 +32,6 @@ const NewPromptAssetPage: React.FC = () => {
 
     const [assetKey, setAssetKey] = useState('');
     const [name, setName] = useState('');
-    const [category, setCategory] = useState('');
     const [initialValue, setInitialValue] = useState('');
     const [initialChangeMessage, setInitialChangeMessage] = useState('');
 
@@ -69,29 +68,14 @@ const NewPromptAssetPage: React.FC = () => {
             return;
         }
 
-        // Obtener tenantId del proyecto cargado. Asumir que project.tenantId existe.
-        // Si la API no lo necesita o lo infiere, esto podría ser opcional o manejado de otra forma.
-        // La especificación de CreatePromptAssetDto lo marca como requerido.
-        const tenantId = project?.tenantId;
-        if (!tenantId) {
-            showErrorToast("Tenant ID is missing from project data. Cannot create asset.");
-            // Podrías intentar recuperarlo o mostrar un error más específico.
-            // Por ahora, bloqueamos la creación.
-            console.error("Tenant ID is missing in project data", project);
-            setSaving(false);
-            return;
-        }
-
         setSaving(true);
         setError(null);
 
-        const payload: CreatePromptAssetDto = {
+        const payload: CreatePromptAssetDtoFrontend = {
             key: assetKey.trim(),
             name: name.trim(),
-            category: category.trim() || undefined,
             initialValue: initialValue.trim(),
             initialChangeMessage: initialChangeMessage.trim() || undefined,
-            tenantId: tenantId, // Se añade tenantId aquí
         };
 
         try {
@@ -173,23 +157,8 @@ const NewPromptAssetPage: React.FC = () => {
                     </div>
 
                     <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Category
-                        </label>
-                        <input
-                            type="text"
-                            name="category"
-                            id="category"
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-                            placeholder="e.g., Salutations, Closings"
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="initialValue" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Initial Value (for v1.0.0) <span className="text-red-500">*</span>
+                        <label htmlFor="initialValue" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Initial Value (for 1.0.0) <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             id="initialValue"
@@ -204,8 +173,8 @@ const NewPromptAssetPage: React.FC = () => {
                     </div>
 
                     <div>
-                        <label htmlFor="initialChangeMessage" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Initial Change Message (for v1.0.0)
+                        <label htmlFor="initialChangeMessage" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Initial Change Message (for 1.0.0)
                         </label>
                         <input
                             type="text"

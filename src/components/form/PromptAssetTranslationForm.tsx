@@ -114,7 +114,7 @@ const PromptAssetTranslationForm: React.FC<PromptAssetTranslationFormProps> = ({
                 aiModelId: defaultAiModelId,
                 variables: { text: versionText, targetLanguage: languageCode, regionName: selectedRegion.name }
             };
-            const result = await rawExecutionService.executeRaw(executionDto);
+            const result = await rawExecutionService.execute(executionDto);
             if (result && typeof result === 'object' && 'response' in result) {
                 const resultWithResponse = result as { response: any };
                 if (typeof resultWithResponse.response === 'string') {

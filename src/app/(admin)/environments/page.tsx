@@ -159,7 +159,7 @@ const EnvironmentsPage: React.FC = () => {
                             {editingEnvironment ? 'Edit Environment' : 'Add New Environment'}
                         </h3>
                         <EnvironmentForm
-                            initialData={editingEnvironment ? { name: editingEnvironment.name, description: editingEnvironment.description || '' } : {}}
+                            initialData={editingEnvironment ? { name: editingEnvironment.name, description: editingEnvironment.description || '' } : null}
                             onSave={handleSaveEnvironment}
                             onCancel={handleCancelForm}
                         />

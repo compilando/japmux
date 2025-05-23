@@ -4,13 +4,14 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**authControllerGetProfile**](#authcontrollergetprofile) | **GET** /api/auth/profile | Get current user profile|
-|[**authControllerLogin**](#authcontrollerlogin) | **POST** /api/auth/login | Log in a user|
-|[**authControllerRegister**](#authcontrollerregister) | **POST** /api/auth/register | Register a new user|
+|[**authControllerGetProfile**](#authcontrollergetprofile) | **GET** /api/auth/profile | Get user profile|
+|[**authControllerLogin**](#authcontrollerlogin) | **POST** /api/auth/login | User login|
+|[**authControllerRegister**](#authcontrollerregister) | **POST** /api/auth/register | Register new user|
 
 # **authControllerGetProfile**
 > UserProfileResponse authControllerGetProfile()
 
+Retrieves the profile information of the currently authenticated user
 
 ### Example
 
@@ -47,14 +48,15 @@ This endpoint does not have any parameters.
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | User profile data. |  -  |
-|**401** | Unauthorized (Invalid or missing token). |  -  |
+|**200** | User profile retrieved successfully |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **authControllerLogin**
 > LoginResponse authControllerLogin(loginDto)
 
+Authenticates a user and returns a JWT token for subsequent API calls
 
 ### Example
 
@@ -68,7 +70,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new AuthenticationApi(configuration);
 
-let loginDto: LoginDto; //
+let loginDto: LoginDto; //User credentials for authentication
 
 const { status, data } = await apiInstance.authControllerLogin(
     loginDto
@@ -79,7 +81,7 @@ const { status, data } = await apiInstance.authControllerLogin(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **loginDto** | **LoginDto**|  | |
+| **loginDto** | **LoginDto**| User credentials for authentication | |
 
 
 ### Return type
@@ -99,14 +101,15 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Login successful, returns JWT token. |  -  |
-|**401** | Unauthorized (Invalid Credentials). |  -  |
+|**200** | Login successful - Returns JWT token |  -  |
+|**401** | Invalid credentials - Email or password is incorrect |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **authControllerRegister**
 > UserProfileResponse authControllerRegister(registerDto)
 
+Creates a new user account in the system. This endpoint is publicly accessible.
 
 ### Example
 
@@ -151,9 +154,9 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**201** | User successfully registered. |  -  |
-|**400** | Invalid input data. |  -  |
-|**409** | Email already exists. |  -  |
+|**201** | User successfully registered |  -  |
+|**400** | Invalid input data - Check the request body format |  -  |
+|**409** | Email already exists - The provided email is already registered |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
