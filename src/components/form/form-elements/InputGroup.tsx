@@ -4,7 +4,7 @@ import ComponentCard from "../../common/ComponentCard";
 import Label from "../Label";
 import Input from "../input/InputField";
 import { EnvelopeIcon } from "../../../icons";
-import PhoneInput from "../group-input/PhoneInput";
+// import PhoneInput from "../group-input/PhoneInput"; // Comentado temporalmente - archivo no existe
 
 export default function InputGroup() {
   const countries = [
@@ -32,6 +32,7 @@ export default function InputGroup() {
             </span>
           </div>
         </div>
+        {/* Secciones de PhoneInput comentadas temporalmente
         <div>
           <Label>Phone</Label>
           <PhoneInput
@@ -40,7 +41,7 @@ export default function InputGroup() {
             placeholder="+1 (555) 000-0000"
             onChange={handlePhoneNumberChange}
           />
-        </div>{" "}
+        </div>
         <div>
           <Label>Phone</Label>
           <PhoneInput
@@ -50,6 +51,7 @@ export default function InputGroup() {
             onChange={handlePhoneNumberChange}
           />
         </div>
+        */}
       </div>
     </ComponentCard>
   );

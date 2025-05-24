@@ -235,29 +235,29 @@ export const userService = {
 
 // Servicio de Proyectos (Mantener manual o reemplazar con generated.ProjectsApi)
 export const projectService = {
-    findAll: async (): Promise<generated.CreateProjectDto[]> => { // Usar CreateProjectDto
+    findAll: async (): Promise<generated.ProjectDto[]> => { // Usar ProjectDto
         // Reemplazar con: const response = await projectsGeneratedApi.projectControllerFindAll(); return response.data;
-        const response = await apiClient.get<generated.CreateProjectDto[]>('/api/projects');
+        const response = await apiClient.get<generated.ProjectDto[]>('/api/projects');
         return response.data;
     },
-    findMine: async (): Promise<generated.CreateProjectDto[]> => { // Usar CreateProjectDto
+    findMine: async (): Promise<generated.ProjectDto[]> => { // Usar ProjectDto
         // Reemplazar con: const response = await projectsGeneratedApi.projectControllerFindMine(); return response.data;
-        const response = await apiClient.get<generated.CreateProjectDto[]>('/api/projects/mine');
+        const response = await apiClient.get<generated.ProjectDto[]>('/api/projects/mine');
         return response.data;
     },
-    findOne: async (id: string): Promise<generated.CreateProjectDto> => { // Usar CreateProjectDto
+    findOne: async (id: string): Promise<generated.ProjectDto> => { // Usar ProjectDto
         // Reemplazar con: const response = await projectsGeneratedApi.projectControllerFindOne(id); return response.data;
-        const response = await apiClient.get<generated.CreateProjectDto>(`/api/projects/${id}`);
+        const response = await apiClient.get<generated.ProjectDto>(`/api/projects/${id}`);
         return response.data;
     },
-    create: async (payload: generated.CreateProjectDto): Promise<generated.CreateProjectDto> => { // Usar CreateProjectDto
+    create: async (payload: generated.CreateProjectDto): Promise<generated.ProjectDto> => { // Usar ProjectDto como retorno
         // Reemplazar con: const response = await projectsGeneratedApi.projectControllerCreate(payload); return response.data;
-        const response = await apiClient.post<generated.CreateProjectDto>('/api/projects', payload);
+        const response = await apiClient.post<generated.ProjectDto>('/api/projects', payload);
         return response.data;
     },
-    update: async (id: string, payload: generated.UpdateProjectDto): Promise<generated.CreateProjectDto> => { // Usar CreateProjectDto como retorno
+    update: async (id: string, payload: generated.UpdateProjectDto): Promise<generated.ProjectDto> => { // Usar ProjectDto como retorno
         // Reemplazar con: const response = await projectsGeneratedApi.projectControllerUpdate(id, payload); return response.data;
-        const response = await apiClient.patch<generated.CreateProjectDto>(`/api/projects/${id}`, payload);
+        const response = await apiClient.patch<generated.ProjectDto>(`/api/projects/${id}`, payload);
         return response.data;
     },
     remove: async (id: string): Promise<void> => {
@@ -383,16 +383,15 @@ export const promptService = {
     remove: async (projectId: string, promptId: string): Promise<void> => {
         await promptsGeneratedApi.promptControllerRemove(projectId, promptId);
     },
-    // Funciones comentadas temporalmente porque LoadPromptStructureDto no existe en los tipos generados
-    // generatePromptStructure: async (projectId: string, userPromptText: string): Promise<generated.LoadPromptStructureDto> => {
-    //     const payload = { userPromptText };
-    //     const response = await apiClient.post<generated.LoadPromptStructureDto>(`/api/projects/${projectId}/prompts/generate-structure`, payload);
-    //     return response.data;
-    // },
-    // loadPromptStructure: async (projectId: string, structure: generated.LoadPromptStructureDto): Promise<generated.LoadPromptStructureDto> => {
-    //     const response = await apiClient.post<generated.LoadPromptStructureDto>(`/api/projects/${projectId}/prompts/load-structure`, structure);
-    //     return response.data;
-    // },
+    // Funciones implementadas usando la API generada
+    generatePromptStructure: async (projectId: string, userPromptText: string): Promise<generated.PromptControllerGenerateStructure200Response> => {
+        const payload: generated.GeneratePromptStructureDto = { userPrompt: userPromptText };
+        const response = await promptsGeneratedApi.promptControllerGenerateStructure(projectId, payload);
+        return response.data;
+    },
+    loadPromptStructure: async (projectId: string, promptId: string): Promise<void> => {
+        await promptsGeneratedApi.promptControllerLoadStructure(projectId, promptId);
+    },
 };
 
 // Interfaz local para el servicio, debería coincidir o ser compatible con PromptVersionData de la página
@@ -730,7 +729,7 @@ export type AiModelResponseDto = generated.AiModelResponseDto;
 export type CreateSystemPromptDto = generated.CreateSystemPromptDto;
 
 // Tipos alias para compatibilidad hacia atrás
-export type Project = generated.CreateProjectDto;
+export type Project = generated.ProjectDto;
 export type User = generated.UserProfileResponse;
 export type Tag = generated.TagDto;
 export type Environment = generated.CreateEnvironmentDto;

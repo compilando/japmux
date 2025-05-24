@@ -63,6 +63,8 @@ const PromptsPage: React.FC = () => {
         setPageError(null);
         try {
             const data = await promptService.findAll(contextProjectId);
+            console.log("[PromptsPage] fetchPrompts: Received data:", data);
+            console.log("[PromptsPage] fetchPrompts: First few prompt IDs:", data.slice(0, 5).map(p => ({ id: p.id, name: p.name })));
             setPrompts(data);
         } catch (err: unknown) {
             console.error("[PromptsPage] Error fetching prompts:", err);
@@ -102,6 +104,13 @@ const PromptsPage: React.FC = () => {
     };
 
     const handleDeletePrompt = async (promptIdToDelete: string, promptName?: string) => {
+        console.log("[PromptsPage] handleDeletePrompt called with:", {
+            promptIdToDelete,
+            promptName,
+            contextProjectId,
+            urlProjectId
+        });
+
         if (!contextProjectId) {
             showErrorToast("No project selected in context.");
             return;
@@ -110,12 +119,52 @@ const PromptsPage: React.FC = () => {
         if (window.confirm(confirmMessage)) {
             setLoadingPrompts(true);
             try {
+                console.log("[PromptsPage] Calling promptService.remove with:", {
+                    projectId: contextProjectId,
+                    promptId: promptIdToDelete
+                });
                 await promptService.remove(contextProjectId, promptIdToDelete);
                 showSuccessToast(`Prompt ${promptName || promptIdToDelete} deleted.`);
                 fetchPrompts();
             } catch (err: unknown) {
                 console.error("[PromptsPage] Error deleting prompt:", err);
-                setPageError(getApiErrorMessage(err, "Failed to delete prompt."));
+
+                // Mejorar el manejo de errores
+                let errorMessage = "Failed to delete prompt.";
+                if (err && typeof err === 'object' && 'response' in err) {
+                    const axiosError = err as any;
+                    const status = axiosError.response?.status;
+                    const responseData = axiosError.response?.data;
+
+                    switch (status) {
+                        case 404:
+                            errorMessage = `Prompt with ID "${promptIdToDelete}" not found in project "${contextProjectId}". It may have been already deleted.`;
+                            break;
+                        case 500:
+                            errorMessage = `Internal server error while deleting "${promptName || promptIdToDelete}". Please check server logs or try again later.`;
+                            break;
+                        case 429:
+                            errorMessage = `Too many requests. Please wait a moment and try again.`;
+                            break;
+                        case 403:
+                            errorMessage = `Permission denied. You don't have rights to delete this prompt.`;
+                            break;
+                        default:
+                            if (responseData?.message) {
+                                errorMessage = responseData.message;
+                            } else {
+                                errorMessage = `Error ${status}: Failed to delete prompt "${promptName || promptIdToDelete}".`;
+                            }
+                    }
+                } else if (err instanceof Error) {
+                    errorMessage = `Network error: ${err.message}`;
+                }
+
+                setPageError(errorMessage);
+                showErrorToast(errorMessage);
+
+                // Refrescar la lista para mantener sincronización
+                fetchPrompts();
             } finally {
                 setLoadingPrompts(false);
             }

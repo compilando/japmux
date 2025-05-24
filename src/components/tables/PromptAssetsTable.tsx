@@ -12,6 +12,7 @@ export interface PromptAssetData extends CreatePromptAssetDto {
     projectId?: string; // Anteriormente projectId
     promptId?: string;
     promptName?: string;
+    languageCode?: string; // Añadir languageCode
     // key: string; // key ya está en CreatePromptAssetDto
 }
 
@@ -26,24 +27,84 @@ interface PromptAssetsTableProps {
 
 const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, projectId, promptId, onEdit, onDelete, loading }) => {
     const [versionsCount, setVersionsCount] = useState<Record<string, number>>({});
+    const [assetsWithLanguage, setAssetsWithLanguage] = useState<PromptAssetData[]>([]);
 
     useEffect(() => {
-        const fetchVersionsCount = async () => {
+        const fetchVersionsCountAndLanguages = async () => {
+            if (!projectId || !promptId || promptAssets.length === 0) {
+                setVersionsCount({});
+                setAssetsWithLanguage(promptAssets);
+                return;
+            }
+
             const counts: Record<string, number> = {};
+            const assetsWithLang: PromptAssetData[] = [];
+
             for (const asset of promptAssets) {
                 try {
                     const versions = await promptAssetService.findVersions(projectId, promptId, asset.key);
                     counts[asset.key] = versions.length;
+
+                    // Obtener el languageCode de la primera versión (la más antigua, que sería la versión base)
+                    let languageCode: string | undefined;
+                    if (versions.length > 0) {
+                        // Ordenar por createdAt o versionTag para obtener la primera versión
+                        const sortedVersions = [...versions].sort((a, b) => {
+                            // Si tienen createdAt, usarlo para ordenar
+                            if ((a as any).createdAt && (b as any).createdAt) {
+                                return new Date((a as any).createdAt).getTime() - new Date((b as any).createdAt).getTime();
+                            }
+                            // Si no, usar versionTag (asumiendo que 1.0.0 viene antes que 1.0.1, etc.)
+                            const tagA = a.versionTag || '';
+                            const tagB = b.versionTag || '';
+                            return tagA.localeCompare(tagB);
+                        });
+                        languageCode = (sortedVersions[0] as any)?.languageCode;
+                    }
+
+                    assetsWithLang.push({
+                        ...asset,
+                        languageCode
+                    });
                 } catch (error) {
                     console.error(`Error fetching versions for asset ${asset.key}:`, error);
                     counts[asset.key] = 0;
+                    assetsWithLang.push(asset);
                 }
             }
             setVersionsCount(counts);
+            setAssetsWithLanguage(assetsWithLang);
         };
 
-        fetchVersionsCount();
+        fetchVersionsCountAndLanguages();
     }, [promptAssets, projectId, promptId]);
+
+    // Función para generar bandera de idioma
+    const renderLanguageFlag = (languageCode: string | undefined) => {
+        if (!languageCode) {
+            return null;
+        }
+
+        const langParts = languageCode.split('-');
+        const countryOrLangCode = langParts.length > 1 ? langParts[1].toLowerCase() : langParts[0].toLowerCase();
+        const flagUrl = countryOrLangCode.length === 2 ? `https://flagcdn.com/16x12/${countryOrLangCode}.png` : `https://flagcdn.com/16x12/xx.png`;
+
+        return (
+            <div className="flex items-center space-x-1 ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700" title={`Base Language: ${languageCode}`}>
+                <img
+                    src={flagUrl}
+                    alt={`${languageCode} flag`}
+                    className="w-4 h-3 object-cover rounded-sm border border-gray-300 dark:border-gray-500"
+                    onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://flagcdn.com/16x12/xx.png'; // Fallback
+                        target.onerror = null;
+                    }}
+                />
+                <span className="text-xs text-gray-600 dark:text-gray-300">{languageCode.toUpperCase()}</span>
+            </div>
+        );
+    };
 
     if (loading) {
         return (
@@ -56,16 +117,23 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
             <div className="p-4 md:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Array.isArray(promptAssets) && promptAssets.map((item) => (
+                {Array.isArray(assetsWithLanguage) && assetsWithLanguage.map((item) => (
                     <div
                         key={item.key}
                         className="bg-white dark:bg-gray-800 shadow-md dark:shadow-lg rounded-lg p-3 border border-gray-200 dark:border-gray-600 hover:shadow-lg dark:hover:shadow-xl transition-shadow duration-200 flex flex-col"
                     >
                         <div className="flex justify-between items-center mb-2 pb-2 border-b border-gray-200 dark:border-gray-600">
-                            <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate" title={item.key}>
-                                {item.key ?? 'N/A'}
-                            </h3>
-                            {item.key && <CopyButton textToCopy={item.key} size="sm" />}
+                            <div className="flex flex-col flex-1 min-w-0">
+                                <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate" title={item.key}>
+                                    {item.key ?? 'N/A'}
+                                </h3>
+                                {item.languageCode && (
+                                    <div className="flex items-center mt-1">
+                                        {renderLanguageFlag(item.languageCode)}
+                                    </div>
+                                )}
+                            </div>
+                            {item.key && <CopyButton textToCopy={item.key} />}
                         </div>
 
                         <div className="grid grid-cols-1 gap-x-3 gap-y-1 mb-3 flex-grow">
@@ -116,7 +184,7 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
                     </div>
                 ))}
             </div>
-            {(!Array.isArray(promptAssets) || promptAssets.length === 0) && (
+            {(!Array.isArray(assetsWithLanguage) || assetsWithLanguage.length === 0) && (
                 <div className="text-center py-12 px-4">
                     <DocumentDuplicateIcon className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
                     <p className="text-gray-500 dark:text-gray-400">No prompt assets found</p>

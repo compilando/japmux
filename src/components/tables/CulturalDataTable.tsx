@@ -93,24 +93,6 @@ const CulturalDataTable: React.FC<CulturalDataTableProps> = ({ culturalDataList,
                                 </div>
                             </div>
 
-                            {/* Nivel de Formalidad */}
-                            <div>
-                                <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                                    Formality Level
-                                </h4>
-                                <div className="flex items-center space-x-2">
-                                    <div className="flex-grow bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                        <div
-                                            className="bg-brand-500 h-2.5 rounded-full transition-all duration-300"
-                                            style={{ width: `${((data.formalityLevel ?? 0) / 5) * 100}%` }}
-                                        ></div>
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300 min-w-[3rem] text-right">
-                                        {data.formalityLevel ?? 0}/5
-                                    </span>
-                                </div>
-                            </div>
-
                             {/* Estilo */}
                             {data.style && (
                                 <div>
@@ -119,18 +101,6 @@ const CulturalDataTable: React.FC<CulturalDataTableProps> = ({ culturalDataList,
                                     </h4>
                                     <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-md">
                                         {data.style}
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Consideraciones */}
-                            {data.considerations && (
-                                <div>
-                                    <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                                        Considerations
-                                    </h4>
-                                    <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-md">
-                                        {data.considerations}
                                     </p>
                                 </div>
                             )}

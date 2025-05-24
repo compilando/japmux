@@ -1,11 +1,11 @@
 import React from 'react';
-import { PromptAssetTranslation } from '@/services/api';
+import { CreateAssetTranslationDto } from '@/services/api';
 import CopyButton from '../common/CopyButton';
 import { TrashBinIcon, PencilIcon } from "@/icons";
 
 interface PromptAssetTranslationsTableProps {
-    translations: PromptAssetTranslation[];
-    onEdit: (item: PromptAssetTranslation) => void;
+    translations: CreateAssetTranslationDto[];
+    onEdit: (item: CreateAssetTranslationDto) => void;
     // onDelete receives the languageCode to identify the translation
     onDelete: (languageCode: string) => void;
     loading?: boolean; // Add loading prop
@@ -40,7 +40,7 @@ const PromptAssetTranslationsTable: React.FC<PromptAssetTranslationsTableProps> 
                             </td> */}
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                 <div className="flex items-center space-x-2">
-                                    <img 
+                                    <img
                                         src={`https://flagcdn.com/24x18/${item.languageCode.split('-')[1].toLowerCase()}.png`}
                                         alt={`${item.languageCode} flag`}
                                         className="w-6 h-4 object-cover rounded-sm"

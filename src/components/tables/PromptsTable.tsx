@@ -8,10 +8,15 @@ import { BoltIcon, ClockIcon, DocumentDuplicateIcon } from '@heroicons/react/24/
 import { promptVersionService, promptAssetService } from '@/services/api';
 import { getPromptTypeLabel, getPromptTypeColor } from '@/config/promptTypes';
 
+// Extender PromptDto para incluir languageCode
+interface PromptWithLanguage extends PromptDto {
+    languageCode?: string;
+}
+
 interface PromptsTableProps {
     prompts: PromptDto[];
     onEdit: (item: PromptDto) => void;
-    onDelete: (id: string) => void;
+    onDelete: (id: string, name?: string) => void;
     projectId?: string;
     loading?: boolean;
 }
@@ -20,44 +25,88 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
     const { selectPrompt } = usePrompts();
     const [versionsCount, setVersionsCount] = useState<Record<string, number>>({});
     const [assetsCount, setAssetsCount] = useState<Record<string, number>>({});
+    const [promptsWithLanguage, setPromptsWithLanguage] = useState<PromptWithLanguage[]>([]);
 
     useEffect(() => {
-        const fetchCounts = async () => {
+        const fetchCountsAndLanguages = async () => {
             if (!projectId || prompts.length === 0) {
                 setVersionsCount({});
                 setAssetsCount({});
+                setPromptsWithLanguage(prompts);
                 return;
             }
 
             const newVersionCounts: Record<string, number> = {};
             const newAssetCounts: Record<string, number> = {};
+            const promptsWithLang: PromptWithLanguage[] = [];
+
+            // Helper para manejar rate limiting
+            const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
             for (const prompt of prompts) {
                 try {
                     const versions = await promptVersionService.findAll(projectId, prompt.id);
                     newVersionCounts[prompt.id] = versions.length;
-                } catch (error) {
+
+                    // Obtener el languageCode de la primera versión (la más antigua, que sería la versión base)
+                    let languageCode: string | undefined;
+                    if (versions.length > 0) {
+                        // Ordenar por createdAt o versionTag para obtener la primera versión
+                        const sortedVersions = [...versions].sort((a, b) => {
+                            // Si tienen createdAt, usarlo para ordenar
+                            if ((a as any).createdAt && (b as any).createdAt) {
+                                return new Date((a as any).createdAt).getTime() - new Date((b as any).createdAt).getTime();
+                            }
+                            // Si no, usar versionTag (asumiendo que 1.0.0 viene antes que 1.0.1, etc.)
+                            const tagA = a.versionTag || '';
+                            const tagB = b.versionTag || '';
+                            return tagA.localeCompare(tagB);
+                        });
+                        languageCode = (sortedVersions[0] as any)?.languageCode;
+                    }
+
+                    promptsWithLang.push({
+                        ...prompt,
+                        languageCode
+                    });
+                } catch (error: any) {
                     console.error(`Error fetching versions for prompt ${prompt.id}:`, error);
                     newVersionCounts[prompt.id] = 0;
+                    promptsWithLang.push(prompt);
+
+                    // Si es rate limiting, añadir delay
+                    if (error.response?.status === 429) {
+                        await delay(1000); // Esperar 1 segundo antes de continuar
+                    }
                 }
 
                 try {
                     const assets = await promptAssetService.findAll(projectId, prompt.id);
                     newAssetCounts[prompt.id] = assets.length;
-                } catch (error) {
+                } catch (error: any) {
                     console.error(`Error fetching assets for prompt ${prompt.id}:`, error);
                     newAssetCounts[prompt.id] = 0;
+
+                    // Si es rate limiting, añadir delay
+                    if (error.response?.status === 429) {
+                        await delay(1000); // Esperar 1 segundo antes de continuar
+                    }
                 }
+
+                // Pequeño delay entre prompts para evitar saturar el servidor
+                await delay(100);
             }
             setVersionsCount(newVersionCounts);
             setAssetsCount(newAssetCounts);
+            setPromptsWithLanguage(promptsWithLang);
         };
 
         if (projectId && prompts.length > 0) {
-            fetchCounts();
+            fetchCountsAndLanguages();
         } else {
             setVersionsCount({});
             setAssetsCount({});
+            setPromptsWithLanguage(prompts);
         }
     }, [prompts, projectId]);
 
@@ -103,6 +152,33 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
         return { label: 'GENERAL', color: getPromptTypeColor('GENERAL') };
     };
 
+    // Función para generar bandera de idioma
+    const renderLanguageFlag = (languageCode: string | undefined) => {
+        if (!languageCode) {
+            return null;
+        }
+
+        const langParts = languageCode.split('-');
+        const countryOrLangCode = langParts.length > 1 ? langParts[1].toLowerCase() : langParts[0].toLowerCase();
+        const flagUrl = countryOrLangCode.length === 2 ? `https://flagcdn.com/16x12/${countryOrLangCode}.png` : `https://flagcdn.com/16x12/xx.png`;
+
+        return (
+            <div className="flex items-center space-x-1 ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700" title={`Base Language: ${languageCode}`}>
+                <img
+                    src={flagUrl}
+                    alt={`${languageCode} flag`}
+                    className="w-4 h-3 object-cover rounded-sm border border-gray-300 dark:border-gray-500"
+                    onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://flagcdn.com/16x12/xx.png'; // Fallback
+                        target.onerror = null;
+                    }}
+                />
+                <span className="text-xs text-gray-600 dark:text-gray-300">{languageCode.toUpperCase()}</span>
+            </div>
+        );
+    };
+
     if (loading && prompts.length === 0) {
         return (
             <div className="flex items-center justify-center py-12">
@@ -113,7 +189,7 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {prompts.map((item: PromptDto) => (
+            {promptsWithLanguage.map((item: PromptWithLanguage) => (
                 <div
                     key={item.id}
                     className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700"
@@ -131,6 +207,7 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                                     <span className="text-sm text-gray-500 dark:text-gray-400 font-mono" title={item.name}>
                                         {item.name}
                                     </span>
+                                    {renderLanguageFlag(item.languageCode)}
                                 </div>
                             </div>
                             <div className="flex items-center space-x-2">
@@ -149,7 +226,14 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                                     <PencilIcon />
                                 </button>
                                 <button
-                                    onClick={() => onDelete(item.id)}
+                                    onClick={() => {
+                                        console.log("[PromptsTable] Delete button clicked for prompt:", {
+                                            id: item.id,
+                                            name: item.name,
+                                            projectId: item.projectId
+                                        });
+                                        onDelete(item.id, item.name);
+                                    }}
                                     className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors duration-200"
                                     aria-label="Delete Prompt"
                                 >

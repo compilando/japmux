@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
-import { promptService } from '@/services/api';
+import { promptService, promptAssetService, regionService } from '@/services/api';
 import { loadPromptStructure } from '@/services/promptApi';
 import { LoadPromptStructureDto } from '@/types/prompt-structure';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 import { useProjects } from '@/context/ProjectContext'; // Importar contexto de proyectos
+import PromptEditor from '@/components/common/PromptEditor';
 
 // Tipos locales para los que no están exportados
 type PromptAssetStructureDto = any;
@@ -55,10 +56,55 @@ const PromptWizardPage: React.FC = () => {
     const [isLoadingLoad, setIsLoadingLoad] = useState<boolean>(false);
     const [loadStatusMessage, setLoadStatusMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+    // Estados para configuración de carga
+    const [promptName, setPromptName] = useState<string>('');
+    const [selectedLanguageCode, setSelectedLanguageCode] = useState<string>('');
+    const [regions, setRegions] = useState<any[]>([]);
+    const [loadingRegions, setLoadingRegions] = useState<boolean>(false);
+
     const breadcrumbs = [
         { label: "Home", href: "/" },
         { label: "Prompt Wizard" }
     ];
+
+    // Efecto para cargar regiones cuando se selecciona un proyecto
+    useEffect(() => {
+        if (selectedProjectId) {
+            setLoadingRegions(true);
+            regionService.findAll(selectedProjectId)
+                .then(regionData => {
+                    setRegions(regionData);
+                    // Establecer idioma por defecto si hay regiones disponibles
+                    if (regionData.length > 0 && !selectedLanguageCode) {
+                        const defaultRegion = regionData.find(r => r.languageCode === 'en-US') || regionData[0];
+                        setSelectedLanguageCode(defaultRegion.languageCode);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error loading regions:', err);
+                    setRegions([]);
+                })
+                .finally(() => {
+                    setLoadingRegions(false);
+                });
+        }
+    }, [selectedProjectId]);
+
+    // Función para validar el nombre del prompt
+    const validatePromptName = (name: string): boolean => {
+        // Solo letras minúsculas, números y guiones bajos
+        const validPattern = /^[a-z0-9_]+$/;
+        return validPattern.test(name);
+    };
+
+    // Función para generar un nombre válido desde el nombre sugerido
+    const generateValidPromptName = (suggestedName: string): string => {
+        return suggestedName
+            .toLowerCase()
+            .replace(/[^a-z0-9_]/g, '_')
+            .replace(/_+/g, '_')
+            .replace(/^_|_$/g, '');
+    };
 
     const handleGenerateStructure = async () => {
         if (!selectedProjectId) {
@@ -70,13 +116,37 @@ const PromptWizardPage: React.FC = () => {
         setErrorGenerate(null);
         setGeneratedJson(null);
         try {
-            // TODO: Implementar generatePromptStructure en promptService
-            // const result = await promptService.generatePromptStructure(selectedProjectId, promptContent);
-            showErrorToast('Generate structure functionality is not yet implemented.');
-            setErrorGenerate('Generate structure functionality is not yet implemented.');
-            // setGeneratedJson(result as StructureData);
-            // setJsonToLoadInput(JSON.stringify(result, null, 2));
-            // showSuccessToast('Structure generated successfully from the prompt.');
+            const result = await promptService.generatePromptStructure(selectedProjectId, promptContent);
+            console.log('Generated structure result:', result);
+
+            // Verificar si result.structure existe (formato esperado según OpenAPI)
+            let structureData = result.structure;
+
+            // Si no existe result.structure, verificar si result mismo es la estructura
+            // Castear a any porque el servidor podría devolver un formato diferente al especificado en la API
+            const resultAny = result as any;
+            if (!structureData && resultAny && (resultAny.prompt || resultAny.version || resultAny.assets)) {
+                console.log('Structure found directly in result, not in result.structure');
+                structureData = resultAny;
+            }
+
+            if (structureData) {
+                setGeneratedJson(structureData as StructureData);
+                setJsonToLoadInput(JSON.stringify(structureData, null, 2));
+
+                // Sugerir un nombre de prompt válido basado en el nombre generado
+                const structureDataAny = structureData as any;
+                if (structureDataAny.prompt?.name && !promptName) {
+                    const suggestedName = generateValidPromptName(structureDataAny.prompt.name);
+                    setPromptName(suggestedName);
+                }
+
+                showSuccessToast('Structure generated successfully from the prompt.');
+            } else {
+                console.log('No structure found in result:', result);
+                showErrorToast('No structure data received from the API.');
+                setErrorGenerate('No structure data received from the API.');
+            }
         } catch (err: unknown) {
             console.error("Error generando estructura:", err);
             let apiErrorMessage = 'Error generating prompt structure.';
@@ -177,6 +247,21 @@ const PromptWizardPage: React.FC = () => {
             setLoadStatusMessage({ type: 'error', message: 'Error: JSON field is empty.' });
             return;
         }
+        if (!promptName.trim()) {
+            showErrorToast('Please enter a prompt name.');
+            setLoadStatusMessage({ type: 'error', message: 'Error: Prompt name is required.' });
+            return;
+        }
+        if (!validatePromptName(promptName)) {
+            showErrorToast('Prompt name must contain only lowercase letters, numbers, and underscores.');
+            setLoadStatusMessage({ type: 'error', message: 'Error: Invalid prompt name format.' });
+            return;
+        }
+        if (!selectedLanguageCode) {
+            showErrorToast('Please select a language.');
+            setLoadStatusMessage({ type: 'error', message: 'Error: Language selection is required.' });
+            return;
+        }
 
         let parsedJson: LoadPromptStructureDto;
         try {
@@ -187,17 +272,67 @@ const PromptWizardPage: React.FC = () => {
             return;
         }
 
+        // Validar que la estructura tenga los campos necesarios
+        if (!parsedJson.version || !parsedJson.version.promptText) {
+            showErrorToast('Invalid structure: missing required version text.');
+            setLoadStatusMessage({ type: 'error', message: 'Error: Invalid structure format.' });
+            return;
+        }
+
         setIsLoadingLoad(true);
         setLoadStatusMessage(null);
 
         try {
-            // TODO: Implementar loadPromptStructure en promptService
-            // const result = await promptService.loadPromptStructure(selectedProjectId, parsedJson);
-            showErrorToast('Load structure functionality is not yet implemented.');
-            setLoadStatusMessage({ type: 'error', message: 'Load structure functionality is not yet implemented.' });
-            // showSuccessToast('JSON structure loaded successfully.');
-            // setLoadStatusMessage({ type: 'success', message: 'JSON structure loaded successfully.' });
-            // setGeneratedJson(parsedJson);
+            console.log('Creating prompt structure:', parsedJson);
+
+            // 1. Crear el prompt principal usando los valores configurados por el usuario
+            const promptPayload = {
+                name: promptName, // Usar el nombre configurado por el usuario
+                description: parsedJson.prompt?.description || `Generated prompt: ${promptName}`,
+                tags: new Set<string>(), // Tags vacíos por ahora
+                type: { type: 'GENERAL' }, // Tipo por defecto
+                promptText: parsedJson.version.promptText,
+                languageCode: selectedLanguageCode, // Usar el idioma seleccionado por el usuario
+                initialTranslations: parsedJson.version.translations?.map(t => ({
+                    languageCode: t.languageCode,
+                    promptText: t.promptText || parsedJson.version.promptText
+                })) || []
+            };
+
+            console.log('Creating prompt with payload:', promptPayload);
+            const createdPrompt = await promptService.create(selectedProjectId, promptPayload as any);
+            console.log('Prompt created:', createdPrompt);
+
+            // 2. Crear los assets si existen
+            if (parsedJson.assets && parsedJson.assets.length > 0) {
+                console.log('Creating assets:', parsedJson.assets);
+                for (const asset of parsedJson.assets) {
+                    try {
+                        const assetPayload = {
+                            key: asset.key,
+                            name: (asset as any).name || asset.key,
+                            category: 'Generated', // Categoría por defecto
+                            initialValue: (asset as any).value,
+                            initialChangeMessage: (asset as any).changeMessage || 'Initial asset from structure'
+                        };
+
+                        console.log('Creating asset:', assetPayload);
+                        await promptAssetService.create(selectedProjectId, createdPrompt.id, assetPayload);
+                        console.log('Asset created:', asset.key);
+                    } catch (assetError) {
+                        console.error(`Error creating asset ${asset.key}:`, assetError);
+                        // Continuar con otros assets aunque uno falle
+                    }
+                }
+            }
+
+            showSuccessToast(`Prompt "${promptName}" and structure loaded successfully!`);
+            setLoadStatusMessage({
+                type: 'success',
+                message: `Success: Prompt "${promptName}" created with ${parsedJson.assets?.length || 0} assets.`
+            });
+            setGeneratedJson(parsedJson);
+
         } catch (error) {
             console.error("Error loading structure:", error);
             let errorMessage = 'Error loading JSON structure.';
@@ -207,6 +342,8 @@ const PromptWizardPage: React.FC = () => {
                 typeof error.response.data === 'object' &&
                 'message' in error.response.data) {
                 errorMessage = String(error.response.data.message);
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
             }
             showErrorToast(errorMessage);
             setLoadStatusMessage({ type: 'error', message: errorMessage });
@@ -226,14 +363,17 @@ const PromptWizardPage: React.FC = () => {
                         <label htmlFor="prompt-editor" className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
                             Write your prompt for the AI to suggest a structure:
                         </label>
-                        <textarea
-                            id="prompt-editor"
-                            rows={5}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline dark:bg-gray-700 dark:border-gray-600"
+                        <PromptEditor
                             value={promptContent}
-                            onChange={(e) => setPromptContent(e.target.value)}
+                            onChange={setPromptContent}
                             placeholder="e.g.: Create a welcome message for new users in English and Spanish..."
-                            disabled={isLoadingGenerate}
+                            rows={8}
+                            assets={[]} // Sin assets para evitar funcionalidad de insertar variables
+                            readOnly={isLoadingGenerate}
+                            showHistory={true}
+                            id="prompt-editor"
+                            aria-label="Prompt content editor"
+                        // Sin extraToolbarButtons para evitar insertar prompts/assets
                         />
                     </div>
                     <div className="flex items-center justify-end">
@@ -279,13 +419,66 @@ const PromptWizardPage: React.FC = () => {
                                         placeholder='Paste the structure JSON here, or generate one with the AI.'
                                         disabled={isLoadingLoad || isLoadingGenerate}
                                     />
+
+                                    {/* Configuración para carga de prompt */}
+                                    <div className="mt-6 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                                        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Configure Prompt</h3>
+
+                                        {/* Campo para nombre del prompt */}
+                                        <div className="mb-4">
+                                            <label htmlFor="prompt-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Prompt Name (lowercase, numbers, underscores only)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="prompt-name"
+                                                value={promptName}
+                                                onChange={(e) => setPromptName(e.target.value)}
+                                                placeholder="e.g. welcome_message_v1"
+                                                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${!validatePromptName(promptName) && promptName ? 'border-red-500' : 'border-gray-300'}`}
+                                                disabled={isLoadingLoad}
+                                            />
+                                            {promptName && !validatePromptName(promptName) && (
+                                                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                                    Only lowercase letters, numbers, and underscores allowed
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Selector de idioma base */}
+                                        <div className="mb-4">
+                                            <label htmlFor="language-code" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Base Language
+                                            </label>
+                                            <select
+                                                id="language-code"
+                                                value={selectedLanguageCode}
+                                                onChange={(e) => setSelectedLanguageCode(e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                                disabled={isLoadingLoad || loadingRegions}
+                                            >
+                                                {loadingRegions ? (
+                                                    <option>Loading languages...</option>
+                                                ) : regions.length > 0 ? (
+                                                    regions.map(region => (
+                                                        <option key={region.languageCode} value={region.languageCode}>
+                                                            {region.languageCode.toUpperCase()} - {region.name || region.languageCode}
+                                                        </option>
+                                                    ))
+                                                ) : (
+                                                    <option value="">No languages available</option>
+                                                )}
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div className="mt-4 flex items-center justify-end">
                                         <button
                                             onClick={handleLoadStructure}
-                                            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoadingLoad || !selectedProjectId || !jsonToLoadInput.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoadingLoad || !selectedProjectId || !jsonToLoadInput.trim() || !promptName.trim() || !validatePromptName(promptName) || !selectedLanguageCode ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             type="button"
-                                            disabled={isLoadingLoad || !selectedProjectId || !jsonToLoadInput.trim()}
-                                            title={!selectedProjectId ? "Select a project to load structure" : !jsonToLoadInput.trim() ? "JSON cannot be empty" : "Load this JSON structure to the project"}
+                                            disabled={isLoadingLoad || !selectedProjectId || !jsonToLoadInput.trim() || !promptName.trim() || !validatePromptName(promptName) || !selectedLanguageCode}
+                                            title={!selectedProjectId ? "Select a project to load structure" : !jsonToLoadInput.trim() ? "JSON cannot be empty" : !promptName.trim() ? "Prompt name is required" : !validatePromptName(promptName) ? "Invalid prompt name format" : !selectedLanguageCode ? "Language selection required" : "Load this JSON structure to the project"}
                                         >
                                             {isLoadingLoad ? 'Loading...' : 'Load Prompt in Project'}
                                         </button>
@@ -306,4 +499,4 @@ const PromptWizardPage: React.FC = () => {
     );
 };
 
-export default PromptWizardPage; 
+export default PromptWizardPage;

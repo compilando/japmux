@@ -87,12 +87,12 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onEdit, onDelete }) => {
                                 <div className="text-sm font-medium text-gray-900 dark:text-white truncate" title={user.name || user.email}>{user.name || 'N/A'}</div>
                                 <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                                     <span className="truncate" title={user.email}>{user.email}</span>
-                                    <CopyButton textToCopy={user.email} size="xs" />
+                                    <CopyButton textToCopy={user.email} />
                                 </div>
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-sm">
-                                <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${(user.role && roleColorMap[user.role.toUpperCase()]) || roleColorMap.DEFAULT}`}>
-                                    {user.role || '-'}
+                                <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${roleColorMap.DEFAULT}`}>
+                                    N/A
                                 </span>
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
