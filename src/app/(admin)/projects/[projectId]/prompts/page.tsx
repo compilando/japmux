@@ -18,6 +18,7 @@ import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptsTable from '@/components/tables/PromptsTable';
 import PromptForm from '@/components/form/PromptForm';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import logger from '@/utils/logger';
 
 // Helper para extraer mensajes de error de forma segura
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
@@ -49,25 +50,25 @@ const PromptsPage: React.FC = () => {
         refreshProjects
     } = useProjects();
 
-    console.log("[PromptsPage] Rendering. urlProjectId:", urlProjectId, "contextProjectId:", contextProjectId, "projectContextIsLoading:", projectContextIsLoading, "selectedProjectFull:", selectedProjectFull?.name);
+    logger.debug(`PromptsPage Rendering. urlProjectId: ${urlProjectId}, contextProjectId: ${contextProjectId}, projectContextIsLoading: ${projectContextIsLoading}, selectedProjectFull: ${selectedProjectFull?.name}`);
 
     const fetchPrompts = useCallback(async () => {
         if (!contextProjectId) {
-            console.log("[PromptsPage] fetchPrompts: No contextProjectId, skipping fetch.");
+            logger.debug("fetchPrompts: No contextProjectId, skipping fetch.");
             setPrompts([]);
             setLoadingPrompts(false);
             return;
         }
-        console.log(`[PromptsPage] fetchPrompts: Fetching for contextProjectId: ${contextProjectId}`);
+        logger.debug(`fetchPrompts: Fetching for contextProjectId: ${contextProjectId}`);
         setLoadingPrompts(true);
         setPageError(null);
         try {
             const data = await promptService.findAll(contextProjectId);
-            console.log("[PromptsPage] fetchPrompts: Received data:", data);
-            console.log("[PromptsPage] fetchPrompts: First few prompt IDs:", data.slice(0, 5).map(p => ({ id: p.id, name: p.name })));
+            logger.debug("fetchPrompts: Received data", data);
+            logger.debug("fetchPrompts: First few prompt IDs", data.slice(0, 5).map(p => ({ id: p.id, name: p.name })));
             setPrompts(data);
         } catch (err: unknown) {
-            console.error("[PromptsPage] Error fetching prompts:", err);
+            logger.error("Error fetching prompts", err);
             setPageError(getApiErrorMessage(err, "Failed to fetch prompts."));
             setPrompts([]);
         } finally {
@@ -104,7 +105,7 @@ const PromptsPage: React.FC = () => {
     };
 
     const handleDeletePrompt = async (promptIdToDelete: string, promptName?: string) => {
-        console.log("[PromptsPage] handleDeletePrompt called with:", {
+        logger.debug("handleDeletePrompt called", {
             promptIdToDelete,
             promptName,
             contextProjectId,
@@ -119,7 +120,7 @@ const PromptsPage: React.FC = () => {
         if (window.confirm(confirmMessage)) {
             setLoadingPrompts(true);
             try {
-                console.log("[PromptsPage] Calling promptService.remove with:", {
+                logger.debug("Calling promptService.remove", {
                     projectId: contextProjectId,
                     promptId: promptIdToDelete
                 });
@@ -127,7 +128,7 @@ const PromptsPage: React.FC = () => {
                 showSuccessToast(`Prompt ${promptName || promptIdToDelete} deleted.`);
                 fetchPrompts();
             } catch (err: unknown) {
-                console.error("[PromptsPage] Error deleting prompt:", err);
+                logger.error("Error deleting prompt", err);
 
                 // Mejorar el manejo de errores
                 let errorMessage = "Failed to delete prompt.";

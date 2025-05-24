@@ -5,8 +5,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { healthService } from '@/services/api';
 import ApiHealthErrorModal from '../ui/ApiHealthErrorModal'; // Adjust path if necessary
 import { useAuth } from '@/context/AuthContext';
+import logger from '@/utils/logger';
 
-const CHECK_INTERVAL_MS = 30000; // Check every 30 seconds
+const CHECK_INTERVAL_MS = 60000; // 1 minuto
 
 interface HealthCheckWrapperProps {
     children: React.ReactNode;
@@ -20,16 +21,16 @@ const HealthCheckWrapper: React.FC<HealthCheckWrapperProps> = ({ children }) => 
     const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
     const checkApiStatus = useCallback(async () => {
-        console.log('[HealthCheck] Checking API status...');
+        logger.debug('HealthCheck: Checking API status...');
         setIsLoading(true);
         try {
             // TODO: Consider adding retries with exponential backoff
             await healthService.check();
-            console.log('[HealthCheck] API is healthy.');
+            logger.debug('HealthCheck: API is healthy.');
             setIsApiHealthy(true);
             setShowErrorModal(false);
         } catch (error) {
-            console.error('[HealthCheck] API health check failed:', error);
+            logger.error('HealthCheck: API health check failed', error);
             setIsApiHealthy(false);
             if (!isAuthenticated && !isAuthLoading && !showErrorModal) {
                 setShowErrorModal(true);
@@ -41,33 +42,33 @@ const HealthCheckWrapper: React.FC<HealthCheckWrapperProps> = ({ children }) => 
 
     // Initial check on mount
     useEffect(() => {
-        console.log('[HealthCheck] Initial mount effect, calling checkApiStatus.');
+        logger.debug('HealthCheck: Initial mount effect, calling checkApiStatus.');
         checkApiStatus();
     }, [checkApiStatus]);
 
     // Periodic check
     useEffect(() => {
-        console.log(`[HealthCheck] Periodic effect running. isApiHealthy: ${isApiHealthy}`);
+        logger.debug(`HealthCheck: Periodic effect running. isApiHealthy: ${isApiHealthy}`);
         if (intervalRef.current) {
-            console.log('[HealthCheck] Clearing previous interval.');
+            logger.debug('HealthCheck: Clearing previous interval.');
             clearInterval(intervalRef.current);
             intervalRef.current = null; // Important to reset the ref
         }
 
         if (isApiHealthy) {
-            console.log(`[HealthCheck] Setting up new interval (${CHECK_INTERVAL_MS}ms).`);
+            logger.debug(`HealthCheck: Setting up new interval (${CHECK_INTERVAL_MS}ms).`);
             intervalRef.current = setInterval(() => {
-                console.log('[HealthCheck] Interval triggered, calling checkApiStatus.');
+                logger.debug('HealthCheck: Interval triggered, calling checkApiStatus.');
                 checkApiStatus();
             }, CHECK_INTERVAL_MS);
         } else {
-            console.log('[HealthCheck] API not healthy, interval not set.');
+            logger.debug('HealthCheck: API not healthy, interval not set.');
         }
 
         // Cleanup on unmount or when dependencies change
         return () => {
             if (intervalRef.current) {
-                console.log('[HealthCheck] Cleanup: Clearing interval.');
+                logger.debug('HealthCheck: Cleanup: Clearing interval.');
                 clearInterval(intervalRef.current);
                 intervalRef.current = null;
             }
@@ -75,11 +76,11 @@ const HealthCheckWrapper: React.FC<HealthCheckWrapperProps> = ({ children }) => 
     }, [checkApiStatus, isApiHealthy]);
 
     const handleRetry = () => {
-        console.log('[HealthCheck] Retry button clicked, calling checkApiStatus.');
+        logger.debug('HealthCheck: Retry button clicked, calling checkApiStatus.');
         checkApiStatus();
     };
 
-    console.log(`[HealthCheck] Rendering wrapper. isLoading: ${isLoading}, showErrorModal: ${showErrorModal}`);
+    logger.debug(`HealthCheck: Rendering wrapper. isLoading: ${isLoading}, showErrorModal: ${showErrorModal}`);
 
     return (
         <>

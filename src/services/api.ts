@@ -23,28 +23,28 @@ const apiClient = axios.create({
 // Interceptor de Request: Añade token de autenticación
 apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        console.log('[Interceptor Request apiClient] Running for URL:', config.url); // Log distintivo
+        // Solo log en desarrollo
+        if (process.env.NODE_ENV === 'development') {
+            console.log('[Interceptor Request apiClient] Running for URL:', config.url);
+        }
+
         if (typeof window !== 'undefined') {
             let token = localStorage.getItem(AUTH_TOKEN_KEY);
             if (!token) {
                 token = sessionStorage.getItem(AUTH_TOKEN_KEY);
-                if (token) {
+                if (token && process.env.NODE_ENV === 'development') {
                     console.log('[Interceptor Request apiClient] Token found in sessionStorage.');
-                } else {
-                    console.log('[Interceptor Request apiClient] Token not found in localStorage or sessionStorage.');
                 }
-            } else {
+            } else if (process.env.NODE_ENV === 'development') {
                 console.log('[Interceptor Request apiClient] Token found in localStorage.');
             }
 
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
-                console.log('[Interceptor Request apiClient] Authorization header SET.');
-            } else {
-                console.log('[Interceptor Request apiClient] Authorization header NOT set (no token).');
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('[Interceptor Request apiClient] Authorization header SET.');
+                }
             }
-        } else {
-            console.log('[Interceptor Request apiClient] Cannot access storage (not window).');
         }
         return config;
     },
@@ -66,7 +66,7 @@ apiClient.interceptors.response.use(
             // No mostrar toast para 401, la redirección es suficiente
             if (typeof window !== 'undefined') {
                 localStorage.removeItem(AUTH_TOKEN_KEY);
-                sessionStorage.removeItem(AUTH_TOKEN_KEY); // Also remove from sessionStorage
+                sessionStorage.removeItem(AUTH_TOKEN_KEY);
                 // Considerar si la redirección debe hacerse aquí o en AuthContext
                 // window.location.href = '/signin';
             }
@@ -173,10 +173,14 @@ export const authService = {
         if (response.data.access_token && typeof window !== 'undefined') {
             if (rememberMe) {
                 localStorage.setItem(AUTH_TOKEN_KEY, response.data.access_token);
-                console.log('authService: Token stored in localStorage (rememberMe=true).');
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('authService: Token stored in localStorage (rememberMe=true).');
+                }
             } else {
                 sessionStorage.setItem(AUTH_TOKEN_KEY, response.data.access_token);
-                console.log('authService: Token stored in sessionStorage (rememberMe=false).');
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('authService: Token stored in sessionStorage (rememberMe=false).');
+                }
             }
         }
         return response.data;
@@ -190,8 +194,10 @@ export const authService = {
     logout: () => {
         if (typeof window !== 'undefined') {
             localStorage.removeItem(AUTH_TOKEN_KEY);
-            sessionStorage.removeItem(AUTH_TOKEN_KEY); // Also remove from sessionStorage
-            console.log('authService: Token removed from localStorage and sessionStorage.');
+            sessionStorage.removeItem(AUTH_TOKEN_KEY);
+            if (process.env.NODE_ENV === 'development') {
+                console.log('authService: Token removed from localStorage and sessionStorage.');
+            }
         }
     },
     isAuthenticated: (): boolean => {
@@ -200,6 +206,21 @@ export const authService = {
         if (token) return true;
         token = sessionStorage.getItem(AUTH_TOKEN_KEY); // Check sessionStorage if not in localStorage
         return !!token;
+    },
+    setToken: (token: string, rememberMe: boolean = false) => {
+        if (typeof window !== 'undefined') {
+            if (rememberMe) {
+                localStorage.setItem(AUTH_TOKEN_KEY, token);
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('authService: Token stored in localStorage (rememberMe=true).');
+                }
+            } else {
+                sessionStorage.setItem(AUTH_TOKEN_KEY, token);
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('authService: Token stored in sessionStorage (rememberMe=false).');
+                }
+            }
+        }
     },
 };
 
