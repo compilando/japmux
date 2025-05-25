@@ -19,9 +19,10 @@ interface PromptsTableProps {
     onDelete: (id: string, name?: string) => void;
     projectId?: string;
     loading?: boolean;
+    deletingPrompts?: Set<string>;
 }
 
-const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, projectId, loading }) => {
+const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, projectId, loading, deletingPrompts = new Set() }) => {
     const { selectPrompt } = usePrompts();
     const [versionsCount, setVersionsCount] = useState<Record<string, number>>({});
     const [assetsCount, setAssetsCount] = useState<Record<string, number>>({});
@@ -101,12 +102,14 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
             setPromptsWithLanguage(promptsWithLang);
         };
 
+        // Actualizar inmediatamente el estado local con los prompts recibidos
+        setPromptsWithLanguage(prompts);
+
         if (projectId && prompts.length > 0) {
             fetchCountsAndLanguages();
         } else {
             setVersionsCount({});
             setAssetsCount({});
-            setPromptsWithLanguage(prompts);
         }
     }, [prompts, projectId]);
 
@@ -230,14 +233,28 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                                         console.log("[PromptsTable] Delete button clicked for prompt:", {
                                             id: item.id,
                                             name: item.name,
-                                            projectId: item.projectId
+                                            projectId: item.projectId,
+                                            isDeleting: deletingPrompts.has(item.id)
                                         });
-                                        onDelete(item.id, item.name);
+                                        if (!deletingPrompts.has(item.id)) {
+                                            onDelete(item.id, item.name);
+                                        }
                                     }}
-                                    className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors duration-200"
-                                    aria-label="Delete Prompt"
+                                    disabled={deletingPrompts.has(item.id)}
+                                    className={`p-1.5 rounded-lg transition-all duration-200 ${deletingPrompts.has(item.id)
+                                            ? "text-gray-400 cursor-not-allowed bg-gray-100 dark:bg-gray-700"
+                                            : "text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30"
+                                        }`}
+                                    aria-label={deletingPrompts.has(item.id) ? "Eliminando..." : "Eliminar Prompt"}
+                                    title={deletingPrompts.has(item.id) ? "Eliminando prompt..." : "Eliminar prompt"}
                                 >
-                                    <TrashBinIcon />
+                                    {deletingPrompts.has(item.id) ? (
+                                        <div className="w-5 h-5 flex items-center justify-center">
+                                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                                        </div>
+                                    ) : (
+                                        <TrashBinIcon />
+                                    )}
                                 </button>
                             </div>
                         </div>

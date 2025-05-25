@@ -38,6 +38,8 @@ const PromptsPage: React.FC = () => {
     const [prompts, setPrompts] = useState<PromptDto[]>([]);
     const [loadingPrompts, setLoadingPrompts] = useState<boolean>(true);
     const [pageError, setPageError] = useState<string | null>(null);
+    const [deletingPrompts, setDeletingPrompts] = useState<Set<string>>(new Set());
+    const [lastDeleteTime, setLastDeleteTime] = useState<number>(0);
 
     const params = useParams();
     const router = useRouter();
@@ -104,7 +106,8 @@ const PromptsPage: React.FC = () => {
         }
     };
 
-    const handleDeletePrompt = async (promptIdToDelete: string, promptName?: string) => {
+    // Debouncing para operaciones de eliminación
+    const handleDeletePrompt = useCallback(async (promptIdToDelete: string, promptName?: string) => {
         logger.debug("handleDeletePrompt called", {
             promptIdToDelete,
             promptName,
@@ -112,26 +115,54 @@ const PromptsPage: React.FC = () => {
             urlProjectId
         });
 
-        if (!contextProjectId) {
-            showErrorToast("No project selected in context.");
+        // Verificar si ya está siendo eliminado (debouncing)
+        if (deletingPrompts.has(promptIdToDelete)) {
+            logger.debug(`Prompt ${promptIdToDelete} is already being deleted, ignoring duplicate request`);
+            showErrorToast("Esta operación ya está en progreso. Por favor espera.");
             return;
         }
-        const confirmMessage = promptName ? `Are you sure you want to delete prompt "${promptName}"?` : "Are you sure you want to delete this prompt?";
+
+        // Prevenir clicks muy rápidos (debounce adicional de 1 segundo)
+        const currentTime = Date.now();
+        if (currentTime - lastDeleteTime < 1000) {
+            logger.debug("Delete operation too soon after last delete, ignoring");
+            showErrorToast("Por favor espera un momento antes de eliminar otro prompt.");
+            return;
+        }
+        setLastDeleteTime(currentTime);
+
+        if (!contextProjectId) {
+            showErrorToast("No hay proyecto seleccionado en el contexto.");
+            return;
+        }
+
+        const confirmMessage = promptName
+            ? `¿Estás seguro de que quieres eliminar el prompt "${promptName}"?`
+            : "¿Estás seguro de que quieres eliminar este prompt?";
+
         if (window.confirm(confirmMessage)) {
-            setLoadingPrompts(true);
+            // Marcar como eliminándose
+            setDeletingPrompts(prev => new Set(prev).add(promptIdToDelete));
+
             try {
                 logger.debug("Calling promptService.remove", {
                     projectId: contextProjectId,
                     promptId: promptIdToDelete
                 });
+
+                // Actualización optimística del estado local
+                setPrompts(prevPrompts => prevPrompts.filter(p => p.id !== promptIdToDelete));
+
                 await promptService.remove(contextProjectId, promptIdToDelete);
-                showSuccessToast(`Prompt ${promptName || promptIdToDelete} deleted.`);
-                fetchPrompts();
+                showSuccessToast(`Prompt ${promptName || promptIdToDelete} eliminado correctamente.`);
+
+                // Sincronizar con el servidor
+                await fetchPrompts();
             } catch (err: unknown) {
                 logger.error("Error deleting prompt", err);
 
-                // Mejorar el manejo de errores
-                let errorMessage = "Failed to delete prompt.";
+                // Manejo mejorado de errores
+                let errorMessage = "Error al eliminar el prompt.";
                 if (err && typeof err === 'object' && 'response' in err) {
                     const axiosError = err as any;
                     const status = axiosError.response?.status;
@@ -139,38 +170,43 @@ const PromptsPage: React.FC = () => {
 
                     switch (status) {
                         case 404:
-                            errorMessage = `Prompt with ID "${promptIdToDelete}" not found in project "${contextProjectId}". It may have been already deleted.`;
+                            errorMessage = `Prompt con ID "${promptIdToDelete}" no encontrado en el proyecto "${contextProjectId}". Puede que ya haya sido eliminado.`;
                             break;
                         case 500:
-                            errorMessage = `Internal server error while deleting "${promptName || promptIdToDelete}". Please check server logs or try again later.`;
+                            errorMessage = `Error interno del servidor al eliminar "${promptName || promptIdToDelete}". Por favor revisa los logs del servidor o intenta más tarde.`;
                             break;
                         case 429:
-                            errorMessage = `Too many requests. Please wait a moment and try again.`;
+                            errorMessage = `Demasiadas solicitudes. Por favor espera un momento e intenta de nuevo.`;
                             break;
                         case 403:
-                            errorMessage = `Permission denied. You don't have rights to delete this prompt.`;
+                            errorMessage = `Permisos denegados. No tienes derechos para eliminar este prompt.`;
                             break;
                         default:
                             if (responseData?.message) {
                                 errorMessage = responseData.message;
                             } else {
-                                errorMessage = `Error ${status}: Failed to delete prompt "${promptName || promptIdToDelete}".`;
+                                errorMessage = `Error ${status}: No se pudo eliminar el prompt "${promptName || promptIdToDelete}".`;
                             }
                     }
                 } else if (err instanceof Error) {
-                    errorMessage = `Network error: ${err.message}`;
+                    errorMessage = `Error de red: ${err.message}`;
                 }
 
                 setPageError(errorMessage);
                 showErrorToast(errorMessage);
 
-                // Refrescar la lista para mantener sincronización
-                fetchPrompts();
+                // En caso de error, restaurar el estado correcto
+                await fetchPrompts();
             } finally {
-                setLoadingPrompts(false);
+                // Remover de la lista de eliminándose
+                setDeletingPrompts(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(promptIdToDelete);
+                    return newSet;
+                });
             }
         }
-    };
+    }, [contextProjectId, urlProjectId, deletingPrompts, fetchPrompts, lastDeleteTime]);
 
     const breadcrumbs = [
         { label: "Home", href: "/" },
@@ -223,6 +259,7 @@ const PromptsPage: React.FC = () => {
                     onDelete={handleDeletePrompt}
                     loading={loadingPrompts}
                     projectId={contextProjectId || ''}
+                    deletingPrompts={deletingPrompts}
                 />
             )}
         </>
