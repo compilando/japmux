@@ -18,7 +18,7 @@ import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 const CulturalDataPage: React.FC = () => {
     const [culturalDataList, setCulturalDataList] = useState<generated.CulturalDataResponse[]>([]);
     const [regionsList, setRegionsList] = useState<generated.CreateRegionDto[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+    // Loading state removed - not used in UI
     const [error, setError] = useState<string | null>(null);
 
     // Estados para el modal/formulario
@@ -31,11 +31,9 @@ const CulturalDataPage: React.FC = () => {
             setCulturalDataList([]);
             setRegionsList([]);
             setError("Please select a project to view cultural data.");
-            setLoading(false);
             return;
         }
 
-        setLoading(true);
         setError(null);
         console.log("Attempting to fetch cultural data for project:", selectedProjectId);
         try {
@@ -66,8 +64,6 @@ const CulturalDataPage: React.FC = () => {
             setError(`Failed to fetch cultural data: ${err instanceof Error ? err.message : String(err)}`);
             setCulturalDataList([]);
             setRegionsList([]);
-        } finally {
-            setLoading(false);
         }
     }, [selectedProjectId]);
 
@@ -77,7 +73,6 @@ const CulturalDataPage: React.FC = () => {
         } else {
             setCulturalDataList([]);
             setRegionsList([]);
-            setLoading(false);
             setError("Please select a project to manage cultural data.");
         }
     }, [selectedProjectId, fetchData]);
@@ -100,15 +95,12 @@ const CulturalDataPage: React.FC = () => {
             return;
         }
         if (window.confirm(`Are you sure you want to delete cultural data with key: ${itemKey}?`)) {
-            setLoading(true);
             try {
                 await culturalDataService.remove(selectedProjectId, itemKey);
                 fetchData();
                 showSuccessToast("Cultural data deleted successfully.");
             } catch (err) {
                 console.error("Error deleting cultural data:", err);
-            } finally {
-                setLoading(false);
             }
         }
     };
@@ -118,7 +110,6 @@ const CulturalDataPage: React.FC = () => {
             showErrorToast("No project selected.");
             return;
         }
-        setLoading(true);
         try {
             let message = "";
             if (editingCulturalData && editingCulturalData.key) {
@@ -133,8 +124,6 @@ const CulturalDataPage: React.FC = () => {
             fetchData();
         } catch (err) {
             console.error("Error saving cultural data:", err);
-        } finally {
-            setLoading(false);
         }
     };
 

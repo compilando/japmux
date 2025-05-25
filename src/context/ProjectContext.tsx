@@ -62,7 +62,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
 
     const fetchProjects = useCallback(async () => {
         // isInitialIdLoaded ya se verifica en el useEffect que llama a esto.
-        console.log("[ProjectContext] fetchProjects: Starting.");
+        // Fetching projects...
         setIsLoading(true);
         setError(null);
 
@@ -120,7 +120,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
             setSelectedProjectIdState(null);
             setSelectedProjectFull(null);
         } finally {
-            console.log("[ProjectContext] fetchProjects: Finished. Setting isLoading to false.");
+            // Projects fetch completed
             setIsLoading(false);
         }
     }, []); // QUITAR selectedProjectId de las dependencias.

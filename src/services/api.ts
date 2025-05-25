@@ -25,7 +25,7 @@ apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         // Solo log en desarrollo
         if (process.env.NODE_ENV === 'development') {
-            console.log('[Interceptor Request apiClient] Running for URL:', config.url);
+            // Request interceptor - production logging removed
         }
 
         if (typeof window !== 'undefined') {
@@ -33,16 +33,16 @@ apiClient.interceptors.request.use(
             if (!token) {
                 token = sessionStorage.getItem(AUTH_TOKEN_KEY);
                 if (token && process.env.NODE_ENV === 'development') {
-                    console.log('[Interceptor Request apiClient] Token found in sessionStorage.');
+                    // Token found in sessionStorage
                 }
             } else if (process.env.NODE_ENV === 'development') {
-                console.log('[Interceptor Request apiClient] Token found in localStorage.');
+                // Token found in localStorage
             }
 
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
                 if (process.env.NODE_ENV === 'development') {
-                    console.log('[Interceptor Request apiClient] Authorization header SET.');
+                    // Authorization header set
                 }
             }
         }

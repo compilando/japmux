@@ -182,9 +182,7 @@ const PromptAssetVersionsPage: React.FC = () => {
         }
     };
 
-    const handleViewTranslations = (versionTag: string) => {
-        router.push(`/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations`);
-    };
+    // handleViewTranslations removed - not used in current UI
 
     const breadcrumbs: Crumb[] = [
         { label: "Home", href: "/" },

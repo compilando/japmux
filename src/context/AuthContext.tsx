@@ -32,12 +32,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const router = useRouter();
 
     const fetchUserProfile = useCallback(async () => {
-        console.log('AuthProvider: fetchUserProfile called'); // Log inicio
+        // Fetching user profile
         if (authService.isAuthenticated()) {
             try {
-                console.log("AuthProvider: Token found, fetching user profile...");
+                // Token found, fetching user profile
                 const userProfile = await authService.getCurrentUserProfile();
-                console.log("AuthProvider: User profile fetched:", userProfile); // Log perfil
+                // User profile fetched successfully
                 setUser(userProfile);
             } catch (err) {
                 console.error("AuthProvider: Failed to fetch user profile on load:", err);
@@ -45,15 +45,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 setUser(null);
             }
         } else {
-            console.log("AuthProvider: No token found.");
+            // No token found
             setUser(null);
         }
         setIsLoading(false);
-        console.log('AuthProvider: fetchUserProfile finished, isLoading:', false); // Log fin carga
+        // fetchUserProfile finished
     }, []);
 
     useEffect(() => {
-        console.log("AuthProvider: Initializing, calling fetchUserProfile...");
+        // Initializing auth provider
         fetchUserProfile();
     }, [fetchUserProfile]);
 

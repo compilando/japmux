@@ -36,7 +36,7 @@
     "date-fns": "^4.1.0",
     "diff": "^8.0.1",
     "flatpickr": "^4.6.13",
-    "next": "15.2.3",
+    "next": "^15.3.2",
     "react": "^19.0.0",
     "react-apexcharts": "^1.7.0",
     "react-dnd": "^16.0.1",

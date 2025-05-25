@@ -230,20 +230,15 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                                 </button>
                                 <button
                                     onClick={() => {
-                                        console.log("[PromptsTable] Delete button clicked for prompt:", {
-                                            id: item.id,
-                                            name: item.name,
-                                            projectId: item.projectId,
-                                            isDeleting: deletingPrompts.has(item.id)
-                                        });
+                                        // Debug log removed for production
                                         if (!deletingPrompts.has(item.id)) {
                                             onDelete(item.id, item.name);
                                         }
                                     }}
                                     disabled={deletingPrompts.has(item.id)}
                                     className={`p-1.5 rounded-lg transition-all duration-200 ${deletingPrompts.has(item.id)
-                                            ? "text-gray-400 cursor-not-allowed bg-gray-100 dark:bg-gray-700"
-                                            : "text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30"
+                                        ? "text-gray-400 cursor-not-allowed bg-gray-100 dark:bg-gray-700"
+                                        : "text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30"
                                         }`}
                                     aria-label={deletingPrompts.has(item.id) ? "Eliminando..." : "Eliminar Prompt"}
                                     title={deletingPrompts.has(item.id) ? "Eliminando prompt..." : "Eliminar prompt"}

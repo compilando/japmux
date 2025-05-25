@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { promptAssetService, projectService } from '@/services/api';
 import { PromptAssetData } from '@/components/tables/PromptAssetsTable'; // Asumiendo que esta interfaz es útil
-import { UpdatePromptAssetDto, CreateProjectDto, PromptDto } from '@/services/generated/api';
+import { UpdatePromptAssetDto, CreateProjectDto } from '@/services/generated/api';
 import Breadcrumb, { Crumb } from '@/components/common/PageBreadCrumb';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import Link from 'next/link';
