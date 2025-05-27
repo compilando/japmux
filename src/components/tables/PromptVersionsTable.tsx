@@ -165,7 +165,7 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                     {/* Acciones con efectos hover mejorados */}
                                     <div className="flex items-center space-x-2 ml-4">
                                         <Link
-                                            href={`/projects/${projectId}/prompts/${currentPromptId}/versions/${item.versionTag}/translations?versionId=${item.id}`}
+                                            href={`/projects/${projectId}/prompts/${currentPromptId}/versions/${item.versionTag}/translations`}
                                             className="inline-flex items-center text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors duration-200"
                                             title="Manage Translations"
                                         >

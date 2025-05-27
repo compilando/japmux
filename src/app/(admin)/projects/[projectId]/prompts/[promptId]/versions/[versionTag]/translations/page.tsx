@@ -21,6 +21,12 @@ import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import { LanguageIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 
+interface CreateTranslationPayload {
+    languageCode: string;
+    promptText: string;
+    versionId?: string;
+}
+
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
     if (axios.isAxiosError(error)) {
         return error.response?.data?.message || error.message || defaultMessage;
@@ -129,11 +135,14 @@ const PromptTranslationsPage: React.FC = () => {
         try {
             const version = await promptVersionService.findOne(projectId, promptId, versionTag);
             if (!version) {
-                throw new Error("Version not found");
+                throw new Error(`Version "${versionTag}" not found. Please verify that the version exists.`);
             }
 
             const versionWithExtras = version as any;
-            setCurrentVersionId(versionWithExtras.id || versionTag);
+            const versionId = versionWithExtras.id;
+            if (!versionId) {
+                throw new Error(`Could not find internal ID for version "${versionTag}". Please try refreshing the page.`);
+            }
 
             const data = await promptTranslationService.findAll(projectId, promptId, versionTag);
             if (Array.isArray(data)) {
@@ -209,25 +218,36 @@ const PromptTranslationsPage: React.FC = () => {
     };
 
     const handleSave = async (payload: CreatePromptTranslationDto | UpdatePromptTranslationDto) => {
-        if (!projectId || !promptId || !versionTag || !currentVersionId) {
-            setError("Missing required data for saving translation.");
+        if (!projectId || !promptId || !versionTag) {
+            setError("Missing required data for saving translation. Please try refreshing the page.");
             return;
         }
 
         setLoading(true);
         try {
+            const version = await promptVersionService.findOne(projectId, promptId, versionTag);
+            if (!version) {
+                throw new Error(`Version "${versionTag}" not found. Please verify that the version exists.`);
+            }
+
+            const versionWithExtras = version as any;
+            const versionId = versionWithExtras.id;
+            if (!versionId) {
+                throw new Error(`Could not find internal ID for version "${versionTag}". Please try refreshing the page.`);
+            }
+
             let message = "";
             if (editingItem && editingItem.languageCode) {
                 await promptTranslationService.update(projectId, promptId, versionTag, editingItem.languageCode, payload as UpdatePromptTranslationDto);
                 message = `Translation for ${editingItem.languageCode} updated.`;
             } else {
                 const createPayload = {
-                    ...payload,
-                    versionId: currentVersionId
+                    languageCode: (payload as CreatePromptTranslationDto).languageCode,
+                    promptText: (payload as CreatePromptTranslationDto).promptText
                 } as CreatePromptTranslationDto;
 
                 await promptTranslationService.create(projectId, promptId, versionTag, createPayload);
-                message = `Translation for ${(createPayload as CreatePromptTranslationDto).languageCode} created.`;
+                message = `Translation for ${createPayload.languageCode} created.`;
             }
             setShowTranslationForm(false);
             setEditingItem(null);
@@ -235,7 +255,7 @@ const PromptTranslationsPage: React.FC = () => {
             fetchData();
         } catch (err: unknown) {
             console.error("Error saving translation:", err);
-            const defaultMsg = 'Failed to save translation.';
+            const defaultMsg = 'Failed to save translation. Please verify that the version exists and try again.';
             setError(getApiErrorMessage(err, defaultMsg));
         } finally {
             setLoading(false);

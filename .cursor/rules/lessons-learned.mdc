@@ -8,3 +8,183 @@ description: Stores important patterns, preferences, and project intelligence, l
 globs: 
 alwaysApply: true
 ---
+
+# Lessons Learned - JAPMUX Project
+
+## Pre-Release Review Insights
+
+### ✅ Successful Patterns Identified
+
+1. **Debouncing Implementation**
+   - Pattern: State-based tracking + temporal cooldown for actions
+   - Success: Eliminated accidental double-clicks on critical operations
+   - Application: Used in prompt deletion, can be applied to other CRUD operations
+
+2. **Optimistic UI Updates**
+   - Pattern: Update UI immediately, sync with server after
+   - Success: Improved perceived performance for delete operations
+   - Lesson: Always have rollback mechanism for failed operations
+
+3. **Error Boundary Implementation**
+   - Pattern: Global error catching with graceful fallback UI
+   - Success: Prevents app crashes from reaching users
+   - Lesson: Critical for production stability
+
+4. **Conditional Logging System**
+   - Pattern: Environment-based logger with production safety
+   - Success: Debug info in dev, clean logs in production
+   - Lesson: Essential for debugging without exposing sensitive data
+
+### 🔧 Architecture Decisions That Worked
+
+1. **Generated API Client**
+   - Tool: OpenAPI Generator + TypeScript-Axios
+   - Benefit: Type safety + reduced boilerplate
+   - Lesson: Keep OpenAPI spec in sync to avoid casting workarounds
+
+2. **Context-Based State Management**
+   - Pattern: React Context for global state (Auth, Project, Theme)
+   - Benefit: Simple, no external dependencies
+   - Lesson: Sufficient for app of this size, scales well
+
+3. **Component Structure**
+   - Pattern: Feature-based organization with reusable components
+   - Structure: `src/components/{feature}/{Component}.tsx`
+   - Lesson: Clear separation makes maintenance easier
+
+4. **Docker Multi-Stage Build**
+   - Pattern: Separate build and runtime stages
+   - Benefit: Small production image (~500MB vs ~2GB)
+   - Lesson: Critical for deployment efficiency
+
+### 🚨 Issues to Avoid in Future
+
+1. **Console.log in Production Code**
+   - Problem: Debug logs scattered throughout codebase
+   - Impact: Performance + potential information leakage
+   - Solution: Always use conditional logger from start
+
+2. **API Client Drift**
+   - Problem: Generated client out of sync with backend
+   - Impact: Type casting workarounds + potential runtime errors
+   - Solution: Automated CI checks for OpenAPI spec sync
+
+3. **Bundle Size Neglect**
+   - Problem: Large development build size (222M)
+   - Impact: Slower development experience
+   - Solution: Regular bundle analysis + tree shaking audit
+
+4. **Inconsistent Error Handling**
+   - Problem: Mix of inline error handling and global patterns
+   - Impact: Inconsistent UX + maintenance difficulty
+   - Solution: Standardized error handling patterns from start
+
+### 📊 Performance Patterns
+
+1. **Page Load Optimization**
+   - Achievement: 21 pages, largest only 227KB
+   - Pattern: Static generation where possible
+   - Lesson: Next.js optimization works well out of box
+
+2. **Lazy Loading Strategy**
+   - Pattern: Dynamic imports for heavy components
+   - Success: Reduced initial bundle size
+   - Application: Especially effective for admin panels
+
+### 🔐 Security Learnings
+
+1. **Header Configuration**
+   - Pattern: Security headers configured in Next.js config
+   - Success: Basic protection without external tools
+   - Lesson: Essential baseline security
+
+2. **Environment Variable Management**
+   - Pattern: Clear separation of public vs private vars
+   - Success: No sensitive data in client bundle
+   - Documentation: `env.example` is crucial for team onboarding
+
+3. **JWT Token Handling**
+   - Pattern: Secure storage with remember-me option
+   - Implementation: localStorage vs sessionStorage based on user choice
+   - Lesson: User control over persistence improves trust
+
+### 🎯 UX/UI Insights
+
+1. **Inline Forms vs Modals**
+   - Discovery: Inline forms feel more natural for editing
+   - Implementation: Two-column layout with context
+   - Success: Reduced "fake" feeling of modal workflows
+
+2. **Visual Feedback Importance**
+   - Pattern: Loading states + disabled states + visual transitions
+   - Success: Users understand system state clearly
+   - Lesson: Every user action needs immediate visual feedback
+
+3. **Git-like History UI**
+   - Pattern: Vertical timeline for version history
+   - Success: Familiar pattern for developers
+   - Application: Works well for any versioned content
+
+### 🔄 Development Workflow Learnings
+
+1. **Pre-Release Automation**
+   - Tool: `scripts/pre-release-check.sh`
+   - Success: Catches issues before manual review
+   - Lesson: Automated checks save significant time
+
+2. **Documentation-Driven Development**
+   - Pattern: Maintain docs/ and tasks/ alongside code
+   - Benefit: Context preservation across sessions
+   - Lesson: Essential for projects with extended timelines
+
+3. **Feature Flag Approach**
+   - Pattern: Prepare features even if backend incomplete
+   - Example: Marketplace UI ready, waiting for backend
+   - Lesson: Enables parallel development streams
+
+### 📈 Metrics for Success
+
+1. **Build Performance**
+   - Target: Sub-30s build times achieved
+   - Method: Optimized Docker caching + incremental builds
+   - Lesson: Build speed directly affects developer productivity
+
+2. **Bundle Size Awareness**
+   - Target: <150KB per page achieved for most pages
+   - Method: Regular bundle analysis + code splitting
+   - Lesson: Performance budget prevents feature creep impact
+
+3. **Error Rate Tracking**
+   - Pattern: Health check endpoint + error boundaries
+   - Preparation: Ready for monitoring integration
+   - Lesson: Observability should be built-in from start
+
+## Key Takeaways for Future Projects
+
+1. **Start with logging strategy** - Don't add it later
+2. **API contracts are critical** - Keep specs synchronized
+3. **User feedback is immediate** - Every action needs visual response
+4. **Documentation pays off** - Especially for complex projects
+5. **Automation catches issues** - Manual review isn't enough
+6. **Performance budget early** - Harder to optimize later
+7. **Security by default** - Not an afterthought
+
+## Patterns to Replicate
+
+- Debouncing for critical actions
+- Optimistic UI updates with rollback
+- Context-based state management
+- Generated API clients with type safety
+- Multi-stage Docker builds
+- Automated pre-release checks
+- Feature-based component organization
+
+## Anti-Patterns to Avoid
+
+- Console.log in production code
+- API spec drift
+- Inconsistent error handling
+- Manual deployment processes
+- Monolithic component files
+- Missing loading states
+- Unclear user feedback
