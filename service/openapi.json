@@ -1277,9 +1277,19 @@
         "operationId": "PromptController_loadStructure",
         "parameters": [
           {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "description": "ID of the project",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "Unique prompt identifier (slug or CUID)",
             "schema": {
               "type": "string"
             }
@@ -6482,9 +6492,8 @@
         "properties": {
           "name": {
             "type": "string",
-            "pattern": "/^[a-z0-9_]+$/",
-            "description": "Unique prompt name (used as ID)",
-            "example": "customer_welcome_greeting"
+            "description": "Name for the prompt. This will be slugified by the system to create a unique identifier.",
+            "example": "Customer Welcome Greeting"
           },
           "description": {
             "type": "string",
