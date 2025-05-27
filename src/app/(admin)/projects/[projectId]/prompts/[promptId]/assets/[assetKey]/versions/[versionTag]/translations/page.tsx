@@ -248,22 +248,26 @@ const PromptAssetTranslationsPage: React.FC = () => {
             }
 
             if (editingItem && editingItem.languageCode) {
-                const updatePayload: UpdateAssetTranslationDto = { value: (payloadFromForm as UpdateAssetTranslationDto).value };
-                await promptAssetService.updateTranslation(projectId, promptId, assetKey, versionTag, editingItem.languageCode, updatePayload);
-                message = `Translation for ${editingItem.languageCode} updated successfully!`;
+                await promptAssetService.updateTranslation(
+                    projectId,
+                    promptId,
+                    assetKey,
+                    versionTag,
+                    editingItem.languageCode,
+                    payloadFromForm as UpdateAssetTranslationDto
+                );
+                message = `Asset translation for ${editingItem.languageCode} updated.`;
             } else {
-                let createPayloadFromForm = payloadFromForm as CreateAssetTranslationDto;
-                if (!createPayloadFromForm.languageCode || !createPayloadFromForm.value) {
-                    showErrorToast("Language code and value are required for a new translation.");
-                    setLoading(false);
-                    return;
-                }
-                const finalCreatePayload: CreateAssetTranslationDto = {
-                    ...createPayloadFromForm,
-                    versionId: (version as any).id,
-                };
-                await promptAssetService.createTranslation(projectId, promptId, assetKey, versionTag, finalCreatePayload);
-                message = `Translation for ${finalCreatePayload.languageCode} created successfully!`;
+                const { versionId: _discard, ...payloadToSend } = payloadFromForm as any;
+
+                await promptAssetService.createTranslation(
+                    projectId,
+                    promptId,
+                    assetKey,
+                    versionTag,
+                    payloadToSend as CreateAssetTranslationDto
+                );
+                message = `Asset translation for ${langCode} created.`;
             }
             setShowAssetTranslationForm(false);
             setEditingItem(null);

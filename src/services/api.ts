@@ -676,7 +676,7 @@ export const promptAssetService = {
         return response.data;
     },
     updateTranslation: async (projectId: string, promptId: string, assetKey: string, versionTag: string, languageCode: string, payload: generated.UpdateAssetTranslationDto): Promise<generated.CreateAssetTranslationDto> => {
-        const response = await apiClient.put<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`, payload);
+        const response = await apiClient.patch<generated.CreateAssetTranslationDto>(`/api/projects/${projectId}/prompts/${promptId}/assets/${assetKey}/versions/${versionTag}/translations/${languageCode}`, payload);
         return response.data;
     },
     removeTranslation: async (projectId: string, promptId: string, assetKey: string, versionTag: string, languageCode: string): Promise<void> => {

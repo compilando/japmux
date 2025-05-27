@@ -204,7 +204,7 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mr-2 ${getPromptType(item).color}`}>
                                         {getPromptType(item).label}
                                     </span>
-                                    {item.id} <CopyButton textToCopy={item.id} />
+                                    {item.name} <CopyButton textToCopy={item.name} />
                                 </h3>
                                 <div className="flex items-center mt-1">
                                     <span className="text-sm text-gray-500 dark:text-gray-400 font-mono" title={item.name}>
