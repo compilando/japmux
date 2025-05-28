@@ -55,7 +55,7 @@ const PromptAssetTranslationsTable: React.FC<PromptAssetTranslationsTableProps> 
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
                                 {/* Show preview of the value */}
-                                <span className="block truncate max-w-xl" title={item.value}>{item.value?.substring(0, 150)}{item.value?.length > 150 ? '...' : ''}</span>
+                                <span className="block truncate max-w-xl" title={item.value}>{item.value?.substring(0, 50)}{item.value?.length > 50 ? '...' : ''}</span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                                 <div className="flex items-center justify-end gap-3">

@@ -24,6 +24,7 @@ import axios from 'axios';
 import styles from './ServePromptPage.module.css'; // Importar CSS Modules
 import CopyButton from '@/components/common/CopyButton'; // Importar CopyButton
 import Breadcrumb from '@/components/common/PageBreadCrumb'; // Asegurar que la importación esté presente
+import ContextInfoBanner from '@/components/common/ContextInfoBanner'; // <-- Importar el nuevo componente
 
 interface StringMap { [key: string]: string; }
 
@@ -55,7 +56,7 @@ const CURL_PLACEHOLDER_MSG = '# Select a project, prompt, and version to see the
 const BASH_PLACEHOLDER_MSG = '# Select a project, prompt, and version to generate the example script.\n# Ensure jq is installed (e.g., sudo apt install jq) for token extraction.';
 
 const ServePromptPage: React.FC = () => {
-    const { selectedProjectId } = useProjects();
+    const { selectedProjectId, selectedProjectFull } = useProjects();
     const [isClient, setIsClient] = useState(false); // Estado para saber si estamos en cliente
     const searchParams = useSearchParams();
 
@@ -103,6 +104,25 @@ const ServePromptPage: React.FC = () => {
     useEffect(() => {
         setIsClient(true);
     }, []);
+
+    // --- Información contextual para mostrar ---
+    const projectNameForDisplay = useMemo(() => {
+        return selectedProjectFull?.name || null;
+    }, [selectedProjectFull]);
+
+    const promptNameForDisplay = useMemo(() => {
+        if (!selectedPrompt?.label) return null;
+        // El label es como "[TIPO]: Nombre Prompt"
+        const labelParts = selectedPrompt.label.split(': ');
+        if (labelParts.length > 1) {
+            return labelParts.slice(1).join(': ').trim();
+        }
+        return selectedPrompt.label; // Fallback
+    }, [selectedPrompt]);
+
+    const versionForDisplay = useMemo(() => {
+        return selectedVersion?.label || null;
+    }, [selectedVersion]);
 
     // --- Efecto para preseleccionar el prompt desde la URL ---
     useEffect(() => {
@@ -228,7 +248,7 @@ const ServePromptPage: React.FC = () => {
                 // Extraer el tipo del ID (asumiendo que el ID tiene un formato como "type-name")
                 const typeMatch = p.id.match(/^([^-]+)-/);
                 const type = typeMatch ? typeMatch[1].toUpperCase() : 'PROMPT';
-                
+
                 return {
                     value: p.id,
                     label: `[${type}]: ${p.name}`
@@ -342,7 +362,7 @@ const ServePromptPage: React.FC = () => {
 
         // Si la versión seleccionada es "latest", usar la versión más reciente
         const versionToUse = selectedVersion.value === 'latest' ? 'latest' : selectedVersion.value;
-        
+
         let fetchPromise: Promise<CreatePromptVersionDto | CreatePromptTranslationDto | null | undefined>;
 
         if (!selectedLanguage || selectedLanguage.value === '__BASE__') {
@@ -351,9 +371,9 @@ const ServePromptPage: React.FC = () => {
         } else {
             // Cargar la traducción seleccionada
             fetchPromise = promptTranslationService.findByLanguage(
-                selectedProjectId, 
-                selectedPrompt.value, 
-                versionToUse, 
+                selectedProjectId,
+                selectedPrompt.value,
+                versionToUse,
                 selectedLanguage.value,
                 isProcessed
             );
@@ -619,6 +639,15 @@ fi
     return (
         <>
             <Breadcrumb crumbs={breadcrumbs} />
+
+            {/* --- Bloque de Información del Prompt y Proyecto --- */}
+            <ContextInfoBanner
+                projectName={projectNameForDisplay}
+                promptName={promptNameForDisplay}
+                versionName={versionForDisplay}
+                isLoading={!isClient} // No mostrar si aún no está montado en cliente o faltan datos
+            />
+
             <div className={`${styles.servePromptContainer} bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen`}>
                 <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">

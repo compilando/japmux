@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
 import {
     CreateProjectDto,
     PromptDto,
@@ -18,11 +18,16 @@ import { usePrompts } from '@/context/PromptContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptVersionsTable from '@/components/tables/PromptVersionsTable';
 import PromptVersionForm from '@/components/form/PromptVersionForm';
+import ContextInfoBanner from '@/components/common/ContextInfoBanner';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import { PlusCircleIcon, PencilIcon as EditIconHero } from '@heroicons/react/24/outline';
 import { diffLines, type Change } from 'diff'; // Importar solo diffLines y Change
 import DiffViewerModal from '@/components/common/DiffViewerModal'; // Importar el nuevo modal
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 // Helper para extraer mensajes de error de forma segura
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
@@ -85,7 +90,22 @@ const getLatestVersionTag = (versions: PromptVersionData[]): string | null => {
 // (Although UpdatePromptVersionDto should ideally allow it)
 // Simplify: we'll use a simple object for the payload.
 
-const PromptVersionsPage: React.FC = () => {
+/*
+interface PromptVersionPageProps {
+    params: {
+        projectId: string;
+        promptId: string; // The promptId from the URL will be the full name (e.g., "type-name")
+    };
+    searchParams?: { [key: string]: string | string[] | undefined }; 
+}
+*/
+
+function PromptVersionsPage() {
+    const params = useParams();
+    const searchParams = useSearchParams();
+    const projectId = params.projectId as string;
+    const promptId = params.promptId as string;
+
     const [itemsList, setItemsList] = useState<PromptVersionMarketplaceDetails[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -103,12 +123,26 @@ const PromptVersionsPage: React.FC = () => {
     const [diffResult, setDiffResult] = useState<Change[] | null>(null);
     const [showDiffModal, setShowDiffModal] = useState<boolean>(false);
 
-    const params = useParams();
-    const { selectedProjectId } = useProjects();
+    const { selectedProjectId, selectedProjectFull } = useProjects();
     const { selectedPromptId } = usePrompts();
 
-    const projectId = params.projectId as string;
-    const promptId = params.promptId as string;
+    const router = useRouter();
+
+    const promptNameFromParams = typeof params.promptId === 'string' ? params.promptId : Array.isArray(params.promptId) ? params.promptId[0] : '';
+
+    // Extract "name" part from "type-name" for display
+    const displayPromptName = useMemo(() => {
+        if (!promptNameFromParams) return 'N/A';
+        const parts = promptNameFromParams.split('-');
+        if (parts.length > 1) {
+            return parts.slice(1).join('-'); // Return everything after the first hyphen
+        }
+        return promptNameFromParams; // Fallback to full ID if no hyphen
+    }, [promptNameFromParams]);
+
+    const projectNameForDisplay = useMemo(() => {
+        return selectedProjectFull?.name || null;
+    }, [selectedProjectFull]);
 
     useEffect(() => {
         if (!projectId || !promptId) return;
@@ -380,146 +414,157 @@ const PromptVersionsPage: React.FC = () => {
         return <p className="text-yellow-600 dark:text-yellow-400">Warning: Navigated directly? URL prompt ID ({promptId.substring(0, 6)}...) differs from last selected prompt ({selectedPromptId.substring(0, 6)}...).</p>;
     }
 
-    const breadcrumbs = [
-        { label: "Home", href: "/" },
-        { label: "Projects", href: "/projects" },
-        { label: breadcrumbLoading ? projectId : (project?.name || projectId), href: `/projects/${projectId}/prompts` },
-        { label: breadcrumbLoading ? promptId : (prompt?.name || promptId) },
-        { label: "Versions" }
-    ];
+    const breadcrumbs = useMemo(() => {
+        const baseCrumbs = [
+            { label: "Home", href: "/" },
+            { label: "Projects", href: "/projects" },
+            { label: "Prompts", href: `/projects/${projectId}/prompts` },
+            { label: breadcrumbLoading ? promptId : (prompt?.name || promptId) },
+            { label: "Versions" }
+        ];
+        return baseCrumbs;
+    }, [projectId, promptId, project, prompt, breadcrumbLoading]);
 
     if (breadcrumbLoading || loading && !formMode) return <p>Loading page details...</p>;
 
     return (
-        <>
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8">
             <Breadcrumb crumbs={breadcrumbs} />
 
-            <div className="my-4">
-                <h1 className="text-2xl font-bold text-black dark:text-white mb-2">Manage Prompt Versions</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Manage the different versions of your prompt. Each version can have its own prompt text, marketplace status (if applicable), and a dedicated set of translations. Create new versions to iterate on your prompt, test changes, or maintain stable releases for consumption.
-                </p>
-            </div>
+            {/* --- Bloque de Información del Prompt y Proyecto --- */}
+            <ContextInfoBanner
+                projectName={projectNameForDisplay}
+                promptName={displayPromptName}
+                isLoading={breadcrumbLoading}
+            />
 
-            {!formMode && (
-                <div className="flex justify-end items-center mb-6 mt-4">
-                    <button
-                        onClick={handleAdd}
-                        className="flex items-center gap-2 px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50"
-                        disabled={loading}
-                    >
-                        <PlusCircleIcon className="h-5 w-5" />
-                        Add Prompt Version
-                    </button>
+            <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
+                        Manage Prompt Versions
+                    </h1>
                 </div>
-            )}
 
-            {formMode && (
-                <div className="mb-6 p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 shadow-md">
-                    <h3 className="text-xl font-semibold leading-7 text-gray-900 dark:text-white mb-6">
-                        {formMode === 'edit' ? `Editing Version: ${editingItem?.versionTag}` : 'Create New Version of Prompt'}
-                    </h3>
-                    <PromptVersionForm
-                        initialData={editingItem ? {
-                            promptText: editingItem.promptText || '',
-                            changeMessage: editingItem.changeMessage || '',
-                            versionTag: editingItem.versionTag
-                        } : null}
-                        onSave={handleSave}
-                        onCancel={handleCancelForm}
-                        latestVersionTag={latestVersionTagForForm ?? undefined}
-                        projectId={projectId}
-                        promptId={promptId}
-                    />
-                </div>
-            )}
-
-            {/* Botón para comparar versiones seleccionadas */}
-            {itemsList.length > 1 && !loading && ( // Mostrar solo si hay más de una versión y no está cargando
-                <div className="my-4 flex justify-start gap-x-4 items-center">
-                    <button
-                        onClick={handleCompareVersions}
-                        disabled={selectedVersionsForDiff.length !== 2}
-                        title={selectedVersionsForDiff.length !== 2 ? "Select 2 versions from the table to compare" : "Compare selected versions"}
-                        className="px-4 py-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h4.5M12 3v1.5M12 9v1.5m0 3v1.5m0 3v1.5M12 21v-1.5m6-10.5h-1.5m0 0V5.25m0 3V9m0 3v1.5m0 3V18M3 10.5h1.5m0 0V9m0 3v1.5m0 3V18" />
-                        </svg>
-                        <span>Compare ({selectedVersionsForDiff.length}/2)</span>
-                    </button>
-                    {selectedVersionsForDiff.length > 0 && (
+                {!formMode && (
+                    <div className="flex justify-end items-center mb-6 mt-4">
                         <button
-                            onClick={() => setSelectedVersionsForDiff([])}
-                            title="Clear selection"
-                            className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                            onClick={handleAdd}
+                            className="flex items-center gap-2 px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50"
+                            disabled={loading}
                         >
-                            Clear Selection
+                            <PlusCircleIcon className="h-5 w-5" />
+                            Add Prompt Version
                         </button>
-                    )}
-                </div>
-            )}
+                    </div>
+                )}
 
-            {/* Tabla de versiones */}
-            {loading && <p className="text-center py-10 text-gray-500 dark:text-gray-400">Loading versions...</p>}
-            {error && (
-                <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-700/30 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg my-4 shadow" role="alert">
-                    <strong className="font-bold">Error:</strong>
-                    <span className="block sm:inline ml-2">{error}</span>
-                </div>
-            )}
-            {!loading && !error && itemsList.length === 0 && (
-                <div className="text-center py-10 mt-4">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                    </svg>
-                    <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No versions</h3>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Start creating a new version for this prompt.</p>
-                </div>
-            )}
-            {!loading && !error && itemsList.length > 0 && (
-                <PromptVersionsTable
-                    promptVersions={itemsList}
-                    projectId={projectId}
-                    promptIdForTable={promptId}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onRequestPublish={handleRequestPublish}
-                    onUnpublish={handleUnpublish}
-                    marketplaceActionLoading={marketplaceActionLoading}
-                    selectedVersionsForDiff={selectedVersionsForDiff}
-                    onSelectVersionForDiff={handleSelectVersionForDiff}
-                />
-            )}
+                {formMode && (
+                    <div className="mb-6 p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 shadow-md">
+                        <h3 className="text-xl font-semibold leading-7 text-gray-900 dark:text-white mb-6">
+                            {formMode === 'edit' ? `Editing Version: ${editingItem?.versionTag}` : 'Create New Version of Prompt'}
+                        </h3>
+                        <PromptVersionForm
+                            initialData={editingItem ? {
+                                promptText: editingItem.promptText || '',
+                                changeMessage: editingItem.changeMessage || '',
+                                versionTag: editingItem.versionTag
+                            } : null}
+                            onSave={handleSave}
+                            onCancel={handleCancelForm}
+                            latestVersionTag={latestVersionTagForForm ?? undefined}
+                            projectId={projectId}
+                            promptId={promptId}
+                        />
+                    </div>
+                )}
 
-            {showDiffModal && diffResult && selectedVersionsForDiff.length === 2 && (() => {
-                const v1Details = itemsList.find(item => item.versionTag === selectedVersionsForDiff[0]);
-                const v2Details = itemsList.find(item => item.versionTag === selectedVersionsForDiff[1]);
+                {/* Botón para comparar versiones seleccionadas */}
+                {itemsList.length > 1 && !loading && ( // Mostrar solo si hay más de una versión y no está cargando
+                    <div className="my-4 flex justify-start gap-x-4 items-center">
+                        <button
+                            onClick={handleCompareVersions}
+                            disabled={selectedVersionsForDiff.length !== 2}
+                            title={selectedVersionsForDiff.length !== 2 ? "Select 2 versions from the table to compare" : "Compare selected versions"}
+                            className="px-4 py-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h4.5M12 3v1.5M12 9v1.5m0 3v1.5m0 3v1.5M12 21v-1.5m6-10.5h-1.5m0 0V5.25m0 3V9m0 3v1.5m0 3V18M3 10.5h1.5m0 0V9m0 3v1.5m0 3V18" />
+                            </svg>
+                            <span>Compare ({selectedVersionsForDiff.length}/2)</span>
+                        </button>
+                        {selectedVersionsForDiff.length > 0 && (
+                            <button
+                                onClick={() => setSelectedVersionsForDiff([])}
+                                title="Clear selection"
+                                className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                            >
+                                Clear Selection
+                            </button>
+                        )}
+                    </div>
+                )}
 
-                if (!v1Details || !v2Details) return null; // No debería pasar si selectedVersionsForDiff tiene 2 elementos válidos
-
-                return (
-                    <DiffViewerModal
-                        isOpen={showDiffModal}
-                        onClose={() => {
-                            setShowDiffModal(false);
-                            setDiffResult(null);
-                            // setSelectedVersionsForDiff([]); // Optional: clear selection
-                        }}
-                        diffResult={diffResult}
-                        versionInfo1={{
-                            tag: v1Details.versionTag,
-                            text: v1Details.promptText
-                        }}
-                        versionInfo2={{
-                            tag: v2Details.versionTag,
-                            text: v2Details.promptText
-                        }}
+                {/* Tabla de versiones */}
+                {loading && <p className="text-center py-10 text-gray-500 dark:text-gray-400">Loading versions...</p>}
+                {error && (
+                    <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-700/30 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg my-4 shadow" role="alert">
+                        <strong className="font-bold">Error:</strong>
+                        <span className="block sm:inline ml-2">{error}</span>
+                    </div>
+                )}
+                {!loading && !error && itemsList.length === 0 && (
+                    <div className="text-center py-10 mt-4">
+                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                        </svg>
+                        <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No versions</h3>
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Start creating a new version for this prompt.</p>
+                    </div>
+                )}
+                {!loading && !error && itemsList.length > 0 && (
+                    <PromptVersionsTable
+                        promptVersions={itemsList}
+                        projectId={projectId}
+                        promptIdForTable={promptId}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onRequestPublish={handleRequestPublish}
+                        onUnpublish={handleUnpublish}
+                        marketplaceActionLoading={marketplaceActionLoading}
+                        selectedVersionsForDiff={selectedVersionsForDiff}
+                        onSelectVersionForDiff={handleSelectVersionForDiff}
                     />
-                );
-            })()}
-        </>
+                )}
+
+                {showDiffModal && diffResult && selectedVersionsForDiff.length === 2 && (() => {
+                    const v1Details = itemsList.find(item => item.versionTag === selectedVersionsForDiff[0]);
+                    const v2Details = itemsList.find(item => item.versionTag === selectedVersionsForDiff[1]);
+
+                    if (!v1Details || !v2Details) return null; // No debería pasar si selectedVersionsForDiff tiene 2 elementos válidos
+
+                    return (
+                        <DiffViewerModal
+                            isOpen={showDiffModal}
+                            onClose={() => {
+                                setShowDiffModal(false);
+                                setDiffResult(null);
+                                // setSelectedVersionsForDiff([]); // Optional: clear selection
+                            }}
+                            diffResult={diffResult}
+                            versionInfo1={{
+                                tag: v1Details.versionTag,
+                                text: v1Details.promptText
+                            }}
+                            versionInfo2={{
+                                tag: v2Details.versionTag,
+                                text: v2Details.promptText
+                            }}
+                        />
+                    );
+                })()}
+            </div>
+        </div>
     );
-};
+}
 
 export default PromptVersionsPage; 

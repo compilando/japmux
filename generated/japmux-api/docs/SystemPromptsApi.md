@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**systemPromptControllerCreate**](#systempromptcontrollercreate) | **POST** /api/system-prompts | Create a new system prompt (Admin Only - conceptually)|
+|[**systemPromptControllerCreate**](#systempromptcontrollercreate) | **POST** /api/system-prompts | Create a new system prompt (Admin Only)|
 |[**systemPromptControllerFindAll**](#systempromptcontrollerfindall) | **GET** /api/system-prompts | Get all system prompts|
 |[**systemPromptControllerFindOne**](#systempromptcontrollerfindone) | **GET** /api/system-prompts/{name} | Get a specific system prompt by name|
-|[**systemPromptControllerRemove**](#systempromptcontrollerremove) | **DELETE** /api/system-prompts/{name} | Delete a system prompt (Admin Only - conceptually)|
-|[**systemPromptControllerUpdate**](#systempromptcontrollerupdate) | **PATCH** /api/system-prompts/{name} | Update an existing system prompt (Admin Only - conceptually)|
+|[**systemPromptControllerRemove**](#systempromptcontrollerremove) | **DELETE** /api/system-prompts/{name} | Delete a system prompt (Admin Only)|
+|[**systemPromptControllerUpdate**](#systempromptcontrollerupdate) | **PATCH** /api/system-prompts/{name} | Update an existing system prompt (Admin Only)|
 
 # **systemPromptControllerCreate**
 > systemPromptControllerCreate(createSystemPromptDto)

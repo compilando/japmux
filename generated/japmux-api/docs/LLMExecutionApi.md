@@ -58,6 +58,7 @@ const { status, data } = await apiInstance.llmExecutionControllerExecuteLlm(
 |**400** | Invalid request body or unsupported provider. |  -  |
 |**401** | Unauthorized. |  -  |
 |**404** | AI Model not found. |  -  |
+|**429** | Too Many Requests - Rate limit exceeded. |  -  |
 |**500** | Internal server error (API Key config, LLM call failed, etc.). |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

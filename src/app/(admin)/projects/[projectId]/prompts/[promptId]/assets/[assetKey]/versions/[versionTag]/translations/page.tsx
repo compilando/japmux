@@ -163,15 +163,26 @@ const PromptAssetTranslationsPage: React.FC = () => {
             }
 
             const translatedLanguageCodes = new Set(fetchedTranslations.map(t => t.languageCode));
+            console.log('Códigos de idioma ya traducidos:', Array.from(translatedLanguageCodes));
+            console.log('Regiones del proyecto:', projectRegions);
+
             // Usar projectRegions como fuente de todos los idiomas posibles
-            // Mapear projectRegions a la estructura { code: string, name: string } si es necesario
-            // CreateRegionDto ya tiene languageCode y name.
             const allPossibleLanguagesFromProject = projectRegions.map(region => ({
                 code: region.languageCode,
                 name: region.name
             }));
+            console.log('Todos los idiomas posibles del proyecto:', allPossibleLanguagesFromProject);
 
-            const remainingLanguages = allPossibleLanguagesFromProject.filter(lang => !translatedLanguageCodes.has(lang.code));
+            // Excluir el idioma original del asset
+            const originalLanguageCode = version?.languageCode;
+            console.log('Idioma original del asset:', originalLanguageCode);
+
+            const remainingLanguages = allPossibleLanguagesFromProject.filter(lang =>
+                !translatedLanguageCodes.has(lang.code) &&
+                lang.code !== originalLanguageCode
+            );
+            console.log('Idiomas disponibles para traducción:', remainingLanguages);
+
             setAvailableLanguagesForNewTranslation(remainingLanguages);
             setAllLanguagesTranslated(remainingLanguages.length === 0 && allPossibleLanguagesFromProject.length > 0);
 

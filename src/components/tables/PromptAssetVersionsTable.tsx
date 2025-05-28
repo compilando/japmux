@@ -52,6 +52,33 @@ const PromptAssetVersionsTable: React.FC<PromptAssetVersionsTableProps> = ({
         }
     };
 
+    // Función para generar bandera de idioma
+    const renderLanguageFlag = (languageCode: string | undefined) => {
+        if (!languageCode) {
+            return null;
+        }
+
+        const langParts = languageCode.split('-');
+        const countryOrLangCode = langParts.length > 1 ? langParts[1].toLowerCase() : langParts[0].toLowerCase();
+        const flagUrl = countryOrLangCode.length === 2 ? `https://flagcdn.com/16x12/${countryOrLangCode}.png` : `https://flagcdn.com/16x12/xx.png`;
+
+        return (
+            <div className="flex items-center space-x-1 ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700" title={`Language: ${languageCode}`}>
+                <img
+                    src={flagUrl}
+                    alt={`${languageCode} flag`}
+                    className="w-4 h-3 object-cover rounded-sm border border-gray-300 dark:border-gray-500"
+                    onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://flagcdn.com/16x12/xx.png'; // Fallback
+                        target.onerror = null;
+                    }}
+                />
+                <span className="text-xs text-gray-600 dark:text-gray-300">{languageCode.toUpperCase()}</span>
+            </div>
+        );
+    };
+
     return (
         <div className="relative">
             {/* Línea de tiempo vertical */}
@@ -77,6 +104,7 @@ const PromptAssetVersionsTable: React.FC<PromptAssetVersionsTableProps> = ({
                                                 {item.versionTag}
                                             </span>
                                             <CopyButton textToCopy={item.versionTag} />
+                                            {renderLanguageFlag(item.languageCode)}
                                             <span className="text-xs text-gray-500 dark:text-gray-400">
                                                 {formatDate(item.createdAt)}
                                             </span>

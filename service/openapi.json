@@ -672,7 +672,7 @@
         ]
       },
       "delete": {
-        "description": "Permanently deletes a region. This is a destructive operation that requires admin privileges.",
+        "description": "Deletes a region by its language code. Accessible by global admins or tenant admins.",
         "operationId": "RegionController_remove",
         "parameters": [
           {
@@ -695,11 +695,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": ""
-          },
           "204": {
-            "description": "Region successfully deleted"
+            "description": "Region deleted successfully"
           },
           "401": {
             "description": "Unauthorized - Invalid or expired token"
@@ -1277,19 +1274,19 @@
         "operationId": "PromptController_loadStructure",
         "parameters": [
           {
-            "name": "projectId",
+            "name": "id",
             "required": true,
             "in": "path",
-            "description": "ID of the project",
+            "description": "ID of the prompt",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "id",
+            "name": "projectId",
             "required": true,
             "in": "path",
-            "description": "Unique prompt identifier (slug or CUID)",
+            "description": "ID of the project",
             "schema": {
               "type": "string"
             }
@@ -1523,6 +1520,151 @@
         "summary": "List prompt backups",
         "tags": [
           "prompts"
+        ]
+      }
+    },
+    "/api/projects/{projectId}/prompts/{promptId}/versions/{versionTag}/translations": {
+      "post": {
+        "operationId": "PromptTranslationController_create",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "Prompt CUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionTag",
+            "required": true,
+            "in": "path",
+            "description": "Version Tag (e.g., 1.0.0) or \"latest\" to get the most recent version",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePromptTranslationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Translation created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePromptTranslationDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data (e.g., missing languageCode)."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden Access to Project."
+          },
+          "404": {
+            "description": "Project, Prompt, or Version not found."
+          },
+          "409": {
+            "description": "Translation for this language already exists for this version."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a translation for a specific prompt version within a project",
+        "tags": [
+          "Prompt Translations (within Project/Prompt/Version)"
+        ]
+      },
+      "get": {
+        "operationId": "PromptTranslationController_findAll",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promptId",
+            "required": true,
+            "in": "path",
+            "description": "Prompt CUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionTag",
+            "required": true,
+            "in": "path",
+            "description": "Version Tag (e.g., 1.0.0) or \"latest\" to get the most recent version",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of translations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreatePromptTranslationDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden Access to Project."
+          },
+          "404": {
+            "description": "Project, Prompt, or Version not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all translations for a specific prompt version within a project",
+        "tags": [
+          "Prompt Translations (within Project/Prompt/Version)"
         ]
       }
     },
@@ -1954,7 +2096,7 @@
             "bearer": []
           }
         ],
-        "summary": "Create a new system prompt (Admin Only - conceptually)",
+        "summary": "Create a new system prompt (Admin Only)",
         "tags": [
           "System Prompts"
         ]
@@ -2058,7 +2200,7 @@
             "bearer": []
           }
         ],
-        "summary": "Update an existing system prompt (Admin Only - conceptually)",
+        "summary": "Update an existing system prompt (Admin Only)",
         "tags": [
           "System Prompts"
         ]
@@ -2092,7 +2234,7 @@
             "bearer": []
           }
         ],
-        "summary": "Delete a system prompt (Admin Only - conceptually)",
+        "summary": "Delete a system prompt (Admin Only)",
         "tags": [
           "System Prompts"
         ]
@@ -4505,151 +4647,6 @@
         ]
       }
     },
-    "/api/projects/{projectId}/prompts/{promptId}/versions/{versionTag}/translations": {
-      "post": {
-        "operationId": "PromptTranslationController_create",
-        "parameters": [
-          {
-            "name": "projectId",
-            "required": true,
-            "in": "path",
-            "description": "Project ID",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "promptId",
-            "required": true,
-            "in": "path",
-            "description": "Prompt CUID",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "versionTag",
-            "required": true,
-            "in": "path",
-            "description": "Version Tag (e.g., 1.0.0) or \"latest\" to get the most recent version",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePromptTranslationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Translation created.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreatePromptTranslationDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid data (e.g., missing languageCode)."
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "403": {
-            "description": "Forbidden Access to Project."
-          },
-          "404": {
-            "description": "Project, Prompt, or Version not found."
-          },
-          "409": {
-            "description": "Translation for this language already exists for this version."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a translation for a specific prompt version within a project",
-        "tags": [
-          "Prompt Translations (within Project/Prompt/Version)"
-        ]
-      },
-      "get": {
-        "operationId": "PromptTranslationController_findAll",
-        "parameters": [
-          {
-            "name": "projectId",
-            "required": true,
-            "in": "path",
-            "description": "Project ID",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "promptId",
-            "required": true,
-            "in": "path",
-            "description": "Prompt CUID",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "versionTag",
-            "required": true,
-            "in": "path",
-            "description": "Version Tag (e.g., 1.0.0) or \"latest\" to get the most recent version",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of translations.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CreatePromptTranslationDto"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "403": {
-            "description": "Forbidden Access to Project."
-          },
-          "404": {
-            "description": "Project, Prompt, or Version not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get all translations for a specific prompt version within a project",
-        "tags": [
-          "Prompt Translations (within Project/Prompt/Version)"
-        ]
-      }
-    },
     "/api/projects/{projectId}/prompts/{promptId}/versions/{versionTag}/translations/{languageCode}": {
       "get": {
         "operationId": "PromptTranslationController_findOneByLanguage",
@@ -6669,6 +6666,26 @@
           }
         }
       },
+      "CreateOrUpdatePromptTranslationDto": {
+        "type": "object",
+        "properties": {
+          "languageCode": {
+            "type": "string",
+            "pattern": "/^[a-z]{2,3}(?:-[A-Z]{2,3})?$/",
+            "description": "Language code for the translation (e.g., es-ES, fr-FR, en). Valid BCP 47 language tag.",
+            "example": "fr-FR"
+          },
+          "promptText": {
+            "type": "string",
+            "description": "Translated prompt text for this version and language. Cannot be empty.",
+            "example": "Bonjour le monde!"
+          }
+        },
+        "required": [
+          "languageCode",
+          "promptText"
+        ]
+      },
       "PromptMetaDto": {
         "type": "object",
         "properties": {
@@ -7580,7 +7597,6 @@
             "type": "string",
             "minLength": 5,
             "maxLength": 5,
-            "pattern": "/^[a-z]{2}(-[A-Z]{2})?$/",
             "description": "Código de idioma para esta traducción (formato xx-XX)",
             "example": "es-ES"
           },
