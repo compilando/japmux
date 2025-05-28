@@ -5,8 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**languageCode** | **string** | Language code for the translation (e.g., es-ES, fr-FR). | [default to undefined]
-**promptText** | **string** | Translated prompt text for this version and language. | [default to undefined]
+**languageCode** | **string** | Language code for the translation (e.g., es-ES, fr-FR, en). Valid BCP 47 language tag. | [default to undefined]
+**promptText** | **string** | Translated prompt text for this version and language. Cannot be empty. | [default to undefined]
 
 ## Example
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { PromptVersionData, PromptVersionMarketplaceDetails } from '@/app/(admin)/projects/[projectId]/prompts/[promptId]/versions/page';
 import CopyButton from '../common/CopyButton';
 import Link from 'next/link';
-import { TrashBinIcon, PencilIcon, ChevronDownIcon, ChevronUpIcon, GitBranchIcon } from "@/icons";
+import { TrashIcon, PencilIcon, ChevronDownIcon, ChevronUpIcon, GitBranchIcon } from "@/icons";
 import { DocumentDuplicateIcon, LanguageIcon } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -202,7 +202,7 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                             className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-600 p-1 transition-colors duration-200"
                                             aria-label="Delete Version"
                                         >
-                                            <TrashBinIcon />
+                                            <TrashIcon />
                                         </button>
                                     </div>
                                 </div>

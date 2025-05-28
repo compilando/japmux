@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { useProjects } from "../context/ProjectContext";
+import { useTenantAdmin } from "@/hooks/useTenantAdmin";
 import {
   HorizontaLDots,
   TableIcon,
@@ -18,6 +19,7 @@ import {
   EyeIcon,
   ChatIcon,
   ShootingStarIcon,
+  BuildingIcon,
 } from "../icons/index";
 import SidebarNavItem from "./SidebarNavItem";
 
@@ -43,6 +45,7 @@ const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
   const { selectedProjectId } = useProjects();
+  const { isTenantAdmin } = useTenantAdmin();
 
   // Define navItems first
   const navItems: NavItem[] = [
@@ -52,7 +55,8 @@ const AppSidebar: React.FC = () => {
       path: "/management",
       subItems: [
         { name: "Users", path: "/users", icon: <UserCircleIcon /> },
-        { icon: <FolderIcon />, name: "Projects", path: "/projects" }
+        { icon: <FolderIcon />, name: "Projects", path: "/projects" },
+        ...(isTenantAdmin ? [{ icon: <BuildingIcon />, name: "Tenants", path: "/tenants" }] : []),
       ],
     },
     {
@@ -177,7 +181,7 @@ const AppSidebar: React.FC = () => {
       <div
         className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}
       >
-        <Link href="/" className="group">
+        <Link href="/dashboard" className="group">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <h1 className="dark:text-white text-2xl font-bold bg-gradient-to-r from-brand-500 to-purple-600 bg-clip-text text-transparent group-hover:from-brand-600 group-hover:to-purple-700 transition-all duration-300">japm.app</h1>

@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **initialValue** | **string** | Valor inicial del asset para la primera versión (1.0.0) | [default to undefined]
 **initialChangeMessage** | **string** | Mensaje de cambio para la primera versión | [optional] [default to undefined]
 **tenantId** | **string** | ID del tenant al que pertenece este asset | [default to undefined]
+**initialTranslations** | [**Array&lt;InitialTranslationDto&gt;**](InitialTranslationDto.md) | Traducciones iniciales para diferentes idiomas | [optional] [default to undefined]
 
 ## Example
 
@@ -24,6 +25,7 @@ const instance: CreatePromptAssetDto = {
     initialValue,
     initialChangeMessage,
     tenantId,
+    initialTranslations,
 };
 ```
 

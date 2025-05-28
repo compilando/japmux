@@ -1,6 +1,6 @@
 import React from 'react';
 // import { TagResponse } from '@/services/api'; // Comentado temporalmente
-import { PencilIcon, TrashBinIcon, CheckLineIcon, CloseLineIcon, ListIcon } from '@/icons'; // Cambiado TagIcon a ListIcon
+import { PencilIcon, TrashIcon, CheckLineIcon, CloseLineIcon, ListIcon } from '@/icons'; // Cambiado TagIcon a ListIcon
 
 // Definición local de TagResponse para evitar error de importación
 // Asumimos que esta es la estructura básica que necesitamos
@@ -117,7 +117,7 @@ const TagCardItem: React.FC<TagCardItemProps> = ({
                                         className="text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-700/20 transition-colors"
                                         title="Delete Tag"
                                     >
-                                        <TrashBinIcon className="w-5 h-5" />
+                                        <TrashIcon className="w-5 h-5" />
                                     </button>
                                 </div>
                             </div>

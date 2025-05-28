@@ -53,6 +53,7 @@
     "@eslint/eslintrc": "^3",
     "@openapitools/openapi-generator-cli": "^2.20.0",
     "@svgr/webpack": "^8.1.0",
+    "@types/axios": "^0.9.36",
     "@types/diff": "^7.0.2",
     "@types/node": "^20",
     "@types/react": "^19",

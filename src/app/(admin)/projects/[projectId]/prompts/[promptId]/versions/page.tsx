@@ -19,7 +19,7 @@ import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptVersionsTable from '@/components/tables/PromptVersionsTable';
 import PromptVersionForm from '@/components/form/PromptVersionForm';
 import ContextInfoBanner from '@/components/common/ContextInfoBanner';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import { PlusCircleIcon, PencilIcon as EditIconHero } from '@heroicons/react/24/outline';
 import { diffLines, type Change } from 'diff'; // Importar solo diffLines y Change
@@ -31,8 +31,10 @@ import { es } from 'date-fns/locale';
 
 // Helper para extraer mensajes de error de forma segura
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
-    if (axios.isAxiosError(error)) {
-        return error.response?.data?.message || error.message || defaultMessage;
+    // Comprobación más robusta para AxiosError
+    if (error && typeof error === 'object' && 'isAxiosError' in error && (error as any).isAxiosError === true) {
+        const axiosError = error as AxiosError<any>; // Castear a AxiosError
+        return axiosError.response?.data?.message || axiosError.message || defaultMessage;
     }
     if (error instanceof Error) {
         return error.message;
@@ -47,7 +49,7 @@ export interface PromptVersionData extends CreatePromptVersionDto {
     versionTag: string; // Asumimos que versionTag SIEMPRE debe existir para una versión existente
     isActive: boolean;
     promptId: string;
-    languageCode?: string;
+    languageCode: string; // Debe ser string para concordar con CreatePromptVersionDto si esta lo requiere como no opcional
 }
 
 // Nueva interfaz para detalles del marketplace, extendiendo PromptVersionData
@@ -101,8 +103,11 @@ interface PromptVersionPageProps {
 */
 
 function PromptVersionsPage() {
+    // 1. Todos los Hooks al PRINCIPIO
     const params = useParams();
     const searchParams = useSearchParams();
+    const router = useRouter();
+
     const projectId = params.projectId as string;
     const promptId = params.promptId as string;
 
@@ -115,10 +120,9 @@ function PromptVersionsPage() {
     const [marketplaceActionLoading, setMarketplaceActionLoading] = useState<Record<string, boolean>>({});
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
-    const [prompt, setPrompt] = useState<PromptDto | null>(null);
+    const [currentPrompt, setCurrentPrompt] = useState<PromptDto | null>(null); // Renombrado de 'prompt' para evitar conflicto con variable local en fetchBreadcrumbData
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
-    // Estados para la funcionalidad de Diff
     const [selectedVersionsForDiff, setSelectedVersionsForDiff] = useState<string[]>([]);
     const [diffResult, setDiffResult] = useState<Change[] | null>(null);
     const [showDiffModal, setShowDiffModal] = useState<boolean>(false);
@@ -126,24 +130,33 @@ function PromptVersionsPage() {
     const { selectedProjectId, selectedProjectFull } = useProjects();
     const { selectedPromptId } = usePrompts();
 
-    const router = useRouter();
-
     const promptNameFromParams = typeof params.promptId === 'string' ? params.promptId : Array.isArray(params.promptId) ? params.promptId[0] : '';
 
-    // Extract "name" part from "type-name" for display
     const displayPromptName = useMemo(() => {
         if (!promptNameFromParams) return 'N/A';
         const parts = promptNameFromParams.split('-');
         if (parts.length > 1) {
-            return parts.slice(1).join('-'); // Return everything after the first hyphen
+            return parts.slice(1).join('-');
         }
-        return promptNameFromParams; // Fallback to full ID if no hyphen
+        return promptNameFromParams;
     }, [promptNameFromParams]);
 
     const projectNameForDisplay = useMemo(() => {
         return selectedProjectFull?.name || null;
     }, [selectedProjectFull]);
 
+    const breadcrumbs = useMemo(() => {
+        return [
+            { label: "Home", href: "/" },
+            { label: "Projects", href: "/projects" },
+            // Usar currentPrompt aquí en lugar de 'prompt' para evitar conflicto
+            { label: "Prompts", href: `/projects/${projectId}/prompts` },
+            { label: breadcrumbLoading ? promptId : (currentPrompt?.name || promptId) },
+            { label: "Versions" }
+        ];
+    }, [projectId, promptId, currentPrompt, breadcrumbLoading]);
+
+    // Efectos y Callbacks después de todos los useState y useMemo principales
     useEffect(() => {
         if (!projectId || !promptId) return;
 
@@ -155,13 +168,13 @@ function PromptVersionsPage() {
                     promptService.findOne(projectId, promptId)
                 ]);
                 setProject(projectData);
-                setPrompt(promptDataFromService);
+                setCurrentPrompt(promptDataFromService); // Usar setCurrentPrompt
             } catch (err: unknown) {
                 console.error("Error fetching breadcrumb data:", err);
                 const defaultMsg = "Failed to load project or prompt details for breadcrumbs.";
                 showErrorToast(getApiErrorMessage(err, defaultMsg));
                 setProject(null);
-                setPrompt(null);
+                setCurrentPrompt(null); // Usar setCurrentPrompt
             } finally {
                 setBreadcrumbLoading(false);
             }
@@ -171,24 +184,11 @@ function PromptVersionsPage() {
     }, [projectId, promptId]);
 
     const fetchData = useCallback(async () => {
-        // --- START: Clear error ALWAYS when trying to load data ---
         setError(null);
-        // --- END: Clear error ---
-
-        if (!projectId || !promptId) {
-            setError("Missing Project or Prompt ID in URL.");
-            setLoading(false);
-            setItemsList([]);
-            return;
-        }
-        if (projectId !== selectedProjectId) {
-            setError("Project ID in URL does not match selected project.");
-            setLoading(false);
-            setItemsList([]);
-            return;
-        }
-        if (selectedPromptId && promptId !== selectedPromptId) {
-            setError(`Error: URL prompt ID (${promptId.substring(0, 6)}...) does not match context prompt ID (${selectedPromptId.substring(0, 6)}...). Clear selection or navigate from Prompts table.`);
+        if (!projectId || !promptId || projectId !== selectedProjectId || (selectedPromptId && promptId !== selectedPromptId)) {
+            // Las condiciones para no cargar datos se manejan antes del return principal.
+            // Aquí solo nos aseguramos de tener los IDs necesarios.
+            // Los mensajes de error específicos se pueden manejar en la sección de renderizado condicional.
             setLoading(false);
             setItemsList([]);
             return;
@@ -232,9 +232,59 @@ function PromptVersionsPage() {
     }, [projectId, promptId, selectedProjectId, selectedPromptId]);
 
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        // Solo llamar a fetchData si tenemos projectId y promptId
+        // y las demás condiciones de los guard clauses se cumplen (implícitamente, ya que fetchData las revisa)
+        if (projectId && promptId) {
+            fetchData();
+        }
+    }, [fetchData, projectId, promptId]);
 
+    // ... (resto de los handlers: handleSelectVersionForDiff, handleCompareVersions, handleAdd, etc. deben estar aquí) ...
+    // ... (asegúrate de que no haya Hooks dentro de estas funciones, solo lógica) ...
+
+    // 2. Lógica de renderizado condicional DESPUÉS de todos los Hooks
+    if (!projectId || !promptId) {
+        return <p className="text-red-500">Error: Missing Project or Prompt ID in URL.</p>;
+    }
+
+    // No es ideal tener selectedProjectId como null si se requiere, 
+    // pero si es posible, hay que manejarlo. Considera si es un estado imposible.
+    if (!selectedProjectId) {
+        return <p className="text-yellow-500">Warning: Project not selected in context. Please select a project.</p>;
+    }
+
+    if (projectId !== selectedProjectId) {
+        return <p className="text-red-500">Error: Project ID in URL ({projectId}) does not match selected project ({selectedProjectId}).</p>;
+    }
+
+    // Si selectedPromptId existe y no coincide, es un caso problemático.
+    if (selectedPromptId && promptId !== selectedPromptId) {
+        return (
+            <div className="p-4">
+                <p className="text-yellow-600 dark:text-yellow-400">
+                    Warning: Navigated directly? URL prompt ID ({promptId.substring(0, 6)}...) differs from last selected prompt ({selectedPromptId.substring(0, 6)}...).
+                    Please clear the selection or navigate from the prompts table.
+                </p>
+                <Link href={`/projects/${projectId}/prompts`} className="text-blue-500 hover:underline mt-2 inline-block">
+                    Go to Prompts for {projectNameForDisplay || projectId}
+                </Link>
+            </div>
+        );
+    }
+
+    if (breadcrumbLoading || (loading && !formMode)) {
+        // Un estado de carga más informativo o un spinner más grande podrían ir aquí
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-brand-500"></div>
+                <p className="ml-4 text-lg text-gray-700 dark:text-gray-300">Loading page details...</p>
+            </div>
+        );
+    }
+
+    // ... (el resto del return JSX principal del componente va aquí) ...
+    // Asegúrate de que el resto de los handlers (handleSave, etc.) estén definidos ANTES de este bloque de return.
+    // Por ejemplo, la función handleSave, handleDelete, etc.
     const handleSelectVersionForDiff = (versionTag: string) => {
         setSelectedVersionsForDiff(prevSelected => {
             if (prevSelected.includes(versionTag)) {
@@ -243,7 +293,6 @@ function PromptVersionsPage() {
                 if (prevSelected.length < 2) {
                     return [...prevSelected, versionTag];
                 }
-                // showErrorToast("Puedes seleccionar hasta 2 versiones para comparar.");
                 return prevSelected;
             }
         });
@@ -251,23 +300,19 @@ function PromptVersionsPage() {
 
     const handleCompareVersions = () => {
         if (selectedVersionsForDiff.length !== 2) {
-            showErrorToast("Por favor, selecciona exactamente dos versiones para comparar.");
+            showErrorToast("Please select exactly two versions to compare.");
+            return;
+        }
+        const version1 = itemsList.find(item => item.versionTag === selectedVersionsForDiff[0]);
+        const version2 = itemsList.find(item => item.versionTag === selectedVersionsForDiff[1]);
+
+        if (!version1 || !version2) {
+            showErrorToast("Could not find selected versions. Please try again.");
             return;
         }
 
-        const version1Data = itemsList.find(item => item.versionTag === selectedVersionsForDiff[0]);
-        const version2Data = itemsList.find(item => item.versionTag === selectedVersionsForDiff[1]);
-
-        if (!version1Data || !version2Data) {
-            showErrorToast("No se pudieron encontrar los datos de las versiones seleccionadas.");
-            return;
-        }
-
-        const text1 = version1Data.promptText ?? '';
-        const text2 = version2Data.promptText ?? '';
-
-        const differences = diffLines(text1, text2, { newlineIsToken: true });
-        setDiffResult(differences);
+        const diff = diffLines(version1.promptText, version2.promptText);
+        setDiffResult(diff);
         setShowDiffModal(true);
     };
 
@@ -282,76 +327,52 @@ function PromptVersionsPage() {
     };
 
     const handleCancelForm = () => {
-        setFormMode(null);
         setEditingItem(null);
+        setFormMode(null);
     };
 
     const handleDelete = async (itemToDelete: PromptVersionData) => {
-        if (!projectId || !promptId || !itemToDelete.versionTag) {
-            showErrorToast("Cannot delete: version data is incomplete (missing versionTag).");
+        if (!itemToDelete || !itemToDelete.versionTag) {
+            showErrorToast("Cannot delete: version information is missing.");
             return;
         }
-        if (window.confirm(`Are you sure you want to delete version tag "${itemToDelete.versionTag}"?`)) {
-            setLoading(true);
-            try {
-                await promptVersionService.remove(projectId, promptId, itemToDelete.versionTag!);
-                showSuccessToast(`Version ${itemToDelete.versionTag} deleted successfully!`);
-                fetchData();
-            } catch (err: unknown) {
-                console.error("Error deleting version:", err);
-                const defaultMsg = 'Failed to delete version.';
-                setError(getApiErrorMessage(err, defaultMsg));
-            } finally {
-                setLoading(false);
-            }
+        if (!confirm(`Are you sure you want to delete version "${itemToDelete.versionTag}"? This action cannot be undone.`)) {
+            return;
+        }
+        try {
+            await promptVersionService.remove(projectId, promptId, itemToDelete.versionTag);
+            showSuccessToast(`Version "${itemToDelete.versionTag}" deleted successfully`);
+            fetchData(); // Recargar datos
+        } catch (error: any) {
+            console.error('Error deleting version:', error);
+            const apiErrorMessage = error.response?.data?.message || error.message || 'Error deleting version';
+            showErrorToast(apiErrorMessage);
         }
     };
 
-    // Funciones para marketplace (asumiendo que podrían estar aquí o necesitan ser definidas
-    // según las props de PromptVersionsTable)
     const handleRequestPublish = async (versionTag: string) => {
-        if (!projectId || !promptId || !versionTag) return;
         setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: true }));
         try {
-            // Asumimos que el servicio devuelve la versión actualizada con el nuevo estado
-            const updatedVersion = await promptVersionService.requestPublish(projectId, promptId, versionTag);
-            // Actualizar el estado en itemsList es crucial aquí
-            setItemsList(prevList =>
-                prevList.map(item =>
-                    item.versionTag === versionTag
-                        ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as PromptVersionMarketplaceDetails).marketplaceStatus || 'PENDING_APPROVAL' }
-                        : item
-                )
-            );
-            showSuccessToast(`Solicitud de publicación para la versión ${versionTag} enviada.`);
-            fetchData(); // Opcional: re-fetch para asegurar consistencia, o confiar en la actualización local.
-        } catch (err) {
-            console.error(`Error requesting publish for version ${versionTag}:`, err);
-            showErrorToast(getApiErrorMessage(err, `Error al solicitar publicación para ${versionTag}.`));
+            await promptVersionService.requestPublish(projectId, promptId, versionTag);
+            showSuccessToast(`Version "${versionTag}" publish request sent successfully.`);
+            fetchData(); // Actualizar para reflejar el nuevo estado
+        } catch (error) {
+            console.error(`Error requesting publish for version ${versionTag}:`, error);
+            showErrorToast(getApiErrorMessage(error, `Failed to request publish for version ${versionTag}.`));
         } finally {
             setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: false }));
         }
     };
 
     const handleUnpublish = async (versionTag: string) => {
-        if (!projectId || !promptId || !versionTag) return;
         setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: true }));
         try {
-            // Asumimos que el servicio devuelve la versión actualizada
-            const updatedVersion = await promptVersionService.unpublish(projectId, promptId, versionTag);
-            // Actualizar el estado en itemsList
-            setItemsList(prevList =>
-                prevList.map(item =>
-                    item.versionTag === versionTag
-                        ? { ...item, ...updatedVersion, marketplaceStatus: (updatedVersion as PromptVersionMarketplaceDetails).marketplaceStatus || 'NOT_PUBLISHED' }
-                        : item
-                )
-            );
-            showSuccessToast(`Version ${versionTag} removed from marketplace.`);
-            fetchData(); // Opcional: re-fetch
-        } catch (err) {
-            console.error(`Error unpublishing version ${versionTag}:`, err);
-            showErrorToast(getApiErrorMessage(err, `Error unpublishing ${versionTag} from marketplace.`));
+            await promptVersionService.unpublish(projectId, promptId, versionTag);
+            showSuccessToast(`Version "${versionTag}" unpublished successfully.`);
+            fetchData(); // Actualizar para reflejar el nuevo estado
+        } catch (error) {
+            console.error(`Error unpublishing version ${versionTag}:`, error);
+            showErrorToast(getApiErrorMessage(error, `Failed to unpublish version ${versionTag}.`));
         } finally {
             setMarketplaceActionLoading(prev => ({ ...prev, [versionTag]: false }));
         }
@@ -359,20 +380,22 @@ function PromptVersionsPage() {
 
     const handleSave = async (payload: CreatePromptVersionDto | UpdatePromptVersionDto, versionTagFromForm?: string, languageCode?: string) => {
         try {
-            if (!versionTagFromForm && !editingItem) {
-                showErrorToast('Version tag is required for new versions.');
-                return;
-            }
-
-            if (editingItem) {
-                await promptVersionService.update(projectId, promptId, editingItem.versionTag, payload as UpdatePromptVersionDto);
+            if (formMode === 'edit' && editingItem && editingItem.versionTag) {
+                // For PATCH, send only changed fields. For simplicity, we send all editable fields from the form.
+                // Ensure the payload for update matches UpdatePromptVersionDto. Typically, it's a subset of fields.
+                const updatePayload: Partial<UpdatePromptVersionDto> = {
+                    promptText: payload.promptText,
+                    changeMessage: payload.changeMessage,
+                    // isActive: (payload as PromptVersionData).isActive, // Example if isActive can be updated
+                };
+                await promptVersionService.update(projectId, promptId, editingItem.versionTag, updatePayload as UpdatePromptVersionDto);
                 showSuccessToast('Version updated successfully');
-            } else {
+            } else if (formMode === 'add') {
                 const rawPayload = {
                     promptText: (payload as CreatePromptVersionDto).promptText,
                     changeMessage: payload.changeMessage,
                     initialTranslations: (payload as CreatePromptVersionDto).initialTranslations,
-                    versionTag: versionTagFromForm,
+                    versionTag: versionTagFromForm, // This should be calculated/validated before this point
                     languageCode: languageCode
                 };
 
@@ -388,8 +411,6 @@ function PromptVersionsPage() {
                     showErrorToast('Language code is required for new versions.');
                     return;
                 }
-                // Castear a 'any' temporalmente para diagnóstico, 
-                // para permitir que versionTag y languageCode se envíen en el payload a pesar de la definición de CreatePromptVersionDto.
                 await promptVersionService.create(projectId, promptId, rawPayload as any);
                 showSuccessToast('New version created successfully');
             }
@@ -402,36 +423,11 @@ function PromptVersionsPage() {
         }
     };
 
-    if (!projectId || !promptId) {
-        return <p className="text-red-500">Error: Missing Project or Prompt ID in URL.</p>;
-    }
-
-    if (projectId !== selectedProjectId) {
-        return <p className="text-red-500">Error: Project ID in URL ({projectId}) does not match selected project ({selectedProjectId}).</p>;
-    }
-
-    if (selectedPromptId && promptId !== selectedPromptId) {
-        return <p className="text-yellow-600 dark:text-yellow-400">Warning: Navigated directly? URL prompt ID ({promptId.substring(0, 6)}...) differs from last selected prompt ({selectedPromptId.substring(0, 6)}...).</p>;
-    }
-
-    const breadcrumbs = useMemo(() => {
-        const baseCrumbs = [
-            { label: "Home", href: "/" },
-            { label: "Projects", href: "/projects" },
-            { label: "Prompts", href: `/projects/${projectId}/prompts` },
-            { label: breadcrumbLoading ? promptId : (prompt?.name || promptId) },
-            { label: "Versions" }
-        ];
-        return baseCrumbs;
-    }, [projectId, promptId, project, prompt, breadcrumbLoading]);
-
-    if (breadcrumbLoading || loading && !formMode) return <p>Loading page details...</p>;
-
+    // El return JSX principal del componente va aquí
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8">
             <Breadcrumb crumbs={breadcrumbs} />
 
-            {/* --- Bloque de Información del Prompt y Proyecto --- */}
             <ContextInfoBanner
                 projectName={projectNameForDisplay}
                 promptName={displayPromptName}
@@ -478,8 +474,7 @@ function PromptVersionsPage() {
                     </div>
                 )}
 
-                {/* Botón para comparar versiones seleccionadas */}
-                {itemsList.length > 1 && !loading && ( // Mostrar solo si hay más de una versión y no está cargando
+                {itemsList.length > 1 && !loading && (
                     <div className="my-4 flex justify-start gap-x-4 items-center">
                         <button
                             onClick={handleCompareVersions}
@@ -504,7 +499,6 @@ function PromptVersionsPage() {
                     </div>
                 )}
 
-                {/* Tabla de versiones */}
                 {loading && <p className="text-center py-10 text-gray-500 dark:text-gray-400">Loading versions...</p>}
                 {error && (
                     <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-700/30 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg my-4 shadow" role="alert">
@@ -540,7 +534,7 @@ function PromptVersionsPage() {
                     const v1Details = itemsList.find(item => item.versionTag === selectedVersionsForDiff[0]);
                     const v2Details = itemsList.find(item => item.versionTag === selectedVersionsForDiff[1]);
 
-                    if (!v1Details || !v2Details) return null; // No debería pasar si selectedVersionsForDiff tiene 2 elementos válidos
+                    if (!v1Details || !v2Details) return null;
 
                     return (
                         <DiffViewerModal
@@ -548,7 +542,6 @@ function PromptVersionsPage() {
                             onClose={() => {
                                 setShowDiffModal(false);
                                 setDiffResult(null);
-                                // setSelectedVersionsForDiff([]); // Optional: clear selection
                             }}
                             diffResult={diffResult}
                             versionInfo1={{

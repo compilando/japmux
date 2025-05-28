@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { CreatePromptAssetDto, promptAssetService } from '@/services/api';
 import CopyButton from '../common/CopyButton';
-import { TrashBinIcon, PencilIcon } from "@/icons";
+import { TrashIcon, PencilIcon } from "@/icons";
 import { ClockIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 
 // Nueva interfaz local para incluir campos que podrían no estar en CreatePromptAssetDto
@@ -178,7 +178,7 @@ const PromptAssetsTable: React.FC<PromptAssetsTableProps> = ({ promptAssets, pro
                                 className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200 p-2 rounded-md hover:bg-red-50 dark:hover:bg-gray-700"
                                 title="Delete Asset"
                             >
-                                <TrashBinIcon />
+                                <TrashIcon />
                             </button>
                         </div>
                     </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../ui/table';
 import { AiModelResponseDto as AiModel } from '@/services/generated/api';
-import { TrashBinIcon, PencilIcon, InfoIcon } from "@/icons";
+import { TrashIcon, PencilIcon, InfoIcon } from "@/icons";
 import CopyButton from '../common/CopyButton';
 
 interface AiModelsTableProps {
@@ -79,7 +79,7 @@ const AiModelsTable: React.FC<AiModelsTableProps> = ({ aiModels, onEdit, onDelet
                                                 aria-label="Delete AI Model"
                                                 title="Delete"
                                             >
-                                                <TrashBinIcon className="w-5 h-5" />
+                                                <TrashIcon className="w-5 h-5" />
                                             </button>
                                         </div>
                                     </TableCell>

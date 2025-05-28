@@ -30,7 +30,7 @@ export default function SignInForm() {
     const success = await login({ email, password }, isChecked);
 
     if (success) {
-      router.push('/');
+      router.push('/dashboard');
     }
     setIsSubmitting(false);
   };

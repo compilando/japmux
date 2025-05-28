@@ -1,6 +1,6 @@
 import React from 'react';
 import { CreateProjectDto, UserProfileResponse } from '@/services/api';
-import { PencilIcon, TrashBinIcon, FolderIcon, UserCircleIcon } from '@/icons';
+import { PencilIcon, TrashIcon, FolderIcon, UserCircleIcon } from '@/icons';
 import { format } from 'date-fns'; // Importar format de date-fns
 
 // ProjectData extiende CreateProjectDto. CreateProjectDto de @/services/api DEBERÍA tener ownerUserId.
@@ -86,7 +86,7 @@ const ProjectCardItem: React.FC<ProjectCardItemProps> = ({ project, usersList, o
                             className="text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-700/20 transition-colors"
                             title="Delete Project"
                         >
-                            <TrashBinIcon className="w-5 h-5" />
+                            <TrashIcon className="w-5 h-5" />
                         </button>
                     </div>
                 </div>

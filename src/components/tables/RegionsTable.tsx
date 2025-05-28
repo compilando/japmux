@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../ui/table';
 import { CreateRegionDto } from '@/services/generated/api';
-import { TrashBinIcon, PencilIcon, InfoIcon } from "@/icons";
+import { TrashIcon, PencilIcon, InfoIcon } from "@/icons";
 import CopyButton from '../common/CopyButton';
 
 interface RegionsTableProps {
@@ -81,7 +81,7 @@ const RegionsTable: React.FC<RegionsTableProps> = ({ regions, onEdit, onDelete }
                                                     className="text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-700/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
                                                     aria-label="Delete Region" title="Delete"
                                                 >
-                                                    <TrashBinIcon className="w-5 h-5" />
+                                                    <TrashIcon className="w-5 h-5" />
                                                 </button>
                                             </div>
                                         </TableCell>

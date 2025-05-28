@@ -1,6 +1,6 @@
 import React from 'react';
 import { AiModelResponseDto } from '@/services/generated/api';
-import { PencilIcon, TrashBinIcon, BoltIcon } from '@/icons'; // Usando BoltIcon como genérico por ahora
+import { PencilIcon, CloseIcon, BoltIcon } from '@/icons'; // Usando BoltIcon como genérico por ahora
 
 interface AiModelCardItemProps {
     model: AiModelResponseDto;
@@ -60,7 +60,7 @@ const AiModelCardItem: React.FC<AiModelCardItemProps> = ({ model, onEdit, onDele
                             className="text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-700/20 transition-colors"
                             title="Delete Model"
                         >
-                            <TrashBinIcon className="w-5 h-5" />
+                            <CloseIcon className="w-5 h-5" />
                         </button>
                     </div>
                 </div>

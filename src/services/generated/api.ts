@@ -105,6 +105,25 @@ export interface AiModelResponseDto {
 /**
  * 
  * @export
+ * @interface AssetTranslationStructureDto
+ */
+export interface AssetTranslationStructureDto {
+    /**
+     * Language code for the asset value translation.
+     * @type {string}
+     * @memberof AssetTranslationStructureDto
+     */
+    'languageCode': string;
+    /**
+     * Translated value of the asset.
+     * @type {string}
+     * @memberof AssetTranslationStructureDto
+     */
+    'value': string;
+}
+/**
+ * 
+ * @export
  * @interface CreateAiModelDto
  */
 export interface CreateAiModelDto {
@@ -139,12 +158,6 @@ export interface CreateAiModelDto {
  * @interface CreateAssetTranslationDto
  */
 export interface CreateAssetTranslationDto {
-    /**
-     * ID de la versión del asset a la que pertenece esta traducción
-     * @type {string}
-     * @memberof CreateAssetTranslationDto
-     */
-    'versionId': string;
     /**
      * Código de idioma para esta traducción (formato xx-XX)
      * @type {string}
@@ -211,6 +224,25 @@ export interface CreateEnvironmentDto {
 /**
  * 
  * @export
+ * @interface CreateOrUpdatePromptTranslationDto
+ */
+export interface CreateOrUpdatePromptTranslationDto {
+    /**
+     * Language code for the translation (e.g., es-ES, fr-FR, en). Valid BCP 47 language tag.
+     * @type {string}
+     * @memberof CreateOrUpdatePromptTranslationDto
+     */
+    'languageCode': string;
+    /**
+     * Translated prompt text for this version and language. Cannot be empty.
+     * @type {string}
+     * @memberof CreateOrUpdatePromptTranslationDto
+     */
+    'promptText': string;
+}
+/**
+ * 
+ * @export
  * @interface CreateProjectDto
  */
 export interface CreateProjectDto {
@@ -269,6 +301,12 @@ export interface CreatePromptAssetDto {
      * @memberof CreatePromptAssetDto
      */
     'tenantId': string;
+    /**
+     * Traducciones iniciales para diferentes idiomas
+     * @type {Array<InitialTranslationDto>}
+     * @memberof CreatePromptAssetDto
+     */
+    'initialTranslations'?: Array<InitialTranslationDto>;
 }
 /**
  * 
@@ -295,11 +333,36 @@ export interface CreatePromptAssetVersionDto {
      */
     'changeMessage'?: string;
     /**
-     * Código de idioma para la versión del asset (ej: en-US, es-ES).
+     * Código de idioma para la versión del asset (e.g., en-US, es-ES). Se obtiene del listado de regiones del proyecto.
      * @type {string}
      * @memberof CreatePromptAssetVersionDto
      */
-    'languageCode'?: string;
+    'languageCode': string;
+}
+/**
+ * 
+ * @export
+ * @interface CreatePromptBackupRequestDto
+ */
+export interface CreatePromptBackupRequestDto {
+    /**
+     * Razón opcional para el borrado
+     * @type {string}
+     * @memberof CreatePromptBackupRequestDto
+     */
+    'deletionReason'?: string;
+    /**
+     * Incluir logs de ejecución en el backup (puede ser pesado)
+     * @type {boolean}
+     * @memberof CreatePromptBackupRequestDto
+     */
+    'includeExecutionLogs'?: boolean;
+    /**
+     * Límite de logs de ejecución a incluir
+     * @type {number}
+     * @memberof CreatePromptBackupRequestDto
+     */
+    'executionLogsLimit'?: number;
 }
 /**
  * 
@@ -308,7 +371,7 @@ export interface CreatePromptAssetVersionDto {
  */
 export interface CreatePromptDto {
     /**
-     * Unique prompt name (used as ID)
+     * Name for the prompt. This will be slugified by the system to create a unique identifier.
      * @type {string}
      * @memberof CreatePromptDto
      */
@@ -338,6 +401,12 @@ export interface CreatePromptDto {
      */
     'promptText': string;
     /**
+     * Código de idioma para la primera versión (e.g., en-US, es-ES). Se obtiene del listado de regiones del proyecto.
+     * @type {string}
+     * @memberof CreatePromptDto
+     */
+    'languageCode': string;
+    /**
      * Optional initial translations for the first version
      * @type {Array<InitialTranslationDto>}
      * @memberof CreatePromptDto
@@ -350,12 +419,6 @@ export interface CreatePromptDto {
  * @interface CreatePromptTranslationDto
  */
 export interface CreatePromptTranslationDto {
-    /**
-     * ID de la versión del prompt a la que pertenece esta traducción
-     * @type {string}
-     * @memberof CreatePromptTranslationDto
-     */
-    'versionId': string;
     /**
      * Código de idioma para esta traducción (formato xx-XX)
      * @type {string}
@@ -387,6 +450,12 @@ export interface CreatePromptVersionDto {
      * @memberof CreatePromptVersionDto
      */
     'versionTag': string;
+    /**
+     * Código de idioma para esta versión (e.g., en-US, es-ES). Se obtiene del listado de regiones del proyecto.
+     * @type {string}
+     * @memberof CreatePromptVersionDto
+     */
+    'languageCode': string;
     /**
      * Mensaje describiendo los cambios en esta versión.
      * @type {string}
@@ -475,12 +544,6 @@ export interface CreateRegionDto {
     'timeZone'?: string;
     /**
      * Default formality level (optional)
-     * @type {string}
-     * @memberof CreateRegionDto
-     */
-    'defaultFormalityLevel'?: string;
-    /**
-     * Additional notes (optional)
      * @type {string}
      * @memberof CreateRegionDto
      */
@@ -621,7 +684,8 @@ export interface CreateUserDto {
 export const CreateUserDtoRoleEnum = {
     User: 'user',
     Admin: 'admin',
-    TenantAdmin: 'tenant_admin'
+    TenantAdmin: 'tenant_admin',
+    PromptConsumer: 'prompt_consumer'
 } as const;
 
 export type CreateUserDtoRoleEnum = typeof CreateUserDtoRoleEnum[keyof typeof CreateUserDtoRoleEnum];
@@ -874,6 +938,43 @@ export interface InitialTranslationDto {
 /**
  * 
  * @export
+ * @interface LoadPromptStructureDto
+ */
+export interface LoadPromptStructureDto {
+    /**
+     * Metadata for the prompt to be created.
+     * @type {PromptMetaDto}
+     * @memberof LoadPromptStructureDto
+     */
+    'prompt': PromptMetaDto;
+    /**
+     * Structure for the initial prompt version.
+     * @type {PromptVersionStructureDto}
+     * @memberof LoadPromptStructureDto
+     */
+    'version': PromptVersionStructureDto;
+    /**
+     * Código de idioma para la versión inicial (e.g., en-US, es-ES). Se obtiene del listado de regiones del proyecto.
+     * @type {string}
+     * @memberof LoadPromptStructureDto
+     */
+    'languageCode': string;
+    /**
+     * List of assets to be created and associated with the prompt (conceptually via placeholders).
+     * @type {Array<PromptAssetStructureDto>}
+     * @memberof LoadPromptStructureDto
+     */
+    'assets': Array<PromptAssetStructureDto>;
+    /**
+     * Optional list of tag names to associate with the prompt.
+     * @type {Array<string>}
+     * @memberof LoadPromptStructureDto
+     */
+    'tags'?: Array<string>;
+}
+/**
+ * 
+ * @export
  * @interface LoginDto
  */
 export interface LoginDto {
@@ -955,6 +1056,43 @@ export interface ProjectDto {
 /**
  * 
  * @export
+ * @interface PromptAssetStructureDto
+ */
+export interface PromptAssetStructureDto {
+    /**
+     * Unique key for the asset in slug-case format. This key is used in {{placeholders}}.
+     * @type {string}
+     * @memberof PromptAssetStructureDto
+     */
+    'key': string;
+    /**
+     * Descriptive name for the asset.
+     * @type {string}
+     * @memberof PromptAssetStructureDto
+     */
+    'name': string;
+    /**
+     * The original extracted value for the asset.
+     * @type {string}
+     * @memberof PromptAssetStructureDto
+     */
+    'value': string;
+    /**
+     * Change message for this asset version.
+     * @type {string}
+     * @memberof PromptAssetStructureDto
+     */
+    'changeMessage': string;
+    /**
+     * Translations for the asset value.
+     * @type {Array<AssetTranslationStructureDto>}
+     * @memberof PromptAssetStructureDto
+     */
+    'translations': Array<AssetTranslationStructureDto>;
+}
+/**
+ * 
+ * @export
  * @interface PromptControllerGenerateStructure200Response
  */
 export interface PromptControllerGenerateStructure200Response {
@@ -970,6 +1108,25 @@ export interface PromptControllerGenerateStructure200Response {
      * @memberof PromptControllerGenerateStructure200Response
      */
     'explanation'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface PromptControllerGenerateStructureAIRequest
+ */
+export interface PromptControllerGenerateStructureAIRequest {
+    /**
+     * The basic prompt text to analyze and structure
+     * @type {string}
+     * @memberof PromptControllerGenerateStructureAIRequest
+     */
+    'userOriginalPrompt': string;
+    /**
+     * AI model to use for generation
+     * @type {string}
+     * @memberof PromptControllerGenerateStructureAIRequest
+     */
+    'targetAiModel'?: string;
 }
 /**
  * 
@@ -1001,6 +1158,75 @@ export interface PromptDto {
      * @memberof PromptDto
      */
     'projectId': string;
+}
+/**
+ * 
+ * @export
+ * @interface PromptMetaDto
+ */
+export interface PromptMetaDto {
+    /**
+     * Suggested name for the prompt.
+     * @type {string}
+     * @memberof PromptMetaDto
+     */
+    'name': string;
+    /**
+     * Suggested description for the prompt.
+     * @type {string}
+     * @memberof PromptMetaDto
+     */
+    'description': string;
+}
+/**
+ * 
+ * @export
+ * @interface PromptVersionStructureDto
+ */
+export interface PromptVersionStructureDto {
+    /**
+     * Core prompt text, potentially including {{asset_key}} placeholders.
+     * @type {string}
+     * @memberof PromptVersionStructureDto
+     */
+    'promptText': string;
+    /**
+     * Change message for this version.
+     * @type {string}
+     * @memberof PromptVersionStructureDto
+     */
+    'changeMessage': string;
+    /**
+     * Array of asset keys (slug-case) used in this prompt version. These keys must correspond to assets defined in the main \"assets\" list.
+     * @type {Array<string>}
+     * @memberof PromptVersionStructureDto
+     */
+    'assets': Array<string>;
+    /**
+     * Translations for the prompt text.
+     * @type {Array<PromptVersionTranslationDto>}
+     * @memberof PromptVersionStructureDto
+     */
+    'translations': Array<PromptVersionTranslationDto>;
+}
+/**
+ * 
+ * @export
+ * @interface PromptVersionTranslationDto
+ */
+export interface PromptVersionTranslationDto {
+    /**
+     * Language code for the translation.
+     * @type {string}
+     * @memberof PromptVersionTranslationDto
+     */
+    'languageCode': string;
+    /**
+     * Translated prompt text, potentially including {{asset_key}} placeholders.
+     * @type {string}
+     * @memberof PromptVersionTranslationDto
+     */
+    'promptText': string;
 }
 /**
  * 
@@ -1111,12 +1337,6 @@ export interface RegionDto {
      * @memberof RegionDto
      */
     'timeZone': string;
-    /**
-     * Default formality level for the region
-     * @type {string}
-     * @memberof RegionDto
-     */
-    'defaultFormalityLevel'?: string | null;
     /**
      * Optional notes about the region
      * @type {string}
@@ -1355,6 +1575,12 @@ export interface UpdatePromptAssetDto {
      */
     'tenantId'?: string;
     /**
+     * Traducciones iniciales para diferentes idiomas
+     * @type {Array<InitialTranslationDto>}
+     * @memberof UpdatePromptAssetDto
+     */
+    'initialTranslations'?: Array<InitialTranslationDto>;
+    /**
      * Activa o desactiva el asset
      * @type {boolean}
      * @memberof UpdatePromptAssetDto
@@ -1437,6 +1663,12 @@ export interface UpdatePromptVersionDto {
      */
     'versionTag'?: string;
     /**
+     * Código de idioma para esta versión (e.g., en-US, es-ES). Se obtiene del listado de regiones del proyecto.
+     * @type {string}
+     * @memberof UpdatePromptVersionDto
+     */
+    'languageCode'?: string;
+    /**
      * Mensaje describiendo los cambios en esta versión.
      * @type {string}
      * @memberof UpdatePromptVersionDto
@@ -1475,12 +1707,6 @@ export interface UpdateRegionDto {
     'timeZone'?: string;
     /**
      * Default formality level (optional)
-     * @type {string}
-     * @memberof UpdateRegionDto
-     */
-    'defaultFormalityLevel'?: string;
-    /**
-     * Additional notes (optional)
      * @type {string}
      * @memberof UpdateRegionDto
      */
@@ -2098,103 +2324,6 @@ export class AIModelsProjectSpecificApi extends BaseAPI {
      */
     public aiModelControllerUpdate(projectId: string, aiModelId: string, updateAiModelDto: UpdateAiModelDto, options?: RawAxiosRequestConfig) {
         return AIModelsProjectSpecificApiFp(this.configuration).aiModelControllerUpdate(projectId, aiModelId, updateAiModelDto, options).then((request) => request(this.axios, this.basePath));
-    }
-}
-
-
-
-/**
- * AssetApi - axios parameter creator
- * @export
- */
-export const AssetApiAxiosParamCreator = function (configuration?: Configuration) {
-    return {
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        assetControllerFindAll: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/assets`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-    }
-};
-
-/**
- * AssetApi - functional programming interface
- * @export
- */
-export const AssetApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = AssetApiAxiosParamCreator(configuration)
-    return {
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async assetControllerFindAll(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.assetControllerFindAll(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AssetApi.assetControllerFindAll']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-    }
-};
-
-/**
- * AssetApi - factory interface
- * @export
- */
-export const AssetApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = AssetApiFp(configuration)
-    return {
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        assetControllerFindAll(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.assetControllerFindAll(options).then((request) => request(axios, basePath));
-        },
-    };
-};
-
-/**
- * AssetApi - object-oriented interface
- * @export
- * @class AssetApi
- * @extends {BaseAPI}
- */
-export class AssetApi extends BaseAPI {
-    /**
-     * 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AssetApi
-     */
-    public assetControllerFindAll(options?: RawAxiosRequestConfig) {
-        return AssetApiFp(this.configuration).assetControllerFindAll(options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -5349,7 +5478,7 @@ export const PromptAssetVersionsApiAxiosParamCreator = function (configuration?:
          * @param {string} projectId ID of the Project the Prompt belongs to
          * @param {string} promptId ID (slug) of the Prompt
          * @param {string} assetKey Key of the PromptAsset
-         * @param {string} versionTag Version tag (e.g., v1.0.0)
+         * @param {string} versionTag Version tag (e.g., 1.0.0)
          * @param {string} languageCode 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5654,7 +5783,7 @@ export const PromptAssetVersionsApiFp = function(configuration?: Configuration) 
          * @param {string} projectId ID of the Project the Prompt belongs to
          * @param {string} promptId ID (slug) of the Prompt
          * @param {string} assetKey Key of the PromptAsset
-         * @param {string} versionTag Version tag (e.g., v1.0.0)
+         * @param {string} versionTag Version tag (e.g., 1.0.0)
          * @param {string} languageCode 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5772,7 +5901,7 @@ export const PromptAssetVersionsApiFactory = function (configuration?: Configura
          * @param {string} projectId ID of the Project the Prompt belongs to
          * @param {string} promptId ID (slug) of the Prompt
          * @param {string} assetKey Key of the PromptAsset
-         * @param {string} versionTag Version tag (e.g., v1.0.0)
+         * @param {string} versionTag Version tag (e.g., 1.0.0)
          * @param {string} languageCode 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5879,7 +6008,7 @@ export class PromptAssetVersionsApi extends BaseAPI {
      * @param {string} projectId ID of the Project the Prompt belongs to
      * @param {string} promptId ID (slug) of the Prompt
      * @param {string} assetKey Key of the PromptAsset
-     * @param {string} versionTag Version tag (e.g., v1.0.0)
+     * @param {string} versionTag Version tag (e.g., 1.0.0)
      * @param {string} languageCode 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6442,7 +6571,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
          * @summary Create a translation for a specific prompt version within a project
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {CreatePromptTranslationDto} createPromptTranslationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6494,7 +6623,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
          * @summary Get all translations for a specific prompt version within a project
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6540,7 +6669,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
          * @summary Get a specific translation by language code for a prompt version. Allows resolving assets.
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code (e.g., es-ES)
          * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
          * @param {string} [environmentId] Environment ID for context.
@@ -6615,7 +6744,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
          * @summary Delete a specific translation by language code for a prompt version
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code of the translation to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6665,7 +6794,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiAxiosParamCreator = 
          * @summary Update a specific translation by language code for a prompt version
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code of the translation to update
          * @param {UpdatePromptTranslationDto} updatePromptTranslationDto 
          * @param {*} [options] Override http request option.
@@ -6731,7 +6860,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFp = function(config
          * @summary Create a translation for a specific prompt version within a project
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {CreatePromptTranslationDto} createPromptTranslationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6747,7 +6876,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFp = function(config
          * @summary Get all translations for a specific prompt version within a project
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6762,7 +6891,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFp = function(config
          * @summary Get a specific translation by language code for a prompt version. Allows resolving assets.
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code (e.g., es-ES)
          * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
          * @param {string} [environmentId] Environment ID for context.
@@ -6783,7 +6912,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFp = function(config
          * @summary Delete a specific translation by language code for a prompt version
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code of the translation to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6799,7 +6928,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFp = function(config
          * @summary Update a specific translation by language code for a prompt version
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code of the translation to update
          * @param {UpdatePromptTranslationDto} updatePromptTranslationDto 
          * @param {*} [options] Override http request option.
@@ -6826,7 +6955,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFactory = function (
          * @summary Create a translation for a specific prompt version within a project
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {CreatePromptTranslationDto} createPromptTranslationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6839,7 +6968,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFactory = function (
          * @summary Get all translations for a specific prompt version within a project
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6851,7 +6980,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFactory = function (
          * @summary Get a specific translation by language code for a prompt version. Allows resolving assets.
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code (e.g., es-ES)
          * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
          * @param {string} [environmentId] Environment ID for context.
@@ -6869,7 +6998,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFactory = function (
          * @summary Delete a specific translation by language code for a prompt version
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code of the translation to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6882,7 +7011,7 @@ export const PromptTranslationsWithinProjectPromptVersionApiFactory = function (
          * @summary Update a specific translation by language code for a prompt version
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {string} languageCode Language code of the translation to update
          * @param {UpdatePromptTranslationDto} updatePromptTranslationDto 
          * @param {*} [options] Override http request option.
@@ -6906,7 +7035,7 @@ export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI {
      * @summary Create a translation for a specific prompt version within a project
      * @param {string} projectId Project ID
      * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+     * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
      * @param {CreatePromptTranslationDto} createPromptTranslationDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6921,7 +7050,7 @@ export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI {
      * @summary Get all translations for a specific prompt version within a project
      * @param {string} projectId Project ID
      * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+     * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptTranslationsWithinProjectPromptVersionApi
@@ -6935,7 +7064,7 @@ export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI {
      * @summary Get a specific translation by language code for a prompt version. Allows resolving assets.
      * @param {string} projectId Project ID
      * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+     * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
      * @param {string} languageCode Language code (e.g., es-ES)
      * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
      * @param {string} [environmentId] Environment ID for context.
@@ -6955,7 +7084,7 @@ export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI {
      * @summary Delete a specific translation by language code for a prompt version
      * @param {string} projectId Project ID
      * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+     * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
      * @param {string} languageCode Language code of the translation to delete
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6970,7 +7099,7 @@ export class PromptTranslationsWithinProjectPromptVersionApi extends BaseAPI {
      * @summary Update a specific translation by language code for a prompt version
      * @param {string} projectId Project ID
      * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version Tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+     * @param {string} versionTag Version Tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
      * @param {string} languageCode Language code of the translation to update
      * @param {UpdatePromptTranslationDto} updatePromptTranslationDto 
      * @param {*} [options] Override http request option.
@@ -7085,7 +7214,7 @@ export const PromptVersionsWithinProjectPromptApiAxiosParamCreator = function (c
          * @summary Get a specific prompt version by its tag within a project/prompt. Allows resolving assets.
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
          * @param {string} [environmentId] Environment ID for context.
          * @param {string} [regionCode] Region code for context (e.g., for asset translations).
@@ -7385,7 +7514,7 @@ export const PromptVersionsWithinProjectPromptApiFp = function(configuration?: C
          * @summary Get a specific prompt version by its tag within a project/prompt. Allows resolving assets.
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
          * @param {string} [environmentId] Environment ID for context.
          * @param {string} [regionCode] Region code for context (e.g., for asset translations).
@@ -7499,7 +7628,7 @@ export const PromptVersionsWithinProjectPromptApiFactory = function (configurati
          * @summary Get a specific prompt version by its tag within a project/prompt. Allows resolving assets.
          * @param {string} projectId Project ID
          * @param {string} promptId Prompt CUID
-         * @param {string} versionTag Version tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+         * @param {string} versionTag Version tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
          * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
          * @param {string} [environmentId] Environment ID for context.
          * @param {string} [regionCode] Region code for context (e.g., for asset translations).
@@ -7602,7 +7731,7 @@ export class PromptVersionsWithinProjectPromptApi extends BaseAPI {
      * @summary Get a specific prompt version by its tag within a project/prompt. Allows resolving assets.
      * @param {string} projectId Project ID
      * @param {string} promptId Prompt CUID
-     * @param {string} versionTag Version tag (e.g., v1.0.0) or \&quot;latest\&quot; to get the most recent version
+     * @param {string} versionTag Version tag (e.g., 1.0.0) or \&quot;latest\&quot; to get the most recent version
      * @param {boolean} [resolveAssets] Whether to resolve asset placeholders. Defaults to false.
      * @param {string} [environmentId] Environment ID for context.
      * @param {string} [regionCode] Region code for context (e.g., for asset translations).
@@ -7723,6 +7852,50 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Creates a complete backup of a prompt without deleting it.
+         * @summary Create prompt backup
+         * @param {string} projectId ID of the project the prompt belongs to
+         * @param {string} id Unique prompt identifier to backup
+         * @param {CreatePromptBackupRequestDto} createPromptBackupRequestDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        promptControllerCreateBackup: async (projectId: string, id: string, createPromptBackupRequestDto: CreatePromptBackupRequestDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'projectId' is not null or undefined
+            assertParamExists('promptControllerCreateBackup', 'projectId', projectId)
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('promptControllerCreateBackup', 'id', id)
+            // verify required parameter 'createPromptBackupRequestDto' is not null or undefined
+            assertParamExists('promptControllerCreateBackup', 'createPromptBackupRequestDto', createPromptBackupRequestDto)
+            const localVarPath = `/api/projects/{projectId}/prompts/{id}/backup`
+                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createPromptBackupRequestDto, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieves a list of all prompts for the current tenant. Results are cached for 1 hour.
          * @summary Get all prompts
          * @param {string} projectId 
@@ -7835,21 +8008,99 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary Load prompt structure
-         * @param {string} projectId Project ID
-         * @param {string} id 
+         * Uses AI to analyze a basic prompt and suggest a complete structure with versions, translations, and assets.
+         * @summary Generate prompt structure using AI
+         * @param {string} projectId ID of the project for context
+         * @param {any} id Base prompt text or identifier
+         * @param {PromptControllerGenerateStructureAIRequest} promptControllerGenerateStructureAIRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerLoadStructure: async (projectId: string, id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        promptControllerGenerateStructureAI: async (projectId: string, id: any, promptControllerGenerateStructureAIRequest: PromptControllerGenerateStructureAIRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'projectId' is not null or undefined
-            assertParamExists('promptControllerLoadStructure', 'projectId', projectId)
+            assertParamExists('promptControllerGenerateStructureAI', 'projectId', projectId)
             // verify required parameter 'id' is not null or undefined
-            assertParamExists('promptControllerLoadStructure', 'id', id)
-            const localVarPath = `/api/projects/{projectId}/prompts/{id}/load-structure`
+            assertParamExists('promptControllerGenerateStructureAI', 'id', id)
+            // verify required parameter 'promptControllerGenerateStructureAIRequest' is not null or undefined
+            assertParamExists('promptControllerGenerateStructureAI', 'promptControllerGenerateStructureAIRequest', promptControllerGenerateStructureAIRequest)
+            const localVarPath = `/api/projects/{projectId}/prompts/{id}/generate-structure`
                 .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)))
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(promptControllerGenerateStructureAIRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Lists all available prompt backups for the project.
+         * @summary List prompt backups
+         * @param {string} projectId ID of the project to list backups for
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        promptControllerListBackups: async (projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'projectId' is not null or undefined
+            assertParamExists('promptControllerListBackups', 'projectId', projectId)
+            const localVarPath = `/api/projects/{projectId}/prompts/backups/list`
+                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Load prompt structure
+         * @param {string} id ID of the prompt
+         * @param {string} projectId ID of the project
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        promptControllerLoadStructure: async (id: string, projectId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('promptControllerLoadStructure', 'id', id)
+            // verify required parameter 'projectId' is not null or undefined
+            assertParamExists('promptControllerLoadStructure', 'projectId', projectId)
+            const localVarPath = `/api/projects/{projectId}/prompts/{id}/load-structure`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)))
+                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -7866,6 +8117,46 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Creates a complete prompt with all its components (versions, translations, assets) from a structured input.
+         * @summary Load complete prompt structure
+         * @param {string} projectId ID of the project where the structure will be loaded
+         * @param {LoadPromptStructureDto} loadPromptStructureDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        promptControllerLoadStructureComplete: async (projectId: string, loadPromptStructureDto: LoadPromptStructureDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'projectId' is not null or undefined
+            assertParamExists('promptControllerLoadStructureComplete', 'projectId', projectId)
+            // verify required parameter 'loadPromptStructureDto' is not null or undefined
+            assertParamExists('promptControllerLoadStructureComplete', 'loadPromptStructureDto', loadPromptStructureDto)
+            const localVarPath = `/api/projects/{projectId}/prompts/load-structure`
+                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(loadPromptStructureDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7979,6 +8270,21 @@ export const PromptsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Creates a complete backup of a prompt without deleting it.
+         * @summary Create prompt backup
+         * @param {string} projectId ID of the project the prompt belongs to
+         * @param {string} id Unique prompt identifier to backup
+         * @param {CreatePromptBackupRequestDto} createPromptBackupRequestDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async promptControllerCreateBackup(projectId: string, id: string, createPromptBackupRequestDto: CreatePromptBackupRequestDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerCreateBackup(projectId, id, createPromptBackupRequestDto, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerCreateBackup']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieves a list of all prompts for the current tenant. Results are cached for 1 hour.
          * @summary Get all prompts
          * @param {string} projectId 
@@ -8020,17 +8326,59 @@ export const PromptsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Load prompt structure
-         * @param {string} projectId Project ID
-         * @param {string} id 
+         * Uses AI to analyze a basic prompt and suggest a complete structure with versions, translations, and assets.
+         * @summary Generate prompt structure using AI
+         * @param {string} projectId ID of the project for context
+         * @param {any} id Base prompt text or identifier
+         * @param {PromptControllerGenerateStructureAIRequest} promptControllerGenerateStructureAIRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async promptControllerLoadStructure(projectId: string, id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerLoadStructure(projectId, id, options);
+        async promptControllerGenerateStructureAI(projectId: string, id: any, promptControllerGenerateStructureAIRequest: PromptControllerGenerateStructureAIRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerGenerateStructureAI(projectId, id, promptControllerGenerateStructureAIRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerGenerateStructureAI']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Lists all available prompt backups for the project.
+         * @summary List prompt backups
+         * @param {string} projectId ID of the project to list backups for
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async promptControllerListBackups(projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerListBackups(projectId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerListBackups']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Load prompt structure
+         * @param {string} id ID of the prompt
+         * @param {string} projectId ID of the project
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async promptControllerLoadStructure(id: string, projectId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerLoadStructure(id, projectId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerLoadStructure']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Creates a complete prompt with all its components (versions, translations, assets) from a structured input.
+         * @summary Load complete prompt structure
+         * @param {string} projectId ID of the project where the structure will be loaded
+         * @param {LoadPromptStructureDto} loadPromptStructureDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async promptControllerLoadStructureComplete(projectId: string, loadPromptStructureDto: LoadPromptStructureDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.promptControllerLoadStructureComplete(projectId, loadPromptStructureDto, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PromptsApi.promptControllerLoadStructureComplete']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -8084,6 +8432,18 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.promptControllerCreate(projectId, createPromptDto, options).then((request) => request(axios, basePath));
         },
         /**
+         * Creates a complete backup of a prompt without deleting it.
+         * @summary Create prompt backup
+         * @param {string} projectId ID of the project the prompt belongs to
+         * @param {string} id Unique prompt identifier to backup
+         * @param {CreatePromptBackupRequestDto} createPromptBackupRequestDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        promptControllerCreateBackup(projectId: string, id: string, createPromptBackupRequestDto: CreatePromptBackupRequestDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.promptControllerCreateBackup(projectId, id, createPromptBackupRequestDto, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieves a list of all prompts for the current tenant. Results are cached for 1 hour.
          * @summary Get all prompts
          * @param {string} projectId 
@@ -8116,15 +8476,48 @@ export const PromptsApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.promptControllerGenerateStructure(projectId, generatePromptStructureDto, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Load prompt structure
-         * @param {string} projectId Project ID
-         * @param {string} id 
+         * Uses AI to analyze a basic prompt and suggest a complete structure with versions, translations, and assets.
+         * @summary Generate prompt structure using AI
+         * @param {string} projectId ID of the project for context
+         * @param {any} id Base prompt text or identifier
+         * @param {PromptControllerGenerateStructureAIRequest} promptControllerGenerateStructureAIRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        promptControllerLoadStructure(projectId: string, id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.promptControllerLoadStructure(projectId, id, options).then((request) => request(axios, basePath));
+        promptControllerGenerateStructureAI(projectId: string, id: any, promptControllerGenerateStructureAIRequest: PromptControllerGenerateStructureAIRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.promptControllerGenerateStructureAI(projectId, id, promptControllerGenerateStructureAIRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Lists all available prompt backups for the project.
+         * @summary List prompt backups
+         * @param {string} projectId ID of the project to list backups for
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        promptControllerListBackups(projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.promptControllerListBackups(projectId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Load prompt structure
+         * @param {string} id ID of the prompt
+         * @param {string} projectId ID of the project
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        promptControllerLoadStructure(id: string, projectId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.promptControllerLoadStructure(id, projectId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Creates a complete prompt with all its components (versions, translations, assets) from a structured input.
+         * @summary Load complete prompt structure
+         * @param {string} projectId ID of the project where the structure will be loaded
+         * @param {LoadPromptStructureDto} loadPromptStructureDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        promptControllerLoadStructureComplete(projectId: string, loadPromptStructureDto: LoadPromptStructureDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.promptControllerLoadStructureComplete(projectId, loadPromptStructureDto, options).then((request) => request(axios, basePath));
         },
         /**
          * Permanently deletes a prompt. This is a destructive operation that requires admin privileges.
@@ -8173,6 +8566,20 @@ export class PromptsApi extends BaseAPI {
     }
 
     /**
+     * Creates a complete backup of a prompt without deleting it.
+     * @summary Create prompt backup
+     * @param {string} projectId ID of the project the prompt belongs to
+     * @param {string} id Unique prompt identifier to backup
+     * @param {CreatePromptBackupRequestDto} createPromptBackupRequestDto 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PromptsApi
+     */
+    public promptControllerCreateBackup(projectId: string, id: string, createPromptBackupRequestDto: CreatePromptBackupRequestDto, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerCreateBackup(projectId, id, createPromptBackupRequestDto, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Retrieves a list of all prompts for the current tenant. Results are cached for 1 hour.
      * @summary Get all prompts
      * @param {string} projectId 
@@ -8211,16 +8618,55 @@ export class PromptsApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Load prompt structure
-     * @param {string} projectId Project ID
-     * @param {string} id 
+     * Uses AI to analyze a basic prompt and suggest a complete structure with versions, translations, and assets.
+     * @summary Generate prompt structure using AI
+     * @param {string} projectId ID of the project for context
+     * @param {any} id Base prompt text or identifier
+     * @param {PromptControllerGenerateStructureAIRequest} promptControllerGenerateStructureAIRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PromptsApi
      */
-    public promptControllerLoadStructure(projectId: string, id: string, options?: RawAxiosRequestConfig) {
-        return PromptsApiFp(this.configuration).promptControllerLoadStructure(projectId, id, options).then((request) => request(this.axios, this.basePath));
+    public promptControllerGenerateStructureAI(projectId: string, id: any, promptControllerGenerateStructureAIRequest: PromptControllerGenerateStructureAIRequest, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerGenerateStructureAI(projectId, id, promptControllerGenerateStructureAIRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Lists all available prompt backups for the project.
+     * @summary List prompt backups
+     * @param {string} projectId ID of the project to list backups for
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PromptsApi
+     */
+    public promptControllerListBackups(projectId: string, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerListBackups(projectId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Load prompt structure
+     * @param {string} id ID of the prompt
+     * @param {string} projectId ID of the project
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PromptsApi
+     */
+    public promptControllerLoadStructure(id: string, projectId: string, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerLoadStructure(id, projectId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Creates a complete prompt with all its components (versions, translations, assets) from a structured input.
+     * @summary Load complete prompt structure
+     * @param {string} projectId ID of the project where the structure will be loaded
+     * @param {LoadPromptStructureDto} loadPromptStructureDto 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PromptsApi
+     */
+    public promptControllerLoadStructureComplete(projectId: string, loadPromptStructureDto: LoadPromptStructureDto, options?: RawAxiosRequestConfig) {
+        return PromptsApiFp(this.configuration).promptControllerLoadStructureComplete(projectId, loadPromptStructureDto, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -8941,7 +9387,7 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Permanently deletes a region. This is a destructive operation that requires admin privileges.
+         * Deletes a region by its language code. Accessible by global admins or tenant admins.
          * @summary Delete region
          * @param {string} langCode Language code of the region to delete (e.g., en-US, es-ES)
          * @param {string} projectId ID of the project
@@ -9082,7 +9528,7 @@ export const RegionsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Permanently deletes a region. This is a destructive operation that requires admin privileges.
+         * Deletes a region by its language code. Accessible by global admins or tenant admins.
          * @summary Delete region
          * @param {string} langCode Language code of the region to delete (e.g., en-US, es-ES)
          * @param {string} projectId ID of the project
@@ -9153,7 +9599,7 @@ export const RegionsApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.regionControllerFindOne(langCode, projectId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Permanently deletes a region. This is a destructive operation that requires admin privileges.
+         * Deletes a region by its language code. Accessible by global admins or tenant admins.
          * @summary Delete region
          * @param {string} langCode Language code of the region to delete (e.g., en-US, es-ES)
          * @param {string} projectId ID of the project
@@ -9224,7 +9670,7 @@ export class RegionsApi extends BaseAPI {
     }
 
     /**
-     * Permanently deletes a region. This is a destructive operation that requires admin privileges.
+     * Deletes a region by its language code. Accessible by global admins or tenant admins.
      * @summary Delete region
      * @param {string} langCode Language code of the region to delete (e.g., en-US, es-ES)
      * @param {string} projectId ID of the project
@@ -9499,7 +9945,7 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
     return {
         /**
          * 
-         * @summary Create a new system prompt (Admin Only - conceptually)
+         * @summary Create a new system prompt (Admin Only)
          * @param {CreateSystemPromptDto} createSystemPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -9611,7 +10057,7 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
         },
         /**
          * 
-         * @summary Delete a system prompt (Admin Only - conceptually)
+         * @summary Delete a system prompt (Admin Only)
          * @param {string} name Unique name of the system prompt to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -9649,7 +10095,7 @@ export const SystemPromptsApiAxiosParamCreator = function (configuration?: Confi
         },
         /**
          * 
-         * @summary Update an existing system prompt (Admin Only - conceptually)
+         * @summary Update an existing system prompt (Admin Only)
          * @param {string} name Unique name of the system prompt to update
          * @param {UpdateSystemPromptDto} updateSystemPromptDto 
          * @param {*} [options] Override http request option.
@@ -9703,7 +10149,7 @@ export const SystemPromptsApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
-         * @summary Create a new system prompt (Admin Only - conceptually)
+         * @summary Create a new system prompt (Admin Only)
          * @param {CreateSystemPromptDto} createSystemPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -9741,7 +10187,7 @@ export const SystemPromptsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Delete a system prompt (Admin Only - conceptually)
+         * @summary Delete a system prompt (Admin Only)
          * @param {string} name Unique name of the system prompt to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -9754,7 +10200,7 @@ export const SystemPromptsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Update an existing system prompt (Admin Only - conceptually)
+         * @summary Update an existing system prompt (Admin Only)
          * @param {string} name Unique name of the system prompt to update
          * @param {UpdateSystemPromptDto} updateSystemPromptDto 
          * @param {*} [options] Override http request option.
@@ -9778,7 +10224,7 @@ export const SystemPromptsApiFactory = function (configuration?: Configuration, 
     return {
         /**
          * 
-         * @summary Create a new system prompt (Admin Only - conceptually)
+         * @summary Create a new system prompt (Admin Only)
          * @param {CreateSystemPromptDto} createSystemPromptDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -9807,7 +10253,7 @@ export const SystemPromptsApiFactory = function (configuration?: Configuration, 
         },
         /**
          * 
-         * @summary Delete a system prompt (Admin Only - conceptually)
+         * @summary Delete a system prompt (Admin Only)
          * @param {string} name Unique name of the system prompt to delete
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -9817,7 +10263,7 @@ export const SystemPromptsApiFactory = function (configuration?: Configuration, 
         },
         /**
          * 
-         * @summary Update an existing system prompt (Admin Only - conceptually)
+         * @summary Update an existing system prompt (Admin Only)
          * @param {string} name Unique name of the system prompt to update
          * @param {UpdateSystemPromptDto} updateSystemPromptDto 
          * @param {*} [options] Override http request option.
@@ -9838,7 +10284,7 @@ export const SystemPromptsApiFactory = function (configuration?: Configuration, 
 export class SystemPromptsApi extends BaseAPI {
     /**
      * 
-     * @summary Create a new system prompt (Admin Only - conceptually)
+     * @summary Create a new system prompt (Admin Only)
      * @param {CreateSystemPromptDto} createSystemPromptDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -9873,7 +10319,7 @@ export class SystemPromptsApi extends BaseAPI {
 
     /**
      * 
-     * @summary Delete a system prompt (Admin Only - conceptually)
+     * @summary Delete a system prompt (Admin Only)
      * @param {string} name Unique name of the system prompt to delete
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -9885,7 +10331,7 @@ export class SystemPromptsApi extends BaseAPI {
 
     /**
      * 
-     * @summary Update an existing system prompt (Admin Only - conceptually)
+     * @summary Update an existing system prompt (Admin Only)
      * @param {string} name Unique name of the system prompt to update
      * @param {UpdateSystemPromptDto} updateSystemPromptDto 
      * @param {*} [options] Override http request option.

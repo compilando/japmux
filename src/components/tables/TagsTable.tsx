@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TagDto } from '@/services/generated/api';
 import CopyButton from '../common/CopyButton';
-import { TrashBinIcon, PencilIcon, InfoIcon, CheckLineIcon, CloseLineIcon } from "@/icons";
+import { TrashIcon, PencilIcon, InfoIcon, CheckLineIcon, CloseLineIcon } from "@/icons";
 
 interface TagsTableProps {
     tags: TagDto[];
@@ -203,7 +203,7 @@ const TagsTable: React.FC<TagsTableProps> = ({ tags, onEdit, onDelete, onAdd, is
                                                     className="text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-700/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
                                                     aria-label="Delete Tag" title="Delete"
                                                 >
-                                                    <TrashBinIcon className="w-5 h-5" />
+                                                    <TrashIcon className="w-5 h-5" />
                                                 </button>
                                             </>
                                         )}

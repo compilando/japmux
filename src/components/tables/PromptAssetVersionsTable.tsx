@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { AssetVersionUIData } from '@/app/(admin)/projects/[projectId]/prompts/[promptId]/assets/[assetKey]/versions/page';
 import CopyButton from '../common/CopyButton';
 import { format } from 'date-fns';
-import { PencilIcon, TrashBinIcon, ChevronDownIcon, ChevronUpIcon } from "@/icons";
+import { PencilIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from "@/icons";
 import { DocumentDuplicateIcon, LanguageIcon } from '@heroicons/react/24/outline';
 
 interface PromptAssetVersionsTableProps {
@@ -130,7 +130,7 @@ const PromptAssetVersionsTable: React.FC<PromptAssetVersionsTableProps> = ({
                                                 className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200"
                                                 title="Delete Version"
                                             >
-                                                <TrashBinIcon />
+                                                <TrashIcon />
                                             </button>
                                         </div>
                                     </div>

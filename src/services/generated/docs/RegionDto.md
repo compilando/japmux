@@ -12,7 +12,6 @@ Name | Type | Description | Notes
 **languageCode** | **string** | Language code for the region | [default to undefined]
 **parentRegionId** | **string** | ID of the parent region, if any | [optional] [default to undefined]
 **timeZone** | **string** | Time zone for the region | [default to undefined]
-**defaultFormalityLevel** | **string** | Default formality level for the region | [optional] [default to undefined]
 **notes** | **string** | Optional notes about the region | [optional] [default to undefined]
 **createdAt** | **string** | Creation timestamp | [default to undefined]
 **updatedAt** | **string** | Last update timestamp | [default to undefined]
@@ -30,7 +29,6 @@ const instance: RegionDto = {
     languageCode,
     parentRegionId,
     timeZone,
-    defaultFormalityLevel,
     notes,
     createdAt,
     updatedAt,

@@ -156,7 +156,7 @@ const apiInstance = new PromptAssetVersionsApi(configuration);
 let projectId: string; //ID of the Project the Prompt belongs to (default to undefined)
 let promptId: string; //ID (slug) of the Prompt (default to undefined)
 let assetKey: string; //Key of the PromptAsset (default to undefined)
-let versionTag: string; //Version tag (e.g., v1.0.0) (default to undefined)
+let versionTag: string; //Version tag (e.g., 1.0.0) (default to undefined)
 let languageCode: string; // (default to undefined)
 
 const { status, data } = await apiInstance.promptAssetVersionControllerFindOneByTag(
@@ -175,7 +175,7 @@ const { status, data } = await apiInstance.promptAssetVersionControllerFindOneBy
 | **projectId** | [**string**] | ID of the Project the Prompt belongs to | defaults to undefined|
 | **promptId** | [**string**] | ID (slug) of the Prompt | defaults to undefined|
 | **assetKey** | [**string**] | Key of the PromptAsset | defaults to undefined|
-| **versionTag** | [**string**] | Version tag (e.g., v1.0.0) | defaults to undefined|
+| **versionTag** | [**string**] | Version tag (e.g., 1.0.0) | defaults to undefined|
 | **languageCode** | [**string**] |  | defaults to undefined|
 
 

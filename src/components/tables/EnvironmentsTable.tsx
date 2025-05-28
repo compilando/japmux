@@ -1,7 +1,7 @@
 import React from 'react';
 import { CreateEnvironmentDto } from '@/services/api';
 import CopyButton from '../common/CopyButton';
-import { TrashBinIcon, PencilIcon, InfoIcon } from "@/icons";
+import { TrashIcon, PencilIcon, InfoIcon } from "@/icons";
 
 interface EnvironmentTableRowData extends CreateEnvironmentDto {
     id: string;
@@ -75,7 +75,7 @@ const EnvironmentsTable: React.FC<EnvironmentsTableProps> = ({ environments, onE
                                             className="text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-700/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
                                             aria-label="Delete Environment" title="Delete"
                                         >
-                                            <TrashBinIcon className="w-5 h-5" />
+                                            <TrashIcon className="w-5 h-5" />
                                         </button>
                                     </div>
                                 </td>

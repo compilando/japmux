@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserProfileResponse } from '@/services/api'; // Usar UserProfileResponse directamente
 import CopyButton from '../common/CopyButton';
-import { TrashBinIcon, PencilIcon, UserCircleIcon, InfoIcon } from "@/icons"; // Añadir UserCircleIcon e InfoIcon
+import { TrashIcon, PencilIcon, UserCircleIcon, InfoIcon } from "@/icons"; // Añadir UserCircleIcon e InfoIcon
 import { format } from 'date-fns'; // Para formatear la fecha
 
 interface UsersTableProps {
@@ -112,7 +112,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onEdit, onDelete }) => {
                                         className="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-700/20 transition-colors"
                                         aria-label="Delete User" title="Delete User"
                                     >
-                                        <TrashBinIcon />
+                                        <TrashIcon />
                                     </button>
                                 </div>
                             </td>

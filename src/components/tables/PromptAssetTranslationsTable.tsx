@@ -1,7 +1,7 @@
 import React from 'react';
 import { CreateAssetTranslationDto } from '@/services/api';
 import CopyButton from '../common/CopyButton';
-import { TrashBinIcon, PencilIcon } from "@/icons";
+import { TrashIcon, PencilIcon } from "@/icons";
 
 interface PromptAssetTranslationsTableProps {
     translations: CreateAssetTranslationDto[];
@@ -73,7 +73,7 @@ const PromptAssetTranslationsTable: React.FC<PromptAssetTranslationsTableProps> 
                                         aria-label="Delete Translation"
                                         disabled={loading}
                                     >
-                                        <TrashBinIcon />
+                                        <TrashIcon />
                                     </button>
                                 </div>
                             </td>

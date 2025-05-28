@@ -3,7 +3,7 @@ import { PromptDto } from '@/services/generated/api';
 import Link from 'next/link';
 import { usePrompts } from '@/context/PromptContext';
 import CopyButton from '../common/CopyButton';
-import { TrashBinIcon, PencilIcon, BoxCubeIcon } from "@/icons";
+import { TrashIcon, PencilIcon, BoxCubeIcon } from "@/icons";
 import { BoltIcon, ClockIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import { promptVersionService, promptAssetService } from '@/services/api';
 import { getPromptTypeLabel, getPromptTypeColor } from '@/config/promptTypes';
@@ -248,7 +248,7 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
                                             <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
                                         </div>
                                     ) : (
-                                        <TrashBinIcon />
+                                        <TrashIcon />
                                     )}
                                 </button>
                             </div>

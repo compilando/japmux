@@ -1,5 +1,5 @@
 import React from 'react';
-import { PencilIcon, TrashBinIcon, BoxCubeIcon } from '@/icons'; // Cambiado ServerIcon a BoxCubeIcon
+import { PencilIcon, TrashIcon, BoxCubeIcon } from '@/icons'; // Cambiado ServerIcon a BoxCubeIcon
 
 // Asumimos que el Environment que llega a la UI tiene al menos estos campos
 export interface EnvironmentData {
@@ -45,7 +45,7 @@ const EnvironmentCardItem: React.FC<EnvironmentCardItemProps> = ({ environment, 
                                 className="text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-700/20 transition-colors"
                                 title="Delete Environment"
                             >
-                                <TrashBinIcon className="w-5 h-5" />
+                                <TrashIcon className="w-5 h-5" />
                             </button>
                         </div>
                     </div>
