@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useProjects } from '@/context/ProjectContext';
 import { useTenantAdmin } from '@/hooks/useTenantAdmin';
 import {
@@ -14,13 +15,21 @@ import {
     PaperPlaneIcon,
     TaskIcon,
 } from '@/icons';
+import {
+    DocumentDuplicateIcon,
+    LanguageIcon,
+    TagIcon,
+    GlobeAltIcon as GlobeIcon,
+    AcademicCapIcon,
+    DocumentTextIcon,
+    ClockIcon,
+} from '@heroicons/react/24/outline';
 import Breadcrumb from '@/components/common/Breadcrumb';
 import { dashboardService, DashboardStats, RecentActivity } from '@/services/api/dashboardService';
-import axios, { AxiosError } from 'axios';
 
 const DashboardPage: React.FC = () => {
     const router = useRouter();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const { selectedProjectId } = useProjects();
     const { isTenantAdmin } = useTenantAdmin();
     const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -38,31 +47,22 @@ const DashboardPage: React.FC = () => {
             try {
                 setIsLoading(true);
                 const [statsData, activityData] = await Promise.all([
-                    dashboardService.getStats(),
-                    dashboardService.getRecentActivity()
+                    dashboardService.getStats(selectedProjectId || undefined),
+                    dashboardService.getRecentActivity(selectedProjectId || undefined)
                 ]);
                 setStats(statsData);
                 setRecentActivity(activityData);
                 setError(null);
-            } catch (err: unknown) {
+            } catch (err) {
                 console.error('Error detallado del dashboard:', err);
-                if (err instanceof AxiosError) {
-                    console.error('Detalles del error Axios:', {
-                        status: err.response?.status,
-                        data: err.response?.data,
-                        headers: err.response?.headers
-                    });
-                    setError(`Error al cargar los datos del dashboard: ${err.response?.data?.message || err.message}`);
-                } else {
-                    setError(`Error al cargar los datos del dashboard: ${err instanceof Error ? err.message : String(err)}`);
-                }
+                setError('Error al cargar los datos del dashboard. Por favor, intente nuevamente más tarde.');
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchDashboardData();
-    }, [isAuthenticated, router]);
+    }, [isAuthenticated, router, selectedProjectId]);
 
     const quickActions = [
         {
@@ -184,10 +184,16 @@ const DashboardPage: React.FC = () => {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {quickActions.map((action) => (
-                        <a
+                        <Link
                             key={action.name}
                             href={action.href}
-                            className="block bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                            className="block p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                            onClick={(e) => {
+                                if (action.href === '#') {
+                                    e.preventDefault();
+                                    return;
+                                }
+                            }}
                         >
                             <div className={`${action.color} p-3 rounded-full w-12 h-12 flex items-center justify-center text-white mb-4`}>
                                 {action.icon}
@@ -198,7 +204,7 @@ const DashboardPage: React.FC = () => {
                             <p className="text-gray-600 dark:text-gray-400">
                                 {action.description}
                             </p>
-                        </a>
+                        </Link>
                     ))}
                 </div>
             </div>
@@ -209,26 +215,111 @@ const DashboardPage: React.FC = () => {
                     Actividad Reciente
                 </h2>
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-                    {recentActivity.map((activity) => (
-                        <div
-                            key={activity.id}
-                            className="flex items-center p-4 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
-                        >
-                            <div className="p-2 bg-brand-100 dark:bg-brand-900 rounded-full mr-4">
-                                {activity.type === 'prompt' && <PaperPlaneIcon className="h-5 w-5" />}
-                                {activity.type === 'model' && <BoltIcon className="h-5 w-5" />}
-                                {activity.type === 'project' && <FolderIcon className="h-5 w-5" />}
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-gray-900 dark:text-white">
-                                    {activity.description}
-                                </p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {new Date(activity.timestamp).toLocaleString()}
-                                </p>
+                    {recentActivity.length === 0 ? (
+                        <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                            <div className="flex flex-col items-center">
+                                <ClockIcon className="h-12 w-12 mb-4 text-gray-400" />
+                                <p className="text-lg font-medium">No hay actividad reciente</p>
+                                <p className="text-sm mt-1">Las acciones que realices aparecerán aquí</p>
                             </div>
                         </div>
-                    ))}
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-800/50">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Usuario
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Acción
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Detalles
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Proyecto
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Fecha
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                    {recentActivity.map((activity) => (
+                                        <tr key={activity.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    <div className="flex-shrink-0 h-8 w-8">
+                                                        <div className="p-1.5 bg-brand-100 dark:bg-brand-900 rounded-full">
+                                                            {activity.entityType === 'PROMPT' && <PaperPlaneIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
+                                                            {activity.entityType === 'AI_MODEL' && <BoltIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
+                                                            {activity.entityType === 'PROJECT' && <FolderIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
+                                                            {activity.entityType === 'PROMPT_ASSET' && <DocumentDuplicateIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
+                                                            {activity.entityType === 'PROMPT_TRANSLATION' && <LanguageIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
+                                                            {activity.entityType === 'ENVIRONMENT' && <BuildingIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
+                                                            {activity.entityType === 'TAG' && <TagIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
+                                                            {activity.entityType === 'REGION' && <GlobeIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
+                                                            {activity.entityType === 'CULTURAL_DATA' && <AcademicCapIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
+                                                            {activity.entityType === 'RAG_DOCUMENT' && <DocumentTextIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
+                                                        </div>
+                                                    </div>
+                                                    <div className="ml-3">
+                                                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                                            {activity.userName}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900 dark:text-white">
+                                                    <span className="font-medium">
+                                                        {activity.action.toLowerCase() === 'create' && 'Creó'}
+                                                        {activity.action.toLowerCase() === 'update' && 'Actualizó'}
+                                                        {activity.action.toLowerCase() === 'delete' && 'Eliminó'}
+                                                        {activity.action.toLowerCase() === 'publish' && 'Publicó'}
+                                                        {activity.action.toLowerCase() === 'unpublish' && 'Despublicó'}
+                                                        {activity.action.toLowerCase() === 'approve' && 'Aprobó'}
+                                                        {activity.action.toLowerCase() === 'reject' && 'Rechazó'}
+                                                    </span>
+                                                    {' '}
+                                                    <span className="text-gray-500 dark:text-gray-400">
+                                                        {activity.entityType.toLowerCase().replace(/_/g, ' ')}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm text-gray-900 dark:text-white">
+                                                    {activity.changes?.new && (
+                                                        <div className="space-y-1">
+                                                            {Object.entries(activity.changes.new).map(([key, value]) => (
+                                                                <div key={key} className="flex items-start">
+                                                                    <span className="font-medium text-gray-700 dark:text-gray-300 min-w-[80px]">
+                                                                        {key}:
+                                                                    </span>
+                                                                    <span className="text-gray-600 dark:text-gray-400 ml-2 break-all">
+                                                                        {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                                                                    </span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900 dark:text-white">
+                                                    {activity.projectName || activity.projectId}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500 dark:text-gray-400">
+                                                {new Date(activity.timestamp).toLocaleString()}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

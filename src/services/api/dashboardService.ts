@@ -1,5 +1,6 @@
-import { projectService, userService } from '@/services/api';
-import * as generated from '@/services/generated';
+import { apiClient } from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
+import { useProjects } from '@/context/ProjectContext';
 
 export interface DashboardStats {
     activeProjects: number;
@@ -10,51 +11,50 @@ export interface DashboardStats {
 
 export interface RecentActivity {
     id: string;
-    type: 'project' | 'user' | 'prompt' | 'model';
-    description: string;
     timestamp: string;
+    action: 'CREATE' | 'UPDATE' | 'DELETE' | 'PUBLISH' | 'UNPUBLISH' | 'APPROVE' | 'REJECT';
+    entityType: 'PROMPT' | 'PROMPT_VERSION' | 'PROMPT_TRANSLATION' | 'PROMPT_ASSET' | 'PROMPT_ASSET_VERSION' | 'ASSET_TRANSLATION' | 'PROJECT' | 'ENVIRONMENT' | 'AI_MODEL' | 'TAG' | 'REGION' | 'CULTURAL_DATA' | 'RAG_DOCUMENT';
+    entityId: string;
+    userId: string;
+    userName: string;
+    projectId: string;
+    projectName: string;
+    details: {
+        method: string;
+        path: string;
+        params: Record<string, string>;
+    };
+    changes: {
+        new: Record<string, any>;
+        old?: Record<string, any>;
+    };
 }
 
-export const dashboardService = {
-    getStats: async (): Promise<DashboardStats> => {
-        try {
-            const projects = await projectService.findAll();
-            const users = await userService.findAll();
-
-            return {
-                activeProjects: projects.length,
-                executedPrompts: 0,
-                activeModels: 0,
-                activeUsers: users.length,
-            };
-        } catch (error) {
-            console.error("Error fetching dashboard stats:", error);
-            return {
-                activeProjects: 0,
-                executedPrompts: 0,
-                activeModels: 0,
-                activeUsers: 0,
-            };
-        }
-    },
-
-    getRecentActivity: async (): Promise<RecentActivity[]> => {
-        try {
-            const projects: generated.ProjectDto[] = await projectService.findAll();
-            const recentProjects = projects
-                .filter(p => (p as any).createdAt)
-                .sort((a, b) => new Date((b as any).createdAt).getTime() - new Date((a as any).createdAt).getTime())
-                .slice(0, 5)
-                .map((project: generated.ProjectDto) => ({
-                    id: project.id || `project-${Math.random().toString(16).slice(2)}`,
-                    type: 'project' as 'project',
-                    description: `Nuevo proyecto creado: ${project.name}`,
-                    timestamp: (project as any).createdAt ? new Date((project as any).createdAt).toISOString() : new Date().toISOString(),
-                }));
-            return recentProjects;
-        } catch (error) {
-            console.error("Error fetching recent activity:", error);
-            return [];
-        }
+class DashboardService {
+    async getStats(projectId?: string): Promise<DashboardStats> {
+        const url = projectId
+            ? `/api/dashboard/stats?projectId=${projectId}`
+            : '/api/dashboard/stats';
+        const response = await apiClient.get<DashboardStats>(url);
+        return response.data;
     }
-}; 
+
+    async getRecentActivity(projectId?: string): Promise<RecentActivity[]> {
+        const params = {
+            limit: 10,
+            offset: 0,
+            projectId: projectId || '',
+            entityType: '', // TODO: Filtrar por tipo de entidad si es necesario
+            action: '' // TODO: Filtrar por acción si es necesario
+        };
+        const response = await apiClient.get<RecentActivity[]>('/api/dashboard/recent-activity', { params });
+        return response.data;
+    }
+
+    async getActivity(): Promise<RecentActivity[]> {
+        const response = await apiClient.get<RecentActivity[]>('/api/dashboard/activity');
+        return response.data;
+    }
+}
+
+export const dashboardService = new DashboardService(); 
