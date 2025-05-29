@@ -1,0 +1,1 @@
+export { UserGroupIcon } from '@heroicons/react/24/outline'; 

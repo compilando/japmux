@@ -203,18 +203,28 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Previous Version ({previousVersion.versionTag})
                                 </h4>
-                                <CopyButton textToCopy={previousVersion.promptText} />
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPromptText(previousVersion.promptText)}
+                                        className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:text-indigo-200 dark:bg-indigo-900 dark:hover:bg-indigo-800"
+                                    >
+                                        <DocumentDuplicateIcon className="h-4 w-4 mr-1" />
+                                        Copy to New Version
+                                    </button>
+                                    <CopyButton textToCopy={previousVersion.promptText} />
+                                </div>
                             </div>
-                            <div className="bg-[#343541] border border-gray-700 rounded-lg p-4 h-full min-h-[200px]">
-                                <pre className="text-sm text-gray-100 whitespace-pre-wrap font-mono h-full overflow-y-auto">
+                            <div className="bg-white border border-gray-200 rounded-lg p-4 h-full min-h-[200px]">
+                                <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono h-full overflow-y-auto">
                                     {previousVersion.promptText}
                                 </pre>
                             </div>
                         </>
                     )}
                     {!isEditing && !previousVersion && (
-                        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full min-h-[200px] flex items-center justify-center">
-                            <p className="text-sm text-gray-400 font-mono">No previous version data to display.</p>
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 h-full min-h-[200px] flex items-center justify-center">
+                            <p className="text-sm text-gray-600 font-mono">No previous version data to display.</p>
                         </div>
                     )}
                     {isEditing && initialData && (
@@ -222,8 +232,8 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Current Prompt (Editing Version {initialData.versionTag})
                             </h4>
-                            <div className="bg-[#343541] border border-gray-700 rounded-lg p-4 h-full min-h-[200px]">
-                                <pre className="text-sm text-gray-100 whitespace-pre-wrap font-mono h-full overflow-y-auto">
+                            <div className="bg-white border border-gray-200 rounded-lg p-4 h-full min-h-[200px]">
+                                <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono h-full overflow-y-auto">
                                     {initialData.promptText}
                                 </pre>
                             </div>

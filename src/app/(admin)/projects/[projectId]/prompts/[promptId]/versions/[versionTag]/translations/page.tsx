@@ -65,6 +65,25 @@ const PromptTranslationsPage: React.FC = () => {
     const [currentVersionId, setCurrentVersionId] = useState<string | null>(null);
 
     useEffect(() => {
+        const fetchVersionId = async () => {
+            if (!projectId || !promptId || !versionTag) return;
+            try {
+                const version = await promptVersionService.findOne(projectId, promptId, versionTag);
+                if (version) {
+                    const versionWithExtras = version as any;
+                    if (versionWithExtras.id) {
+                        setCurrentVersionId(versionWithExtras.id);
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching version ID:', err);
+            }
+        };
+
+        fetchVersionId();
+    }, [projectId, promptId, versionTag]);
+
+    useEffect(() => {
         setCurrentVersionId(versionIdQueryParam);
     }, [versionIdQueryParam]);
 
@@ -228,12 +247,6 @@ const PromptTranslationsPage: React.FC = () => {
             const version = await promptVersionService.findOne(projectId, promptId, versionTag);
             if (!version) {
                 throw new Error(`Version "${versionTag}" not found. Please verify that the version exists.`);
-            }
-
-            const versionWithExtras = version as any;
-            const versionId = versionWithExtras.id;
-            if (!versionId) {
-                throw new Error(`Could not find internal ID for version "${versionTag}". Please try refreshing the page.`);
             }
 
             let message = "";

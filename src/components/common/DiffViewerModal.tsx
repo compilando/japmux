@@ -61,7 +61,7 @@ const DiffViewerModal: React.FC<DiffViewerModalProps> = ({ isOpen, onClose, diff
                         <div>Versión: <span className="font-mono text-brand-600 dark:text-brand-400">{versionInfo1.tag}</span> (Rojo: Eliminado de esta)</div>
                         <div>Versión: <span className="font-mono text-brand-600 dark:text-brand-400">{versionInfo2.tag}</span> (Verde: Añadido en esta)</div>
                     </div>
-                    <pre className="text-sm whitespace-pre-wrap font-mono bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <pre className="text-sm whitespace-pre-wrap font-mono bg-white p-4 rounded-md border border-gray-200 shadow-sm">
                         {diffResult.map((part, index) => (
                             <span key={index} className={`block ${getLineColor(part)}`}>
                                 <span className={`inline-block w-6 text-right pr-2 opacity-70 ${part.added ? 'text-green-700 dark:text-green-300' : part.removed ? 'text-red-700 dark:text-red-300' : 'text-gray-500 dark:text-gray-400'}`}>

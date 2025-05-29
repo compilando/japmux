@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { useProjects } from "../context/ProjectContext";
 import { useTenantAdmin } from "@/hooks/useTenantAdmin";
+import { useAuth } from "@/context/AuthContext";
 import {
   HorizontaLDots,
   TableIcon,
@@ -22,6 +23,7 @@ import {
   BuildingIcon,
 } from "../icons/index";
 import SidebarNavItem from "./SidebarNavItem";
+import { ExtendedUserProfileResponse } from "@/services/api";
 
 // Define SubItem type
 export interface SubItem {
@@ -46,51 +48,70 @@ const AppSidebar: React.FC = () => {
   const pathname = usePathname();
   const { selectedProjectId } = useProjects();
   const { isTenantAdmin } = useTenantAdmin();
+  const { user } = useAuth();
+  const userRole = (user as ExtendedUserProfileResponse)?.role;
 
-  // Define navItems first
-  const navItems: NavItem[] = [
-    {
-      icon: <UserCircleIcon />,
-      name: "Control Center",
-      path: "/management",
-      subItems: [
-        { name: "Users", path: "/users", icon: <UserCircleIcon /> },
-        { icon: <FolderIcon />, name: "Projects", path: "/projects" },
-        ...(isTenantAdmin ? [{ icon: <BuildingIcon />, name: "Tenants", path: "/tenants" }] : []),
-      ],
-    },
-    {
-      icon: <BoltIcon />,
-      name: "Current Project",
-      path: "/current-project",
-      subItems: selectedProjectId ? [
-        { name: "AI Models", path: "/ai-models", icon: <BoltIcon /> },
-        { name: "Environments", path: "/environments", icon: <TableIcon /> },
-        { name: "Regions", path: "/regions", icon: <ListIcon /> },
-        { name: "Cultural Data", path: "/cultural-data", icon: <EyeIcon /> },
-        { name: "Tags", path: "/tags", icon: <ChatIcon /> },
-      ] : [],
-    },
-    {
-      icon: <TaskIcon />,
-      name: "My Prompts",
-      path: selectedProjectId ? `/projects/${selectedProjectId}/prompts` : undefined,
-    },
-    {
-      icon: <PaperPlaneIcon />,
-      name: "Execute Prompt",
-      path: "/serveprompt",
-      new: true
-    },
-    {
-      icon: <ShootingStarIcon />,
-      name: "Magic Assistant",
-      path: "/prompt-wizard",
-      pro: true
+  // Define navItems based on user role
+  const getNavItems = (): NavItem[] => {
+    if (userRole === 'tenant_admin') {
+      return [
+        {
+          icon: <UserCircleIcon />,
+          name: "Control Center",
+          path: "/management",
+          subItems: [
+            { name: "Users", path: "/users", icon: <UserCircleIcon /> },
+            { icon: <FolderIcon />, name: "Projects", path: "/projects" },
+            { icon: <BuildingIcon />, name: "Tenants", path: "/tenants" },
+          ],
+        }
+      ];
+    } else if (userRole === 'admin') {
+      return [
+        {
+          icon: <UserCircleIcon />,
+          name: "Control Center",
+          path: "/management",
+          subItems: [
+            { name: "Users", path: "/users", icon: <UserCircleIcon /> },
+            { icon: <FolderIcon />, name: "Projects", path: "/projects" },
+          ],
+        },
+        {
+          icon: <BoltIcon />,
+          name: "Current Project",
+          path: "/current-project",
+          subItems: selectedProjectId ? [
+            { name: "AI Models", path: "/ai-models", icon: <BoltIcon /> },
+            { name: "Environments", path: "/environments", icon: <TableIcon /> },
+            { name: "Regions", path: "/regions", icon: <ListIcon /> },
+            { name: "Cultural Data", path: "/cultural-data", icon: <EyeIcon /> },
+            { name: "Tags", path: "/tags", icon: <ChatIcon /> },
+          ] : [],
+        },
+        {
+          icon: <TaskIcon />,
+          name: "My Prompts",
+          path: selectedProjectId ? `/projects/${selectedProjectId}/prompts` : undefined,
+        },
+        {
+          icon: <PaperPlaneIcon />,
+          name: "Execute Prompt",
+          path: "/serveprompt",
+          new: true
+        },
+        {
+          icon: <ShootingStarIcon />,
+          name: "Magic Assistant",
+          path: "/prompt-wizard",
+          pro: true
+        }
+      ];
     }
-  ].filter(item => !(item.subItems && item.subItems.length === 0 && item.name === "Current Project"));
+    return [];
+  };
 
-  // Índice removido por no ser utilizado
+  const navItems = getNavItems().filter(item => !(item.subItems && item.subItems.length === 0 && item.name === "Current Project"));
 
   // State for submenu toggle and height calculation
   const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);

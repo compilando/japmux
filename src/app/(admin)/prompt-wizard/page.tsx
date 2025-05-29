@@ -50,6 +50,7 @@ const PromptWizardPage: React.FC = () => {
     const [generatedJson, setGeneratedJson] = useState<StructureData | null>(null);
     const [isLoadingGenerate, setIsLoadingGenerate] = useState<boolean>(false);
     const [errorGenerate, setErrorGenerate] = useState<string | null>(null);
+    const [isLoaded, setIsLoaded] = useState<boolean>(false); // Nuevo estado para controlar si ya se cargó
 
     // jsonToLoadInput será el estado para el textarea unificado
     const [jsonToLoadInput, setJsonToLoadInput] = useState<string>('');
@@ -332,6 +333,7 @@ const PromptWizardPage: React.FC = () => {
                 message: `Success: Prompt "${promptName}" created with ${parsedJson.assets?.length || 0} assets.`
             });
             setGeneratedJson(parsedJson);
+            setIsLoaded(true); // Marcar como cargado exitosamente
 
         } catch (error) {
             console.error("Error loading structure:", error);
@@ -473,15 +475,17 @@ const PromptWizardPage: React.FC = () => {
                                     </div>
 
                                     <div className="mt-4 flex items-center justify-end">
-                                        <button
-                                            onClick={handleLoadStructure}
-                                            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoadingLoad || !selectedProjectId || !jsonToLoadInput.trim() || !promptName.trim() || !validatePromptName(promptName) || !selectedLanguageCode ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            type="button"
-                                            disabled={isLoadingLoad || !selectedProjectId || !jsonToLoadInput.trim() || !promptName.trim() || !validatePromptName(promptName) || !selectedLanguageCode}
-                                            title={!selectedProjectId ? "Select a project to load structure" : !jsonToLoadInput.trim() ? "JSON cannot be empty" : !promptName.trim() ? "Prompt name is required" : !validatePromptName(promptName) ? "Invalid prompt name format" : !selectedLanguageCode ? "Language selection required" : "Load this JSON structure to the project"}
-                                        >
-                                            {isLoadingLoad ? 'Loading...' : 'Load Prompt in Project'}
-                                        </button>
+                                        {!isLoaded && (
+                                            <button
+                                                onClick={handleLoadStructure}
+                                                className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoadingLoad || !selectedProjectId || !jsonToLoadInput.trim() || !promptName.trim() || !validatePromptName(promptName) || !selectedLanguageCode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                type="button"
+                                                disabled={isLoadingLoad || !selectedProjectId || !jsonToLoadInput.trim() || !promptName.trim() || !validatePromptName(promptName) || !selectedLanguageCode}
+                                                title={!selectedProjectId ? "Select a project to load structure" : !jsonToLoadInput.trim() ? "JSON cannot be empty" : !promptName.trim() ? "Prompt name is required" : !validatePromptName(promptName) ? "Invalid prompt name format" : !selectedLanguageCode ? "Language selection required" : "Load this JSON structure to the project"}
+                                            >
+                                                {isLoadingLoad ? 'Loading...' : 'Load Prompt in Project'}
+                                            </button>
+                                        )}
                                     </div>
                                     {loadStatusMessage && (
                                         <div className={`mt-4 px-4 py-3 rounded relative border ${loadStatusMessage.type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'}`} role="alert">

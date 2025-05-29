@@ -211,10 +211,12 @@ const DashboardPage: React.FC = () => {
 
             {/* Recent Activity */}
             <div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                    Actividad Reciente
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <span className="bg-gradient-to-r from-brand-500 to-brand-600 bg-clip-text text-transparent">
+                        Actividad Reciente
+                    </span>
                 </h2>
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700">
                     {recentActivity.length === 0 ? (
                         <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                             <div className="flex flex-col items-center">
@@ -226,8 +228,8 @@ const DashboardPage: React.FC = () => {
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead className="bg-gray-50 dark:bg-gray-800/50">
-                                    <tr>
+                                <thead>
+                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50">
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                             Usuario
                                         </th>
@@ -247,11 +249,11 @@ const DashboardPage: React.FC = () => {
                                 </thead>
                                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     {recentActivity.map((activity) => (
-                                        <tr key={activity.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                                        <tr key={activity.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 group">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <div className="flex-shrink-0 h-8 w-8">
-                                                        <div className="p-1.5 bg-brand-100 dark:bg-brand-900 rounded-full">
+                                                        <div className="p-1.5 bg-gradient-to-br from-brand-100 to-brand-200 dark:from-brand-900 dark:to-brand-800 rounded-full group-hover:scale-110 transition-transform duration-200">
                                                             {activity.entityType === 'PROMPT' && <PaperPlaneIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
                                                             {activity.entityType === 'AI_MODEL' && <BoltIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
                                                             {activity.entityType === 'PROJECT' && <FolderIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
@@ -265,15 +267,15 @@ const DashboardPage: React.FC = () => {
                                                         </div>
                                                     </div>
                                                     <div className="ml-3">
-                                                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                                        <div className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors duration-200">
                                                             {activity.userName}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-900 dark:text-white">
-                                                    <span className="font-medium">
+                                                <div className="text-sm">
+                                                    <span className="font-medium text-brand-600 dark:text-brand-400">
                                                         {activity.action.toLowerCase() === 'create' && 'Creó'}
                                                         {activity.action.toLowerCase() === 'update' && 'Actualizó'}
                                                         {activity.action.toLowerCase() === 'delete' && 'Eliminó'}
@@ -289,12 +291,12 @@ const DashboardPage: React.FC = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="text-sm text-gray-900 dark:text-white">
+                                                <div className="text-sm">
                                                     {activity.changes?.new && (
                                                         <div className="space-y-1">
                                                             {Object.entries(activity.changes.new).map(([key, value]) => (
                                                                 <div key={key} className="flex items-start">
-                                                                    <span className="font-medium text-gray-700 dark:text-gray-300 min-w-[80px]">
+                                                                    <span className="font-medium text-brand-600 dark:text-brand-400 min-w-[80px]">
                                                                         {key}:
                                                                     </span>
                                                                     <span className="text-gray-600 dark:text-gray-400 ml-2 break-all">
@@ -307,8 +309,10 @@ const DashboardPage: React.FC = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-900 dark:text-white">
-                                                    {activity.projectName || activity.projectId}
+                                                <div className="text-sm">
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-100 text-brand-800 dark:bg-brand-900 dark:text-brand-200">
+                                                        {activity.projectName || activity.projectId}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500 dark:text-gray-400">

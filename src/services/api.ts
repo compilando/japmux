@@ -753,3 +753,103 @@ export const culturalDataService = {
         await apiClient.delete(`/api/projects/${projectId}/cultural-data/${key}`);
     },
 };
+
+// Tipos para Tenants
+export interface TenantResponseDto {
+    id: string;
+    name: string;
+    description?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CreateTenantDto {
+    name: string;
+    description?: string;
+}
+
+export interface UpdateTenantDto {
+    name?: string;
+    marketplaceRequiresApproval?: boolean;
+}
+
+// Servicio de Tenants
+export const tenantService = {
+    findAll: async (): Promise<TenantResponseDto[]> => {
+        try {
+            console.log('[tenantService] Fetching all tenants...');
+            const token = localStorage.getItem(AUTH_TOKEN_KEY) || sessionStorage.getItem(AUTH_TOKEN_KEY);
+            console.log('[tenantService] Token available:', !!token);
+
+            const response = await apiClient.get<TenantResponseDto[]>('/api/tenants');
+            console.log('[tenantService] Response status:', response.status);
+            return response.data;
+        } catch (error: any) {
+            console.error('[tenantService] Error fetching tenants:', error);
+            console.error('[tenantService] Error response:', error.response?.data);
+            console.error('[tenantService] Error status:', error.response?.status);
+            throw error;
+        }
+    },
+    findOne: async (id: string): Promise<TenantResponseDto> => {
+        try {
+            console.log(`[tenantService] Fetching tenant ${id}...`);
+            const response = await apiClient.get<TenantResponseDto>(`/api/tenants/${id}`);
+            console.log('[tenantService] Response status:', response.status);
+            return response.data;
+        } catch (error: any) {
+            console.error(`[tenantService] Error fetching tenant ${id}:`, error);
+            console.error('[tenantService] Error response:', error.response?.data);
+            console.error('[tenantService] Error status:', error.response?.status);
+            throw error;
+        }
+    },
+    create: async (payload: CreateTenantDto): Promise<TenantResponseDto> => {
+        try {
+            console.log('[tenantService] Creating new tenant...');
+            const response = await apiClient.post<TenantResponseDto>('/api/tenants', payload);
+            console.log('[tenantService] Response status:', response.status);
+            return response.data;
+        } catch (error: any) {
+            console.error('[tenantService] Error creating tenant:', error);
+            console.error('[tenantService] Error response:', error.response?.data);
+            console.error('[tenantService] Error status:', error.response?.status);
+            throw error;
+        }
+    },
+    update: async (id: string, payload: UpdateTenantDto): Promise<TenantResponseDto> => {
+        try {
+            console.log(`[tenantService] Updating tenant ${id}...`);
+            const response = await apiClient.patch<TenantResponseDto>(`/api/tenants/${id}`, payload);
+            console.log('[tenantService] Response status:', response.status);
+            return response.data;
+        } catch (error: any) {
+            console.error(`[tenantService] Error updating tenant ${id}:`, error);
+            console.error('[tenantService] Error response:', error.response?.data);
+            console.error('[tenantService] Error status:', error.response?.status);
+            throw error;
+        }
+    },
+    remove: async (id: string): Promise<void> => {
+        try {
+            console.log(`[tenantService] Deleting tenant ${id}...`);
+            await apiClient.delete(`/api/tenants/${id}`);
+            console.log('[tenantService] Delete successful');
+        } catch (error: any) {
+            console.error(`[tenantService] Error deleting tenant ${id}:`, error);
+            console.error('[tenantService] Error response:', error.response?.data);
+            console.error('[tenantService] Error status:', error.response?.status);
+            throw error;
+        }
+    }
+};
+
+// Extender UserProfileResponse para incluir role y tenantId
+export interface ExtendedUserProfileResponse extends UserProfileResponse {
+    role: string;
+    tenantId: string;
+    updatedAt: string;
+}
+
+// Actualizar el tipo User para usar ExtendedUserProfileResponse
+export type User = ExtendedUserProfileResponse;

@@ -21,12 +21,10 @@ const HealthCheckWrapper: React.FC<HealthCheckWrapperProps> = ({ children }) => 
     const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
     const checkApiStatus = useCallback(async () => {
-        logger.debug('HealthCheck: Checking API status...');
         setIsLoading(true);
         try {
             // TODO: Consider adding retries with exponential backoff
             await healthService.check();
-            logger.debug('HealthCheck: API is healthy.');
             setIsApiHealthy(true);
             setShowErrorModal(false);
         } catch (error) {
@@ -42,23 +40,18 @@ const HealthCheckWrapper: React.FC<HealthCheckWrapperProps> = ({ children }) => 
 
     // Initial check on mount
     useEffect(() => {
-        logger.debug('HealthCheck: Initial mount effect, calling checkApiStatus.');
         checkApiStatus();
     }, [checkApiStatus]);
 
     // Periodic check
     useEffect(() => {
-        logger.debug(`HealthCheck: Periodic effect running. isApiHealthy: ${isApiHealthy}`);
         if (intervalRef.current) {
-            logger.debug('HealthCheck: Clearing previous interval.');
             clearInterval(intervalRef.current);
             intervalRef.current = null; // Important to reset the ref
         }
 
         if (isApiHealthy) {
-            logger.debug(`HealthCheck: Setting up new interval (${CHECK_INTERVAL_MS}ms).`);
             intervalRef.current = setInterval(() => {
-                logger.debug('HealthCheck: Interval triggered, calling checkApiStatus.');
                 checkApiStatus();
             }, CHECK_INTERVAL_MS);
         } else {
@@ -68,7 +61,6 @@ const HealthCheckWrapper: React.FC<HealthCheckWrapperProps> = ({ children }) => 
         // Cleanup on unmount or when dependencies change
         return () => {
             if (intervalRef.current) {
-                logger.debug('HealthCheck: Cleanup: Clearing interval.');
                 clearInterval(intervalRef.current);
                 intervalRef.current = null;
             }
@@ -76,11 +68,8 @@ const HealthCheckWrapper: React.FC<HealthCheckWrapperProps> = ({ children }) => 
     }, [checkApiStatus, isApiHealthy]);
 
     const handleRetry = () => {
-        logger.debug('HealthCheck: Retry button clicked, calling checkApiStatus.');
         checkApiStatus();
     };
-
-    logger.debug(`HealthCheck: Rendering wrapper. isLoading: ${isLoading}, showErrorModal: ${showErrorModal}`);
 
     return (
         <>
