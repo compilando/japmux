@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { apiClient } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
+import { ExtendedUserProfileResponse } from '@/services/api';
 
 export const useTenantAdmin = () => {
     const [isTenantAdmin, setIsTenantAdmin] = useState(false);
@@ -8,35 +8,14 @@ export const useTenantAdmin = () => {
     const { isAuthenticated, user } = useAuth();
 
     useEffect(() => {
-        const checkTenantAdmin = async () => {
+        if (!isAuthenticated || !user) {
+            setIsTenantAdmin(false);
+            setIsLoading(false);
+            return;
+        }
 
-            if (!isAuthenticated) {
-                console.log('[useTenantAdmin] User is not authenticated');
-                setIsTenantAdmin(false);
-                setIsLoading(false);
-                return;
-            }
-
-            try {
-                const response = await apiClient.get('/api/tenant-admin-check');
-                if (response.status === 200) {
-                    console.log('[useTenantAdmin] User is tenant admin');
-                    setIsTenantAdmin(true);
-                } else {
-                    console.log('[useTenantAdmin] User is not tenant admin');
-                    setIsTenantAdmin(false);
-                }
-            } catch (error: any) {
-                console.error('[useTenantAdmin] Error checking tenant admin status:', error);
-                console.error('[useTenantAdmin] Error response:', error.response?.data);
-                console.error('[useTenantAdmin] Error status:', error.response?.status);
-                setIsTenantAdmin(false);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        checkTenantAdmin();
+        setIsTenantAdmin((user as ExtendedUserProfileResponse).role === 'tenant_admin');
+        setIsLoading(false);
     }, [isAuthenticated, user]);
 
     return { isTenantAdmin, isLoading };
