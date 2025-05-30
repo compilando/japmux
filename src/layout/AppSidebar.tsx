@@ -83,7 +83,7 @@ const AppSidebar: React.FC = () => {
             { name: "AI Models", path: "/ai-models", icon: <BoltIcon /> },
             { name: "Environments", path: "/environments", icon: <TableIcon /> },
             { name: "Regions", path: "/regions", icon: <ListIcon /> },
-            { name: "Cultural Data", path: "/cultural-data", icon: <EyeIcon /> },
+            //{ name: "Cultural Data", path: "/cultural-data", icon: <EyeIcon /> },
             { name: "Tags", path: "/tags", icon: <ChatIcon /> },
           ] : [],
         },

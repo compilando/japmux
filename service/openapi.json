@@ -108,12 +108,11 @@
     },
     "/api/users": {
       "post": {
-        "description": "Creates a new user within the authenticated admin's tenant. Requires admin privileges.",
+        "description": "Creates a new user in the system. For tenant_admins, can optionally specify a tenantId to create the user in that tenant.",
         "operationId": "UserController_create",
         "parameters": [],
         "requestBody": {
           "required": true,
-          "description": "User data to create",
           "content": {
             "application/json": {
               "schema": {
@@ -124,7 +123,7 @@
         },
         "responses": {
           "201": {
-            "description": "User successfully created",
+            "description": "User created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -140,7 +139,7 @@
             "description": "Unauthorized - Invalid or expired token"
           },
           "403": {
-            "description": "Forbidden - Admin role required"
+            "description": "Forbidden - Admin or tenant admin role required"
           }
         },
         "security": [
@@ -356,6 +355,40 @@
           }
         ],
         "summary": "Delete user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/check": {
+      "get": {
+        "description": "Returns true if a user with the specified email exists, false otherwise",
+        "operationId": "UserController_checkUserExists",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User existence check result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exists": {
+                      "type": "boolean",
+                      "description": "Whether the user exists or not"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check if a user exists by email",
         "tags": [
           "Users"
         ]
@@ -6148,6 +6181,11 @@
               "prompt_consumer"
             ],
             "default": "user"
+          },
+          "tenantId": {
+            "type": "string",
+            "pattern": "/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$|^default-tenant$/",
+            "description": "Optional tenant ID to create the user in. Only used if the requesting user is a tenant_admin. Can be a UUID or \"default-tenant\""
           }
         },
         "required": [

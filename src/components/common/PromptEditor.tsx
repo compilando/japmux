@@ -35,6 +35,7 @@ import { PromptTemplate } from '@/config/promptTemplates';
  * @property {string} [aria-label] - Etiqueta ARIA para accesibilidad
  * @property {string} [aria-describedby] - ID del elemento que describe el editor
  * @property {React.ReactNode} [extraToolbarButtons] - Botones adicionales para la barra de herramientas
+ * @property {string} [className] - Clase adicional para el editor
  */
 interface PromptEditorProps {
     value: string;
@@ -48,6 +49,7 @@ interface PromptEditorProps {
     'aria-label'?: string;
     'aria-describedby'?: string;
     extraToolbarButtons?: React.ReactNode;
+    className?: string;
 }
 
 interface HistoryEntry {
@@ -102,7 +104,8 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
     id,
     'aria-label': ariaLabel,
     'aria-describedby': ariaDescribedby,
-    extraToolbarButtons
+    extraToolbarButtons,
+    className
 }) => {
     const editorRef = useRef<HTMLTextAreaElement>(null);
     const [showAssetMenu, setShowAssetMenu] = useState(false);
@@ -524,7 +527,8 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
                     onContextMenu={handleContextMenu}
                     rows={rows}
                     readOnly={readOnly}
-                    className="w-full px-4 py-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-mono text-sm shadow-sm transition-shadow duration-200 hover:shadow-md"
+                    className={`w-full px-4 py-2 text-white bg-[#343541] border border-gray-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm shadow-sm transition-shadow duration-200 hover:shadow-md font-mono ${className || ''}`}
+                    style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
                     placeholder={placeholder}
                     aria-label={ariaLabel || "Editor of prompt"}
                     aria-describedby={ariaDescribedby}

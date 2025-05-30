@@ -66,11 +66,11 @@ const DashboardPage: React.FC = () => {
 
     const quickActions = [
         {
-            name: 'Run Prompt',
-            description: 'Execute a prompt in the current project',
-            icon: <PaperAirplaneIcon className="h-6 w-6" />,
-            href: '/serveprompt',
-            color: 'bg-blue-500',
+            name: 'My Prompts',
+            description: 'Manage your saved prompts',
+            icon: <ClipboardDocumentCheckIcon className="h-6 w-6" />,
+            href: selectedProjectId ? `/projects/${selectedProjectId}/prompts` : '#',
+            color: 'bg-green-500',
         },
         {
             name: 'Magic Assistant',
@@ -80,11 +80,11 @@ const DashboardPage: React.FC = () => {
             color: 'bg-purple-500',
         },
         {
-            name: 'My Prompts',
-            description: 'Manage your saved prompts',
-            icon: <ClipboardDocumentCheckIcon className="h-6 w-6" />,
-            href: selectedProjectId ? `/projects/${selectedProjectId}/prompts` : '#',
-            color: 'bg-green-500',
+            name: 'Run Prompt',
+            description: 'Execute a prompt in the current project',
+            icon: <PaperAirplaneIcon className="h-6 w-6" />,
+            href: '/serveprompt',
+            color: 'bg-blue-500',
         },
         {
             name: 'Projects',
@@ -148,12 +148,12 @@ const DashboardPage: React.FC = () => {
                                 icon: <PaperAirplaneIcon className="h-6 w-6" />,
                             },
                             {
-                                name: 'AI Models',
+                                name: 'Project AI Models',
                                 value: stats.activeModels.toString(),
                                 icon: <BoltIcon className="h-6 w-6" />,
                             },
                             {
-                                name: 'Active Users',
+                                name: 'Tenant Active Users',
                                 value: stats.activeUsers.toString(),
                                 icon: <UserCircleIcon className="h-6 w-6" />,
                             },

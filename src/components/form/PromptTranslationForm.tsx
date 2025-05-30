@@ -165,14 +165,17 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
                 const resultWithResponse = result as { response: any };
                 if (typeof resultWithResponse.response === 'string') {
                     const cleanResponse = resultWithResponse.response
-                        .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-                        .replace(/\n/g, ' ')
-                        .replace(/\s+/g, ' ')
+                        .replace(/```json\n?/g, '')  // Remove opening ```json
+                        .replace(/```\n?/g, '')      // Remove closing ```
+                        .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')  // Remove control characters
                         .trim();
 
                     const parsedResponse = JSON.parse(cleanResponse);
                     if (parsedResponse && typeof parsedResponse === 'object' && 'translatedText' in parsedResponse) {
-                        const translatedText = String(parsedResponse.translatedText).replace(/\\n/g, '\n');
+                        const translatedText = String(parsedResponse.translatedText)
+                            .replace(/\\n/g, '\n')  // Replace literal \n with actual newlines
+                            .replace(/\\r/g, '')    // Remove \r
+                            .replace(/\\t/g, '    '); // Replace \t with 4 spaces
                         setFormData(prev => ({ ...prev, promptText: translatedText }));
                     } else {
                         throw new Error('Response does not contain translatedText or is in incorrect format.');
@@ -290,6 +293,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
                                 rows={18}
                                 assets={[]}
                                 showHistory={true}
+                                className="font-mono"
                                 extraToolbarButtons={
                                     <div className="flex gap-2">
                                         <InsertReferenceButton

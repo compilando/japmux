@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { PromptVersionData, PromptVersionMarketplaceDetails } from '@/app/(admin)/projects/[projectId]/prompts/[promptId]/versions/page';
 import CopyButton from '../common/CopyButton';
 import Link from 'next/link';
-import { TrashIcon, PencilIcon, ChevronDownIcon, ChevronUpIcon, GitBranchIcon } from "@/icons";
+import { TrashIcon, PencilIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
 import { DocumentDuplicateIcon, LanguageIcon } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -86,7 +86,7 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                     <div className="flex-1">
                                         <div className="flex items-center space-x-2 mb-2">
                                             <div className="flex items-center space-x-1">
-                                                <GitBranchIcon className="w-4 h-4 text-brand-500 dark:text-brand-400" />
+                                                <CodeBracketIcon className="w-4 h-4 text-brand-500 dark:text-brand-400" />
                                                 <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{item.versionTag}</span>
                                             </div>
                                             <CopyButton textToCopy={item.versionTag} />
@@ -150,11 +150,11 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                                 <div className="flex items-center justify-between">
                                                     <p
                                                         id={`prompt-text-${item.id}`}
-                                                        className={`text-sm text-gray-700 dark:text-gray-300 ${!isExpanded ? 'line-clamp-3' : ''} whitespace-pre-line transition-all duration-300 group-hover/prompt:text-gray-900 dark:group-hover/prompt:text-gray-100`}
+                                                        className={`text-sm text-gray-700 dark:text-gray-300 ${!isExpanded ? 'line-clamp-3' : ''} whitespace-pre-line transition-all duration-300 group-hover/prompt:text-gray-900 dark:group-hover/prompt:text-gray-100 bg-gray-200 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-700 rounded p-3 flex-1`}
                                                     >
                                                         {item.promptText}
                                                     </p>
-                                                    <span className="ml-2 text-gray-400 group-hover/prompt:text-brand-500 dark:group-hover/prompt:text-brand-400 transition-colors duration-200 flex-shrink-0">
+                                                    <span className="ml-2 text-gray-400 group-hover/prompt:text-brand-500 dark:group-hover/prompt:text-brand-400 transition-colors duration-200 flex-shrink-0 self-start mt-3">
                                                         {isExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
                                                     </span>
                                                 </div>
@@ -195,14 +195,14 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                             className="text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-600 p-1 transition-colors duration-200"
                                             aria-label="Edit Version"
                                         >
-                                            <PencilIcon />
+                                            <PencilIcon className="w-5 h-5" />
                                         </button>
                                         <button
                                             onClick={() => onDelete(item)}
                                             className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-600 p-1 transition-colors duration-200"
                                             aria-label="Delete Version"
                                         >
-                                            <TrashIcon />
+                                            <TrashIcon className="w-5 h-5" />
                                         </button>
                                     </div>
                                 </div>

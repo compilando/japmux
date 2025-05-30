@@ -415,6 +415,7 @@ const PromptWizardPage: React.FC = () => {
                                     <textarea
                                         id="json-unified-editor"
                                         className="w-full flex-grow p-3 border border-gray-700 dark:border-gray-600 rounded-md bg-gray-800 dark:bg-gray-900 text-gray-100 dark:text-gray-200 text-sm font-mono whitespace-pre focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                        style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
                                         rows={generatedJson ? 20 : 25}
                                         value={jsonToLoadInput}
                                         onChange={(e) => setJsonToLoadInput(e.target.value)}
