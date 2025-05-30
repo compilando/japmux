@@ -1,4 +1,5 @@
-import axios, { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { showErrorToast } from '@/utils/toastUtils'; // Importar la utilidad
 // Importar todo lo exportado por el cliente generado
 import * as generated from './generated';
@@ -201,32 +202,54 @@ export const authService = {
     },
 };
 
-// Servicio de Usuarios (Mantener manual o reemplazar con generated.UsersApi)
+export interface UserResponseDto {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    tenantId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface UpdateUserDto {
+    name?: string;
+    email?: string;
+    role?: string;
+    tenantId?: string;
+}
+
 export const userService = {
-    findAll: async (): Promise<generated.UserProfileResponse[]> => { // Usar UserProfileResponse
-        // Reemplazar con: const response = await usersGeneratedApi.userControllerFindAll(); return response.data;
-        // Nota: El endpoint /api/users devuelve CreateUserDto[] según api.ts, pero usaremos UserProfileResponse consistentemente si es posible
-        const response = await apiClient.get<generated.UserProfileResponse[]>('/api/users');
+    findAll: async (tenantId?: string): Promise<UserResponseDto[]> => {
+        const params: { tenantId?: string } = {};
+        if (tenantId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tenantId)) {
+            params.tenantId = tenantId;
+        }
+        const response = await apiClient.get<UserResponseDto[]>('/api/users', { params });
         return response.data;
     },
-    findOne: async (id: string): Promise<generated.UserProfileResponse> => { // Usar UserProfileResponse
-        // Reemplazar con: const response = await usersGeneratedApi.userControllerFindOne(id); return response.data;
-        const response = await apiClient.get<generated.UserProfileResponse>(`/api/users/${id}`);
+    findOne: async (id: string): Promise<UserResponseDto> => {
+        const response = await apiClient.get<UserResponseDto>(`/api/users/${id}`);
         return response.data;
     },
-    create: async (payload: generated.CreateUserDto): Promise<generated.UserProfileResponse> => { // Usar UserProfileResponse
-        // Reemplazar con: const response = await usersGeneratedApi.userControllerCreate(payload); return response.data;
-        const response = await apiClient.post<generated.UserProfileResponse>('/api/users', payload);
+    findByTenant: async (tenantId: string): Promise<UserResponseDto[]> => {
+        if (tenantId !== 'default-tenant' && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tenantId)) {
+            throw new Error('Invalid tenant ID format. Must be a valid UUID or "default-tenant".');
+        }
+        const response = await apiClient.get<UserResponseDto[]>('/api/users', {
+            params: { tenantId }
+        });
         return response.data;
     },
-    update: async (id: string, payload: object): Promise<generated.UserProfileResponse> => { // Usar object para payload y UserProfileResponse como retorno
-        // Reemplazar con: const response = await usersGeneratedApi.userControllerUpdate(id, payload); return response.data;
-        // Nota: el método generado 'userControllerUpdate' espera 'body: object'
-        const response = await apiClient.patch<generated.UserProfileResponse>(`/api/users/${id}`, payload);
+    create: async (payload: generated.CreateUserDto): Promise<UserResponseDto> => {
+        const response = await apiClient.post<UserResponseDto>('/api/users', payload);
+        return response.data;
+    },
+    update: async (id: string, payload: UpdateUserDto): Promise<UserResponseDto> => {
+        const response = await apiClient.patch<UserResponseDto>(`/api/users/${id}`, payload);
         return response.data;
     },
     remove: async (id: string): Promise<void> => {
-        // Reemplazar con: await usersGeneratedApi.userControllerRemove(id);
         await apiClient.delete(`/api/users/${id}`);
     },
 };
@@ -727,9 +750,18 @@ export type CreateSystemPromptDto = generated.CreateSystemPromptDto;
 
 // Tipos alias para compatibilidad hacia atrás
 export type Project = generated.ProjectDto;
-export type User = generated.UserProfileResponse;
 export type Tag = generated.TagDto;
 export type Environment = generated.CreateEnvironmentDto;
+
+// Extender UserProfileResponse para incluir role y tenantId
+export interface ExtendedUserProfileResponse extends UserProfileResponse {
+    role: string;
+    tenantId: string;
+    updatedAt: string;
+}
+
+// Definir el tipo User una sola vez
+export type User = ExtendedUserProfileResponse;
 
 // Servicio de Data Cultural (Datos culturales)
 export const culturalDataService = {
@@ -758,14 +790,21 @@ export const culturalDataService = {
 export interface TenantResponseDto {
     id: string;
     name: string;
-    description?: string;
+    marketplaceRequiresApproval: boolean;
     createdAt: string;
     updatedAt: string;
 }
 
+export interface CreateTenantAdminUserDto {
+    email: string;
+    password: string;
+    name?: string;
+}
+
 export interface CreateTenantDto {
     name: string;
-    description?: string;
+    marketplaceRequiresApproval?: boolean;
+    initialAdminUser: CreateTenantAdminUserDto;
 }
 
 export interface UpdateTenantDto {
@@ -777,12 +816,8 @@ export interface UpdateTenantDto {
 export const tenantService = {
     findAll: async (): Promise<TenantResponseDto[]> => {
         try {
-            console.log('[tenantService] Fetching all tenants...');
             const token = localStorage.getItem(AUTH_TOKEN_KEY) || sessionStorage.getItem(AUTH_TOKEN_KEY);
-            console.log('[tenantService] Token available:', !!token);
-
             const response = await apiClient.get<TenantResponseDto[]>('/api/tenants');
-            console.log('[tenantService] Response status:', response.status);
             return response.data;
         } catch (error: any) {
             console.error('[tenantService] Error fetching tenants:', error);
@@ -793,9 +828,7 @@ export const tenantService = {
     },
     findOne: async (id: string): Promise<TenantResponseDto> => {
         try {
-            console.log(`[tenantService] Fetching tenant ${id}...`);
             const response = await apiClient.get<TenantResponseDto>(`/api/tenants/${id}`);
-            console.log('[tenantService] Response status:', response.status);
             return response.data;
         } catch (error: any) {
             console.error(`[tenantService] Error fetching tenant ${id}:`, error);
@@ -806,9 +839,7 @@ export const tenantService = {
     },
     create: async (payload: CreateTenantDto): Promise<TenantResponseDto> => {
         try {
-            console.log('[tenantService] Creating new tenant...');
             const response = await apiClient.post<TenantResponseDto>('/api/tenants', payload);
-            console.log('[tenantService] Response status:', response.status);
             return response.data;
         } catch (error: any) {
             console.error('[tenantService] Error creating tenant:', error);
@@ -819,9 +850,7 @@ export const tenantService = {
     },
     update: async (id: string, payload: UpdateTenantDto): Promise<TenantResponseDto> => {
         try {
-            console.log(`[tenantService] Updating tenant ${id}...`);
             const response = await apiClient.patch<TenantResponseDto>(`/api/tenants/${id}`, payload);
-            console.log('[tenantService] Response status:', response.status);
             return response.data;
         } catch (error: any) {
             console.error(`[tenantService] Error updating tenant ${id}:`, error);
@@ -832,9 +861,7 @@ export const tenantService = {
     },
     remove: async (id: string): Promise<void> => {
         try {
-            console.log(`[tenantService] Deleting tenant ${id}...`);
             await apiClient.delete(`/api/tenants/${id}`);
-            console.log('[tenantService] Delete successful');
         } catch (error: any) {
             console.error(`[tenantService] Error deleting tenant ${id}:`, error);
             console.error('[tenantService] Error response:', error.response?.data);
@@ -843,13 +870,3 @@ export const tenantService = {
         }
     }
 };
-
-// Extender UserProfileResponse para incluir role y tenantId
-export interface ExtendedUserProfileResponse extends UserProfileResponse {
-    role: string;
-    tenantId: string;
-    updatedAt: string;
-}
-
-// Actualizar el tipo User para usar ExtendedUserProfileResponse
-export type User = ExtendedUserProfileResponse;

@@ -60,8 +60,6 @@ const AppSidebar: React.FC = () => {
           name: "Control Center",
           path: "/management",
           subItems: [
-            { name: "Users", path: "/users", icon: <UserCircleIcon /> },
-            { icon: <FolderIcon />, name: "Projects", path: "/projects" },
             { icon: <BuildingIcon />, name: "Tenants", path: "/tenants" },
           ],
         }

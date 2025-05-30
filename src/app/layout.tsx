@@ -1,16 +1,20 @@
-import { Outfit } from 'next/font/google';
-import './globals.css';
-import { Toaster } from 'react-hot-toast';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
+import { TenantProvider } from "@/context/TenantContext";
+import { SidebarProvider } from "@/context/SidebarContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { NotificationProvider } from "@/context/NotificationContext";
+import { Toaster } from "react-hot-toast";
+import HealthCheckWrapper from "@/components/layout/HealthCheckWrapper";
 
-import { SidebarProvider } from '@/context/SidebarContext';
-import { ThemeProvider } from '@/context/ThemeContext';
-import { AuthProvider } from '@/context/AuthContext';
-import { NotificationProvider } from '@/context/NotificationContext';
-import HealthCheckWrapper from '@/components/layout/HealthCheckWrapper';
+const inter = Inter({ subsets: ["latin"] });
 
-const outfit = Outfit({
-  subsets: ["latin"],
-});
+export const metadata: Metadata = {
+  title: "JAPMUX",
+  description: "JAPMUX - Sistema de Gestión",
+};
 
 export default function RootLayout({
   children,
@@ -19,15 +23,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.className} dark:bg-gray-900`}>
+      <body className={inter.className}>
         <AuthProvider>
           <NotificationProvider>
             <HealthCheckWrapper>
               <ThemeProvider>
-                <SidebarProvider>{children}</SidebarProvider>
+                <SidebarProvider>
+                  <TenantProvider>
+                    {children}
+                    <Toaster position="bottom-right" reverseOrder={false} />
+                  </TenantProvider>
+                </SidebarProvider>
               </ThemeProvider>
             </HealthCheckWrapper>
-            <Toaster position="bottom-right" reverseOrder={false} />
           </NotificationProvider>
         </AuthProvider>
       </body>
