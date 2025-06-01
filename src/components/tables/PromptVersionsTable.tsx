@@ -65,15 +65,15 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                             onMouseLeave={() => setHoveredItem(null)}
                         >
                             {/* Checkbox para seleccionar para Diff */}
-                            <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full pr-2 flex items-center">
+                            <div className="absolute left-2 top-1/2 -translate-y-1/2 -translate-x-full flex items-center">
                                 <input
                                     type="checkbox"
                                     className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-indigo-600 dark:ring-offset-gray-800"
                                     checked={selectedVersionsForDiff.includes(item.versionTag)}
                                     onChange={() => onSelectVersionForDiff(item.versionTag)}
                                     disabled={selectedVersionsForDiff.length >= 2 && !selectedVersionsForDiff.includes(item.versionTag)}
-                                    title={selectedVersionsForDiff.length >= 2 && !selectedVersionsForDiff.includes(item.versionTag) ? "Deselecciona una versión para elegir otra" : "Seleccionar para comparar"}
-                                    aria-label={`Seleccionar versión ${item.versionTag} para comparar`}
+                                    title={selectedVersionsForDiff.length >= 2 && !selectedVersionsForDiff.includes(item.versionTag) ? "Uncheck a version to select another" : "Select to compare"}
+                                    aria-label={`Select version ${item.versionTag} to compare`}
                                 />
                             </div>
 
@@ -129,7 +129,7 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                             </div>
                                         )}
 
-                                        {/* Estado del marketplace con efecto hover */}
+                                        {/* Estado del marketplace con efecto hover 
                                         <div className="mb-2">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full transition-colors duration-200 ${status === 'PUBLISHED' ? 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100 group-hover:bg-green-200 dark:group-hover:bg-green-600' :
                                                 status === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-600 dark:text-yellow-100 group-hover:bg-yellow-200 dark:group-hover:bg-yellow-500' :
@@ -138,6 +138,7 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                                 {status || 'NOT_PUBLISHED'}
                                             </span>
                                         </div>
+                                        */}
 
                                         {/* Vista previa del contenido - Restaurada a expandible/colapsable */}
                                         <div className="relative mt-2">
@@ -150,7 +151,7 @@ const PromptVersionsTable: React.FC<PromptVersionsTableProps> = ({
                                                 <div className="flex items-center justify-between">
                                                     <p
                                                         id={`prompt-text-${item.id}`}
-                                                        className={`text-sm text-gray-700 dark:text-gray-300 ${!isExpanded ? 'line-clamp-3' : ''} whitespace-pre-line transition-all duration-300 group-hover/prompt:text-gray-900 dark:group-hover/prompt:text-gray-100 bg-gray-200 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-700 rounded p-3 flex-1`}
+                                                        className={`text-sm text-gray-700 dark:text-gray-300 ${!isExpanded ? 'line-clamp-8' : ''} whitespace-pre-line transition-all duration-300 group-hover/prompt:text-gray-900 dark:group-hover/prompt:text-gray-100 bg-gray-200 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-700 rounded p-3 flex-1`}
                                                     >
                                                         {item.promptText}
                                                     </p>

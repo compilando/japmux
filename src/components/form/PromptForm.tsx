@@ -55,7 +55,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
         promptText: '',
         projectId: projectId,
         type: 'GENERAL',
-        languageCode: 'en'
+        languageCode: ''
     });
     const [assets, setAssets] = useState<PromptAssetData[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -116,7 +116,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
                 promptText: data.promptText || '',
                 projectId: projectId,
                 type: data.type?.value || data.type || 'GENERAL',
-                languageCode: data.languageCode || 'en'
+                languageCode: data.languageCode || ''
             }));
 
             let initialTagIds: string[] = [];
@@ -134,7 +134,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
                 promptText: '',
                 projectId: projectId,
                 type: 'GENERAL',
-                languageCode: 'en'
+                languageCode: ''
             });
             setSelectedTagIds([]);
         }
@@ -160,30 +160,57 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
             setLoadingRegions(true);
             try {
                 const regionsData = await regionService.findAll(projectId);
+                console.log('[PromptForm fetchRegions] Loaded regions:', regionsData);
                 setRegions(regionsData);
 
-                if (!formData.languageCode || formData.languageCode === 'en') {
+                // Solo establecer el languageCode por defecto cuando no estemos editando
+                if (!isEditing && regionsData.length > 0) {
                     const defaultLanguageCode = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE_CODE || 'en-US';
+                    console.log('[PromptForm fetchRegions] Default language from env:', defaultLanguageCode);
+
                     const hasDefaultRegion = regionsData.some(region => region.languageCode === defaultLanguageCode);
+                    console.log('[PromptForm fetchRegions] Has default region:', hasDefaultRegion);
 
                     const newLanguageCode = hasDefaultRegion
                         ? defaultLanguageCode
-                        : regionsData.length > 0
-                            ? regionsData[0].languageCode
-                            : 'en-US';
+                        : regionsData[0].languageCode;
 
-                    setFormData(prev => ({ ...prev, languageCode: newLanguageCode }));
+                    console.log('[PromptForm fetchRegions] Setting languageCode to:', newLanguageCode);
+
+                    setFormData(prev => {
+                        console.log('[PromptForm fetchRegions] Current languageCode:', prev.languageCode);
+                        return { ...prev, languageCode: newLanguageCode };
+                    });
                 }
             } catch (error) {
                 console.error('Error loading regions:', error);
-                setFormData(prev => ({ ...prev, languageCode: 'en-US' }));
+                // Solo establecer fallback si no estamos editando
+                if (!isEditing) {
+                    setFormData(prev => ({
+                        ...prev,
+                        languageCode: 'en-US'
+                    }));
+                }
             } finally {
                 setLoadingRegions(false);
             }
         };
 
+        // Ejecutar inmediatamente
         fetchRegions();
-    }, [projectId]);
+    }, [projectId, isEditing]);
+
+    // Efecto adicional para establecer languageCode cuando las regiones cambien
+    useEffect(() => {
+        if (!isEditing && regions.length > 0 && !formData.languageCode) {
+            const defaultLanguageCode = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE_CODE || 'en-US';
+            const hasDefaultRegion = regions.some(region => region.languageCode === defaultLanguageCode);
+            const newLanguageCode = hasDefaultRegion ? defaultLanguageCode : regions[0].languageCode;
+
+            console.log('[PromptForm useEffect regions] Setting languageCode to:', newLanguageCode);
+            setFormData(prev => ({ ...prev, languageCode: newLanguageCode }));
+        }
+    }, [regions, isEditing, formData.languageCode]);
 
     const handleTagSelectChange = (selectedOptions: MultiValue<TagOption>) => {
         const newIds = selectedOptions ? selectedOptions.map(option => option.value) : [];
@@ -212,6 +239,9 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
         e.preventDefault();
         setError('');
 
+        console.log('[PromptForm handleSubmit] Current formData:', formData);
+        console.log('[PromptForm handleSubmit] languageCode:', formData.languageCode, 'length:', formData.languageCode.length);
+
         if (!formData.name.trim()) {
             setError('Name is required');
             return;
@@ -223,8 +253,20 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
         }
 
         if (!isEditing && (!formData.languageCode || formData.languageCode.length < 2)) {
-            setError('Language code is required and must be at least 2 characters long');
-            return;
+            // Intentar establecer un languageCode por defecto si no hay uno
+            if (regions.length > 0) {
+                const defaultLanguageCode = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE_CODE || 'en-US';
+                const hasDefaultRegion = regions.some(region => region.languageCode === defaultLanguageCode);
+                const fallbackLanguageCode = hasDefaultRegion ? defaultLanguageCode : regions[0].languageCode;
+
+                console.log('[PromptForm handleSubmit] Setting fallback languageCode:', fallbackLanguageCode);
+                setFormData(prev => ({ ...prev, languageCode: fallbackLanguageCode }));
+                setError('Language code has been set automatically. Please submit again.');
+                return;
+            } else {
+                setError('Language code is required and must be at least 2 characters long');
+                return;
+            }
         }
 
         try {

@@ -809,7 +809,7 @@ fi
                             onChange={(e) => setIsProcessed(e.target.checked)}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                         />
-                        <span>Mostrar prompt procesado (resolver referencias y variables)</span>
+                        <span>Show processed prompt (resolve references and variables)</span>
                     </label>
                 </div>
 

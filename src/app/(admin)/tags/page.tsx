@@ -214,9 +214,6 @@ const TagsPage: React.FC = () => {
         <>
             <Breadcrumb crumbs={breadcrumbs} />
             <div className="my-6">
-                <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
-                    Tags Management
-                </h2>
                 <p className="text-base font-medium dark:text-white">
                     Organize and manage your tags for the selected project.
                 </p>

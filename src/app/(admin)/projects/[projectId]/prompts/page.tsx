@@ -227,42 +227,104 @@ const PromptsPage: React.FC = () => {
     }
 
     return (
-        <>
-            <Breadcrumb crumbs={breadcrumbs} />
-            <div className="my-6">
-                <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">
-                    Prompts for <span className="text-indigo-600 dark:text-indigo-400">{selectedProjectFull?.name || contextProjectId}</span>
-                </h2>
-                <p className="text-base font-medium text-gray-700 dark:text-gray-300">
-                    Create, view, and manage all prompts associated with this project. Each prompt can have multiple versions and translations.
-                </p>
+        <div className="relative min-h-screen">
+            {/* Background elements */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-20 -right-20 w-40 h-40 bg-brand-200/10 dark:bg-brand-800/5 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-200/10 dark:bg-purple-800/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
             </div>
 
-            <div className="flex justify-end mb-4">
-                <button
-                    onClick={handleAddPrompt}
-                    className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                    disabled={loadingPrompts || projectContextIsLoading || !contextProjectId}
-                >
-                    Add New Prompt
-                </button>
+            <div className="relative">
+                <Breadcrumb crumbs={breadcrumbs} />
+
+                {/* Header section with glassmorphism */}
+                <div className="my-8">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/50 via-white/30 to-white/50 dark:from-gray-900/50 dark:via-gray-800/30 dark:to-gray-900/50 backdrop-blur-xl rounded-2xl"></div>
+                        <div className="relative p-6 bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm rounded-2xl border border-white/30 dark:border-gray-700/40 shadow-lg">
+                            <div className="flex items-center justify-between">
+                                <div className="flex-1 min-w-0 pr-8">
+                                    <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-brand-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                                        Prompts for: <span className="text-black-600 dark:text-black-400">{selectedProjectFull?.name || contextProjectId}</span>
+                                    </h2>
+                                    <p className="text-lg text-gray-600 dark:text-gray-300">
+                                        Create, view, and manage all prompts associated with this project. Each prompt can have multiple versions and translations.
+                                    </p>
+                                </div>
+                                <div className="flex-shrink-0">
+                                    <button
+                                        onClick={handleAddPrompt}
+                                        className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                        disabled={loadingPrompts || projectContextIsLoading || !contextProjectId}
+                                    >
+                                        Add New Prompt
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main content with glassmorphism */}
+                <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/40 to-white/60 dark:from-gray-900/60 dark:via-gray-800/40 dark:to-gray-900/60 backdrop-blur-xl rounded-3xl"></div>
+
+                    <div className="relative p-8 bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm rounded-3xl border border-white/30 dark:border-gray-700/40 shadow-xl">
+
+                        {/* Error message with glassmorphism */}
+                        {pageError && (
+                            <div className="mb-6">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-red-50/60 via-red-50/40 to-red-50/60 dark:from-red-900/60 dark:via-red-900/40 dark:to-red-900/60 backdrop-blur-xl rounded-2xl"></div>
+                                    <div className="relative p-4 bg-red-50/30 dark:bg-red-900/30 backdrop-blur-sm rounded-2xl border border-red-200/30 dark:border-red-700/40 shadow-lg">
+                                        <p className="text-red-600 dark:text-red-400 font-medium">Error: {pageError}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Empty state with glassmorphism */}
+                        {!loadingPrompts && prompts.length === 0 && !pageError ? (
+                            <div className="text-center py-16">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/40 to-white/60 dark:from-gray-900/60 dark:via-gray-800/40 dark:to-gray-900/60 backdrop-blur-xl rounded-3xl"></div>
+                                    <div className="relative p-12 bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm rounded-3xl border border-white/30 dark:border-gray-700/40 shadow-lg">
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                                            No Prompts Found
+                                        </h3>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                                            This project doesn't have any prompts yet. Get started by creating your first prompt.
+                                        </p>
+                                        <button
+                                            onClick={handleAddPrompt}
+                                            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                            disabled={loadingPrompts || projectContextIsLoading || !contextProjectId}
+                                        >
+                                            Create First Prompt
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            /* Table section with glassmorphism container */
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/20 to-white/40 dark:from-gray-800/40 dark:via-gray-700/20 dark:to-gray-800/40 backdrop-blur-sm rounded-2xl"></div>
+                                <div className="relative p-6 bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm rounded-2xl border border-white/20 dark:border-gray-600/30">
+                                    <PromptsTable
+                                        prompts={prompts}
+                                        onEdit={handleEditPrompt}
+                                        onDelete={handleDeletePrompt}
+                                        loading={loadingPrompts}
+                                        projectId={contextProjectId || ''}
+                                        deletingPrompts={deletingPrompts}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
-
-            {pageError && <p className="text-red-500 py-2">Error: {pageError}</p>}
-
-            {!loadingPrompts && prompts.length === 0 && !pageError ? (
-                <p className="text-center py-4 text-gray-500 dark:text-gray-400">No prompts found for this project.</p>
-            ) : (
-                <PromptsTable
-                    prompts={prompts}
-                    onEdit={handleEditPrompt}
-                    onDelete={handleDeletePrompt}
-                    loading={loadingPrompts}
-                    projectId={contextProjectId || ''}
-                    deletingPrompts={deletingPrompts}
-                />
-            )}
-        </>
+        </div>
     );
 };
 

@@ -436,7 +436,7 @@ function PromptVersionsPage() {
 
             <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
                         Manage Prompt Versions
                     </h1>
                 </div>

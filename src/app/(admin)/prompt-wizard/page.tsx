@@ -313,9 +313,6 @@ const PromptWizardPage: React.FC = () => {
                     <div className="relative">
                         <div className="absolute inset-0 bg-gradient-to-r from-white/50 via-white/30 to-white/50 dark:from-gray-900/50 dark:via-gray-800/30 dark:to-gray-900/50 backdrop-blur-xl rounded-2xl"></div>
                         <div className="relative p-6 bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm rounded-2xl border border-white/30 dark:border-gray-700/40 shadow-lg">
-                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 bg-gradient-to-r from-brand-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                                Prompt Wizard
-                            </h2>
                             <p className="text-lg text-gray-600 dark:text-gray-300">
                                 Generate intelligent prompt structures using AI assistance
                             </p>

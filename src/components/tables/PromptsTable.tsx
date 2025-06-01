@@ -3,8 +3,7 @@ import { PromptDto } from '@/services/generated/api';
 import Link from 'next/link';
 import { usePrompts } from '@/context/PromptContext';
 import CopyButton from '../common/CopyButton';
-import { TrashIcon, PencilIcon, BoxCubeIcon } from "@/icons";
-import { BoltIcon, ClockIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { BoltIcon, ClockIcon, DocumentDuplicateIcon, TrashIcon, PencilIcon, CubeIcon } from '@heroicons/react/24/outline';
 import { promptVersionService, promptAssetService } from '@/services/api';
 import { getPromptTypeLabel, getPromptTypeColor } from '@/config/promptTypes';
 
@@ -191,127 +190,172 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {promptsWithLanguage.map((item: PromptWithLanguage) => (
-                <div
-                    key={item.id}
-                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700"
-                >
-                    <div className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1 min-w-0">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate" title={item.name}>
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mr-2 ${getPromptType(item).color}`}>
-                                        {getPromptType(item).label}
-                                    </span>
-                                    {item.name} <CopyButton textToCopy={item.name} />
-                                </h3>
-                                <div className="flex items-center mt-1">
-                                    <span className="text-sm text-gray-500 dark:text-gray-400 font-mono" title={item.name}>
+                <div key={item.id} className="group relative">
+                    {/* Background blur and gradient effects */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-white/60 to-white/80 dark:from-gray-900/80 dark:via-gray-800/60 dark:to-gray-900/80 backdrop-blur-xl rounded-2xl"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-brand-50/20 via-transparent to-purple-50/20 dark:from-brand-950/10 dark:via-transparent dark:to-purple-950/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                    {/* Glassmorphism card */}
+                    <div className="relative bg-white/40 dark:bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-white/30 dark:border-gray-700/40 shadow-lg group-hover:shadow-2xl transition-all duration-500 overflow-hidden group-hover:scale-[1.02]">
+
+                        {/* Header with gradient and prompt type badge */}
+                        <div className="relative p-6 pb-0 border-b border-white/20 dark:border-gray-700/30 bg-gradient-to-r from-white/50 via-white/30 to-white/50 dark:from-gray-800/50 dark:via-gray-700/30 dark:to-gray-800/50">
+                            <div className="flex items-start justify-between mb-4">
+                                <div className="flex-1 min-w-0 pr-16">
+                                    {/* Prompt type badge */}
+                                    <div className="mb-3">
+                                        <span className={`inline-flex items-center px-3 py-1 rounded-xl text-xs font-semibold shadow-sm ${getPromptType(item).color}`}>
+                                            {getPromptType(item).label}
+                                        </span>
+                                    </div>
+
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors duration-300 line-clamp-2" title={item.name}>
                                         {item.name}
-                                    </span>
-                                    {renderLanguageFlag(item.languageCode)}
+                                    </h3>
+
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        <span className="text-xs text-gray-500 dark:text-gray-400 font-mono bg-gray-100/50 dark:bg-gray-700/50 px-2 py-1 rounded-lg backdrop-blur-sm" title={item.name}>
+                                            {item.name.length > 20 ? `${item.name.substring(0, 20)}...` : item.name}
+                                        </span>
+                                        <CopyButton textToCopy={item.name} />
+                                    </div>
+
+                                    {/* Language indicator on separate line */}
+                                    <div className="flex items-center">
+                                        {renderLanguageFlag(item.languageCode)}
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Link
-                                    href={`/serveprompt?promptId=${item.id}`}
-                                    className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 p-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors duration-200"
-                                    title="Test/Serve Prompt"
-                                >
-                                    <BoltIcon className="w-5 h-5" />
-                                </Link>
-                                <button
-                                    onClick={() => onEdit(item)}
-                                    className="text-blue-500 hover:text-blue-700 p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors duration-200"
-                                    aria-label="Edit Prompt"
-                                >
-                                    <PencilIcon />
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        // Debug log removed for production
-                                        if (!deletingPrompts.has(item.id)) {
-                                            onDelete(item.id, item.name);
-                                        }
-                                    }}
-                                    disabled={deletingPrompts.has(item.id)}
-                                    className={`p-1.5 rounded-lg transition-all duration-200 ${deletingPrompts.has(item.id)
-                                        ? "text-gray-400 cursor-not-allowed bg-gray-100 dark:bg-gray-700"
-                                        : "text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30"
-                                        }`}
-                                    aria-label={deletingPrompts.has(item.id) ? "Eliminando..." : "Eliminar Prompt"}
-                                    title={deletingPrompts.has(item.id) ? "Eliminando prompt..." : "Eliminar prompt"}
-                                >
-                                    {deletingPrompts.has(item.id) ? (
-                                        <div className="w-5 h-5 flex items-center justify-center">
-                                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                                        </div>
-                                    ) : (
-                                        <TrashIcon />
-                                    )}
-                                </button>
+
+                                {/* Action buttons with glassmorphism */}
+                                <div className="absolute top-4 right-4 flex items-center space-x-2 opacity-60 group-hover:opacity-100 transition-all duration-300">
+                                    <Link
+                                        href={`/serveprompt?promptId=${item.id}`}
+                                        className="relative p-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/30 dark:border-gray-700/40 text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300 hover:shadow-lg transition-all duration-300 hover:scale-110"
+                                        title="Test/Serve Prompt"
+                                    >
+                                        <BoltIcon className="w-4 h-4" />
+                                        <div className="absolute inset-0 bg-indigo-500/10 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                                    </Link>
+                                    <button
+                                        onClick={() => onEdit(item)}
+                                        className="relative p-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/30 dark:border-gray-700/40 text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 hover:shadow-lg transition-all duration-300 hover:scale-110"
+                                        aria-label="Edit Prompt"
+                                    >
+                                        <PencilIcon className="w-4 h-4" />
+                                        <div className="absolute inset-0 bg-blue-500/10 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (!deletingPrompts.has(item.id)) {
+                                                onDelete(item.id, item.name);
+                                            }
+                                        }}
+                                        disabled={deletingPrompts.has(item.id)}
+                                        className={`relative p-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/30 dark:border-gray-700/40 hover:shadow-lg transition-all duration-300 hover:scale-110 ${deletingPrompts.has(item.id)
+                                            ? "text-gray-400 cursor-not-allowed opacity-50"
+                                            : "text-red-500 hover:text-red-700 dark:hover:text-red-300"
+                                            }`}
+                                        aria-label={deletingPrompts.has(item.id) ? "Eliminando..." : "Eliminar Prompt"}
+                                        title={deletingPrompts.has(item.id) ? "Eliminando prompt..." : "Eliminar prompt"}
+                                    >
+                                        {deletingPrompts.has(item.id) ? (
+                                            <div className="w-4 h-4 flex items-center justify-center">
+                                                <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                                            </div>
+                                        ) : (
+                                            <TrashIcon className="w-4 h-4" />
+                                        )}
+                                        {!deletingPrompts.has(item.id) && (
+                                            <div className="absolute inset-0 bg-red-500/10 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2" title={item.description}>
-                            {item.description || 'No description provided'}
-                        </p>
+                        {/* Content section */}
+                        <div className="relative p-6 pt-0 space-y-2">
+                            <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3" title={item.description}>
+                                {item.description || 'No description provided'}
+                            </p>
 
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            {(item as any).tags && Array.isArray((item as any).tags) && (item as any).tags.length > 0 ? (
-                                ((item as any).tags as any[]).map((tag: any, index: number) => (
-                                    <span
-                                        key={index}
-                                        className="px-2.5 py-1 text-xs font-medium text-indigo-800 bg-indigo-100 rounded-full dark:bg-indigo-900 dark:text-indigo-200 transition-colors duration-200"
-                                    >
-                                        {tag.name || 'N/A'}
+                            {/* Tags section */}
+                            <div className="flex flex-wrap gap-2">
+                                {(item as any).tags && Array.isArray((item as any).tags) && (item as any).tags.length > 0 ? (
+                                    ((item as any).tags as any[]).slice(0, 3).map((tag: any, index: number) => (
+                                        <span
+                                            key={index}
+                                            className="px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-100/80 dark:bg-indigo-900/50 dark:text-indigo-300 rounded-lg backdrop-blur-sm border border-indigo-200/50 dark:border-indigo-800/50 transition-colors duration-200"
+                                        >
+                                            {tag.name || 'N/A'}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="text-xs text-gray-500 dark:text-gray-400 italic">No tags</span>
+                                )}
+                                {(item as any).tags && (item as any).tags.length > 3 && (
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        +{(item as any).tags.length - 3} more
                                     </span>
-                                ))
-                            ) : (
-                                <span className="text-xs text-gray-500 dark:text-gray-400">No tags</span>
+                                )}
+                            </div>
+
+                            {/* Stats and actions section */}
+                            {projectId && (
+                                <div className="flex items-center justify-between pt-4 border-t border-white/20 dark:border-gray-700/30">
+                                    <Link
+                                        href={`/projects/${projectId}/prompts/${item.id}/versions`}
+                                        onClick={() => selectPrompt(item.id)}
+                                        className="flex items-center space-x-2 text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors duration-200 group/link"
+                                        title="Manage Versions"
+                                    >
+                                        <ClockIcon className="w-4 h-4 group-hover/link:scale-110 transition-transform duration-200" />
+                                        <span className="font-medium">Versions</span>
+                                        {versionsCount[item.id] !== undefined && (
+                                            <span className="px-2 py-0.5 text-xs font-semibold bg-green-100/80 dark:bg-green-900/50 text-green-800 dark:text-green-200 rounded-full border border-green-200/50 dark:border-green-800/50 backdrop-blur-sm">
+                                                {versionsCount[item.id]}
+                                            </span>
+                                        )}
+                                    </Link>
+                                    <Link
+                                        href={`/projects/${projectId}/prompts/${item.id}/assets`}
+                                        className="flex items-center space-x-2 text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors duration-200 group/link"
+                                        title="Manage Assets"
+                                    >
+                                        <CubeIcon className="w-4 h-4 group-hover/link:scale-110 transition-transform duration-200" />
+                                        <span className="font-medium">Assets</span>
+                                        {assetsCount[item.id] !== undefined && (
+                                            <span className="px-2 py-0.5 text-xs font-semibold bg-purple-100/80 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200 rounded-full border border-purple-200/50 dark:border-purple-800/50 backdrop-blur-sm">
+                                                {assetsCount[item.id]}
+                                            </span>
+                                        )}
+                                    </Link>
+                                </div>
                             )}
                         </div>
 
-                        {projectId && (
-                            <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <Link
-                                    href={`/projects/${projectId}/prompts/${item.id}/versions`}
-                                    onClick={() => selectPrompt(item.id)}
-                                    className="flex items-center text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors duration-200"
-                                    title="Manage Versions"
-                                >
-                                    <ClockIcon className="w-4 h-4 mr-1.5" />
-                                    <span>Versions</span>
-                                    {versionsCount[item.id] !== undefined && (
-                                        <span className="ml-1.5 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full dark:bg-green-900 dark:text-green-200">
-                                            {versionsCount[item.id]}
-                                        </span>
-                                    )}
-                                </Link>
-                                <Link
-                                    href={`/projects/${projectId}/prompts/${item.id}/assets`}
-                                    className="flex items-center text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors duration-200"
-                                    title="Manage Assets"
-                                >
-                                    <BoxCubeIcon className="mr-1.5" />
-                                    <span>Assets</span>
-                                    {assetsCount[item.id] !== undefined && (
-                                        <span className="ml-1.5 px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded-full dark:bg-purple-900 dark:text-purple-200">
-                                            {assetsCount[item.id]}
-                                        </span>
-                                    )}
-                                </Link>
-                            </div>
-                        )}
+                        {/* Decorative elements */}
+                        <div className="absolute top-4 left-4 w-6 h-6 bg-gradient-to-br from-brand-200/20 to-purple-200/20 dark:from-brand-800/10 dark:to-purple-800/10 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div className="absolute bottom-4 right-4 w-8 h-8 bg-gradient-to-br from-purple-200/20 to-pink-200/20 dark:from-purple-800/10 dark:to-pink-800/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-200"></div>
                     </div>
+
+                    {/* Hover glow effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-brand-200/20 to-purple-200/20 dark:from-brand-800/10 dark:to-purple-800/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none"></div>
                 </div>
             ))}
             {prompts.length === 0 && !loading && (
                 <div className="col-span-full">
-                    <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
-                        <DocumentDuplicateIcon className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
-                        <p className="text-gray-500 dark:text-gray-400">No prompts found</p>
+                    <div className="text-center py-16">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/40 to-white/60 dark:from-gray-900/60 dark:via-gray-800/40 dark:to-gray-900/60 backdrop-blur-xl rounded-3xl"></div>
+                            <div className="relative p-12 bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm rounded-3xl border border-white/30 dark:border-gray-700/40 shadow-lg">
+                                <DocumentDuplicateIcon className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Prompts Found</h3>
+                                <p className="text-gray-500 dark:text-gray-400">No prompts have been created for this project yet.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
