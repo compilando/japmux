@@ -443,7 +443,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
                                     type="button"
                                     onClick={handleImprovePrompt}
                                     disabled={isImproving || !formData.promptText.trim()}
-                                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                                 >
                                     {isImproving ? 'Improving...' : 'Improve Prompt'}
                                 </button>
