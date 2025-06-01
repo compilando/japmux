@@ -26,7 +26,7 @@ apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         // Solo log en desarrollo
         if (process.env.NODE_ENV === 'development') {
-            // Request interceptor - production logging removed
+            console.log('Request interceptor: Adding auth token');
         }
 
         if (typeof window !== 'undefined') {
@@ -34,17 +34,19 @@ apiClient.interceptors.request.use(
             if (!token) {
                 token = sessionStorage.getItem(AUTH_TOKEN_KEY);
                 if (token && process.env.NODE_ENV === 'development') {
-                    // Token found in sessionStorage
+                    console.log('Token found in sessionStorage');
                 }
             } else if (process.env.NODE_ENV === 'development') {
-                // Token found in localStorage
+                console.log('Token found in localStorage');
             }
 
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
                 if (process.env.NODE_ENV === 'development') {
-                    // Authorization header set
+                    console.log('Authorization header set:', config.headers.Authorization);
                 }
+            } else if (process.env.NODE_ENV === 'development') {
+                console.log('No token found in storage');
             }
         }
         return config;
@@ -55,29 +57,28 @@ apiClient.interceptors.request.use(
 // Interceptor de Response: Manejo global de errores
 apiClient.interceptors.response.use(
     (response: AxiosResponse) => response,
-    (error: AxiosError<unknown>) => { // Tipar el error si es posible
+    (error: AxiosError<unknown>) => {
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Response interceptor error:', error.response?.status, error.response?.data);
+        }
+
         const errorMessage = error.response?.data && typeof error.response.data === 'object' && 'message' in error.response.data
             ? String(error.response.data.message)
             : error.response?.data && typeof error.response.data === 'object' && 'error' in error.response.data
                 ? String(error.response.data.error)
-                : error.message; // Fallback al mensaje genérico del error
+                : error.message;
 
         if (error.response?.status === 401) {
             console.error('API Error: Unauthorized (401).');
-            // No mostrar toast para 401, la redirección es suficiente
             if (typeof window !== 'undefined') {
                 localStorage.removeItem(AUTH_TOKEN_KEY);
                 sessionStorage.removeItem(AUTH_TOKEN_KEY);
-                // Considerar si la redirección debe hacerse aquí o en AuthContext
-                // window.location.href = '/signin';
             }
         } else if (error.response?.status === 403) {
             console.error('API Error: Forbidden (403).');
-            // Mostrar toast específico para Forbidden
             showErrorToast(errorMessage || 'Forbidden: You do not have permission to access this resource.');
         } else {
-            // Para otros errores, mostrar el toast de error
-            console.error('API call error:', errorMessage, error.response); // Mantener log para debug
+            console.error('API call error:', errorMessage, error.response);
             showErrorToast(errorMessage || 'An unexpected API error occurred.');
         }
         return Promise.reject(error);
@@ -251,6 +252,13 @@ export const userService = {
     },
     remove: async (id: string): Promise<void> => {
         await apiClient.delete(`/api/users/${id}`);
+    },
+    checkInitialUser: async (): Promise<{ exists: boolean; userId: string }> => {
+        const response = await apiClient.get<{ exists: boolean; userId: string }>('/api/auth/initial_setup_check');
+        return response.data;
+    },
+    updateInitialUser: async (userId: string, payload: { email: string; password: string }): Promise<void> => {
+        await apiClient.patch(`/api/users/${userId}`, payload);
     },
 };
 

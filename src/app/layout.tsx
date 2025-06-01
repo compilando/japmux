@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { Toaster } from "react-hot-toast";
 import HealthCheckWrapper from "@/components/layout/HealthCheckWrapper";
+import InitialSetupWizard from "@/components/setup/InitialSetupWizard";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -37,6 +38,7 @@ export default function RootLayout({
                 <SidebarProvider>
                   <TenantProvider>
                     {children}
+                    <InitialSetupWizard />
                     <Toaster position="bottom-right" reverseOrder={false} />
                   </TenantProvider>
                 </SidebarProvider>
