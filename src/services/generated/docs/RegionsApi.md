@@ -181,7 +181,7 @@ const { status, data } = await apiInstance.regionControllerFindOne(
 # **regionControllerRemove**
 > regionControllerRemove()
 
-Deletes a region by its language code. Accessible by global admins or tenant admins.
+Permanently deletes a region from the system. Accessible by global admins or tenant admins.
 
 ### Example
 
@@ -228,7 +228,8 @@ void (empty response body)
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**204** | Region deleted successfully |  -  |
+|**200** | Region deleted successfully |  -  |
+|**204** |  |  -  |
 |**401** | Unauthorized - Invalid or expired token |  -  |
 |**403** | Forbidden - Insufficient permissions to delete regions |  -  |
 |**404** | Region not found - The specified language code does not exist for this tenant |  -  |

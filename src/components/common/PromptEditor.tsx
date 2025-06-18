@@ -420,15 +420,6 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
                         aria-label="Insert markdown link"
                         aria-describedby="template-link-desc"
                     />
-                    <ToolbarButton
-                        onClick={() => insertTemplate('![alt text](https://example.com/image.jpg)')}
-                        icon={PhotoIcon}
-                        label="Image"
-                        disabled={readOnly}
-                        tooltip="Insert markdown image"
-                        aria-label="Insert markdown image"
-                        aria-describedby="template-image-desc"
-                    />
                 </div>
 
                 {/* Utilities Group */}

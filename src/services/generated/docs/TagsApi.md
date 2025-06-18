@@ -5,9 +5,9 @@ All URIs are relative to *http://localhost*
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
 |[**tagControllerCreate**](#tagcontrollercreate) | **POST** /api/projects/{projectId}/tags | Crea una nueva etiqueta para un proyecto|
-|[**tagControllerFindAll**](#tagcontrollerfindall) | **GET** /api/projects/{projectId}/tags | Obtiene todas las etiquetas de un proyecto|
-|[**tagControllerFindByName**](#tagcontrollerfindbyname) | **GET** /api/projects/{projectId}/tags/by-name/{name} | Obtiene una etiqueta por su nombre dentro de un proyecto|
-|[**tagControllerFindOne**](#tagcontrollerfindone) | **GET** /api/projects/{projectId}/tags/{tagId} | Obtiene una etiqueta por su ID dentro de un proyecto|
+|[**tagControllerFindAll**](#tagcontrollerfindall) | **GET** /api/projects/{projectId}/tags | Get all tags from a project|
+|[**tagControllerFindByName**](#tagcontrollerfindbyname) | **GET** /api/projects/{projectId}/tags/by-name/{name} | Get a tag by name within a project|
+|[**tagControllerFindOne**](#tagcontrollerfindone) | **GET** /api/projects/{projectId}/tags/{tagId} | Get a tag by ID within a project|
 |[**tagControllerRemove**](#tagcontrollerremove) | **DELETE** /api/projects/{projectId}/tags/{tagId} | Elimina una etiqueta de un proyecto|
 |[**tagControllerUpdate**](#tagcontrollerupdate) | **PATCH** /api/projects/{projectId}/tags/{tagId} | Actualiza una etiqueta existente en un proyecto|
 
@@ -83,7 +83,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new TagsApi(configuration);
 
-let projectId: string; //ID del proyecto (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.tagControllerFindAll(
     projectId
@@ -94,7 +94,7 @@ const { status, data } = await apiInstance.tagControllerFindAll(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -114,8 +114,8 @@ const { status, data } = await apiInstance.tagControllerFindAll(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Lista de etiquetas. |  -  |
-|**404** | Proyecto no encontrado. |  -  |
+|**200** | List of tags. |  -  |
+|**404** | Project not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -134,8 +134,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new TagsApi(configuration);
 
-let name: string; //Nombre único de la etiqueta en el proyecto (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let name: string; //Unique tag name in the project (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.tagControllerFindByName(
     name,
@@ -147,8 +147,8 @@ const { status, data } = await apiInstance.tagControllerFindByName(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **name** | [**string**] | Nombre único de la etiqueta en el proyecto | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **name** | [**string**] | Unique tag name in the project | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -168,8 +168,8 @@ const { status, data } = await apiInstance.tagControllerFindByName(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Etiqueta encontrada. |  -  |
-|**404** | Proyecto o Etiqueta no encontrada. |  -  |
+|**200** | Tag found. |  -  |
+|**404** | Project or Tag not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -188,8 +188,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new TagsApi(configuration);
 
-let tagId: string; //ID único de la etiqueta (CUID) (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let tagId: string; //Unique tag identifier (CUID) (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.tagControllerFindOne(
     tagId,
@@ -201,8 +201,8 @@ const { status, data } = await apiInstance.tagControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **tagId** | [**string**] | ID único de la etiqueta (CUID) | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **tagId** | [**string**] | Unique tag identifier (CUID) | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -222,8 +222,8 @@ const { status, data } = await apiInstance.tagControllerFindOne(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Etiqueta encontrada. |  -  |
-|**404** | Proyecto o Etiqueta no encontrada. |  -  |
+|**200** | Tag found. |  -  |
+|**404** | Project or Tag not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

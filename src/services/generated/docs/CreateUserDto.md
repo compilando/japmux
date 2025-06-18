@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **email** | **string** | Unique user email | [default to undefined]
 **password** | **string** | User\&#39;s password | [default to undefined]
 **role** | **string** | Role of the user | [optional] [default to RoleEnum_User]
+**tenantId** | **string** | Optional tenant ID to create the user in. Only used if the requesting user is a tenant_admin. Can be a UUID or \&quot;default-tenant\&quot; | [optional] [default to undefined]
 
 ## Example
 
@@ -20,6 +21,7 @@ const instance: CreateUserDto = {
     email,
     password,
     role,
+    tenantId,
 };
 ```
 

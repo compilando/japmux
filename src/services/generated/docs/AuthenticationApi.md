@@ -5,6 +5,7 @@ All URIs are relative to *http://localhost*
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
 |[**authControllerGetProfile**](#authcontrollergetprofile) | **GET** /api/auth/profile | Get user profile|
+|[**authControllerInitialSetupCheck**](#authcontrollerinitialsetupcheck) | **GET** /api/auth/initial_setup_check | Check if initial setup is needed|
 |[**authControllerLogin**](#authcontrollerlogin) | **POST** /api/auth/login | User login|
 |[**authControllerRegister**](#authcontrollerregister) | **POST** /api/auth/register | Register new user|
 
@@ -50,6 +51,50 @@ This endpoint does not have any parameters.
 |-------------|-------------|------------------|
 |**200** | User profile retrieved successfully |  -  |
 |**401** | Unauthorized - Invalid or expired token |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **authControllerInitialSetupCheck**
+> AuthControllerInitialSetupCheck200Response authControllerInitialSetupCheck()
+
+Returns true if a user with the specified email exists, false otherwise
+
+### Example
+
+```typescript
+import {
+    AuthenticationApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new AuthenticationApi(configuration);
+
+const { status, data } = await apiInstance.authControllerInitialSetupCheck();
+```
+
+### Parameters
+This endpoint does not have any parameters.
+
+
+### Return type
+
+**AuthControllerInitialSetupCheck200Response**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Initial setup check result |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

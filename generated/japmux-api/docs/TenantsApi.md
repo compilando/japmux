@@ -13,7 +13,7 @@ All URIs are relative to *http://localhost*
 # **tenantControllerCreate**
 > TenantDto tenantControllerCreate(createTenantDto)
 
-Creates a new tenant in the system. This operation requires global admin privileges.
+Creates a new tenant in the system. This operation requires admin or tenant admin privileges.
 
 ### Example
 
@@ -61,7 +61,7 @@ const { status, data } = await apiInstance.tenantControllerCreate(
 |**201** | Tenant successfully created |  -  |
 |**400** | Invalid input data - Check the request body format |  -  |
 |**401** | Unauthorized - Invalid or expired token |  -  |
-|**403** | Forbidden - Global admin role required |  -  |
+|**403** | Forbidden - Admin or tenant admin role required, or tenancy is disabled |  -  |
 |**409** | Tenant name already exists - The provided name is already in use |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -69,7 +69,7 @@ const { status, data } = await apiInstance.tenantControllerCreate(
 # **tenantControllerFindAll**
 > Array<TenantDto> tenantControllerFindAll()
 
-Retrieves a list of all tenants in the system. This operation requires global admin privileges.
+Retrieves a list of all tenants in the system. This operation requires admin or tenant admin privileges.
 
 ### Example
 
@@ -108,14 +108,14 @@ This endpoint does not have any parameters.
 |-------------|-------------|------------------|
 |**200** | List of tenants retrieved successfully |  -  |
 |**401** | Unauthorized - Invalid or expired token |  -  |
-|**403** | Forbidden - Global admin role required |  -  |
+|**403** | Forbidden - Admin or tenant admin role required, or tenancy is disabled |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tenantControllerFindOne**
 > TenantDto tenantControllerFindOne()
 
-Retrieves a specific tenant by their unique ID. Accessible by global admins or tenant admins of the specified tenant.
+Retrieves a specific tenant by their unique ID. Accessible by admins or tenant admins.
 
 ### Example
 
@@ -128,7 +128,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new TenantsApi(configuration);
 
-let tenantId: string; //Unique tenant identifier (UUID) (default to undefined)
+let tenantId: string; //Unique tenant identifier (UUID or \"default-tenant\") (default to undefined)
 
 const { status, data } = await apiInstance.tenantControllerFindOne(
     tenantId
@@ -139,7 +139,7 @@ const { status, data } = await apiInstance.tenantControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **tenantId** | [**string**] | Unique tenant identifier (UUID) | defaults to undefined|
+| **tenantId** | [**string**] | Unique tenant identifier (UUID or \&quot;default-tenant\&quot;) | defaults to undefined|
 
 
 ### Return type
@@ -161,15 +161,15 @@ const { status, data } = await apiInstance.tenantControllerFindOne(
 |-------------|-------------|------------------|
 |**200** | Tenant found successfully |  -  |
 |**401** | Unauthorized - Invalid or expired token |  -  |
-|**403** | Forbidden - Insufficient permissions to access this tenant |  -  |
+|**403** | Forbidden - Admin or tenant admin role required, or tenancy is disabled |  -  |
 |**404** | Tenant not found - The specified ID does not exist |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tenantControllerRemove**
-> tenantControllerRemove()
+> TenantDto tenantControllerRemove()
 
-Permanently deletes a tenant from the system. This is a destructive operation that requires global admin privileges.
+Permanently deletes a tenant from the system. Accessible by global admins or tenant admins.
 
 ### Example
 
@@ -198,7 +198,7 @@ const { status, data } = await apiInstance.tenantControllerRemove(
 
 ### Return type
 
-void (empty response body)
+**TenantDto**
 
 ### Authorization
 
@@ -207,15 +207,15 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**204** | Tenant successfully deleted |  -  |
+|**200** | Tenant deleted successfully |  -  |
 |**401** | Unauthorized - Invalid or expired token |  -  |
-|**403** | Forbidden - Global admin role required |  -  |
+|**403** | Forbidden - Admin or tenant admin role required, or tenancy is disabled |  -  |
 |**404** | Tenant not found - The specified ID does not exist |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -223,7 +223,7 @@ void (empty response body)
 # **tenantControllerUpdate**
 > TenantDto tenantControllerUpdate(updateTenantDto)
 
-Updates an existing tenant\'s information. Accessible by global admins or tenant admins of the specified tenant.
+Updates an existing tenant\'s information. Accessible by global admins or tenant admins.
 
 ### Example
 
@@ -274,7 +274,7 @@ const { status, data } = await apiInstance.tenantControllerUpdate(
 |**200** | Tenant updated successfully |  -  |
 |**400** | Invalid input data - Check the request body format |  -  |
 |**401** | Unauthorized - Invalid or expired token |  -  |
-|**403** | Forbidden - Insufficient permissions to update this tenant |  -  |
+|**403** | Forbidden - Admin or tenant admin role required, or tenancy is disabled |  -  |
 |**404** | Tenant not found - The specified ID does not exist |  -  |
 |**409** | Tenant name already exists - The provided name is already in use |  -  |
 

@@ -160,17 +160,7 @@
             "name": "tenantId",
             "required": false,
             "in": "query",
-            "description": "Optional tenant ID to filter users. Only used if the requesting user is a tenant_admin. Can be a UUID or \"default-tenant\"",
-            "schema": {
-              "pattern": "/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$|^default-tenant$/",
-              "type": "string"
-            }
-          },
-          {
-            "required": false,
-            "description": "Optional tenant ID to filter users. Only used if the requesting user is a tenant_admin. Can be a UUID or \"default-tenant\"",
-            "name": "tenantId",
-            "in": "query",
+            "description": "Optional tenant ID to filter users. Only for tenant_admins. Can be a UUID or \"default-tenant\"",
             "schema": {
               "pattern": "/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$|^default-tenant$/",
               "type": "string"
@@ -547,6 +537,154 @@
         "summary": "Check if initial setup is needed",
         "tags": [
           "Authentication"
+        ]
+      }
+    },
+    "/api/api-keys": {
+      "post": {
+        "operationId": "ApiKeyController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApiKeyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "API Key created successfully. The full key is returned only once.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApiKeyResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new API Key for the current user",
+        "tags": [
+          "ApiKeys"
+        ]
+      },
+      "get": {
+        "operationId": "ApiKeyController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all API Keys for the current user",
+        "tags": [
+          "ApiKeys"
+        ]
+      }
+    },
+    "/api/api-keys/{id}": {
+      "get": {
+        "operationId": "ApiKeyController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a specific API Key for the current user",
+        "tags": [
+          "ApiKeys"
+        ]
+      },
+      "patch": {
+        "operationId": "ApiKeyController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApiKeyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an API Key for the current user",
+        "tags": [
+          "ApiKeys"
+        ]
+      },
+      "delete": {
+        "operationId": "ApiKeyController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke an API Key for the current user",
+        "tags": [
+          "ApiKeys"
         ]
       }
     },
@@ -1876,7 +2014,7 @@
             "description": "Unauthorized - Invalid or expired token"
           },
           "403": {
-            "description": "Forbidden - Admin or tenant admin role required"
+            "description": "Forbidden - Admin or tenant admin role required, or tenancy is disabled"
           },
           "409": {
             "description": "Tenant name already exists - The provided name is already in use"
@@ -1914,7 +2052,7 @@
             "description": "Unauthorized - Invalid or expired token"
           },
           "403": {
-            "description": "Forbidden - Admin or tenant admin role required"
+            "description": "Forbidden - Admin or tenant admin role required, or tenancy is disabled"
           }
         },
         "security": [
@@ -1958,7 +2096,7 @@
             "description": "Unauthorized - Invalid or expired token"
           },
           "403": {
-            "description": "Forbidden - Admin or tenant admin role required"
+            "description": "Forbidden - Admin or tenant admin role required, or tenancy is disabled"
           },
           "404": {
             "description": "Tenant not found - The specified ID does not exist"
@@ -2017,7 +2155,7 @@
             "description": "Unauthorized - Invalid or expired token"
           },
           "403": {
-            "description": "Forbidden - Admin or tenant admin role required"
+            "description": "Forbidden - Admin or tenant admin role required, or tenancy is disabled"
           },
           "404": {
             "description": "Tenant not found - The specified ID does not exist"
@@ -2066,7 +2204,7 @@
             "description": "Unauthorized - Invalid or expired token"
           },
           "403": {
-            "description": "Forbidden - Admin or tenant admin role required"
+            "description": "Forbidden - Admin or tenant admin role required, or tenancy is disabled"
           },
           "404": {
             "description": "Tenant not found - The specified ID does not exist"
@@ -6355,6 +6493,80 @@
         "required": [
           "access_token"
         ]
+      },
+      "CreateApiKeyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateApiKeyResponseDto": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "The full API Key secret. This is only returned once upon creation. Save it securely.",
+            "example": "japm_1234abcd_unSecretoMuyLargoQueSoloVesUnaVez"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "prefix": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "lastUsedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "revoked": {
+            "type": "boolean"
+          },
+          "userId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "apiKey",
+          "id",
+          "name",
+          "prefix",
+          "createdAt",
+          "updatedAt",
+          "expiresAt",
+          "lastUsedAt",
+          "revoked",
+          "userId"
+        ]
+      },
+      "UpdateApiKeyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
       },
       "CreateRegionDto": {
         "type": "object",

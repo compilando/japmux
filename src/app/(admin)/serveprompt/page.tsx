@@ -419,7 +419,7 @@ const ServePromptPage: React.FC = () => {
         }
 
         const projectId = selectedProjectId;
-        const promptName = selectedPrompt.label;
+        const promptName = selectedPrompt.value;
         const versionTag = selectedVersion.value === 'latest' ? 'latest' : selectedVersion.value;
 
         let promptApiPath;
@@ -432,7 +432,7 @@ const ServePromptPage: React.FC = () => {
         const fullPromptApiUrl = `${currentApiBaseUrl}${promptApiPath}`;
 
         // 1. Generar el comando cURL simple
-        let одиночныйCurlCommand = `curl -X POST "${fullPromptApiUrl}" \\
+        let CurlCommand = `curl -X POST "${fullPromptApiUrl}" \\
      -H "Authorization: Bearer YOUR_AUTH_TOKEN" \\
      -H "Content-Type: application/json"`;
 
@@ -445,9 +445,20 @@ const ServePromptPage: React.FC = () => {
 
 
         if (Object.keys(bodyPayload).length > 0) {
-            одиночныйCurlCommand += ` \\
+            CurlCommand += ` \\
      -d '${JSON.stringify(bodyPayload, null, 2)}'`;
         }
+
+        CurlCommand += `\n\n--------------------------`;
+        CurlCommand += `\n\nOR with api-key: \n\ncurl -X POST "${fullPromptApiUrl}" \\
+     -H "x-api-key: YOUR_API_KEY" \\
+     -H "Content-Type: application/json"`;
+
+        if (Object.keys(bodyPayload).length > 0) {
+            CurlCommand += ` \\
+     -d '${JSON.stringify(bodyPayload, null, 2)}'`;
+        }
+
 
         let curlNote = `\n\n# NOTE (for single cURL):`;
         curlNote += `# Replace 'YOUR_AUTH_TOKEN' with your actual token.`;
@@ -457,8 +468,8 @@ const ServePromptPage: React.FC = () => {
         } else {
             curlNote += `\n# No variables provided for this example; add them to the JSON body if needed.`;
         }
-        одиночныйCurlCommand += curlNote;
-        setCurlCommand(одиночныйCurlCommand);
+        CurlCommand += curlNote;
+        setCurlCommand(CurlCommand);
 
         // 2. Generar el script Bash de ejemplo
         const loginEndpointExample = `${currentApiBaseUrl}/api/auth/login`;

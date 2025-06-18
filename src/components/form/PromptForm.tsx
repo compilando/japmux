@@ -319,7 +319,8 @@ const PromptForm: React.FC<PromptFormProps> = ({ initialData, onCreate, onUpdate
                 systemPromptName: "prompt-improver",
                 aiModelId: defaultAiModelId,
                 variables: {
-                    text: formData.promptText
+                    prompt_to_improve: formData.promptText,
+                    language: formData.languageCode
                 }
             };
 

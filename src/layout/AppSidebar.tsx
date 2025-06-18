@@ -34,6 +34,7 @@ import {
   BuildingOfficeIcon as HeroBuildingIcon,
   TableCellsIcon as HeroTableIcon,
   ClipboardDocumentCheckIcon as HeroTaskIcon,
+  LockClosedIcon,
 } from '@heroicons/react/24/outline';
 import SidebarNavItem from "./SidebarNavItem";
 import { ExtendedUserProfileResponse } from "@/services/api";
@@ -86,6 +87,7 @@ const AppSidebar: React.FC = () => {
           subItems: [
             { name: "Users", path: "/users", icon: <UserCircleIcon className="" /> },
             { icon: <FolderIcon className="" />, name: "Projects", path: "/projects" },
+            { name: "API Keys", path: "/api-keys", icon: <LockClosedIcon className="h-5 w-5" /> },
           ],
         },
         {
@@ -97,7 +99,7 @@ const AppSidebar: React.FC = () => {
             { name: "Environments", path: "/environments", icon: <TableIcon className="" /> },
             { name: "Regions", path: "/regions", icon: <ListIcon className="" /> },
             //{ name: "Cultural Data", path: "/cultural-data", icon: <EyeIcon className="" /> },
-            { name: "Tags", path: "/tags", icon: <ChatIcon className="" /> },
+            { name: "Tags", path: "/tags", icon: <ChatIcon className="" /> }
           ] : [],
         },
         {

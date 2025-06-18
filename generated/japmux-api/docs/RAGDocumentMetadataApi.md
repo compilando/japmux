@@ -5,8 +5,8 @@ All URIs are relative to *http://localhost*
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
 |[**ragDocumentMetadataControllerCreate**](#ragdocumentmetadatacontrollercreate) | **POST** /api/projects/{projectId}/rag-document-metadata | Crear metadatos para un documento RAG dentro de un proyecto|
-|[**ragDocumentMetadataControllerFindAll**](#ragdocumentmetadatacontrollerfindall) | **GET** /api/projects/{projectId}/rag-document-metadata | Obtener todos los metadatos de documentos RAG de un proyecto|
-|[**ragDocumentMetadataControllerFindOne**](#ragdocumentmetadatacontrollerfindone) | **GET** /api/projects/{projectId}/rag-document-metadata/{metadataId} | Obtener metadatos por ID dentro de un proyecto|
+|[**ragDocumentMetadataControllerFindAll**](#ragdocumentmetadatacontrollerfindall) | **GET** /api/projects/{projectId}/rag-document-metadata | Get all RAG document metadata from a project|
+|[**ragDocumentMetadataControllerFindOne**](#ragdocumentmetadatacontrollerfindone) | **GET** /api/projects/{projectId}/rag-document-metadata/{metadataId} | Get metadata by ID within a project|
 |[**ragDocumentMetadataControllerRemove**](#ragdocumentmetadatacontrollerremove) | **DELETE** /api/projects/{projectId}/rag-document-metadata/{metadataId} | Eliminar metadatos por ID dentro de un proyecto|
 |[**ragDocumentMetadataControllerUpdate**](#ragdocumentmetadatacontrollerupdate) | **PATCH** /api/projects/{projectId}/rag-document-metadata/{metadataId} | Actualizar metadatos por ID dentro de un proyecto|
 
@@ -81,7 +81,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new RAGDocumentMetadataApi(configuration);
 
-let projectId: string; //ID del proyecto (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.ragDocumentMetadataControllerFindAll(
     projectId
@@ -92,7 +92,7 @@ const { status, data } = await apiInstance.ragDocumentMetadataControllerFindAll(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -112,8 +112,8 @@ const { status, data } = await apiInstance.ragDocumentMetadataControllerFindAll(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Lista de metadatos. |  -  |
-|**404** | Proyecto no encontrado. |  -  |
+|**200** | List of metadata. |  -  |
+|**404** | Project not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -132,8 +132,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new RAGDocumentMetadataApi(configuration);
 
-let metadataId: string; //ID de los metadatos (CUID) (default to undefined)
-let projectId: string; //ID del proyecto (default to undefined)
+let metadataId: string; //Metadata ID (CUID) (default to undefined)
+let projectId: string; //Project ID (default to undefined)
 
 const { status, data } = await apiInstance.ragDocumentMetadataControllerFindOne(
     metadataId,
@@ -145,8 +145,8 @@ const { status, data } = await apiInstance.ragDocumentMetadataControllerFindOne(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **metadataId** | [**string**] | ID de los metadatos (CUID) | defaults to undefined|
-| **projectId** | [**string**] | ID del proyecto | defaults to undefined|
+| **metadataId** | [**string**] | Metadata ID (CUID) | defaults to undefined|
+| **projectId** | [**string**] | Project ID | defaults to undefined|
 
 
 ### Return type
@@ -166,8 +166,8 @@ const { status, data } = await apiInstance.ragDocumentMetadataControllerFindOne(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Metadatos encontrados. |  -  |
-|**404** | Proyecto o Metadatos no encontrados. |  -  |
+|**200** | Metadata found. |  -  |
+|**404** | Project or Metadata not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

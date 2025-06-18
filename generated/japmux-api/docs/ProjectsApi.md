@@ -6,7 +6,7 @@ All URIs are relative to *http://localhost*
 |------------- | ------------- | -------------|
 |[**projectControllerCreate**](#projectcontrollercreate) | **POST** /api/projects | Create new project|
 |[**projectControllerFindAll**](#projectcontrollerfindall) | **GET** /api/projects | Get all projects|
-|[**projectControllerFindMine**](#projectcontrollerfindmine) | **GET** /api/projects/mine | Obtener proyectos del usuario actual|
+|[**projectControllerFindMine**](#projectcontrollerfindmine) | **GET** /api/projects/mine | Get current user projects|
 |[**projectControllerFindOne**](#projectcontrollerfindone) | **GET** /api/projects/{id} | Get project by ID|
 |[**projectControllerRemove**](#projectcontrollerremove) | **DELETE** /api/projects/{id} | Delete project|
 |[**projectControllerUpdate**](#projectcontrollerupdate) | **PATCH** /api/projects/{id} | Update project|
@@ -115,7 +115,7 @@ This endpoint does not have any parameters.
 # **projectControllerFindMine**
 > Array<CreateProjectDto> projectControllerFindMine()
 
-Retorna todos los proyectos a los que tiene acceso el usuario autenticado
+Returns all projects that the authenticated user has access to
 
 ### Example
 
@@ -152,9 +152,9 @@ This endpoint does not have any parameters.
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Lista de proyectos del usuario |  -  |
-|**401** | No autorizado - Token inválido o expirado |  -  |
-|**403** | Acceso denegado - Información de tenant no disponible |  -  |
+|**200** | List of user projects |  -  |
+|**401** | Unauthorized - Invalid or expired token |  -  |
+|**403** | Access denied - Tenant information not available |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -214,7 +214,7 @@ const { status, data } = await apiInstance.projectControllerFindOne(
 # **projectControllerRemove**
 > projectControllerRemove()
 
-Permanently deletes a project. This is a destructive operation that requires admin privileges.
+Deletes a project by ID.
 
 ### Example
 
@@ -227,7 +227,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new ProjectsApi(configuration);
 
-let id: string; //Unique project identifier to delete (UUID) (default to undefined)
+let id: string; // (default to undefined)
 
 const { status, data } = await apiInstance.projectControllerRemove(
     id
@@ -238,7 +238,7 @@ const { status, data } = await apiInstance.projectControllerRemove(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **id** | [**string**] | Unique project identifier to delete (UUID) | defaults to undefined|
+| **id** | [**string**] |  | defaults to undefined|
 
 
 ### Return type
@@ -258,17 +258,17 @@ void (empty response body)
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**204** | Project successfully deleted |  -  |
+|**200** |  |  -  |
+|**204** | Project deleted successfully |  -  |
 |**401** | Unauthorized - Invalid or expired token |  -  |
-|**403** | Forbidden - Insufficient permissions to delete projects |  -  |
-|**404** | Project not found - The specified ID does not exist for this tenant |  -  |
+|**404** | Project not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **projectControllerUpdate**
 > ProjectDto projectControllerUpdate(updateProjectDto)
 
-Updates an existing project\'s information. Accessible by global admins or tenant admins.
+Updates an existing project by ID.
 
 ### Example
 
@@ -282,7 +282,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new ProjectsApi(configuration);
 
-let id: string; //Unique project identifier to update (UUID) (default to undefined)
+let id: string; // (default to undefined)
 let updateProjectDto: UpdateProjectDto; //
 
 const { status, data } = await apiInstance.projectControllerUpdate(
@@ -296,7 +296,7 @@ const { status, data } = await apiInstance.projectControllerUpdate(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **updateProjectDto** | **UpdateProjectDto**|  | |
-| **id** | [**string**] | Unique project identifier to update (UUID) | defaults to undefined|
+| **id** | [**string**] |  | defaults to undefined|
 
 
 ### Return type
@@ -317,11 +317,8 @@ const { status, data } = await apiInstance.projectControllerUpdate(
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Project updated successfully |  -  |
-|**400** | Invalid input data - Check the request body format |  -  |
 |**401** | Unauthorized - Invalid or expired token |  -  |
-|**403** | Forbidden - Insufficient permissions to update projects |  -  |
-|**404** | Project not found - The specified ID does not exist for this tenant |  -  |
-|**409** | Project name already exists - The provided name is already in use |  -  |
+|**404** | Project not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

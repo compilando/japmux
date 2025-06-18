@@ -8,8 +8,8 @@ All URIs are relative to *http://localhost*
 |[**promptAssetVersionControllerFindAll**](#promptassetversioncontrollerfindall) | **GET** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions | Get all versions for a specific prompt asset|
 |[**promptAssetVersionControllerFindOneByTag**](#promptassetversioncontrollerfindonebytag) | **GET** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag} | Get a specific prompt asset version by its tag|
 |[**promptAssetVersionControllerRemove**](#promptassetversioncontrollerremove) | **DELETE** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag} | Delete a specific prompt asset version by its tag|
-|[**promptAssetVersionControllerRequestPublish**](#promptassetversioncontrollerrequestpublish) | **POST** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag}/request-publish | Request to publish an asset version to the marketplace|
-|[**promptAssetVersionControllerUnpublish**](#promptassetversioncontrollerunpublish) | **POST** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag}/unpublish | Unpublish an asset version from the marketplace|
+|[**promptAssetVersionControllerRequestPublish**](#promptassetversioncontrollerrequestpublish) | **POST** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag}/publish | Request to publish a specific prompt asset version|
+|[**promptAssetVersionControllerUnpublish**](#promptassetversioncontrollerunpublish) | **POST** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag}/unpublish | Unpublish a specific prompt asset version|
 |[**promptAssetVersionControllerUpdate**](#promptassetversioncontrollerupdate) | **PATCH** /api/projects/{projectId}/prompts/{promptId}/assets/{assetKey}/versions/{versionTag} | Update a specific prompt asset version by its tag|
 
 # **promptAssetVersionControllerCreate**
@@ -283,7 +283,7 @@ const apiInstance = new PromptAssetVersionsApi(configuration);
 let projectId: string; //ID of the Project the Prompt belongs to (default to undefined)
 let promptId: string; //ID (slug) of the Prompt (default to undefined)
 let assetKey: string; //Key of the PromptAsset (default to undefined)
-let versionTag: string; //Version tag (default to undefined)
+let versionTag: string; //Version tag to publish (default to undefined)
 
 const { status, data } = await apiInstance.promptAssetVersionControllerRequestPublish(
     projectId,
@@ -300,7 +300,7 @@ const { status, data } = await apiInstance.promptAssetVersionControllerRequestPu
 | **projectId** | [**string**] | ID of the Project the Prompt belongs to | defaults to undefined|
 | **promptId** | [**string**] | ID (slug) of the Prompt | defaults to undefined|
 | **assetKey** | [**string**] | Key of the PromptAsset | defaults to undefined|
-| **versionTag** | [**string**] | Version tag | defaults to undefined|
+| **versionTag** | [**string**] | Version tag to publish | defaults to undefined|
 
 
 ### Return type
@@ -320,10 +320,11 @@ const { status, data } = await apiInstance.promptAssetVersionControllerRequestPu
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Publish request processed. |  -  |
+|**200** | Publish request submitted. |  -  |
+|**201** |  |  -  |
 |**401** | Unauthorized. |  -  |
 |**403** | Forbidden Access to Project. |  -  |
-|**404** | Resource not found. |  -  |
+|**404** | Project, Asset, or Version not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -345,7 +346,7 @@ const apiInstance = new PromptAssetVersionsApi(configuration);
 let projectId: string; //ID of the Project the Prompt belongs to (default to undefined)
 let promptId: string; //ID (slug) of the Prompt (default to undefined)
 let assetKey: string; //Key of the PromptAsset (default to undefined)
-let versionTag: string; //Version tag (default to undefined)
+let versionTag: string; //Version tag to unpublish (default to undefined)
 
 const { status, data } = await apiInstance.promptAssetVersionControllerUnpublish(
     projectId,
@@ -362,7 +363,7 @@ const { status, data } = await apiInstance.promptAssetVersionControllerUnpublish
 | **projectId** | [**string**] | ID of the Project the Prompt belongs to | defaults to undefined|
 | **promptId** | [**string**] | ID (slug) of the Prompt | defaults to undefined|
 | **assetKey** | [**string**] | Key of the PromptAsset | defaults to undefined|
-| **versionTag** | [**string**] | Version tag | defaults to undefined|
+| **versionTag** | [**string**] | Version tag to unpublish | defaults to undefined|
 
 
 ### Return type
@@ -383,9 +384,10 @@ const { status, data } = await apiInstance.promptAssetVersionControllerUnpublish
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Version unpublished. |  -  |
+|**201** |  |  -  |
 |**401** | Unauthorized. |  -  |
 |**403** | Forbidden Access to Project. |  -  |
-|**404** | Resource not found. |  -  |
+|**404** | Project, Asset, or Version not found. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

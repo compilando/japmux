@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **versionTag** | **string** | Etiqueta de versión (e.g., 1.0.1, 1.1.0). Si no se provee, se podría auto-incrementar o requerir. | [optional] [default to undefined]
 **changeMessage** | **string** | Mensaje describiendo los cambios en esta versión. | [optional] [default to undefined]
 **languageCode** | **string** | Código de idioma para la versión del asset (e.g., en-US, es-ES). Se obtiene del listado de regiones del proyecto. | [default to undefined]
+**translations** | [**Array&lt;AssetTranslationDto&gt;**](AssetTranslationDto.md) | Traducciones para esta versión del asset. | [optional] [default to undefined]
 
 ## Example
 
@@ -20,6 +21,7 @@ const instance: CreatePromptAssetVersionDto = {
     versionTag,
     changeMessage,
     languageCode,
+    translations,
 };
 ```
 

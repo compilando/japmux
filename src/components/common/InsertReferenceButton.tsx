@@ -171,7 +171,7 @@ const InsertReferenceButton: React.FC<InsertReferenceButtonProps> = ({ projectId
     const promptOptions: PromptOption[] = prompts
         .filter(prompt => !currentPromptId || prompt.id !== currentPromptId)
         .map(prompt => ({
-            value: prompt.id,
+            value: prompt.id, c
             label: prompt.name
         }));
 
