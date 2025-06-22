@@ -20,7 +20,8 @@ import {
 import Select, { SingleValue } from 'react-select';
 import AsyncSelect from 'react-select/async'; // Import AsyncSelect
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
-import axios from 'axios';
+import axiosInstance from '@/services/axiosInstance'; // <-- Importar la instancia correcta
+import axios from 'axios'; // Importar axios para la comprobación de errores
 import styles from './ServePromptPage.module.css'; // Importar CSS Modules
 import CopyButton from '@/components/common/CopyButton'; // Importar CopyButton
 import Breadcrumb from '@/components/common/PageBreadCrumb'; // Asegurar que la importación esté presente
@@ -40,6 +41,7 @@ interface LlmExecutionResponse {
     result: string;
     modelUsed?: string;
     providerUsed?: string;
+    assets?: any[]; // Propiedad para los assets
     // Add other potential properties if known
 }
 
@@ -81,6 +83,7 @@ const ServePromptPage: React.FC = () => {
     // --- Estado para Tamaño de Fuente ---
     const [selectedFontSize, setSelectedFontSize] = useState<FontSize>('m'); // Default 'm'
     const [isProcessed, setIsProcessed] = useState<boolean>(false); // Nuevo estado para el checkbox
+    const [includeAssets, setIncludeAssets] = useState<boolean>(false); // Nuevo estado para incluir assets
 
     // --- Estados UI/Generales ---
     const [loadingVersions, setLoadingVersions] = useState<boolean>(false);
@@ -218,7 +221,7 @@ const ServePromptPage: React.FC = () => {
 
     // --- Función para extraer variables del texto ---
     const extractVariables = (text: string): string[] => {
-        const regex = /{{\s*(\w+)\s*}}/g;
+        const regex = /{{\s*([\w-]+)\s*}}/g;
         const matches = text.matchAll(regex);
         const vars = new Set<string>();
         for (const match of matches) {
@@ -429,28 +432,31 @@ const ServePromptPage: React.FC = () => {
         } else {
             promptApiPath = `/api/serve-prompt/execute/${encodeURIComponent(projectId)}/${encodeURIComponent(promptName)}/${encodeURIComponent(versionTag)}/base`;
         }
-        const fullPromptApiUrl = `${currentApiBaseUrl}${promptApiPath}`;
+
+        const queryParams = new URLSearchParams();
+        if (includeAssets) {
+            queryParams.append('includeAssets', 'true');
+        }
+        if (isProcessed) {
+            queryParams.append('processed', 'true');
+        }
+        const queryString = queryParams.toString();
+        const fullPromptApiUrl = `${currentApiBaseUrl}${promptApiPath}${queryString ? `?${queryString}` : ''}`;
+
+        const bodyPayload: { variables?: StringMap } = {};
+
+        // Solo añadir 'variables' si el objeto no está vacío
+        const activeVariables = Object.entries(variableInputs)
+            .filter(([, val]) => val.trim() !== '')
+            .reduce((obj, [key, val]) => { obj[key] = val; return obj; }, {} as StringMap);
+
+        if (Object.keys(activeVariables).length > 0) {
+            bodyPayload.variables = activeVariables;
+        }
 
         // 1. Generar el comando cURL simple
         let CurlCommand = `curl -X POST "${fullPromptApiUrl}" \\
      -H "Authorization: Bearer YOUR_AUTH_TOKEN" \\
-     -H "Content-Type: application/json"`;
-
-        const bodyPayload: { variables?: StringMap, aiModelId?: string } = {};
-        if (Object.keys(variableInputs).filter(k => variableInputs[k].trim() !== '').length > 0) {
-            bodyPayload.variables = Object.entries(variableInputs)
-                .filter(([, val]) => val.trim() !== '')
-                .reduce((obj, [key, val]) => { obj[key] = val; return obj; }, {} as StringMap);
-        }
-
-
-        if (Object.keys(bodyPayload).length > 0) {
-            CurlCommand += ` \\
-     -d '${JSON.stringify(bodyPayload, null, 2)}'`;
-        }
-
-        CurlCommand += `\n\n--------------------------`;
-        CurlCommand += `\n\nOR with api-key: \n\ncurl -X POST "${fullPromptApiUrl}" \\
      -H "x-api-key: YOUR_API_KEY" \\
      -H "Content-Type: application/json"`;
 
@@ -459,14 +465,15 @@ const ServePromptPage: React.FC = () => {
      -d '${JSON.stringify(bodyPayload, null, 2)}'`;
         }
 
+        CurlCommand += `\n\n--------------------------`;
+        CurlCommand += `\nChoose one of Authorization: Bearer or x-api-key`;
 
-        let curlNote = `\n\n# NOTE (for single cURL):`;
-        curlNote += `# Replace 'YOUR_AUTH_TOKEN' with your actual token.`;
-        // Eliminada la nota sobre aiModelId
-        if (bodyPayload.variables && Object.keys(bodyPayload.variables).length > 0) {
-            curlNote += `\n# Variables provided are included in the example body.`;
-        } else {
-            curlNote += `\n# No variables provided for this example; add them to the JSON body if needed.`;
+        let curlNote = `\n`;
+        if (includeAssets) {
+            curlNote += `\n# The 'includeAssets=true' parameter is added to fetch associated assets.`;
+        }
+        if (isProcessed) {
+            curlNote += `\n# The 'processed=true' parameter ensures the final prompt text is returned.`;
         }
         CurlCommand += curlNote;
         setCurlCommand(CurlCommand);
@@ -479,15 +486,17 @@ const ServePromptPage: React.FC = () => {
   -H "Authorization: Bearer $TOKEN" \\
   -H "Content-Type: application/json"`;
 
-        // Asegurar que scriptBodyPayload siempre tenga 'variables' como un objeto.
-        const scriptBodyPayload: { variables: StringMap } = { variables: {} };
+        // Asegurar que el cuerpo del script también incluye 'processed' si es necesario
+        const scriptBodyPayload: { variables?: StringMap } = {};
         if (bodyPayload.variables && Object.keys(bodyPayload.variables).length > 0) {
             scriptBodyPayload.variables = bodyPayload.variables;
         }
 
-        // Siempre añadir -d con al menos { "variables": {} }
-        servePromptCurlInScript += ` \\
+        // Siempre añadir -d si hay variables
+        if (Object.keys(scriptBodyPayload).length > 0) {
+            servePromptCurlInScript += ` \\
   -d '${JSON.stringify(scriptBodyPayload, null, 2)}'`;
+        }
 
         const fullBashScript = `#!/bin/bash
 
@@ -544,7 +553,7 @@ fi
 `;
         setBashScriptExample(fullBashScript);
 
-    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, variableInputs, displayedCurlBaseUrl]);
+    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, variableInputs, displayedCurlBaseUrl, includeAssets, isProcessed]);
 
     // --- Handler para actualizar input de variable ---
     const handleVariableInputChange = (varName: string, value: string) => {
@@ -588,40 +597,260 @@ fi
 
     // --- Handler para Ejecución ---
     const handleExecute = useCallback(async () => {
-        if (!selectedProjectId || !selectedPrompt?.value || !selectedVersion?.value || !selectedAiModel?.value || !selectedLanguage?.value) {
-            showErrorToast("Please select project, prompt, version, language, and AI model.");
+        if (!selectedProjectId || !selectedPrompt?.value || !selectedVersion?.value || !selectedLanguage?.value) {
+            showErrorToast("Please select project, prompt, version, and language.");
             return;
         }
 
         setIsExecuting(true);
         setError(null);
-        setExecutionResult(null); // Limpiar resultado anterior
+        setExecutionResult(null);
 
-        // --- Corregido: Crear DTO según la definición de ExecuteLlmDto ---
-        const executionDto: ExecuteLlmDto = {
-            modelId: selectedAiModel.value, // Usar el ID del modelo seleccionado
-            promptText: currentPromptText, // Usar el texto del prompt ya cargado/seleccionado
-            variables: variableInputs, // Pasar las variables (opcional según DTO, pero útil)
-        };
+        // Construir la URL y el cuerpo de la petición correctamente
+        const currentApiBaseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000').replace(/\/+$/, '');
+        const versionToUse = selectedVersion.value === 'latest' ? 'latest' : selectedVersion.value;
+
+        let promptApiPath;
+        if (selectedLanguage.value && selectedLanguage.value !== '__BASE__') {
+            promptApiPath = `/api/serve-prompt/execute/${encodeURIComponent(selectedProjectId)}/${encodeURIComponent(selectedPrompt.value)}/${encodeURIComponent(versionToUse)}/lang/${encodeURIComponent(selectedLanguage.value)}`;
+        } else {
+            promptApiPath = `/api/serve-prompt/execute/${encodeURIComponent(selectedProjectId)}/${encodeURIComponent(selectedPrompt.value)}/${encodeURIComponent(versionToUse)}/base`;
+        }
+
+        const queryParams = new URLSearchParams();
+        if (includeAssets) {
+            queryParams.append('includeAssets', 'true');
+        }
+        if (isProcessed) {
+            queryParams.append('processed', 'true');
+        }
+
+        const queryString = queryParams.toString();
+        const fullPromptApiUrl = `${currentApiBaseUrl}${promptApiPath}${queryString ? `?${queryString}` : ''}`;
+
+        const bodyPayload: { variables?: StringMap } = {};
+
+        // Solo añadir 'variables' si el objeto no está vacío
+        const activeVariables = Object.entries(variableInputs)
+            .filter(([, val]) => val.trim() !== '')
+            .reduce((obj, [key, val]) => { obj[key] = val; return obj; }, {} as StringMap);
+
+        if (Object.keys(activeVariables).length > 0) {
+            bodyPayload.variables = activeVariables;
+        }
 
         try {
-            const result = await llmExecutionService.execute(executionDto);
-            setExecutionResult(result as LlmExecutionResponse); // Conversión de tipo segura
-            showSuccessToast("Prompt executed successfully!");
-        } catch (err: unknown) {
-            console.error("Error executing prompt:", err);
-            let errorMessage = 'Failed to execute prompt.';
-            if (axios.isAxiosError(err) && err.response?.data?.message) {
-                errorMessage = err.response.data.message;
-            } else if (err instanceof Error) {
-                errorMessage = err.message;
+            // Usar axiosInstance para asegurar que la autenticación se incluye
+            const response = await axiosInstance.post(fullPromptApiUrl, bodyPayload.variables ? bodyPayload : undefined, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            console.log("--> [Debug] API Response from Execute button:", response.data); // Log para depurar
+
+            // Manejo de respuesta flexible
+            if (typeof response.data === 'object' && response.data !== null) {
+                const responseData = response.data as any;
+                // Dar prioridad a 'processedPrompt'
+                const resultText = responseData.processedPrompt || responseData.result || responseData.completion || responseData.text || JSON.stringify(responseData);
+
+                const finalResult: LlmExecutionResponse = {
+                    ...responseData,
+                    result: resultText,
+                };
+                setExecutionResult(finalResult);
+
+            } else if (typeof response.data === 'string') {
+                setExecutionResult({ result: response.data });
+            } else {
+                setExecutionResult({ result: "Received an unexpected response format." });
             }
-            setError(errorMessage);
-            showErrorToast(errorMessage);
+
+            showSuccessToast("Prompt preprocessed successfully!");
+        } catch (err: unknown) {
+            console.error("--- PROMPT EXECUTION ERROR ---", err);
+            let finalErrorMessage = 'Failed to preprocess prompt. Check console for details.';
+
+            if (axios.isAxiosError(err)) {
+                console.log("--> [Debug] Error is an AxiosError.");
+                if (err.response) {
+                    console.log("--> [Debug] Error has a response object:", err.response);
+                    const responseData = err.response.data;
+                    if (responseData) {
+                        console.log("--> [Debug] Error response has data:", responseData);
+                        const serverMessage = responseData.message;
+                        console.log("--> [Debug] Server message:", serverMessage);
+                        if (Array.isArray(serverMessage) && serverMessage.length > 0) {
+                            finalErrorMessage = serverMessage.join('; ');
+                            console.log("--> [Debug] Extracted error from array:", finalErrorMessage);
+                        } else if (serverMessage) {
+                            finalErrorMessage = String(serverMessage);
+                            console.log("--> [Debug] Extracted error from string/other:", finalErrorMessage);
+                        } else {
+                            console.log("--> [Debug] No 'message' property found in response data. Stringifying.");
+                            finalErrorMessage = JSON.stringify(responseData);
+                        }
+                    } else {
+                        console.log("--> [Debug] Error response has no data.");
+                    }
+                } else {
+                    console.log("--> [Debug] Error has no response object.");
+                }
+            } else if (err instanceof Error) {
+                console.log("--> [Debug] Error is a standard Error instance.");
+                finalErrorMessage = err.message;
+            }
+
+            console.log("--> [Debug] Final error message to be displayed:", finalErrorMessage);
+            setError(finalErrorMessage);
+            showErrorToast(finalErrorMessage);
         } finally {
             setIsExecuting(false);
         }
-    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, selectedAiModel, variableInputs, currentPromptText]);
+    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, variableInputs, includeAssets, isProcessed]);
+
+    // --- Handler para Ejecución con LLM ---
+    const handleExecuteWithLLM = useCallback(async () => {
+        if (!selectedProjectId || !selectedPrompt?.value || !selectedVersion?.value || !selectedLanguage?.value) {
+            showErrorToast("Please select project, prompt, version, and language.");
+            return;
+        }
+
+        setIsExecuting(true);
+        setError(null);
+        setExecutionResult(null);
+
+        // Construir la URL y el cuerpo de la petición para LLM execution
+        const currentApiBaseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000').replace(/\/+$/, '');
+        const versionToUse = selectedVersion.value === 'latest' ? 'latest' : selectedVersion.value;
+
+        let promptApiPath;
+        if (selectedLanguage.value && selectedLanguage.value !== '__BASE__') {
+            promptApiPath = `/api/serve-prompt/execute/${encodeURIComponent(selectedProjectId)}/${encodeURIComponent(selectedPrompt.value)}/${encodeURIComponent(versionToUse)}/lang/${encodeURIComponent(selectedLanguage.value)}`;
+        } else {
+            promptApiPath = `/api/serve-prompt/execute/${encodeURIComponent(selectedProjectId)}/${encodeURIComponent(selectedPrompt.value)}/${encodeURIComponent(versionToUse)}/base`;
+        }
+
+        const queryParams = new URLSearchParams();
+        if (includeAssets) {
+            queryParams.append('includeAssets', 'true');
+        }
+        if (isProcessed) {
+            queryParams.append('processed', 'true');
+        }
+
+        const queryString = queryParams.toString();
+        const fullPromptApiUrl = `${currentApiBaseUrl}${promptApiPath}${queryString ? `?${queryString}` : ''}`;
+
+        const bodyPayload: { variables?: StringMap } = {};
+
+        // Solo añadir 'variables' si el objeto no está vacío
+        const activeVariables = Object.entries(variableInputs)
+            .filter(([, val]) => val.trim() !== '')
+            .reduce((obj, [key, val]) => { obj[key] = val; return obj; }, {} as StringMap);
+
+        if (Object.keys(activeVariables).length > 0) {
+            bodyPayload.variables = activeVariables;
+        }
+
+        try {
+            // Primero obtener el prompt procesado
+            const preprocessResponse = await axiosInstance.post(fullPromptApiUrl, bodyPayload.variables ? bodyPayload : undefined, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            let processedPromptText = '';
+            if (typeof preprocessResponse.data === 'object' && preprocessResponse.data !== null) {
+                const responseData = preprocessResponse.data as any;
+                processedPromptText = responseData.processedPrompt || responseData.result || responseData.completion || responseData.text || JSON.stringify(responseData);
+            } else if (typeof preprocessResponse.data === 'string') {
+                processedPromptText = preprocessResponse.data;
+            } else {
+                throw new Error("Failed to get processed prompt text");
+            }
+
+            // Ahora ejecutar con LLM
+            const llmExecutionPayload = {
+                modelId: selectedAiModel?.value || '',
+                promptText: processedPromptText,
+                // Opcionalmente, también puedes incluir:
+                // projectId: selectedProjectId,
+                // promptId: selectedPrompt?.value,
+                // versionTag: selectedVersion?.value,
+                // languageCode: selectedLanguage?.value,
+                // variables: activeVariables
+            };
+
+            const llmResponse = await axiosInstance.post(`${currentApiBaseUrl}/api/llm-execution/execute`, llmExecutionPayload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            console.log("--> [Debug] LLM API Response:", llmResponse.data);
+
+            // Manejo de respuesta del LLM
+            if (typeof llmResponse.data === 'object' && llmResponse.data !== null) {
+                const responseData = llmResponse.data as any;
+                const resultText = responseData.response || responseData.result || responseData.completion || responseData.text || JSON.stringify(responseData);
+
+                const finalResult: LlmExecutionResponse = {
+                    ...responseData,
+                    result: resultText,
+                };
+                setExecutionResult(finalResult);
+
+            } else if (typeof llmResponse.data === 'string') {
+                setExecutionResult({ result: llmResponse.data });
+            } else {
+                setExecutionResult({ result: "Received an unexpected response format from LLM." });
+            }
+
+            showSuccessToast("Prompt executed with LLM successfully!");
+        } catch (err: unknown) {
+            console.error("--- LLM EXECUTION ERROR ---", err);
+            let finalErrorMessage = 'Failed to execute prompt with LLM. Check console for details.';
+
+            if (axios.isAxiosError(err)) {
+                console.log("--> [Debug] Error is an AxiosError.");
+                if (err.response) {
+                    console.log("--> [Debug] Error has a response object:", err.response);
+                    const responseData = err.response.data;
+                    if (responseData) {
+                        console.log("--> [Debug] Error response has data:", responseData);
+                        const serverMessage = responseData.message;
+                        console.log("--> [Debug] Server message:", serverMessage);
+                        if (Array.isArray(serverMessage) && serverMessage.length > 0) {
+                            finalErrorMessage = serverMessage.join('; ');
+                            console.log("--> [Debug] Extracted error from array:", finalErrorMessage);
+                        } else if (serverMessage) {
+                            finalErrorMessage = String(serverMessage);
+                            console.log("--> [Debug] Extracted error from string/other:", finalErrorMessage);
+                        } else {
+                            console.log("--> [Debug] No 'message' property found in response data. Stringifying.");
+                            finalErrorMessage = JSON.stringify(responseData);
+                        }
+                    } else {
+                        console.log("--> [Debug] Error response has no data.");
+                    }
+                } else {
+                    console.log("--> [Debug] Error has no response object.");
+                }
+            } else if (err instanceof Error) {
+                console.log("--> [Debug] Error is a standard Error instance.");
+                finalErrorMessage = err.message;
+            }
+
+            console.log("--> [Debug] Final error message to be displayed:", finalErrorMessage);
+            setError(finalErrorMessage);
+            showErrorToast(finalErrorMessage);
+        } finally {
+            setIsExecuting(false);
+        }
+    }, [selectedProjectId, selectedPrompt, selectedVersion, selectedLanguage, selectedAiModel, variableInputs, includeAssets, isProcessed]);
 
     // --- Placeholder para API Token (debe ser gestionado de forma segura) ---
     const API_TOKEN_PLACEHOLDER = 'YOUR_AUTH_TOKEN'; // Mover a .env o configuración
@@ -649,6 +878,22 @@ fi
     // --- Render ---
     return (
         <>
+            <style jsx global>{`
+                .react-select__control {
+                    min-height: 38px; /* Altura mínima por defecto */
+                    height: auto; /* Altura automática para acomodar contenido */
+                }
+                .react-select__menu {
+                    min-width: 100%;
+                    width: auto; /* El menú se ajusta al contenido */
+                }
+                .react-select__option, .react-select__single-value {
+                    white-space: normal; /* Permite que el texto se divida en varias líneas */
+                    word-wrap: break-word; /* Para navegadores más antiguos */
+                    overflow-wrap: break-word; /* Estándar actual */
+                    max-width: 100%; /* Asegura que no se desborde del contenedor */
+                }
+            `}</style>
             <Breadcrumb crumbs={breadcrumbs} />
 
             {/* --- Bloque de Información del Prompt y Proyecto --- */}
@@ -660,12 +905,6 @@ fi
             />
 
             <div className={`${styles.servePromptContainer} bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen`}>
-                <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Test and execute your configured prompts with different variables and models.
-                    </p>
-                </div>
-
                 {error && (
                     <div className={`${styles.errorBanner} bg-yellow-100 border-yellow-400 text-yellow-700 dark:bg-yellow-700 dark:text-yellow-100 dark:border-yellow-600`}>
                         Error: {error}
@@ -811,8 +1050,8 @@ fi
                     </div>
                 </div>
 
-                {/* Checkbox para procesar el prompt */}
-                <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                {/* Checkbox para procesar el prompt y para incluir assets */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                     <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <input
                             type="checkbox"
@@ -820,7 +1059,16 @@ fi
                             onChange={(e) => setIsProcessed(e.target.checked)}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                         />
-                        <span>Show processed prompt (resolve references and variables)</span>
+                        <span>Process prompt references and variables (final result after replacements)</span>
+                    </label>
+                    <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <input
+                            type="checkbox"
+                            checked={includeAssets}
+                            onChange={(e) => setIncludeAssets(e.target.checked)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                        />
+                        <span>Include assets in API response</span>
                     </label>
                 </div>
 
@@ -829,7 +1077,6 @@ fi
                         <div className={`${styles.promptDetailsSection} bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow`}>
                             <h2 className="text-xl font-semibold mb-3 text-black dark:text-white">Prompt Details & Variables</h2>
                             <div className="mb-4">
-                                <label htmlFor="font-size-selector" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Text Size:</label>
                                 <div className={styles.fontSizeSelectorContainer}>
                                     <span className={`${styles.fontSizeSelectorLabel} text-gray-700 dark:text-gray-300`}>Font Size:</span>
                                     <div className={styles.fontSizeSelector}>
@@ -870,13 +1117,23 @@ fi
                                     ))}
                                 </div>
                             )}
-                            <button
-                                onClick={handleExecute}
-                                disabled={isExecuting || !selectedAiModel || !currentPromptText}
-                                className={`${styles.executeButton} mt-6 w-full py-2 px-4 rounded-md text-white font-semibold transition-colors duration-150 ease-in-out bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-gray-500`}
-                            >
-                                {isExecuting ? 'Executing...' : 'Execute Prompt'}
-                            </button>
+                            <div className="flex gap-2 mt-6">
+                                <button
+                                    onClick={handleExecute}
+                                    disabled={isExecuting || !currentPromptText}
+                                    className={`${styles.executeButton} flex-1 py-2 px-4 rounded-md text-white font-semibold transition-colors duration-150 ease-in-out bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-gray-500`}
+                                >
+                                    {isExecuting ? 'Processing...' : 'Preprocess Prompt'}
+                                </button>
+                                <button
+                                    onClick={handleExecuteWithLLM}
+                                    disabled={isExecuting || !currentPromptText || !selectedAiModel}
+                                    className={`${styles.executeButton} flex-1 py-2 px-4 rounded-md text-white font-semibold transition-colors duration-150 ease-in-out bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-green-500 dark:hover:bg-green-600 dark:disabled:bg-gray-500`}
+                                    title={!selectedAiModel ? "Select an AI Model first" : "Execute prompt with LLM"}
+                                >
+                                    {isExecuting ? 'Executing...' : 'Execute with LLM'}
+                                </button>
+                            </div>
                         </div>
                         <div className={`${styles.resultsSection} bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow`}>
                             <h2 className="text-xl font-semibold mb-3 text-black dark:text-white">Execution Results</h2>
@@ -897,6 +1154,20 @@ fi
                                         className={`font-mono ${getFontSizeClass(selectedFontSize)} w-full p-3 border border-gray-700 dark:border-gray-600 rounded-md bg-gray-800 dark:bg-gray-800 text-gray-100 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 resize-none`}
                                         rows={16}
                                     />
+
+                                    {/* --- Nueva caja para Assets --- */}
+                                    {includeAssets && executionResult.assets && executionResult.assets.length > 0 && (
+                                        <div className="mt-4">
+                                            <h3 className="text-lg font-semibold mb-2 text-black dark:text-white">Returned Assets</h3>
+                                            <textarea
+                                                id="execution-assets-text"
+                                                readOnly
+                                                value={JSON.stringify(executionResult.assets, null, 2)}
+                                                className={`font-mono ${getFontSizeClass(selectedFontSize)} w-full p-3 border border-gray-700 dark:border-gray-600 rounded-md bg-gray-800 dark:bg-gray-800 text-gray-100 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 resize-none`}
+                                                rows={10}
+                                            />
+                                        </div>
+                                    )}
                                 </>
                             )}
                             {!executionResult && !isExecuting && (

@@ -108,7 +108,9 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
     className
 }) => {
     const editorRef = useRef<HTMLTextAreaElement>(null);
+    const variableButtonRef = useRef<HTMLButtonElement>(null);
     const [showAssetMenu, setShowAssetMenu] = useState(false);
+    const [showVariableMenu, setShowVariableMenu] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
     const [history, setHistory] = useState<HistoryEntry[]>([]);
     const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
@@ -356,6 +358,49 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
         }
     }, [onChange]);
 
+    // Click handler para el botón de variables
+    const handleVariableButtonClick = () => {
+        const variableName = window.prompt("Enter the name for the variable (e.g., 'user_name'):");
+
+        if (variableName && variableName.trim() !== '') {
+            const sanitizedName = variableName.trim().replace(/\s+/g, '_');
+            const variableToInsert = `{{${sanitizedName}}}`;
+
+            if (editorRef.current) {
+                const textarea = editorRef.current;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = textarea.value;
+
+                const newText = text.substring(0, start) + variableToInsert + text.substring(end);
+                onChange(newText);
+
+                // Colocar el cursor después de la variable insertada
+                setTimeout(() => {
+                    textarea.focus();
+                    textarea.setSelectionRange(start + variableToInsert.length, start + variableToInsert.length);
+                }, 0);
+            }
+        }
+    };
+
+    // Cerrar menú si se hace clic fuera
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (showVariableMenu) {
+                setShowVariableMenu(false);
+            }
+            if (showAssetMenu) {
+                setShowAssetMenu(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showVariableMenu, showAssetMenu]);
+
     return (
         <div
             className="space-y-2"
@@ -495,16 +540,19 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
 
                 {/* Variables Button */}
                 <div className="flex gap-2" role="group" aria-label="Variables">
-                    <ToolbarButton
-                        onClick={() => setShowAssetMenu(true)}
-                        icon={VariableIcon}
-                        label="Insert Variable"
-                        disabled={readOnly || memoizedAssets.length === 0}
-                        tooltip="Insert variable (right-click in editor)"
-                        aria-label="Insert variable"
-                        aria-describedby="variable-desc"
-                        className="text-indigo-600 dark:text-indigo-400"
-                    />
+                    <button
+                        ref={variableButtonRef}
+                        type="button"
+                        onClick={handleVariableButtonClick}
+                        disabled={readOnly}
+                        className="px-2 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600"
+                        data-tooltip-id="tooltip-variable"
+                        data-tooltip-content="Insert a new variable placeholder"
+                        aria-label="Insert a new variable placeholder"
+                    >
+                        <VariableIcon className="w-4 h-4 inline-block mr-1" aria-hidden="true" />
+                        <span>Insert Variable</span>
+                    </button>
                 </div>
             </div>
 
@@ -538,36 +586,38 @@ const PromptEditor: React.FC<PromptEditorProps> = React.memo(({
                 )}
             </div>
 
-            {/* Menú de assets */}
-            {
-                showAssetMenu && (
-                    <div
-                        className="fixed z-50 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700"
-                        style={{
-                            left: menuPosition.x,
-                            top: menuPosition.y,
-                            maxHeight: '300px',
-                            overflowY: 'auto'
-                        }}
-                        role="menu"
-                        aria-label="Variables menu"
-                    >
-                        <div className="py-1">
-                            {memoizedAssets.map((asset) => (
+            {/* Menú contextual de assets (clic derecho) - AHORA MUESTRA VARIABLES/ASSETS */}
+            {showAssetMenu && (
+                <div
+                    className="fixed z-50 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700"
+                    style={{
+                        left: menuPosition.x,
+                        top: menuPosition.y,
+                        maxHeight: '300px',
+                        overflowY: 'auto'
+                    }}
+                    role="menu"
+                    aria-label="Insert asset/variable menu"
+                >
+                    <div className="py-1">
+                        {memoizedAssets.length > 0 ? (
+                            memoizedAssets.map((asset) => (
                                 <button
                                     key={asset.key}
                                     onClick={() => handleAssetSelect(asset)}
-                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                     role="menuitem"
-                                    aria-label={`Insert variable ${asset.name}`}
+                                    aria-label={`Insert asset ${asset.name}`}
                                 >
                                     {asset.name} ({asset.key})
                                 </button>
-                            ))}
-                        </div>
+                            ))
+                        ) : (
+                            <div className="px-4 py-2 text-sm text-gray-500">No assets available to insert.</div>
+                        )}
                     </div>
-                )
-            }
+                </div>
+            )}
 
             {/* Tooltips */}
             <Tooltip id="editor-help" />

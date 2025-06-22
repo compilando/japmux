@@ -82,7 +82,7 @@ const ProjectCardItem: React.FC<ProjectCardItemProps> = ({ project, usersList, o
                             </div>
 
                             <div className="min-w-0 flex-1">
-                                <h3 className={`font-bold text-lg truncate transition-colors duration-300 ${isSelected ? 'text-brand-700 dark:text-brand-300' : 'text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400'}`} title={project.name}>
+                                <h3 className={`font-bold text-lg transition-colors duration-300 ${isSelected ? 'text-brand-700 dark:text-brand-300' : 'text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400'}`} title={project.name}>
                                     {project.name}
                                 </h3>
                                 {project.description && (
@@ -135,7 +135,7 @@ const ProjectCardItem: React.FC<ProjectCardItemProps> = ({ project, usersList, o
                                     <UserCircleIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                                 </div>
                             )}
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate" title={ownerName}>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300" title={ownerName}>
                                 {ownerName}
                             </span>
                         </div>

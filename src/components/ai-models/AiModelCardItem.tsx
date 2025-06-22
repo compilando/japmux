@@ -73,7 +73,7 @@ const AiModelCardItem: React.FC<AiModelCardItemProps> = ({ model, onEdit, onDele
                             </div>
 
                             <div className="min-w-0 flex-1">
-                                <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors duration-300" title={model.name}>
+                                <h3 className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors duration-300" title={model.name}>
                                     {model.name}
                                 </h3>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">

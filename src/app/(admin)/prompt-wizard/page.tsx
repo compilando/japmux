@@ -49,8 +49,8 @@ const PromptWizardPage: React.FC = () => {
     const { selectedProjectId } = useProjects(); // Obtener projectId del contexto
     const [promptContent, setPromptContent] = useState<string>('');
     const [generatedJson, setGeneratedJson] = useState<StructureData | null>(null);
-    const [isLoadingGenerate, setIsLoadingGenerate] = useState<boolean>(false);
-    const [errorGenerate, setErrorGenerate] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [isLoaded, setIsLoaded] = useState<boolean>(false); // Nuevo estado para controlar si ya se cargó
 
     // jsonToLoadInput será el estado para el textarea unificado
@@ -110,15 +110,22 @@ const PromptWizardPage: React.FC = () => {
 
     const handleGenerateStructure = async () => {
         if (!selectedProjectId) {
-            showErrorToast('Please select a project first to generate the structure.');
+            setError("Project ID is not selected.");
+            showErrorToast("Project ID is not selected.");
+            return;
+        }
+        if (!promptContent.trim()) {
+            setError("Prompt content cannot be empty.");
+            showErrorToast("Prompt content cannot be empty.");
             return;
         }
 
-        setIsLoadingGenerate(true);
-        setErrorGenerate(null);
+        setIsLoading(true);
+        setError(null);
         setGeneratedJson(null);
         try {
-            const result = await promptService.generatePromptStructure(selectedProjectId, promptContent);
+            console.log('[PromptWizard] Attempting to generate structure with projectId:', selectedProjectId);
+            const result = await promptService.generateStructure(selectedProjectId, { userPrompt: promptContent });
             console.log('Generated structure result:', result);
 
             // Verificar si result.structure existe (formato esperado según OpenAPI)
@@ -147,7 +154,7 @@ const PromptWizardPage: React.FC = () => {
             } else {
                 console.log('No structure found in result:', result);
                 showErrorToast('No structure data received from the API.');
-                setErrorGenerate('No structure data received from the API.');
+                setError('No structure data received from the API.');
             }
         } catch (err: unknown) {
             console.error("Error generando estructura:", err);
@@ -159,10 +166,10 @@ const PromptWizardPage: React.FC = () => {
                 'message' in err.response.data) {
                 apiErrorMessage = String(err.response.data.message);
             }
-            setErrorGenerate(apiErrorMessage);
+            setError(apiErrorMessage);
             showErrorToast(apiErrorMessage);
         } finally {
-            setIsLoadingGenerate(false);
+            setIsLoading(false);
         }
     };
 
@@ -341,7 +348,7 @@ const PromptWizardPage: React.FC = () => {
                                         placeholder="e.g.: Create a welcome message for new users in English and Spanish..."
                                         rows={8}
                                         assets={[]} // Sin assets para evitar funcionalidad de insertar variables
-                                        readOnly={isLoadingGenerate}
+                                        readOnly={isLoading}
                                         showHistory={true}
                                         id="prompt-editor"
                                         aria-label="Prompt content editor"
@@ -351,18 +358,18 @@ const PromptWizardPage: React.FC = () => {
                                 <div className="flex items-center justify-end">
                                     <button
                                         onClick={handleGenerateStructure}
-                                        className={`px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 ${isLoadingGenerate || !selectedProjectId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className={`px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 ${isLoading || !selectedProjectId ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         type="button"
-                                        disabled={isLoadingGenerate || !selectedProjectId}
+                                        disabled={isLoading || !selectedProjectId}
                                         title={!selectedProjectId ? "Select a project to generate structure" : "Generate structure based on the prompt"}
                                     >
-                                        {isLoadingGenerate ? 'Generating, please wait...' : 'Suggest Structure by AI'}
+                                        {isLoading ? 'Generating, please wait...' : 'Suggest Structure by AI'}
                                     </button>
                                 </div>
-                                {errorGenerate && (
+                                {error && (
                                     <div className="mt-4 p-4 bg-red-100/80 dark:bg-red-900/40 border border-red-400/50 dark:border-red-600/50 text-red-700 dark:text-red-300 rounded-xl backdrop-blur-sm" role="alert">
                                         <strong className="font-bold">Error generating: </strong>
-                                        <span className="block sm:inline">{errorGenerate}</span>
+                                        <span className="block sm:inline">{error}</span>
                                     </div>
                                 )}
                             </div>
@@ -395,7 +402,7 @@ const PromptWizardPage: React.FC = () => {
                                                     value={jsonToLoadInput}
                                                     onChange={(e) => setJsonToLoadInput(e.target.value)}
                                                     placeholder='Paste the structure JSON here, or generate one with the AI.'
-                                                    disabled={isLoadingLoad || isLoadingGenerate}
+                                                    disabled={isLoadingLoad || isLoading}
                                                 />
 
                                                 {/* Configuración para carga de prompt */}

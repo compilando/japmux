@@ -80,7 +80,7 @@ const UserCardItem: React.FC<UserCardItemProps> = ({ user, onEdit, onDelete, cur
                                 <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors duration-300" title={user.name}>
                                     {user.name}
                                 </h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate" title={user.email}>
+                                <p className="text-sm text-gray-600 dark:text-gray-400" title={user.email}>
                                     {user.email}
                                 </p>
                             </div>
@@ -118,11 +118,6 @@ const UserCardItem: React.FC<UserCardItemProps> = ({ user, onEdit, onDelete, cur
                             Role
                         </h4>
                         <div className="flex items-center space-x-2">
-                            <div className={`p-2 bg-gradient-to-br ${roleColor} rounded-lg shadow-sm`}>
-                                <div className="text-white">
-                                    {roleIcon}
-                                </div>
-                            </div>
                             <span className={`px-3 py-1 text-sm font-semibold rounded-full bg-gradient-to-r ${roleColor.replace('to-', 'to-').replace('from-', 'from-')} bg-opacity-10 text-gray-800 dark:text-gray-200 border border-white/30 dark:border-gray-700/40`}>
                                 {user.role.replace('_', ' ')}
                             </span>

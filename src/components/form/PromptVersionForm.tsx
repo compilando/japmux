@@ -251,11 +251,14 @@ const PromptVersionForm: React.FC<PromptVersionFormProps> = ({ initialData, onSa
                             value={versionTag}
                             onChange={(e) => setVersionTag(e.target.value)}
                             required
-                            disabled={isEditing}
-                            pattern="^\d+\.\d+\.\d+(-[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?(\+[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?$"
-                            title="Semantic Versioning format (e.g., 1.0.0, 1.2.3-beta)"
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white disabled:bg-gray-500 font-mono"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white font-mono"
+                            placeholder="e.g., 1.0.0 or 1.0.0-beta.1"
+                            pattern="^\d+\.\d+\.\d+.*$"
+                            title="Must be a valid SemVer tag (e.g., 1.0.0, 1.0.1-beta, 2.0.0+build.42)"
                         />
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Use <a href="https://semver.org/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">Semantic Versioning</a> (e.g., 1.0.0, 1.0.1-beta).
+                        </p>
                     </div>
 
                     <div>

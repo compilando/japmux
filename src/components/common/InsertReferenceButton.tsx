@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { promptService, promptVersionService, promptTranslationService, promptAssetService } from '@/services/api';
-import { PromptDto, CreatePromptVersionDto, CreatePromptTranslationDto } from '@/services/generated/api';
+import { promptService, promptVersionService, promptTranslationService, promptAssetService, PromptDto } from '@/services/api';
+import { CreatePromptVersionDto, CreatePromptTranslationDto } from '@/services/generated/api';
 import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
 import { PromptVersionData } from '@/app/(admin)/projects/[projectId]/prompts/[promptId]/versions/page';
 import Select from 'react-select';
@@ -12,22 +12,7 @@ interface InsertReferenceButtonProps {
     currentPromptId?: string;
 }
 
-interface PromptOption {
-    value: string;
-    label: string;
-}
-
-interface VersionOption {
-    value: string;
-    label: string;
-}
-
-interface TranslationOption {
-    value: string;
-    label: string;
-}
-
-interface AssetOption {
+interface Option {
     value: string;
     label: string;
 }
@@ -45,13 +30,13 @@ interface PromptVersionForSelect extends CreatePromptVersionDto {
 const InsertReferenceButton: React.FC<InsertReferenceButtonProps> = ({ projectId, onInsert, type, currentPromptId }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [prompts, setPrompts] = useState<PromptDto[]>([]);
-    const [selectedPrompt, setSelectedPrompt] = useState<PromptOption | null>(null);
+    const [selectedPrompt, setSelectedPrompt] = useState<Option | null>(null);
     const [versions, setVersions] = useState<PromptVersionForSelect[]>([]);
-    const [selectedVersion, setSelectedVersion] = useState<VersionOption | null>(null);
+    const [selectedVersion, setSelectedVersion] = useState<Option | null>(null);
     const [translations, setTranslations] = useState<CreatePromptTranslationDto[]>([]);
-    const [selectedTranslation, setSelectedTranslation] = useState<TranslationOption | null>(null);
+    const [selectedTranslation, setSelectedTranslation] = useState<Option | null>(null);
     const [assets, setAssets] = useState<PromptAssetData[]>([]);
-    const [selectedAsset, setSelectedAsset] = useState<AssetOption | null>(null);
+    const [selectedAsset, setSelectedAsset] = useState<Option | null>(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -129,22 +114,46 @@ const InsertReferenceButton: React.FC<InsertReferenceButtonProps> = ({ projectId
 
     useEffect(() => {
         const loadAssets = async (promptId: string) => {
+            if (!projectId) {
+                console.log("--> [Debug] Aborting asset load: No projectId.");
+                setAssets([]);
+                return;
+            }
             try {
+                console.log(`--> [Debug] Loading assets for projectId: ${projectId}, promptId: ${promptId}`);
                 const assetsData = await promptAssetService.findAll(projectId, promptId);
-                setAssets(assetsData);
+                console.log('--> [Debug] API Response for Assets:', assetsData);
+                if (Array.isArray(assetsData)) {
+                    setAssets(assetsData);
+                } else {
+                    console.error("--> [Debug] Asset data is not an array:", assetsData);
+                    setAssets([]);
+                }
             } catch (error) {
-                console.error('Error loading assets:', error);
+                console.error('--> [Debug] Error loading assets:', error);
+                setAssets([]);
             }
         };
-        if (type === 'asset' && currentPromptId) {
-            loadAssets(currentPromptId);
-        } else if (selectedPrompt) {
-            loadAssets(selectedPrompt.value);
+
+        console.log(`--> [Debug] Asset useEffect triggered. Type: ${type}, CurrentPromptId: ${currentPromptId}, ProjectId: ${projectId}`);
+
+        // Only act if the button is for assets.
+        if (type === 'asset') {
+            // Only load if we have all the necessary IDs.
+            if (projectId && currentPromptId) {
+                loadAssets(currentPromptId);
+            } else {
+                // If the IDs are not present, do nothing. Don't clear the assets
+                // because the IDs might just be loading. They will be cleared
+                // if the project ID changes, which is handled by other components.
+                console.log("--> [Debug] 'asset' type but missing projectId or currentPromptId. Waiting...");
+            }
         } else {
+            // If the button is not of type 'asset', ensure the list is clear.
+            // This is important if the component instance is reused and the 'type' prop changes.
             setAssets([]);
-            setSelectedAsset(null);
         }
-    }, [selectedPrompt, currentPromptId, type]);
+    }, [projectId, type, currentPromptId]);
 
     const handleInsert = () => {
         if (type === 'prompt' && selectedPrompt && selectedVersion) {
@@ -152,8 +161,10 @@ const InsertReferenceButton: React.FC<InsertReferenceButtonProps> = ({ projectId
                 ? `{{prompt:${selectedPrompt.value}:${selectedVersion.value}:${selectedTranslation.value}}}`
                 : `{{prompt:${selectedPrompt.value}:${selectedVersion.value}}}`;
             onInsert(reference);
-        } else if (type === 'asset' && selectedPrompt && selectedAsset) {
-            const reference = `{{asset:${selectedPrompt.value}:${selectedAsset.value}}}`;
+        } else if (type === 'asset' && selectedAsset) {
+            // El formato correcto no necesita el ID del prompt.
+            // Si en el futuro se necesitara una versión específica, se añadiría aquí.
+            const reference = `{{asset:${selectedAsset.value}}}`;
             onInsert(reference);
         }
         setIsOpen(false);
@@ -168,14 +179,14 @@ const InsertReferenceButton: React.FC<InsertReferenceButtonProps> = ({ projectId
         setAssets([]);
     };
 
-    const promptOptions: PromptOption[] = prompts
+    const promptOptions: Option[] = prompts
         .filter(prompt => !currentPromptId || prompt.id !== currentPromptId)
         .map(prompt => ({
-            value: prompt.id, c
+            value: prompt.id,
             label: prompt.name
         }));
 
-    const versionOptions: VersionOption[] = [
+    const versionOptions: Option[] = [
         { value: 'latest', label: 'Latest' },
         ...versions.map(version => ({
             value: version.versionTag,
@@ -183,15 +194,17 @@ const InsertReferenceButton: React.FC<InsertReferenceButtonProps> = ({ projectId
         }))
     ];
 
-    const translationOptions: TranslationOption[] = translations.map(translation => ({
+    const translationOptions: Option[] = translations.map(translation => ({
         value: translation.languageCode || '',
         label: translation.languageCode || ''
     }));
 
-    const assetOptions = assets.map(asset => ({
+    const assetOptions: Option[] = assets.map(asset => ({
         value: asset.key,
-        label: asset.name
+        label: asset.name || asset.key
     }));
+
+    console.log('--> [Debug] Final assetOptions passed to Select:', assetOptions);
 
     return (
         <div className="relative">
@@ -204,50 +217,53 @@ const InsertReferenceButton: React.FC<InsertReferenceButtonProps> = ({ projectId
             </button>
 
             {isOpen && (
-                <div className="absolute z-50 mt-2 w-96 bg-white rounded-md shadow-lg">
+                <div className="absolute z-50 mt-2 w-96 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
                     <div className="p-4">
                         <div className="space-y-4">
                             {type === 'prompt' ? (
                                 <>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Prompt</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Prompt</label>
                                         <Select
                                             options={promptOptions}
                                             value={selectedPrompt}
                                             onChange={setSelectedPrompt}
                                             isLoading={loading}
                                             placeholder="Select prompt..."
-                                            menuPortalTarget={typeof window !== 'undefined' ? document.body : undefined}
-                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999, minWidth: '240px', maxWidth: '380px' }) }}
+                                            className="react-select-container dark:react-select-container-dark"
+                                            classNamePrefix="react-select"
+                                            menuPlacement="bottom"
                                         />
                                     </div>
 
                                     {selectedPrompt && (
                                         <>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">Version</label>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Version</label>
                                                 <Select
                                                     options={versionOptions}
                                                     value={selectedVersion}
                                                     onChange={setSelectedVersion}
                                                     isLoading={loading}
                                                     placeholder="Select version..."
-                                                    menuPortalTarget={typeof window !== 'undefined' ? document.body : undefined}
-                                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999, minWidth: '240px', maxWidth: '380px' }) }}
+                                                    className="react-select-container dark:react-select-container-dark"
+                                                    classNamePrefix="react-select"
+                                                    menuPlacement="bottom"
                                                 />
                                             </div>
 
                                             {selectedVersion && (
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700">Translation</label>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Translation</label>
                                                     <Select
                                                         options={translationOptions}
                                                         value={selectedTranslation}
                                                         onChange={setSelectedTranslation}
                                                         isLoading={loading}
                                                         placeholder="Select translation..."
-                                                        menuPortalTarget={typeof window !== 'undefined' ? document.body : undefined}
-                                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999, minWidth: '240px', maxWidth: '380px' }) }}
+                                                        className="react-select-container dark:react-select-container-dark"
+                                                        classNamePrefix="react-select"
+                                                        menuPlacement="bottom"
                                                     />
                                                 </div>
                                             )}
@@ -255,42 +271,37 @@ const InsertReferenceButton: React.FC<InsertReferenceButtonProps> = ({ projectId
                                     )}
                                 </>
                             ) : (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Asset</label>
-                                    <Select
-                                        options={assetOptions}
-                                        value={selectedAsset}
-                                        onChange={setSelectedAsset}
-                                        isLoading={loading}
-                                        placeholder={assets.length === 0 ? "No assets available" : "Select asset..."}
-                                        menuPortalTarget={typeof window !== 'undefined' ? document.body : undefined}
-                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999, minWidth: '240px', maxWidth: '380px' }) }}
-                                    />
-                                    {assets.length === 0 && (
-                                        <p className="mt-2 text-sm text-gray-500">
-                                            No assets available for this prompt.
-                                        </p>
-                                    )}
-                                </div>
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Asset</label>
+                                        <Select
+                                            options={assetOptions}
+                                            value={selectedAsset}
+                                            onChange={setSelectedAsset}
+                                            isLoading={loading}
+                                            placeholder={assets.length === 0 ? "No assets available" : "Select asset..."}
+                                            className="react-select-container dark:react-select-container-dark"
+                                            classNamePrefix="react-select"
+                                            menuPlacement="bottom"
+                                        />
+                                        {assets.length === 0 && !loading && (
+                                            <p className="mt-2 text-sm text-gray-500">
+                                                No assets available for this prompt.
+                                            </p>
+                                        )}
+                                    </div>
+                                </>
                             )}
 
-                            <div className="flex justify-end space-x-2">
-                                <button
-                                    type="button"
-                                    onClick={handleClose}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                                >
+                            <div className="flex justify-end pt-4 space-x-2">
+                                <button type="button" onClick={handleClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                     Cancel
                                 </button>
                                 <button
                                     type="button"
                                     onClick={handleInsert}
-                                    disabled={
-                                        type === 'prompt'
-                                            ? (!selectedPrompt || !selectedVersion)
-                                            : (!selectedAsset || assets.length === 0)
-                                    }
-                                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                                    disabled={!((type === 'prompt' && selectedPrompt && selectedVersion) || (type === 'asset' && selectedAsset))}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                                 >
                                     Insert
                                 </button>
