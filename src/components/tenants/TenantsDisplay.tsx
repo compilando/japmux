@@ -14,11 +14,11 @@ interface TenantsDisplayProps {
 const TenantsDisplay: React.FC<TenantsDisplayProps> = ({ tenantsList, onEdit, onDelete }) => {
     const router = useRouter();
     const { user } = useAuth();
-    const { setCurrentTenant } = useTenant();
+    const { setSelectedTenant } = useTenant();
     const isGlobalAdmin = (user as ExtendedUserProfileResponse)?.role === 'global_admin';
 
     const handleManageUsers = (tenant: TenantResponseDto) => {
-        setCurrentTenant(tenant);
+        setSelectedTenant(tenant);
         router.push(`/tenants/${tenant.id}/users`);
     };
 
@@ -53,7 +53,7 @@ const TenantsDisplay: React.FC<TenantsDisplayProps> = ({ tenantsList, onEdit, on
                     {tenantsList.map((tenant) => (
                         <tr key={tenant.id}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{tenant.name}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tenant.description || '-'}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {new Date(tenant.createdAt).toLocaleDateString()}
                             </td>

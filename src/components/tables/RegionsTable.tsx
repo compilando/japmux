@@ -1,7 +1,9 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../ui/table';
 import { CreateRegionDto } from '@/services/generated/api';
-import { TrashIcon, PencilIcon, InfoIcon } from "@/icons";
+import PencilIcon from "@/icons/pencil.svg";
+import InfoIcon from "@/icons/info.svg";
+import TrashIcon from "@/icons/trash.svg";
 import CopyButton from '../common/CopyButton';
 
 interface RegionsTableProps {

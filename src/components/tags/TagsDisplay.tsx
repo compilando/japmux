@@ -1,7 +1,8 @@
 import React from 'react';
 import { TagResponse } from './TagCardItem'; // Importar TagResponse definida localmente
 import TagCardItem from './TagCardItem';
-import { InfoIcon, PlusIcon } from '@/icons';
+import InfoIcon from "@/icons/info.svg";
+import PlusIcon from "@/icons/plus.svg";
 
 interface NewTagData {
     name: string;

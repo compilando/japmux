@@ -1,7 +1,7 @@
 import React from 'react';
 import { EnvironmentData } from './EnvironmentCardItem'; // Usar la interfaz local
 import EnvironmentCardItem from './EnvironmentCardItem';
-import { InfoIcon } from '@/icons';
+import InfoIcon from '@/icons/info.svg';
 
 interface EnvironmentsDisplayProps {
     environmentsList: EnvironmentData[];

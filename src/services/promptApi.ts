@@ -1,6 +1,7 @@
 import { LoadPromptStructureDto } from '../types/prompt-structure';
 import axiosInstance from './axiosInstance'; // Importar la instancia de Axios configurada
-import { AxiosError } from 'axios';
+// Tipo personalizado para compatibilidad con axios 1.x
+type AxiosError = any;
 
 interface ErrorDetails {
   message?: string;
@@ -31,7 +32,7 @@ export async function loadPromptStructure(
       errorDetails: response.data as ErrorDetails
     };
   } catch (error) {
-    const axiosError = error as AxiosError<unknown>;
+    const axiosError = error as any;
     console.error('Error al llamar a la API loadPromptStructure:', axiosError.response?.data || axiosError.message);
 
     let errorMessage = 'Error de red o conexión.';

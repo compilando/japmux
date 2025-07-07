@@ -1,5 +1,7 @@
 import React from 'react';
-import { PencilIcon, TrashIcon, BoxCubeIcon } from '@/icons'; // Cambiado ServerIcon a BoxCubeIcon
+import PencilIcon from '@/icons/pencil.svg';
+import TrashIcon from '@/icons/trash.svg';
+import BoxCubeIcon from '@/icons/box-cube.svg';
 
 // Asumimos que el Environment que llega a la UI tiene al menos estos campos
 export interface EnvironmentData {

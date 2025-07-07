@@ -1,10 +1,7 @@
 "use client";
 import React, { memo } from "react";
 import Link from "next/link";
-import {
-  ChevronDownIcon,
-  // Add other icons if they are directly used and not passed as nav.icon
-} from "../icons/index"; // Adjust path as necessary
+import ChevronDownIcon from "../icons/chevron-down.svg";
 import { ChevronDownIcon as HeroChevronDownIcon } from '@heroicons/react/24/outline';
 import type { NavItem, SubItem } from "./AppSidebar"; // Assuming NavItem is exported or defined here
 import { cn } from "@/lib/utils";

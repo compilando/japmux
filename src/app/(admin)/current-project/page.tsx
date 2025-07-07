@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import React from "react";
 import Link from "next/link";
-import {
-  TableIcon,
-  ListIcon,
-  EyeIcon,
-  ChatIcon,
-  PaperPlaneIcon
-} from "@/icons/index"; // Assuming icons are exported from here
+import TableIcon from "@/icons/table.svg";
+import ListIcon from "@/icons/list.svg";
+import EyeIcon from "@/icons/eye.svg";
+import ChatIcon from "@/icons/chat.svg";
+import PaperPlaneIcon from "@/icons/paper-plane.svg";
 
 export const metadata: Metadata = {
   title: "Current Project - japm.app",

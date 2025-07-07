@@ -1,6 +1,10 @@
 import React from 'react';
 // import { TagResponse } from '@/services/api'; // Comentado temporalmente
-import { PencilIcon, TrashIcon, CheckLineIcon, CloseLineIcon, ListIcon } from '@/icons'; // Cambiado TagIcon a ListIcon
+import PencilIcon from "@/icons/pencil.svg";
+import TrashIcon from "@/icons/trash.svg";
+import CheckLineIcon from "@/icons/check-line.svg";
+import CloseLineIcon from "@/icons/close-line.svg";
+import ListIcon from "@/icons/list.svg";
 
 // Definición local de TagResponse para evitar error de importación
 // Asumimos que esta es la estructura básica que necesitamos

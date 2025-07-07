@@ -1,7 +1,8 @@
 import React from 'react';
 import { CreateAssetTranslationDto } from '@/services/api';
 import CopyButton from '../common/CopyButton';
-import { TrashIcon, PencilIcon } from "@/icons";
+import TrashIcon from "@/icons/trash.svg";
+import PencilIcon from "@/icons/pencil.svg";
 
 interface PromptAssetTranslationsTableProps {
     translations: CreateAssetTranslationDto[];

@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import React from "react";
 import Link from "next/link";
-import {
-  UserCircleIcon,
-  FolderIcon
-} from "@/icons/index"; // Assuming icons are exported from here
+import UserCircleIcon from "@/icons/user-circle.svg";
+import FolderIcon from "@/icons/folder.svg";
 
 export const metadata: Metadata = {
   title: "Management - japm.app",

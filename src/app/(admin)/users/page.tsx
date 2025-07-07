@@ -93,7 +93,7 @@ const UsersPage: React.FC = () => {
                 // Asegurarse de que el nuevo usuario pertenezca al tenant actual si es tenant_admin
                 const createData = {
                     ...userData as CreateUserDto,
-                    tenantId: user?.role === 'tenant_admin' ? selectedTenantId : undefined,
+                    tenantId: user?.role === 'tenant_admin' ? (selectedTenantId || undefined) : undefined,
                 };
                 await userService.create(createData);
                 showSuccessToast('User created successfully');

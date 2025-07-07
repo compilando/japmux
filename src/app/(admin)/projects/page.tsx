@@ -7,6 +7,7 @@ import {
     CreateProjectDto,
     UpdateProjectDto,
     UserProfileResponse,
+    ExtendedUserProfileResponse,
 } from '@/services/api';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
 import ProjectForm from '@/components/form/ProjectForm';
@@ -24,7 +25,7 @@ interface ProjectData extends CreateProjectDto {
 
 const ProjectsPage: React.FC = () => {
     const [projects, setProjects] = useState<ProjectData[]>([]);
-    const [usersList, setUsersList] = useState<UserProfileResponse[]>([]);
+    const [usersList, setUsersList] = useState<ExtendedUserProfileResponse[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [showForm, setShowForm] = useState<boolean>(false);
@@ -52,7 +53,7 @@ const ProjectsPage: React.FC = () => {
             })) as ProjectData[];
 
             setProjects(mappedProjects);
-            setUsersList(usersData as UserProfileResponse[]);
+            setUsersList(usersData as ExtendedUserProfileResponse[]);
 
         } catch (err: any) {
             console.error("Failed to fetch projects or users:", err);

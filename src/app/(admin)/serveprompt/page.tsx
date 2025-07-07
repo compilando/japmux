@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useProjects } from '@/context/ProjectContext';
 import { useSearchParams } from 'next/navigation';
 import {
-    PromptDto,
+    CreatePromptDto,
     CreatePromptVersionDto,
     CreatePromptTranslationDto,
     AiModelResponseDto,
@@ -52,6 +52,9 @@ interface PromptVersionForSelect extends CreatePromptVersionDto {
     id?: string; // Often present in fetched data
     versionTag: string; // Should be present and non-optional for selection logic based on current code
 }
+
+// Tipo personalizado para un prompt existente con id
+type PromptWithId = CreatePromptDto & { id: string };
 
 // Constantes para los mensajes placeholder
 const CURL_PLACEHOLDER_MSG = '# Select a project, prompt, and version to see the commands.';
@@ -149,7 +152,7 @@ const ServePromptPage: React.FC = () => {
             // Por ahora, vamos a simular la carga o asumir que necesitamos obtener el nombre de alguna forma.
             // Lo ideal sería una llamada como:
             promptService.findOne(selectedProjectId, promptIdFromQuery)
-                .then((promptData: PromptDto) => {
+                .then((promptData: PromptWithId) => {
                     console.log('[ServePromptPage] Fetched promptData:', promptData);
                     if (promptData && promptData.id && promptData.name) {
                         const newSelectedPrompt = { value: promptData.id, label: promptData.name };
@@ -237,9 +240,9 @@ const ServePromptPage: React.FC = () => {
         }
         try {
             const fetchedPrompts = await promptService.findAll(selectedProjectId);
-            let options: PromptDto[] = [];
+            let options: PromptWithId[] = [];
             if (Array.isArray(fetchedPrompts)) {
-                options = fetchedPrompts as PromptDto[];
+                options = fetchedPrompts as PromptWithId[];
             }
 
             // Filtrar opciones basadas en inputValue si es necesario (filtrado del lado del cliente)
@@ -310,7 +313,7 @@ const ServePromptPage: React.FC = () => {
                 }
             })
             .catch((err: Error) => {
-                if (axios.isAxiosError(err) && err.response?.status === 404) {
+                if ((axios as any).isAxiosError && (axios as any).isAxiosError(err) && (err as any).response?.status === 404) {
                     console.log("No translations found for this version.");
                     setTranslations([]);
                     setSelectedLanguage({ value: '__BASE__', label: 'Base Text' });
@@ -672,11 +675,11 @@ fi
             console.error("--- PROMPT EXECUTION ERROR ---", err);
             let finalErrorMessage = 'Failed to preprocess prompt. Check console for details.';
 
-            if (axios.isAxiosError(err)) {
+            if ((axios as any).isAxiosError && (axios as any).isAxiosError(err)) {
                 console.log("--> [Debug] Error is an AxiosError.");
-                if (err.response) {
-                    console.log("--> [Debug] Error has a response object:", err.response);
-                    const responseData = err.response.data;
+                if ((err as any).response) {
+                    console.log("--> [Debug] Error has a response object:", (err as any).response);
+                    const responseData = (err as any).response.data;
                     if (responseData) {
                         console.log("--> [Debug] Error response has data:", responseData);
                         const serverMessage = responseData.message;
@@ -814,11 +817,11 @@ fi
             console.error("--- LLM EXECUTION ERROR ---", err);
             let finalErrorMessage = 'Failed to execute prompt with LLM. Check console for details.';
 
-            if (axios.isAxiosError(err)) {
+            if ((axios as any).isAxiosError && (axios as any).isAxiosError(err)) {
                 console.log("--> [Debug] Error is an AxiosError.");
-                if (err.response) {
-                    console.log("--> [Debug] Error has a response object:", err.response);
-                    const responseData = err.response.data;
+                if ((err as any).response) {
+                    console.log("--> [Debug] Error has a response object:", (err as any).response);
+                    const responseData = (err as any).response.data;
                     if (responseData) {
                         console.log("--> [Debug] Error response has data:", responseData);
                         const serverMessage = responseData.message;

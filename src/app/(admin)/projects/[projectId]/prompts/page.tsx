@@ -3,15 +3,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-    // Prompt, // Does not exist or is not used directly
+    CreateProjectDto,
     CreatePromptDto,
     UpdatePromptDto,
-    PromptDto,
 } from '@/services/generated/api';
 import {
     promptService,
     projectService,
-    CreateProjectDto,
 } from '@/services/api';
 import { useProjects } from '@/context/ProjectContext';
 import Breadcrumb from '@/components/common/PageBreadCrumb';
@@ -19,6 +17,14 @@ import PromptsTable from '@/components/tables/PromptsTable';
 import PromptForm from '@/components/form/PromptForm';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import logger from '@/utils/logger';
+
+// Tipo personalizado para un prompt existente con id
+type PromptWithId = CreatePromptDto & { id: string };
+
+// Tipo para prompts con información de idioma
+interface PromptWithLanguage extends Omit<PromptWithId, 'languageCode'> {
+    languageCode?: string;
+}
 
 // Helper para extraer mensajes de error de forma segura
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
@@ -35,7 +41,7 @@ const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
 };
 
 const PromptsPage: React.FC = () => {
-    const [prompts, setPrompts] = useState<PromptDto[]>([]);
+    const [prompts, setPrompts] = useState<PromptWithId[]>([]);
     const [loadingPrompts, setLoadingPrompts] = useState<boolean>(true);
     const [pageError, setPageError] = useState<string | null>(null);
     const [deletingPrompts, setDeletingPrompts] = useState<Set<string>>(new Set());
@@ -98,7 +104,7 @@ const PromptsPage: React.FC = () => {
         }
     };
 
-    const handleEditPrompt = (promptToEdit: PromptDto) => {
+    const handleEditPrompt = (promptToEdit: PromptWithLanguage) => {
         if (contextProjectId && promptToEdit && promptToEdit.id) {
             router.push(`/projects/${contextProjectId}/prompts/${promptToEdit.id}/edit`);
         } else {

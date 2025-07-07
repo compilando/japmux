@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import {
     CreateProjectDto,
-    PromptDto,
+    CreatePromptDto,
     CreatePromptVersionDto,
     UpdatePromptVersionDto,
 } from '@/services/generated/api';
@@ -19,7 +19,7 @@ import Breadcrumb from '@/components/common/PageBreadCrumb';
 import PromptVersionsTable from '@/components/tables/PromptVersionsTable';
 import PromptVersionForm from '@/components/form/PromptVersionForm';
 import ContextInfoBanner from '@/components/common/ContextInfoBanner';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import { PlusCircleIcon, PencilIcon as EditIconHero } from '@heroicons/react/24/outline';
 import { diffLines, type Change } from 'diff'; // Importar solo diffLines y Change
@@ -32,9 +32,8 @@ import { es } from 'date-fns/locale';
 // Helper para extraer mensajes de error de forma segura
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
     // Comprobación más robusta para AxiosError
-    if (error && typeof error === 'object' && 'isAxiosError' in error && (error as any).isAxiosError === true) {
-        const axiosError = error as AxiosError<any>; // Castear a AxiosError
-        return axiosError.response?.data?.message || axiosError.message || defaultMessage;
+    if ((axios as any).isAxiosError && (axios as any).isAxiosError(error)) {
+        return (error as any).response?.data?.message || (error as any).message || defaultMessage;
     }
     if (error instanceof Error) {
         return error.message;
@@ -120,7 +119,7 @@ function PromptVersionsPage() {
     const [marketplaceActionLoading, setMarketplaceActionLoading] = useState<Record<string, boolean>>({});
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
-    const [currentPrompt, setCurrentPrompt] = useState<PromptDto | null>(null); // Renombrado de 'prompt' para evitar conflicto con variable local en fetchBreadcrumbData
+    const [currentPrompt, setCurrentPrompt] = useState<CreatePromptDto | null>(null); // Renombrado de 'prompt' para evitar conflicto con variable local en fetchBreadcrumbData
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
     const [selectedVersionsForDiff, setSelectedVersionsForDiff] = useState<string[]>([]);

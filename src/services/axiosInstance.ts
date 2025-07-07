@@ -35,7 +35,7 @@ axiosInstance.interceptors.request.use(
       console.log('[Interceptor Request axiosInstance] Cannot access storage (not window).');
     }
 
-    if (token) {
+    if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
       console.log('[Interceptor Request axiosInstance] Authorization header SET with token.');
     } else {

@@ -15,7 +15,9 @@
 
 import type { Configuration } from "./configuration";
 import type { RequestArgs } from "./base";
-import type { AxiosInstance, AxiosResponse } from 'axios';
+// Tipos personalizados para compatibilidad con axios 1.x
+type AxiosInstance = any;
+type AxiosResponse<T = any> = any;
 import { RequiredError } from "./base";
 
 /**
@@ -89,17 +91,17 @@ function setFlattenedQueryParams(urlSearchParams: URLSearchParams, parameter: an
     if (typeof parameter === "object") {
         if (Array.isArray(parameter)) {
             (parameter as any[]).forEach(item => setFlattenedQueryParams(urlSearchParams, item, key));
-        } 
+        }
         else {
-            Object.keys(parameter).forEach(currentKey => 
+            Object.keys(parameter).forEach(currentKey =>
                 setFlattenedQueryParams(urlSearchParams, parameter[currentKey], `${key}${key !== '' ? '.' : ''}${currentKey}`)
             );
         }
-    } 
+    }
     else {
         if (urlSearchParams.has(key)) {
             urlSearchParams.append(key, parameter);
-        } 
+        }
         else {
             urlSearchParams.set(key, parameter);
         }
@@ -144,7 +146,7 @@ export const toPathString = function (url: URL) {
  */
 export const createRequestFunction = function (axiosArgs: RequestArgs, globalAxios: AxiosInstance, BASE_PATH: string, configuration?: Configuration) {
     return <T = unknown, R = AxiosResponse<T>>(axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
-        const axiosRequestArgs = {...axiosArgs.options, url: (axios.defaults.baseURL ? '' : configuration?.basePath ?? basePath) + axiosArgs.url};
-        return axios.request<T, R>(axiosRequestArgs);
+        const axiosRequestArgs = { ...axiosArgs.options, url: (axios.defaults.baseURL ? '' : configuration?.basePath ?? basePath) + axiosArgs.url };
+        return axios.request(axiosRequestArgs);
     };
 }

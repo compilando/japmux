@@ -1,7 +1,8 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../ui/table';
 import { Project, User } from '@/services/api';
-import { TrashIcon, PencilIcon } from "@/icons";
+import TrashIcon from "@/icons/trash.svg";
+import PencilIcon from "@/icons/pencil.svg";
 import CopyButton from '../common/CopyButton';
 
 interface ProjectsTableProps {

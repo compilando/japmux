@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { TagDto } from '@/services/generated/api';
 import CopyButton from '../common/CopyButton';
-import { TrashIcon, PencilIcon, InfoIcon, CheckLineIcon, CloseLineIcon } from "@/icons";
+import TrashIcon from "@/icons/trash.svg";
+import PencilIcon from "@/icons/pencil.svg";
+import InfoIcon from "@/icons/info.svg";
+import CheckLineIcon from "@/icons/check-line.svg";
+import CloseLineIcon from "@/icons/close-line.svg";
 
 interface TagsTableProps {
     tags: TagDto[];

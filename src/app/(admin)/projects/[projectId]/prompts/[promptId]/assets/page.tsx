@@ -13,7 +13,10 @@ import Breadcrumb, { Crumb } from '@/components/common/PageBreadCrumb';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import Link from 'next/link';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { CreateProjectDto, PromptDto } from '@/services/generated';
+import { CreateProjectDto, UpdatePromptDto, CreatePromptDto } from '@/services/generated';
+
+// Tipo personalizado para un prompt existente con id
+type PromptWithId = CreatePromptDto & { id: string };
 
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
     if (error instanceof Error) {
@@ -29,7 +32,7 @@ const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
 const PromptAssetsListPage: React.FC = () => {
     const [assets, setAssets] = useState<PromptAssetData[]>([]);
     const [project, setProject] = useState<CreateProjectDto | null>(null);
-    const [currentPrompt, setCurrentPrompt] = useState<PromptDto | null>(null);
+    const [currentPrompt, setCurrentPrompt] = useState<PromptWithId | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);

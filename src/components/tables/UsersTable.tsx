@@ -1,7 +1,10 @@
 import React from 'react';
 import { UserProfileResponse } from '@/services/api'; // Usar UserProfileResponse directamente
 import CopyButton from '../common/CopyButton';
-import { TrashIcon, PencilIcon, UserCircleIcon, InfoIcon } from "@/icons"; // Añadir UserCircleIcon e InfoIcon
+import TrashIcon from "@/icons/trash.svg";
+import PencilIcon from "@/icons/pencil.svg";
+import UserCircleIcon from "@/icons/user-circle.svg";
+import InfoIcon from "@/icons/info.svg";
 import { format } from 'date-fns'; // Para formatear la fecha
 
 interface UsersTableProps {

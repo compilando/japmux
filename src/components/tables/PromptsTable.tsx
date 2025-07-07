@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PromptDto } from '@/services/generated/api';
+import { CreatePromptDto } from '@/services/generated/api';
 import Link from 'next/link';
 import { usePrompts } from '@/context/PromptContext';
 import CopyButton from '../common/CopyButton';
@@ -7,14 +7,16 @@ import { BoltIcon, ClockIcon, DocumentDuplicateIcon, TrashIcon, PencilIcon, Cube
 import { promptVersionService, promptAssetService } from '@/services/api';
 import { getPromptTypeLabel, getPromptTypeColor } from '@/config/promptTypes';
 
-// Extender PromptDto para incluir languageCode
-interface PromptWithLanguage extends PromptDto {
+// Tipo personalizado para un prompt existente con id
+type PromptWithId = CreatePromptDto & { id: string };
+
+interface PromptWithLanguage extends Omit<PromptWithId, 'languageCode'> {
     languageCode?: string;
 }
 
 interface PromptsTableProps {
-    prompts: PromptDto[];
-    onEdit: (item: PromptDto) => void;
+    prompts: PromptWithLanguage[];
+    onEdit: (item: PromptWithLanguage) => void;
     onDelete: (id: string, name?: string) => void;
     projectId?: string;
     loading?: boolean;
@@ -113,7 +115,7 @@ const PromptsTable: React.FC<PromptsTableProps> = ({ prompts, onEdit, onDelete, 
     }, [prompts, projectId]);
 
     // Función refactorizada para obtener el tipo del prompt
-    const getPromptType = (prompt: PromptDto): { label: string; color: string } => {
+    const getPromptType = (prompt: PromptWithLanguage): { label: string; color: string } => {
         // Primero, intentar obtener el tipo del campo type si existe
         const typeValue = (prompt as any).type?.value || (prompt as any).type;
 

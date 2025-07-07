@@ -6,7 +6,7 @@ import {
     CreateProjectDto,
     CreatePromptAssetVersionDto,
     UpdatePromptAssetVersionDto,
-    PromptDto,
+    CreatePromptDto,
 } from '@/services/generated/api';
 import {
     promptAssetService,
@@ -21,8 +21,8 @@ import axios from 'axios';
 import { PromptAssetData } from '@/components/tables/PromptAssetsTable';
 
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
-    if (axios.isAxiosError(error)) {
-        return error.response?.data?.message || error.message || defaultMessage;
+    if ((axios as any).isAxiosError && (axios as any).isAxiosError(error)) {
+        return (error as any).response?.data?.message || (error as any).message || defaultMessage;
     }
     if (error instanceof Error) {
         return error.message;
@@ -55,7 +55,7 @@ const PromptAssetVersionsPage: React.FC = () => {
     const [latestVersionTagForForm, setLatestVersionTagForForm] = useState<string | null>(null);
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
-    const [currentPrompt, setCurrentPrompt] = useState<PromptDto | null>(null);
+    const [currentPrompt, setCurrentPrompt] = useState<CreatePromptDto | null>(null);
     const [asset, setAsset] = useState<PromptAssetData | null>(null);
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
 
@@ -74,7 +74,7 @@ const PromptAssetVersionsPage: React.FC = () => {
             promptAssetService.findOne(projectId, promptId, assetKey)
         ]).then(([projectData, promptData, assetData]) => {
             setProject(projectData as CreateProjectDto);
-            setCurrentPrompt(promptData as PromptDto);
+            setCurrentPrompt(promptData as CreatePromptDto);
             setAsset(assetData as PromptAssetData);
         }).catch(err => {
             console.error("Error fetching breadcrumb data (project/prompt/asset):", err);

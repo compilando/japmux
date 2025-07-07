@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
     CreateProjectDto,
-    PromptDto,
+    CreatePromptDto,
     CreatePromptAssetDto,
     CreatePromptAssetVersionDto,
     CreateAssetTranslationDto,
@@ -27,8 +27,8 @@ import { DocumentDuplicateIcon, LanguageIcon } from '@heroicons/react/24/outline
 
 // Helper para extraer mensajes de error de forma segura
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
-    if (axios.isAxiosError(error)) {
-        return error.response?.data?.message || error.message || defaultMessage;
+    if ((axios as any).isAxiosError && (axios as any).isAxiosError(error)) {
+        return (error as any).response?.data?.message || (error as any).message || defaultMessage;
     }
     if (error instanceof Error) {
         return error.message;
@@ -48,7 +48,7 @@ const PromptAssetTranslationsPage: React.FC = () => {
     const [editingItem, setEditingItem] = useState<AssetTranslationUIData | null>(null);
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
-    const [currentPrompt, setCurrentPrompt] = useState<PromptDto | null>(null);
+    const [currentPrompt, setCurrentPrompt] = useState<CreatePromptDto | null>(null);
     const [asset, setAsset] = useState<PromptAssetData | null>(null);
     const [version, setVersion] = useState<CreatePromptAssetVersionDto | null>(null); // version.value es el texto original
     const [breadcrumbLoading, setBreadcrumbLoading] = useState<boolean>(true);
@@ -80,7 +80,7 @@ const PromptAssetTranslationsPage: React.FC = () => {
                 ]);
 
                 setProject(projectData as CreateProjectDto);
-                setCurrentPrompt(promptData as PromptDto);
+                setCurrentPrompt(promptData as CreatePromptDto);
                 setAsset(assetData as PromptAssetData);
                 setVersion(versionData as CreatePromptAssetVersionDto);
                 setProjectRegions(regionsData); // Guardar las regiones del proyecto

@@ -4,7 +4,9 @@ import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { useAuth } from "@/context/AuthContext";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
+import ChevronLeftIcon from "@/icons/chevron-left.svg";
+import EyeCloseIcon from "@/icons/eye-close.svg";
+import EyeIcon from "@/icons/eye.svg";
 import Link from "next/link";
 import React, { useState, FormEvent } from "react";
 

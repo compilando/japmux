@@ -66,8 +66,8 @@ const RegionsPage: React.FC = () => {
             }
         } catch (err) {
             console.error("Error fetching regions:", err);
-            if (axios.isAxiosError(err)) {
-                console.error("Axios error details:", err.response?.status, err.response?.data);
+            if ((axios as any).isAxiosError && (axios as any).isAxiosError(err)) {
+                console.error("Axios error details:", (err as any).response?.status, (err as any).response?.data);
             }
             setError('Failed to fetch regions. Check console and network tab for details.');
             setRegions([]);

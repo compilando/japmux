@@ -35,8 +35,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
 }) => {
     const [formData, setFormData] = useState<CreatePromptTranslationDto>({
         languageCode: initialData?.languageCode || '',
-        promptText: initialData?.promptText || '',
-        versionId: versionId || initialData?.versionId || ''
+        promptText: initialData?.promptText || ''
     });
     const [loadingRegions, setLoadingRegions] = useState<boolean>(false);
     const [isTranslating, setIsTranslating] = useState<boolean>(false);
@@ -50,8 +49,7 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
         // Populate form data when initialData or isEditing changes
         setFormData({
             languageCode: initialData?.languageCode || '',
-            promptText: initialData?.promptText || '',
-            versionId: versionId || initialData?.versionId || ''
+            promptText: initialData?.promptText || ''
         });
         if (!isEditing && availableLanguages && availableLanguages.length > 0 && !initialData?.languageCode) {
             setFormData(prev => ({ ...prev, languageCode: availableLanguages[0].code }));
@@ -106,10 +104,9 @@ const PromptTranslationForm: React.FC<PromptTranslationFormProps> = ({
             if (isEditing && initialData) {
                 await onSave({ promptText: formData.promptText } as UpdatePromptTranslationDto);
             } else {
-                // Aseguramos que el versionId esté presente para nuevas traducciones
+                // Para nuevas traducciones, usamos solo formData sin versionId
                 const payload = {
-                    ...formData,
-                    versionId: versionId || initialData?.versionId
+                    ...formData
                 };
                 await onSave(payload);
             }

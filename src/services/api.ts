@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios from 'axios';
 import { showErrorToast } from '@/utils/toastUtils'; // Importar la utilidad
 // Importar todo lo exportado por el cliente generado
 import * as generated from './generated';
@@ -22,7 +22,7 @@ export const apiClient = axios.create({
 
 // Interceptor de Request: Añade token de autenticación
 apiClient.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
+    (config: any) => {
         // Solo log en desarrollo
         if (process.env.NODE_ENV === 'development') {
             console.log('Request interceptor: Adding auth token');
@@ -50,13 +50,13 @@ apiClient.interceptors.request.use(
         }
         return config;
     },
-    (error: AxiosError) => Promise.reject(error)
+    (error: any) => Promise.reject(error)
 );
 
 // Interceptor de Response: Manejo global de errores
 apiClient.interceptors.response.use(
-    (response: AxiosResponse) => response,
-    (error: AxiosError<unknown>) => {
+    (response: any) => response,
+    (error: any) => {
         if (process.env.NODE_ENV === 'development') {
             console.log('Response interceptor error:', error.response?.status, error.response?.data);
         }
@@ -345,7 +345,7 @@ export const environmentService = {
             return response.data;
         } catch (error) {
             if (error && typeof error === 'object' && 'response' in error) {
-                const axiosError = error as AxiosError;
+                const axiosError = error as any;
                 if (axiosError.response && axiosError.response.status === 404) {
                     return null;
                 }
@@ -416,7 +416,7 @@ export const promptService = {
         const response = await promptsApi.promptControllerGenerateStructure(projectId, payload);
         return response.data;
     },
-    async loadStructure(projectId: string, payload: generated.LoadPromptStructureDto): Promise<any> {
+    async loadStructure(projectId: string, payload: any): Promise<any> {
         // HACK: This endpoint seems to be missing from the latest generated client.
         // Assuming a similar signature to generateStructure for now.
         // Replace with the correct call when the generator is fixed.

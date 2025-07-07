@@ -28,8 +28,8 @@ interface CreateTranslationPayload {
 }
 
 const getApiErrorMessage = (error: unknown, defaultMessage: string): string => {
-    if (axios.isAxiosError(error)) {
-        return error.response?.data?.message || error.message || defaultMessage;
+    if ((axios as any).isAxiosError && (axios as any).isAxiosError(error)) {
+        return (error as any).response?.data?.message || (error as any).message || defaultMessage;
     }
     if (error instanceof Error) {
         return error.message;

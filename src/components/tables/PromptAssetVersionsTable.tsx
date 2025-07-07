@@ -3,7 +3,10 @@ import Link from 'next/link';
 import { AssetVersionUIData } from '@/app/(admin)/projects/[projectId]/prompts/[promptId]/assets/[assetKey]/versions/page';
 import CopyButton from '../common/CopyButton';
 import { format } from 'date-fns';
-import { PencilIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from "@/icons";
+import PencilIcon from "@/icons/pencil.svg";
+import TrashIcon from "@/icons/trash.svg";
+import ChevronDownIcon from "@/icons/chevron-down.svg";
+import ChevronUpIcon from "@/icons/chevron-up.svg";
 import { DocumentDuplicateIcon, LanguageIcon } from '@heroicons/react/24/outline';
 
 interface PromptAssetVersionsTableProps {

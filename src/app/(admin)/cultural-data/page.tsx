@@ -58,8 +58,8 @@ const CulturalDataPage: React.FC = () => {
 
         } catch (err) {
             console.error("Error fetching cultural data:", err);
-            if (axios.isAxiosError(err)) {
-                console.error("Axios error details:", err.response?.status, err.response?.data);
+            if ((axios as any).isAxiosError && (axios as any).isAxiosError(err)) {
+                console.error("Axios error details:", (err as any).response?.status, (err as any).response?.data);
             }
             setError(`Failed to fetch cultural data: ${err instanceof Error ? err.message : String(err)}`);
             setCulturalDataList([]);

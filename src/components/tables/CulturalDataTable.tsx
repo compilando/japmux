@@ -1,6 +1,8 @@
 import React from 'react';
 import { CulturalDataResponse, CreateRegionDto } from '@/services/generated/api';
-import { TrashIcon, PencilIcon, InfoIcon } from "@/icons";
+import TrashIcon from "@/icons/trash.svg";
+import PencilIcon from "@/icons/pencil.svg";
+import InfoIcon from "@/icons/info.svg";
 import CopyButton from '../common/CopyButton';
 
 interface CulturalDataTableProps {

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { promptAssetService, projectService, promptService, CreatePromptAssetDtoFrontend } from '@/services/api';
-import { CreateProjectDto, PromptDto } from '@/services/generated/api';
+import { CreateProjectDto, CreatePromptDto } from '@/services/generated/api';
 import Breadcrumb, { Crumb } from '@/components/common/PageBreadCrumb';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import Link from 'next/link';
@@ -28,7 +28,7 @@ const NewPromptAssetPage: React.FC = () => {
     const promptId = params.promptId as string;
 
     const [project, setProject] = useState<CreateProjectDto | null>(null);
-    const [currentPrompt, setCurrentPrompt] = useState<PromptDto | null>(null);
+    const [currentPrompt, setCurrentPrompt] = useState<CreatePromptDto | null>(null);
 
     const [assetKey, setAssetKey] = useState('');
     const [name, setName] = useState('');

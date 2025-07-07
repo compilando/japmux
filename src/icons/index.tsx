@@ -147,5 +147,5 @@ export {
   ChevronUpIcon,
   ChatIcon,
   GitBranchIcon,
-  TrashIcon,
+  TrashIcon
 };

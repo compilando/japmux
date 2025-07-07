@@ -1,7 +1,9 @@
 import React from 'react';
 import { CreateEnvironmentDto } from '@/services/api';
 import CopyButton from '../common/CopyButton';
-import { TrashIcon, PencilIcon, InfoIcon } from "@/icons";
+import TrashIcon from "@/icons/trash.svg";
+import PencilIcon from "@/icons/pencil.svg";
+import InfoIcon from "@/icons/info.svg";
 
 interface EnvironmentTableRowData extends CreateEnvironmentDto {
     id: string;

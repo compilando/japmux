@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CreateApiKeyDto } from '@/services/api';
+import { CreateApiKeyDto } from '@/services/generated/api';
 
 interface ApiKeyFormProps {
     onSubmit: (data: CreateApiKeyDto) => void;

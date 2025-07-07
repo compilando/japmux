@@ -7,21 +7,18 @@ import { useSidebar } from "../context/SidebarContext";
 import { useProjects } from "../context/ProjectContext";
 import { useTenantAdmin } from "@/hooks/useTenantAdmin";
 import { useAuth } from "@/context/AuthContext";
-import {
-  HorizontaLDots,
-  TableIcon,
-  UserCircleIcon,
-  BoltIcon,
-  FolderIcon,
-  TaskIcon,
-  PaperPlaneIcon,
-  BoxCubeIcon,
-  ListIcon,
-  EyeIcon,
-  ChatIcon,
-  ShootingStarIcon,
-  BuildingIcon,
-} from "../icons/index";
+import TableIcon from "../icons/table.svg";
+import UserCircleIcon from "../icons/user-circle.svg";
+import BoltIcon from "../icons/bolt.svg";
+import FolderIcon from "../icons/folder.svg";
+import TaskIcon from "../icons/task.svg";
+import PaperPlaneIcon from "../icons/paper-plane.svg";
+import BoxCubeIcon from "../icons/box-cube.svg";
+import ListIcon from "../icons/list.svg";
+import EyeIcon from "../icons/eye.svg";
+import ChatIcon from "../icons/chat.svg";
+import ShootingStarIcon from "../icons/shooting-star.svg";
+import BuildingIcon from "../icons/box.svg";
 import {
   BoltIcon as HeroBoltIcon,
   FolderIcon as HeroFolderIcon,
@@ -266,7 +263,11 @@ const AppSidebar: React.FC = () => {
                     </span>
                   ) : (
                     <div className="p-1 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg">
-                      <HorizontaLDots className="" />
+                      <div className="w-4 h-4 flex flex-col justify-center items-center space-y-0.5">
+                        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                      </div>
                     </div>
                   )}
                 </h2>

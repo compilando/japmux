@@ -3,7 +3,7 @@ import React from "react";
 import ComponentCard from "../../common/ComponentCard";
 import Label from "../Label";
 import Input from "../input/InputField";
-import { EnvelopeIcon } from "../../../icons";
+import EnvelopeIcon from "../../../icons/envelope.svg";
 // import PhoneInput from "../group-input/PhoneInput"; // Comentado temporalmente - archivo no existe
 
 export default function InputGroup() {
